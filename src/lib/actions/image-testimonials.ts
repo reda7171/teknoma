@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { getCached } from '@/lib/cache'
 import { revalidatePath } from 'next/cache'
-import { writeFile, mkdir, unlink } from 'fs/promises'
+import { writeFile, readFile, mkdir, unlink } from 'fs/promises'
 import { join, normalize } from 'path'
 import { existsSync } from 'fs'
 import { sanitizeFilename } from '@/lib/security'
@@ -20,7 +20,33 @@ const ALLOWED_FILES: Record<string, string[]> = {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
-async function handleSecureImageUpload(file: File, subDir: string, prefix: string) {
+export async function blurPhoneOnBuffer(imageBuffer: Buffer): Promise<Buffer> {
+    const meta = await sharp(imageBuffer).metadata()
+    if (!meta.width || !meta.height) return imageBuffer
+
+    // Région proportionnelle correspondant au bandeau numéro de WhatsApp
+    const box = {
+        left: Math.round(meta.width * 0.22),
+        top: Math.round(meta.height * 0.035),
+        width: Math.round(meta.width * 0.44),
+        height: Math.round(meta.height * 0.042)
+    }
+
+    if (box.left + box.width <= meta.width && box.top + box.height <= meta.height) {
+        const patch = await sharp(imageBuffer)
+            .extract(box)
+            .blur(25)
+            .toBuffer()
+
+        return await sharp(imageBuffer)
+            .composite([{ input: patch, top: box.top, left: box.left }])
+            .jpeg({ quality: 90, mozjpeg: true })
+            .toBuffer()
+    }
+    return imageBuffer
+}
+
+async function handleSecureImageUpload(file: File, subDir: string, prefix: string, autoBlurPhone = true) {
     if (!file) {
         throw new Error("Aucun fichier fourni")
     }
@@ -48,6 +74,10 @@ async function handleSecureImageUpload(file: File, subDir: string, prefix: strin
             .jpeg({ quality: 85, mozjpeg: true })
             .resize(1200, 1600, { fit: 'inside', withoutEnlargement: true })
             .toBuffer()
+
+        if (autoBlurPhone) {
+            processedBuffer = await blurPhoneOnBuffer(processedBuffer)
+        }
     } catch (sharpError) {
         processedBuffer = buffer
     }
@@ -82,7 +112,8 @@ export async function uploadImageTestimonial(formData: FormData) {
             return { success: false, error: "Le fichier et le nom du client sont requis" }
         }
 
-        const imageUrl = await handleSecureImageUpload(file, 'testimonials', 'testimonial_img')
+        const shouldBlur = formData.get('blurPhone') !== 'false'
+        const imageUrl = await handleSecureImageUpload(file, 'testimonials', 'testimonial_img', shouldBlur)
 
         await prisma.imageTestimonial.create({
             data: {
@@ -201,5 +232,58 @@ export async function toggleImageTestimonial(id: string) {
         return { success: true }
     } catch (error: any) {
         return { success: false, error: error.message || "Erreur lors du changement d'état" }
+    }
+}
+
+export async function blurTestimonialPhoneNumber(id: string) {
+    try {
+        await verifyAdmin()
+        const testimonial = await prisma.imageTestimonial.findUnique({ where: { id } })
+        if (!testimonial) {
+            return { success: false, error: 'Avis introuvable' }
+        }
+
+        const publicDir = process.cwd()
+        const filepath = normalize(join(publicDir, 'public', testimonial.imageUrl))
+        if (!existsSync(filepath)) {
+            return { success: false, error: 'Fichier image introuvable sur le disque' }
+        }
+
+        const fileBuffer = await readFile(filepath)
+        const blurredBuffer = await blurPhoneOnBuffer(fileBuffer)
+        await writeFile(filepath, blurredBuffer)
+
+        revalidatePath('/admin/reviews')
+        revalidatePath('/', 'layout')
+        return { success: true }
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Erreur lors du floutage du numéro' }
+    }
+}
+
+export async function blurAllTestimonialPhoneNumbers() {
+    try {
+        await verifyAdmin()
+        const testimonials = await prisma.imageTestimonial.findMany()
+        const publicDir = process.cwd()
+        let count = 0
+
+        for (const t of testimonials) {
+            const filepath = normalize(join(publicDir, 'public', t.imageUrl))
+            if (existsSync(filepath)) {
+                try {
+                    const fileBuffer = await readFile(filepath)
+                    const blurredBuffer = await blurPhoneOnBuffer(fileBuffer)
+                    await writeFile(filepath, blurredBuffer)
+                    count++
+                } catch (e) { }
+            }
+        }
+
+        revalidatePath('/admin/reviews')
+        revalidatePath('/', 'layout')
+        return { success: true, count }
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Erreur lors du floutage général' }
     }
 }

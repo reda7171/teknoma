@@ -1,10 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, Trash2, ImageIcon } from 'lucide-react'
+import { CheckCircle, Trash2, ImageIcon, EyeOff, Loader2 } from 'lucide-react'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { useRouter } from 'next/navigation'
-import { deleteImageTestimonials, deleteImageTestimonial, toggleImageTestimonial, uploadImageTestimonial } from '@/lib/actions/image-testimonials'
+import { 
+    deleteImageTestimonials, 
+    deleteImageTestimonial, 
+    toggleImageTestimonial, 
+    uploadImageTestimonial,
+    blurTestimonialPhoneNumber,
+    blurAllTestimonialPhoneNumbers
+} from '@/lib/actions/image-testimonials'
 
 interface ImageTestimonial {
     id: string
@@ -18,6 +25,8 @@ export default function ImageTestimonialsTable({ testimonials }: { testimonials:
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [isDeleting, setIsDeleting] = useState(false)
     const [isUploading, setIsUploading] = useState(false)
+    const [isBlurringAll, setIsBlurringAll] = useState(false)
+    const [blurringId, setBlurringId] = useState<string | null>(null)
     const [showUploadModal, setShowUploadModal] = useState(false)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const router = useRouter()
@@ -50,6 +59,30 @@ export default function ImageTestimonialsTable({ testimonials }: { testimonials:
 
         if (res.success) {
             setSelectedIds(new Set())
+            router.refresh()
+        } else {
+            alert(res.error)
+        }
+    }
+
+    const handleBlurSingle = async (id: string) => {
+        setBlurringId(id)
+        const res = await blurTestimonialPhoneNumber(id)
+        setBlurringId(null)
+        if (res.success) {
+            router.refresh()
+        } else {
+            alert(res.error)
+        }
+    }
+
+    const handleBlurAll = async () => {
+        if (!confirm("Voulez-vous flouter le numéro de téléphone WhatsApp de toutes les captures ?")) return
+        setIsBlurringAll(true)
+        const res = await blurAllTestimonialPhoneNumbers()
+        setIsBlurringAll(false)
+        if (res.success) {
+            alert(`${res.count} capture(s) traitée(s) avec succès.`)
             router.refresh()
         } else {
             alert(res.error)
@@ -110,7 +143,16 @@ export default function ImageTestimonialsTable({ testimonials }: { testimonials:
                         </button>
                     </div>
                 ) : (
-                    <div className="w-full flex justify-end">
+                    <div className="w-full flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={handleBlurAll}
+                            disabled={isBlurringAll || testimonials.length === 0}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50"
+                        >
+                            {isBlurringAll ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <EyeOff className="w-3.5 h-3.5" />}
+                            {isBlurringAll ? 'Floutage en cours...' : 'Flouter tous les numéros'}
+                        </button>
                         <button
                             onClick={() => setShowUploadModal(true)}
                             className="px-6 py-2.5 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-800 transition-colors"
@@ -190,6 +232,18 @@ export default function ImageTestimonialsTable({ testimonials }: { testimonials:
                                         <td className="px-10 py-6 text-right">
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
+                                                    onClick={() => handleBlurSingle(testimonial.id)}
+                                                    disabled={blurringId === testimonial.id}
+                                                    className="p-3 bg-white text-gray-700 border border-gray-100 rounded-xl hover:bg-gray-100 hover:text-black transition-all shadow-sm active:scale-90 disabled:opacity-50"
+                                                    title="Flouter le numéro de téléphone WhatsApp"
+                                                >
+                                                    {blurringId === testimonial.id ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        <EyeOff className="w-4 h-4" />
+                                                    )}
+                                                </button>
+                                                <button
                                                     onClick={async () => {
                                                         await toggleImageTestimonial(testimonial.id)
                                                     }}
@@ -258,6 +312,20 @@ export default function ImageTestimonialsTable({ testimonials }: { testimonials:
                                         )}
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <input
+                                    id="blurPhone"
+                                    name="blurPhone"
+                                    type="checkbox"
+                                    defaultChecked
+                                    value="true"
+                                    className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black cursor-pointer"
+                                />
+                                <label htmlFor="blurPhone" className="text-xs font-semibold text-gray-700 cursor-pointer select-none">
+                                    Flouter le numéro de téléphone WhatsApp (recommandé)
+                                </label>
                             </div>
 
                             <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
