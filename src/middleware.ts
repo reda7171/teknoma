@@ -8,11 +8,13 @@ const intlMiddleware = createMiddleware(routing);
 export default function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
-  // 1. Force HTTPS in production
+  // 1. Force HTTPS in production (exclude localhost and internal IPs)
+  const host = request.headers.get('host') || '';
+  const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('::1');
   const proto = request.headers.get('x-forwarded-proto');
-  if (process.env.NODE_ENV === 'production' && proto === 'http') {
-    const host = request.headers.get('host') || 'riwaya.store';
-    return NextResponse.redirect(`https://${host}${request.nextUrl.pathname}${request.nextUrl.search}`, 301);
+  if (!isLocalhost && process.env.NODE_ENV === 'production' && proto === 'http') {
+    const targetHost = host || 'riwaya.store';
+    return NextResponse.redirect(`https://${targetHost}${request.nextUrl.pathname}${request.nextUrl.search}`, 301);
   }
 
   // 2. Force admin routes to always use French locale

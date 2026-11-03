@@ -4,6 +4,9 @@
       "startServerCommand": "npx next start -p 3000",
       "startServerReadyPattern": "ready on|Listening on|http://localhost:3000",
       "startServerReadyTimeout": 60000,
+      "settings": {
+        "chromeFlags": "--no-sandbox --ignore-certificate-errors --disable-setuid-sandbox --disable-dev-shm-usage"
+      },
       "url": [
         "http://localhost:3000/fr",
         "http://localhost:3000/fr/packs",
