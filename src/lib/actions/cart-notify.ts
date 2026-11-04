@@ -145,17 +145,46 @@ export async function notifyClearCart(totalValue: number, totalItems: number, se
     }
 }
 
-export async function notifyCheckoutInitiated(totalValue: number, totalItems: number, sessionId?: string) {
+export async function notifyCheckoutInitiated(totalValue: number, totalItems: number, sessionId?: string, userName?: string) {
     try {
         const ip = await getIpIdentifier()
         const isAdmin = await isAuthenticated()
         const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
 
+        let customerName = userName?.trim() || ''
+
+        if (!customerName) {
+            try {
+                const { getCommunityUser } = await import('@/lib/actions/community-auth')
+                const communityUser = await getCommunityUser()
+                if (communityUser) {
+                    customerName = communityUser.fullName || communityUser.email || ''
+                }
+            } catch {
+                // Ignore
+            }
+        }
+
+        if (!customerName && isAdmin) {
+            try {
+                const { getAdminUser } = await import('@/lib/actions/auth')
+                const adminUser = await getAdminUser()
+                if (adminUser) {
+                    customerName = (adminUser as any).fullName || (adminUser as any).name || adminUser.email || ''
+                }
+            } catch {
+                // Ignore
+            }
+        }
+
         const { getSetting } = await import('@/lib/actions/site-settings')
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
 
         if (shouldNotify) {
-            await sendTelegramMessage(`🚀 <b>Passage en Caisse Initié</b>${adminTag}\n\nUn client se dirige vers la page de paiement :\n📦 <b>Articles:</b> ${totalItems}\n💰 <b>Valeur:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
+            const cleanUser = customerName ? customerName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''
+            const userLine = cleanUser ? `\n👤 <b>Client :</b> ${cleanUser} <i>(Connecté)</i>` : ''
+
+            await sendTelegramMessage(`🚀 <b>Passage en Caisse Initié</b>${adminTag}\n\nUn client se dirige vers la page de paiement :${userLine}\n📦 <b>Articles:</b> ${totalItems}\n💰 <b>Valeur:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
         }
         
         return { success: true }
