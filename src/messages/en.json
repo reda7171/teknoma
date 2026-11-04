@@ -1,4 +1,13 @@
 {
+  "GmailReward": {
+    "Badge": "+10 DH Free",
+    "Title": "Congratulations!",
+    "Subtitle": "Gmail reward unlocked",
+    "Description": "Thank you for signing in with Google. You received a 10 DH instant discount on your purchases!",
+    "CodeLabel": "Your exclusive promo code:",
+    "Copied": "Code copied successfully!",
+    "ShopNow": "Shop now"
+  },
   "CartPromoPopup": {
     "Badge": "-10% Off",
     "Title": "Get an instant 10% discount on your cart!",

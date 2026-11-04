@@ -1,4 +1,13 @@
 {
+  "GmailReward": {
+    "Badge": "+10 DH Offerts",
+    "Title": "Félicitations !",
+    "Subtitle": "Récompense Gmail débloquée",
+    "Description": "Merci de vous être connecté avec Google. Vous avez reçu 10 DH de réduction immédiate à valoir sur vos achats !",
+    "CodeLabel": "Votre code promo exclusif :",
+    "Copied": "Code copié avec succès !",
+    "ShopNow": "En profiter maintenant"
+  },
   "CartPromoPopup": {
     "Badge": "-10% Offerts",
     "Title": "Profitez de -10% immédiats sur votre panier !",

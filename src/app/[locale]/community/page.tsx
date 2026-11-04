@@ -15,7 +15,6 @@ import { getUserRecommendations } from '@/lib/actions/community-recommendations'
 import RecommendationsSection from '@/components/community/RecommendationsSection'
 import RegistrationTracker from '@/components/community/RegistrationTracker'
 import CityLocalizer from '@/components/community/CityLocalizer'
-import WelcomeOfferPopup from '@/components/community/WelcomeOfferPopup'
 import PostLoginLocalizer from '@/components/community/PostLoginLocalizer'
 
 export default async function CommunityDashboard({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
@@ -45,7 +44,6 @@ export default async function CommunityDashboard({ params, searchParams }: { par
     return (
         <main className="min-h-screen bg-pixio-cream flex flex-col">
             <RegistrationTracker />
-            <WelcomeOfferPopup />
             <PostLoginLocalizer hasCity={!!(u.city)} isNewRegistration={isNewRegistration} />
             <HeaderWithUser />
 

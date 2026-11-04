@@ -37,6 +37,7 @@ export default function GoogleOneTap() {
                 const result = await googleOneTapLogin(response.credential)
                 if (result.success) {
                     showNotification('Connexion réussie', 'success')
+                    useUIStore.getState().openGmailReward()
                     router.refresh()
                 } else {
                     showNotification(result.error || 'Erreur de connexion', 'error')

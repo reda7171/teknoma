@@ -15,6 +15,10 @@ interface UIStore {
     setIsAuthenticated: (val: boolean) => void
     openAuthModal: () => void
     closeAuthModal: () => void
+    // Récompense Gmail (+10 Dhs)
+    isGmailRewardOpen: boolean
+    openGmailReward: () => void
+    closeGmailReward: () => void
     // Notifications system
     notification: {
         message: string
@@ -58,6 +62,9 @@ export const useUIStore = create<UIStore>((set) => ({
         return { isAuthModalOpen: true }
     }),
     closeAuthModal: () => set({ isAuthModalOpen: false }),
+    isGmailRewardOpen: false,
+    openGmailReward: () => set({ isGmailRewardOpen: true }),
+    closeGmailReward: () => set({ isGmailRewardOpen: false }),
     notification: null,
     showNotification: (message, type = 'success') => {
         const id = Date.now()

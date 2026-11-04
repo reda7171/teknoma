@@ -207,7 +207,8 @@ export async function login(formData: FormData): Promise<AuthResult> {
             return { success: true, redirect: '/influencer' }
         }
 
-        return { success: true, redirect: '/community' }
+        const isGmail = provider === 'google' || (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com')))
+        return { success: true, redirect: isGmail ? '/community?gmail_reward=true' : '/community' }
 
     } catch (error) {
         return { success: false, error: 'Erreur de connexion' }
@@ -281,7 +282,7 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
                 addGmailReaderToGoogleReviews(user.email).catch(console.error)
             }
             await createSession(user.id)
-            return { success: true, redirect: '/community?registered=true' }
+            return { success: true, redirect: '/community?registered=true&gmail_reward=true' }
         }
 
         // Historique
@@ -331,7 +332,8 @@ export async function oauthLoginOrRegister({ email, fullName, provider }: { emai
             return { success: true, redirect: '/influencer' }
         }
 
-        return { success: true, redirect: '/community' }
+        const isGmail = provider === 'google' || (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com')))
+        return { success: true, redirect: isGmail ? '/community?gmail_reward=true' : '/community' }
 
     } catch (error) {
         console.error('OAuth Login Error:', error)
