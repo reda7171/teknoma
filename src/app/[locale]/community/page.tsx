@@ -57,7 +57,6 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                             <RefreshCw className="w-6 h-6 text-amber-600" />
                         </div>
                         <div>
-                            <h3 className="text-amber-900 font-black text-xl md:text-2xl uppercase tracking-tight mb-2">{t('Dashboard.RestrictedAccess')}</h3>
                             <p className="text-amber-700 text-sm md:text-base font-bold leading-relaxed">
                                 {t('Dashboard.EligibilityDesc')}
                                 <Link href="/" className="ml-2 underline hover:text-amber-900">{t('Dashboard.BrowseShop')} →</Link>
