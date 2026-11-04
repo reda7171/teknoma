@@ -78,6 +78,8 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
+                                aria-label={showPassword ? t('HidePassword') : t('ShowPassword')}
+                                title={showPassword ? t('HidePassword') : t('ShowPassword')}
                                 className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

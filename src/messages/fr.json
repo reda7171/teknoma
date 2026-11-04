@@ -1030,6 +1030,8 @@
     "FullName": "Nom & Prénom",
     "Email": "Email",
     "Password": "Mot de passe",
+    "ShowPassword": "Afficher le mot de passe",
+    "HidePassword": "Masquer le mot de passe",
     "Phone": "Numéro de téléphone",
     "City": "Ville",
     "CityPlaceholder": "Casablanca, Rabat...",

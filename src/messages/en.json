@@ -1051,6 +1051,8 @@
     "FullName": "Full Name",
     "Email": "Email",
     "Password": "Password",
+    "ShowPassword": "Show password",
+    "HidePassword": "Hide password",
     "Phone": "Phone number",
     "City": "City",
     "CityPlaceholder": "Casablanca, Rabat...",
