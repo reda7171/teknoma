@@ -169,9 +169,8 @@ jobs:
 
             # Nettoyage preventif des conteneurs en conflit
             echo "Nettoyage preventif des conteneurs en conflit..."
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker stop riwaya_app 2>/dev/null || true
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker rm -f riwaya_app 2>/dev/null || true
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker ps -a --filter "name=riwaya_app" -q | xargs -r sudo docker rm -f 2>/dev/null || true
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker rm -f 6c16caadb77f_riwaya_app riwaya_app 2>/dev/null || true
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sh -c 'docker rm -f $(docker ps -a -q --filter "name=app") 2>/dev/null || true'
 
             # Rechargement direct du service avec Docker Compose v2
             echo "Rechargement du service..."
