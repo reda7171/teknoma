@@ -112,7 +112,10 @@ function ResetPasswordForm() {
                         title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                         className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
                     >
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
+                        <span className="sr-only">
+                            {showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                        </span>
                     </button>
                 </div>
 

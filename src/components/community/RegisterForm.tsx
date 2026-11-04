@@ -81,7 +81,10 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
                                 title={showPassword ? t('HidePassword') : t('ShowPassword')}
                                 className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
                             >
-                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                {showPassword ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
+                                <span className="sr-only">
+                                    {showPassword ? (t('HidePassword') || 'Masquer le mot de passe') : (t('ShowPassword') || 'Afficher le mot de passe')}
+                                </span>
                             </button>
                         </div>
                     </div>
