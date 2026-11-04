@@ -145,24 +145,82 @@ export async function notifyClearCart(totalValue: number, totalItems: number, se
     }
 }
 
-export async function notifyCheckoutInitiated(totalValue: number, totalItems: number, sessionId?: string, userName?: string) {
+export async function notifyCheckoutInitiated(totalValue: number, totalItems: number, sessionId?: string, userName?: string, cartItems?: any[]) {
     try {
         const ip = await getIpIdentifier()
         const isAdmin = await isAuthenticated()
         const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
 
         let customerName = userName?.trim() || ''
+        let customerEmail: string | null = null
+        let customerPhone: string | null = null
 
-        if (!customerName) {
-            try {
-                const { getCommunityUser } = await import('@/lib/actions/community-auth')
-                const communityUser = await getCommunityUser()
-                if (communityUser) {
+        try {
+            const { getCommunityUser } = await import('@/lib/actions/community-auth')
+            const communityUser = await getCommunityUser()
+            if (communityUser) {
+                if (!customerName) {
                     customerName = communityUser.fullName || communityUser.email || ''
                 }
-            } catch {
-                // Ignore
+                customerEmail = communityUser.email || null
+                customerPhone = communityUser.phone || null
+
+                // Si pas de téléphone dans le profil utilisateur, chercher dans ses commandes passées
+                if (!customerPhone && customerEmail) {
+                    const { prisma } = await import('@/lib/prisma')
+                    const lastOrder = await prisma.order.findFirst({
+                        where: { email: customerEmail, phone: { not: '' } },
+                        orderBy: { createdAt: 'desc' },
+                        select: { phone: true }
+                    })
+                    if (lastOrder?.phone) {
+                        customerPhone = lastOrder.phone
+                    }
+                }
+
+                // Enregistrement / mise à jour automatique du panier abandonné pour ce client connecté identifié
+                if (customerPhone || customerEmail) {
+                    const { prisma } = await import('@/lib/prisma')
+                    const cartData = cartItems && Array.isArray(cartItems) ? JSON.stringify(cartItems) : JSON.stringify([])
+
+                    const existingCart = await prisma.abandonedCart.findFirst({
+                        where: {
+                            status: 'PENDING',
+                            OR: [
+                                ...(customerPhone ? [{ phone: customerPhone }] : []),
+                                ...(customerEmail ? [{ email: customerEmail }] : [])
+                            ],
+                            createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+                        }
+                    })
+
+                    if (existingCart) {
+                        await prisma.abandonedCart.update({
+                            where: { id: existingCart.id },
+                            data: {
+                                total: totalValue,
+                                cartData: cartData !== '[]' ? cartData : existingCart.cartData,
+                                phone: customerPhone || existingCart.phone,
+                                email: customerEmail || existingCart.email,
+                                fullName: customerName || existingCart.fullName
+                            }
+                        })
+                    } else {
+                        await prisma.abandonedCart.create({
+                            data: {
+                                total: totalValue,
+                                cartData,
+                                phone: customerPhone,
+                                email: customerEmail,
+                                fullName: customerName || null,
+                                status: 'PENDING'
+                            }
+                        })
+                    }
+                }
             }
+        } catch {
+            // Ignore
         }
 
         if (!customerName && isAdmin) {
@@ -170,7 +228,7 @@ export async function notifyCheckoutInitiated(totalValue: number, totalItems: nu
                 const { getAdminUser } = await import('@/lib/actions/auth')
                 const adminUser = await getAdminUser()
                 if (adminUser) {
-                    customerName = (adminUser as any).fullName || (adminUser as any).name || adminUser.email || ''
+                    customerName = (adminUser as any)?.fullName || (adminUser as any)?.name || (adminUser as any)?.email || ''
                 }
             } catch {
                 // Ignore

@@ -35,7 +35,7 @@ export default function CheckoutClient({
     paymentSettings,
     is3For4Active
 }: { 
-    user?: { fullName?: string | null; email: string; image?: string | null; credits?: number } | null;
+    user?: { fullName?: string | null; email: string; phone?: string | null; image?: string | null; credits?: number } | null;
     minOrderAmount?: number;
     paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string; logo?: string; qrCode?: string }[] }
     is3For4Active?: boolean;
@@ -75,6 +75,7 @@ export default function CheckoutClient({
     const defaultValues: Partial<CheckoutForm> = user ? {
         email: user.email,
         fullName: user.fullName || '',
+        phone: user.phone || '',
         paymentMethod: paymentSettings?.codEnabled !== false ? 'COD' : 'STRIPE'
     } : {
         paymentMethod: paymentSettings?.codEnabled !== false ? 'COD' : 'STRIPE'
@@ -90,6 +91,15 @@ export default function CheckoutClient({
     const watchedCity = watch('city')
 
     const [abandonedCartId, setAbandonedCartId] = useState<string | null>(null)
+    useEffect(() => {
+        if (user && (user.phone || user.email) && items.length > 0) {
+            const timer = setTimeout(() => {
+                saveAbandonedCart()
+            }, 1000)
+            return () => clearTimeout(timer)
+        }
+    }, [user, items.length])
+
 
     const saveAbandonedCart = async () => {
         const data = getValues()

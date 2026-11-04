@@ -45,7 +45,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
         const value = getTotalPrice()
         const count = getTotalItems()
         withExponentialRetry(
-            () => notifyCheckoutInitiated(value, count, sessionId || undefined),
+            () => notifyCheckoutInitiated(value, count, sessionId || undefined, undefined, items),
             { maxRetries: 2, baseDelayMs: 300 }
         ).catch(console.error)
     }

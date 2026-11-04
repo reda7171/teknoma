@@ -22,6 +22,7 @@ export default async function CheckoutPage() {
     const userProps = user ? {
         fullName: user.fullName,
         email: user.email,
+        phone: user.phone || '',
         image: user.image,
         credits: user.credits,
     } : null

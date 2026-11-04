@@ -91,7 +91,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         const value = getTotalPrice()
         const count = getTotalItems()
         withExponentialRetry(
-            () => notifyCheckoutInitiated(value, count, sessionId || undefined),
+            () => notifyCheckoutInitiated(value, count, sessionId || undefined, undefined, items),
             { maxRetries: 2, baseDelayMs: 300 }
         ).catch(console.error)
         onClose()
