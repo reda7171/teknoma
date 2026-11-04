@@ -1,0 +1,30 @@
+name: Restart App Container
+
+on:
+  workflow_dispatch:
+
+jobs:
+  restart-app:
+    name: Restart Next.js App on VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Restart App
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 2222
+          command_timeout: 10m
+          script: |
+            cd /var/www/riwayama
+            echo "Nettoyage des conteneurs en conflit..."
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker stop riwaya_app 2>/dev/null || true
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker rm -f riwaya_app 2>/dev/null || true
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker ps -a --filter "name=riwaya_app" -q | xargs -r sudo docker rm -f 2>/dev/null || true
+            echo "Relance du conteneur app..."
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps --force-recreate app
+            echo "Attente du démarrage (5s)..."
+            sleep 5
+            echo "Vérification statut..."
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker ps --filter "name=riwaya_app"
