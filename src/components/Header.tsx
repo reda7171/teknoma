@@ -108,10 +108,19 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
         setMobileSearchOpen(false)
     }, [pathname, closeMobileMenu])
 
-    // Éviter les problèmes d'hydratation
+    // Éviter les problèmes d'hydratation et synchroniser l'état d'authentification
     useEffect(() => {
         setMounted(true)
-    }, [])
+        const isAuth = Boolean(user)
+        useUIStore.getState().setIsAuthenticated(isAuth)
+        if (typeof document !== 'undefined') {
+            if (isAuth) {
+                document.cookie = 'riwaya_authenticated=1; path=/; max-age=2592000; SameSite=Lax'
+            } else if (document.cookie.includes('riwaya_authenticated=1')) {
+                document.cookie = 'riwaya_authenticated=; path=/; max-age=0; SameSite=Lax'
+            }
+        }
+    }, [user])
 
     const [isCartAnimating, setIsCartAnimating] = useState(false)
 

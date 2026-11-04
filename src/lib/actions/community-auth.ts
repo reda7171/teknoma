@@ -220,6 +220,7 @@ export async function login(formData: FormData): Promise<AuthResult> {
 export async function logout() {
     const cookieStore = await cookies()
     cookieStore.delete('community-token')
+    cookieStore.delete('riwaya_authenticated')
 }
 
 /**
@@ -388,9 +389,16 @@ async function createSession(userId: string) {
     const cookieStore = await cookies()
     cookieStore.set('community-token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Forcer à false pour permettre la connexion via IP/HTTP sur VPS
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30, // 30 jours
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+    })
+    cookieStore.set('riwaya_authenticated', '1', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30,
         path: '/',
     })
 

@@ -8,15 +8,19 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
 export default function AuthModal() {
-    const { isAuthModalOpen, closeAuthModal, showNotification } = useUIStore()
+    const { isAuthModalOpen, closeAuthModal, showNotification, isAuthenticated } = useUIStore()
     const t = useTranslations('AuthModal')
     const [mounted, setMounted] = useState(false)
     
     useEffect(() => {
         setMounted(true)
-    }, [])
+        if (typeof document !== 'undefined' && document.cookie.includes('riwaya_authenticated=1')) {
+            closeAuthModal()
+        }
+    }, [closeAuthModal])
 
-    if (!mounted || !isAuthModalOpen) return null;
+    if (!mounted || !isAuthModalOpen || isAuthenticated) return null;
+    if (typeof document !== 'undefined' && document.cookie.includes('riwaya_authenticated=1')) return null;
     
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "967210658791-vn1et4a1cr5b78as8vh5f3h1jfs153kh.apps.googleusercontent.com"
     

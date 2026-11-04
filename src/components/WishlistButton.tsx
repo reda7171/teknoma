@@ -53,7 +53,11 @@ export default function WishlistButton({ item, className, showText = false, vari
                     removeItem(item.id)
                 } else {
                     if (res.error === "Non connecté") {
-                        openAuthModal()
+                        if (typeof document !== 'undefined' && document.cookie.includes('riwaya_authenticated=1')) {
+                            showNotification(res.error || "Erreur de synchronisation", 'error')
+                        } else {
+                            openAuthModal()
+                        }
                     } else {
                         showNotification(res.error || "Erreur lors de la suppression", 'error')
                     }
@@ -88,7 +92,11 @@ export default function WishlistButton({ item, className, showText = false, vari
                     })
                 } else {
                     if (res.error === "Non connecté") {
-                        openAuthModal()
+                        if (typeof document !== 'undefined' && document.cookie.includes('riwaya_authenticated=1')) {
+                            showNotification(res.error || "Erreur de synchronisation", 'error')
+                        } else {
+                            openAuthModal()
+                        }
                     } else {
                         showNotification(res.error || "Erreur lors de l'ajout", 'error')
                     }

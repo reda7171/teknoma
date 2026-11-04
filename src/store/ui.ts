@@ -11,6 +11,8 @@ interface UIStore {
     toggleMobileMenu: () => void
     setMobileMenuOpen: (open: boolean | ((prev: boolean) => boolean)) => void
     isAuthModalOpen: boolean
+    isAuthenticated: boolean
+    setIsAuthenticated: (val: boolean) => void
     openAuthModal: () => void
     closeAuthModal: () => void
     // Notifications system
@@ -45,8 +47,16 @@ export const useUIStore = create<UIStore>((set) => ({
             isCartOpen: nextValue ? false : state.isCartOpen
         }
     }),
+    isAuthenticated: false,
+    setIsAuthenticated: (val) => set({ isAuthenticated: val, isAuthModalOpen: val ? false : undefined }),
     isAuthModalOpen: false,
-    openAuthModal: () => set({ isAuthModalOpen: true }),
+    openAuthModal: () => set((state) => {
+        if (state.isAuthenticated) return { isAuthModalOpen: false }
+        if (typeof document !== 'undefined' && document.cookie.includes('riwaya_authenticated=1')) {
+            return { isAuthenticated: true, isAuthModalOpen: false }
+        }
+        return { isAuthModalOpen: true }
+    }),
     closeAuthModal: () => set({ isAuthModalOpen: false }),
     notification: null,
     showNotification: (message, type = 'success') => {
@@ -59,4 +69,3 @@ export const useUIStore = create<UIStore>((set) => ({
     },
     hideNotification: () => set({ notification: null }),
 }))
-

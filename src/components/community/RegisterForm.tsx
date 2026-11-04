@@ -1,9 +1,9 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { useState } from 'react'
 import { register } from '@/lib/actions/community-auth'
-import { Link, useRouter } from '@/i18n/routing'
+import { Link } from '@/i18n/routing'
 import { Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { MOROCCO_CITIES } from '@/lib/constants/cities'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
@@ -18,7 +18,7 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
     const t = useTranslations('Community')
     const tm = useTranslations('Community.Market')
     const tcmn = useTranslations('Common')
-    const router = useRouter()
+    const locale = useLocale()
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -33,8 +33,7 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
 
         if (res.success) {
             fbPixelEvents.completeRegistration()
-            router.push('/community?welcome=true')
-            router.refresh()
+            window.location.href = '/' + locale + '/community?welcome=true'
         } else {
             setError(res.error || tcmn('Errors.UnexpectedError'))
             setLoading(false)

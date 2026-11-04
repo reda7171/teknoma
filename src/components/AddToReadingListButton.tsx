@@ -64,7 +64,11 @@ export default function AddToReadingListButton({ bookId, title, author, cover, t
         } else {
             // Si erreur de connexion
             if (result.error === 'Vous devez être connecté') {
-                openAuthModal()
+                if (typeof document !== 'undefined' && document.cookie.includes('riwaya_authenticated=1')) {
+                    showNotification(result.error || 'Erreur de synchronisation', 'error')
+                } else {
+                    openAuthModal()
+                }
             } else {
                 showNotification(result.error || 'Erreur', 'error')
             }

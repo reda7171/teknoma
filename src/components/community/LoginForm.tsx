@@ -1,12 +1,11 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
+import { useState } from 'react'
 import { login } from '@/lib/actions/community-auth'
-import { Link, useRouter } from '@/i18n/routing'
+import { Link } from '@/i18n/routing'
 import { Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import OAuthButtons from './OAuthButtons'
-import { useUIStore } from '@/store/ui'
 
 interface LoginFormProps {
     googleEnabled?: boolean;
@@ -16,18 +15,10 @@ interface LoginFormProps {
 export default function LoginForm({ googleEnabled = true, facebookEnabled = true }: LoginFormProps) {
     const t = useTranslations('Community')
     const tcmn = useTranslations('Common')
-    const router = useRouter()
+    const locale = useLocale()
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const { openAuthModal } = useUIStore()
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            openAuthModal()
-        }, 30000)
-        return () => clearTimeout(timer)
-    }, [openAuthModal])
 
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -38,8 +29,11 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
         const res = await login(formData)
 
         if (res.success) {
-            router.push('/community')
-            router.refresh()
+            let target = res.redirect || '/community'
+            if (!target.startsWith(`/${locale}`) && target.startsWith('/')) {
+                target = `/${locale}${target}`
+            }
+            window.location.href = target
         } else {
             setError(res.error || tcmn('Errors.UnexpectedError'))
             setLoading(false)

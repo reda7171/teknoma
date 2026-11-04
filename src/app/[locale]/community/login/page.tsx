@@ -4,8 +4,16 @@ import LoginForm from '@/components/community/LoginForm'
 import { getTranslations } from 'next-intl/server'
 import { Wallet, Truck, RefreshCcw, Gift, PackageOpen } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { getCommunityUser } from '@/lib/actions/community-auth'
+import { redirect } from 'next/navigation'
 
-export default async function LoginPage() {
+export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params
+    const user = await getCommunityUser()
+    if (user) {
+        redirect(`/${locale}/community`)
+    }
+
     const t = await getTranslations('AuthBenefits')
     const googleEnabledSetting = await prisma.siteSettings.findUnique({ where: { key: 'auth_google_enabled' } })
     const facebookEnabledSetting = await prisma.siteSettings.findUnique({ where: { key: 'auth_facebook_enabled' } })
@@ -13,7 +21,6 @@ export default async function LoginPage() {
     const googleEnabled = googleEnabledSetting?.value !== 'false'
     const facebookEnabled = facebookEnabledSetting?.value !== 'false'
 
-    
     const benefits = [
         { icon: Gift, title: t('b1_title'), desc: t('b1_desc'), color: 'text-pixio-pink', bg: 'bg-pixio-pink/20' },
         { icon: Wallet, title: t('b2_title'), desc: t('b2_desc'), color: 'text-amber-500', bg: 'bg-amber-100' },
