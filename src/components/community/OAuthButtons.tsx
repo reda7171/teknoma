@@ -99,7 +99,7 @@ export default function OAuthButtons({ googleEnabled = true, facebookEnabled = t
                     <div className="w-full border-t border-gray-200"></div>
                 </div>
                 <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
-                    <span className="bg-white px-4 text-gray-400">{t('Or')}</span>
+                    <span className="bg-white px-4 text-gray-700">{t('Or')}</span>
                 </div>
             </div>
         </div>

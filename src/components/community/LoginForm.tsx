@@ -55,7 +55,7 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
 
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-700 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
                         <input
                             name="email"
                             type="email"
@@ -66,7 +66,7 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Password')}</label>
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-700 ltr:ml-1 rtl:mr-1">{t('Password')}</label>
                         <div className="relative">
                             <input
                                 name="password"
@@ -78,7 +78,7 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
+                                className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
@@ -102,7 +102,7 @@ export default function LoginForm({ googleEnabled = true, facebookEnabled = true
                 </form>
 
                 <div className="mt-8 text-center">
-                    <p className="text-xs rtl:text-sm font-bold text-gray-400">
+                    <p className="text-xs rtl:text-sm font-bold text-gray-700">
                         {t('NoAccount')} <Link href="/community/register" className="text-black underline decoration-2 underline-offset-4 hover:text-gray-600 transition-colors">{t('RegisterButton')}</Link>
                     </p>
                 </div>

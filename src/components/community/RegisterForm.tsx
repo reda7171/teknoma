@@ -50,22 +50,22 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
 
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('FullName')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 ltr:ml-1 rtl:mr-1">{t('FullName')}</label>
                         <input name="fullName" required className="w-full px-6 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black" placeholder="Taha Hussein" />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
                         <input name="email" type="email" required className="w-full px-6 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black" placeholder="hello@example.com" />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Phone')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 ltr:ml-1 rtl:mr-1">{t('Phone')}</label>
                         <input name="phone" type="tel" required className="w-full px-6 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black" placeholder="0612345678" />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Password')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 ltr:ml-1 rtl:mr-1">{t('Password')}</label>
                         <div className="relative">
                             <input
                                 name="password"
@@ -77,7 +77,7 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
+                                className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
@@ -85,7 +85,7 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('City')}</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 ltr:ml-1 rtl:mr-1">{t('City')}</label>
                         <div className="relative">
                             <select aria-label="Sélection city"
                                 name="city"
@@ -119,7 +119,7 @@ export default function RegisterForm({ googleEnabled = true, facebookEnabled = t
                 </form>
 
                 <div className="mt-8 text-center">
-                    <p className="text-xs font-bold text-gray-400">
+                    <p className="text-xs font-bold text-gray-700">
                         {t('AlreadyAccount')} <Link href="/community/login" className="text-black underline decoration-2 underline-offset-4 hover:text-gray-600 transition-colors">{t('LoginButton')}</Link>
                     </p>
                 </div>
