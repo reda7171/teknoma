@@ -193,11 +193,11 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
 
             {/* Afficher la bulle d'aide uniquement lorsque le panier contient un article. */}
             {totalItems > 0 && (
-                <div className="absolute bottom-full right-0 mb-3 flex items-center drop-shadow-md cursor-pointer select-none md:bottom-auto md:right-full md:top-1/2 md:mb-0 md:mr-3.5 md:-translate-y-1/2 rtl:md:right-auto rtl:md:left-full rtl:md:mr-0 rtl:md:ml-3.5">
-                    <div className="relative bg-slate-950 text-white text-[11px] font-black px-3.5 py-2 rounded-2xl whitespace-nowrap flex items-center gap-2 border border-slate-800 shadow-2xl hover:bg-slate-900 transition-colors">
+                <div className="absolute bottom-full right-0 mb-3 flex items-center drop-shadow-md cursor-pointer select-none md:bottom-auto md:right-full md:top-1/2 md:mb-0 md:mr-3.5 md:-translate-y-1/2 ">
+                    <div className="relative bg-slate-950 text-white text-[11px] font-black px-3.5 py-2 rounded-2xl whitespace-nowrap flex items-center gap-2 border border-slate-800 shadow-2xl hover:bg-slate-900 transition-colors" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                         <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse shrink-0" />
                         <span>{tooltipText}</span>
-                        <div className="absolute -bottom-1 right-5 w-2 h-2 bg-slate-950 rotate-45 border-r border-b border-slate-800 md:bottom-auto md:right-[-0.25rem] md:top-1/2 md:-translate-y-1/2 md:border-b-0 md:border-t md:border-r rtl:md:right-auto rtl:md:-left-1 rtl:md:border-t-0 rtl:md:border-r-0 rtl:md:border-b rtl:md:border-l" />
+                        <div className="absolute -bottom-1 right-5 w-2 h-2 bg-slate-950 rotate-45 border-r border-b border-slate-800 md:bottom-auto md:right-[-0.25rem] md:top-1/2 md:-translate-y-1/2 md:border-b-0 md:border-t md:border-r " />
                     </div>
                 </div>
             )}
