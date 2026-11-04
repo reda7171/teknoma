@@ -1361,7 +1361,11 @@
       "AddBook": "Ajouter à ma wishlist",
       "BookTitle": "Titre du livre",
       "Author": "Auteur (optionnel)",
-      "Success": "Livre ajouté à votre wishlist"
+      "Success": "Livre ajouté à votre wishlist",
+      "ImportFromCart": "Ajouter depuis le panier",
+      "CartImportSuccess": "Livres du panier synchronisés avec votre wishlist",
+      "CartBooksReady": "Livres dans votre panier prêts à être ajoutés",
+      "SyncingCart": "Synchronisation du panier..."
     }
   },
   "PacksPage": {

@@ -1382,7 +1382,11 @@
       "AddBook": "Add to my wishlist",
       "BookTitle": "Book Title",
       "Author": "Author (optional)",
-      "Success": "Book added to your wishlist"
+      "Success": "Book added to your wishlist",
+      "ImportFromCart": "Add from cart",
+      "CartImportSuccess": "Cart books synced to your wishlist",
+      "CartBooksReady": "Books in your cart ready to add",
+      "SyncingCart": "Syncing cart..."
     }
   },
   "PackDetail": {

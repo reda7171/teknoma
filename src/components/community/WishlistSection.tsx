@@ -1,14 +1,17 @@
 'use client'
 
-import { useState, useTransition, useOptimistic } from 'react'
-import { addToWishlist, removeFromWishlist } from '@/lib/actions/community-wishlist'
-import { Plus, Trash2, Loader2, BookMarked, Search } from 'lucide-react'
+import { useState, useTransition, useOptimistic, useEffect, useRef } from 'react'
+import Image from 'next/image'
+import { addToWishlist, removeFromWishlist, syncCartToWishlist } from '@/lib/actions/community-wishlist'
+import { Plus, Trash2, Loader2, BookMarked, Search, ShoppingCart } from 'lucide-react'
 import { useRouter } from '@/i18n/routing'
 import BookSearchModal, { SelectedBookData } from '@/components/community/BookSearchModal'
 import { useTranslations } from 'next-intl'
 import { useUIStore } from '@/store/ui'
 import { useWishlistStore } from '@/store/wishlist'
+import { useCartStore } from '@/store/cart'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
+import { normalizeImage } from '@/lib/utils'
 
 interface WishlistSectionProps {
     wishlist: any[]
@@ -24,6 +27,9 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
 
+    const { items: cartItems } = useCartStore()
+    const { addItem: addWishlistLocalItem, removeItem: removeWishlistLocalItem } = useWishlistStore()
+
     const [optimisticWishlist, updateOptimisticWishlist] = useOptimistic(
         wishlist,
         (state, { type, item, id }: { type: 'ADD' | 'DELETE', item?: any, id?: string }) => {
@@ -32,6 +38,76 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
             return state
         }
     )
+
+    const currentWishlist = optimisticWishlist
+
+    // Identifier les livres du panier non encore présents dans la wishlist
+    const unimportedCartItems = cartItems.filter(cartItem => {
+        return !currentWishlist.some(wItem => {
+            const wBookId = wItem.bookId || wItem.book?.id
+            const wPackId = wItem.packId || wItem.pack?.id
+            if (wBookId && wBookId === cartItem.id) return true
+            if (wPackId && wPackId === cartItem.id) return true
+            if (wItem.id === cartItem.id) return true
+            if (wItem.title && cartItem.title && wItem.title.trim().toLowerCase() === cartItem.title.trim().toLowerCase()) return true
+            return false
+        })
+    })
+
+    const handleImportCart = (itemsToImport = unimportedCartItems) => {
+        if (!itemsToImport.length) return
+
+        startTransition(async () => {
+            itemsToImport.forEach(item => {
+                updateOptimisticWishlist({
+                    type: 'ADD',
+                    item: {
+                        id: `cart_${item.id}_${Date.now()}`,
+                        bookId: item.type === 'PACK' ? undefined : item.id,
+                        packId: item.type === 'PACK' ? item.id : undefined,
+                        title: item.title,
+                        author: (item as any).author || undefined,
+                        book: item.type !== 'PACK' ? { id: item.id, title: item.title, image: item.image, price: item.price } : undefined,
+                        pack: item.type === 'PACK' ? { id: item.id, name: item.title, image: item.image, price: item.price } : undefined,
+                        isOptimistic: true
+                    }
+                })
+
+                addWishlistLocalItem({
+                    id: item.id,
+                    type: item.type === 'PACK' ? 'PACK' : 'BOOK',
+                    title: item.title,
+                    price: item.price,
+                    image: item.image,
+                    slug: item.type === 'PACK' ? `/packs/${item.id}` : `/books/${item.id}`
+                })
+            })
+
+            const res = await syncCartToWishlist(
+                itemsToImport.map(i => ({
+                    id: i.id,
+                    title: i.title,
+                    author: (i as any).author,
+                    type: i.type,
+                    image: i.image
+                }))
+            )
+
+            if (res.success) {
+                showNotification(t('CartImportSuccess'))
+                router.refresh()
+            }
+        })
+    }
+
+    // Auto-synchronisation si la wishlist utilisateur est vide mais que son panier contient des livres
+    const autoSyncTriggered = useRef(false)
+    useEffect(() => {
+        if (!autoSyncTriggered.current && wishlist.length === 0 && unimportedCartItems.length > 0) {
+            autoSyncTriggered.current = true
+            handleImportCart(unimportedCartItems)
+        }
+    }, [wishlist.length, unimportedCartItems.length])
 
     async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -46,7 +122,6 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
             })
             setShowForm(false)
             
-            // Track AddToCart event
             try {
                 fbPixelEvents.addToCart({
                     id: `wishlist_${Date.now()}`,
@@ -71,24 +146,18 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
         setAuthor(data.author)
     }
 
-    const { removeItem } = useWishlistStore()
-
     async function handleRemove(id: string, bookId?: string) {
         startTransition(async () => {
             updateOptimisticWishlist({ type: 'DELETE', id })
-            // Supprimer de la DB
             await removeFromWishlist(id)
-            // Supprimer du store local (Zustand) pour l'en-tête
             if (bookId) {
-                removeItem(bookId)
+                removeWishlistLocalItem(bookId)
             } else {
-                removeItem(id)
+                removeWishlistLocalItem(id)
             }
             router.refresh()
         })
     }
-
-    const currentWishlist = optimisticWishlist
 
     return (
         <div className="bg-white rounded-[2.5rem] p-8 lg:p-10 border border-gray-100 shadow-xl shadow-black/5 mb-12">
@@ -102,12 +171,29 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
                         <p className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400">{t('Subtitle')}</p>
                     </div>
                 </div>
-                <button
-                    onClick={() => startTransition(() => setShowForm(!showForm))}
-                    className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors shadow-lg"
-                >
-                    <Plus className={`w-5 h-5 transition-transform ${showForm ? 'rotate-45' : ''}`} />
-                </button>
+                <div className="flex items-center gap-2">
+                    {unimportedCartItems.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={() => handleImportCart(unimportedCartItems)}
+                            disabled={isPending}
+                            className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 rounded-2xl text-xs font-black transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                            title={t('ImportFromCart')}
+                        >
+                            <ShoppingCart className="w-3.5 h-3.5 text-amber-600" />
+                            <span className="hidden sm:inline">{t('ImportFromCart')}</span>
+                            <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-black">
+                                {unimportedCartItems.length}
+                            </span>
+                        </button>
+                    )}
+                    <button
+                        onClick={() => startTransition(() => setShowForm(!showForm))}
+                        className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors shadow-lg shrink-0"
+                    >
+                        <Plus className={`w-5 h-5 transition-transform ${showForm ? 'rotate-45' : ''}`} />
+                    </button>
+                </div>
             </div>
 
             {showForm && (
@@ -163,21 +249,56 @@ export default function WishlistSection({ wishlist }: WishlistSectionProps) {
 
             {currentWishlist.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {currentWishlist.map((item) => (
-                        <div key={item.id} className="group flex items-center justify-between p-4 bg-gray-50 hover:bg-white border-2 border-transparent hover:border-black rounded-2xl transition-all">
-                            <div className="min-w-0">
-                                <h3 className={`font-black text-sm text-black truncate ${item.isOptimistic ? 'opacity-50' : ''}`}>{item.title}</h3>
-                                {item.author && <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">{item.author}</p>}
+                    {currentWishlist.map((item) => {
+                        const cover = item.book?.image || item.pack?.image || item.image
+                        const itemPrice = item.book?.price || item.pack?.price
+                        const itemAuthor = item.author || item.book?.author
+
+                        return (
+                            <div key={item.id} className="group flex items-center justify-between p-3.5 bg-gray-50 hover:bg-white border-2 border-transparent hover:border-black rounded-2xl transition-all shadow-sm hover:shadow-md gap-3">
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    {cover ? (
+                                        <div className="relative w-12 h-16 rounded-xl overflow-hidden bg-gray-200 shrink-0 border border-gray-100">
+                                            <Image
+                                                src={normalizeImage(cover)}
+                                                alt={item.title}
+                                                fill
+                                                sizes="48px"
+                                                className="object-cover"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="w-12 h-16 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                                            <BookMarked className="w-5 h-5 text-amber-600" />
+                                        </div>
+                                    )}
+                                    <div className="min-w-0 flex-1">
+                                        <h3 className={`font-black text-sm text-black truncate ${item.isOptimistic ? 'opacity-50' : ''}`} title={item.title}>
+                                            {item.title}
+                                        </h3>
+                                        {itemAuthor && (
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">
+                                                {itemAuthor}
+                                            </p>
+                                        )}
+                                        {itemPrice && (
+                                            <span className="text-[11px] font-black text-emerald-600">
+                                                {itemPrice} DH
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleRemove(item.id, item.bookId || item.book?.id || item.packId || item.pack?.id)}
+                                    disabled={isPending}
+                                    className="p-2 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50 shrink-0"
+                                    aria-label="Remove"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => handleRemove(item.id, item.bookId)}
-                                disabled={isPending}
-                                className="p-2 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </button>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             ) : (
                 <div className="text-center py-10 bg-gray-50 rounded-3xl border-dashed border-2 border-gray-200">

@@ -98,6 +98,97 @@ export async function removeFromWishlist(id: string) {
     }
 }
 
+export async function syncCartToWishlist(cartItems: Array<{ id: string, title: string, author?: string, type?: string, image?: string }>) {
+    const user = await getCommunityUser()
+    if (!user) return { success: false, error: "Non connecté" }
+    if (!Array.isArray(cartItems) || cartItems.length === 0) return { success: true, count: 0, items: [] }
+
+    try {
+        let addedCount = 0
+        const newlyAdded: any[] = []
+
+        for (const item of cartItems) {
+            if (!item || !item.title) continue
+
+            let validBookId: string | undefined = undefined
+            let validPackId: string | undefined = undefined
+            let author = item.author
+
+            if (item.type === 'PACK') {
+                const pack = await (prisma as any).pack.findUnique({
+                    where: { id: item.id },
+                    select: { id: true, name: true, image: true, price: true }
+                })
+                if (pack) validPackId = pack.id
+            } else {
+                const book = await (prisma as any).book.findUnique({
+                    where: { id: item.id },
+                    select: { id: true, title: true, author: true, image: true, price: true, category: true }
+                })
+                if (book) {
+                    validBookId = book.id
+                    if (!author && book.author) author = book.author
+                }
+            }
+
+            // Vérifier si le livre est déjà dans la wishlist de l'utilisateur
+            const orConditions: any[] = [{ title: item.title }]
+            if (validBookId) orConditions.push({ bookId: validBookId })
+            if (validPackId) orConditions.push({ packId: validPackId })
+
+            const existing = await (prisma as any).wishlist.findFirst({
+                where: {
+                    userId: user.id,
+                    OR: orConditions
+                }
+            })
+
+            if (!existing) {
+                const created = await (prisma as any).wishlist.create({
+                    data: {
+                        userId: user.id,
+                        bookId: validBookId,
+                        packId: validPackId,
+                        title: item.title,
+                        author: author || undefined
+                    },
+                    include: {
+                        book: {
+                            select: {
+                                id: true,
+                                title: true,
+                                author: true,
+                                image: true,
+                                price: true,
+                                category: true
+                            }
+                        },
+                        pack: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                                price: true
+                            }
+                        }
+                    }
+                })
+                newlyAdded.push(created)
+                addedCount++
+            }
+        }
+
+        if (addedCount > 0) {
+            revalidatePath('/community')
+        }
+
+        return { success: true, count: addedCount, items: newlyAdded }
+    } catch (error) {
+        console.error('syncCartToWishlist error:', error)
+        return { success: false, error: "Erreur lors de la synchronisation" }
+    }
+}
+
 export async function getWishlist() {
     const user = await getCommunityUser()
     if (!user) return []
