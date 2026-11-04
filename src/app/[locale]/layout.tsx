@@ -15,7 +15,7 @@ const WhatsAppChannelButton = dynamic(() => import('@/components/WhatsAppChannel
 const ChatBot = dynamic(() => import('@/components/ChatBot'))
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
 const CartPromoLeadPopup = dynamic(() => import('@/components/cart/CartPromoLeadPopup'))
-const WelcomeOfferPopup = dynamic(() => import('@/components/community/WelcomeOfferPopup'), { ssr: false })
+const WelcomeOfferPopup = dynamic(() => import('@/components/community/WelcomeOfferPopup'))
 import UtmTracker from '@/components/UtmTracker'
 import DeferredMarketingScripts from '@/components/DeferredMarketingScripts'
 import AuthModalLoader from '@/components/auth/AuthModalLoader'
