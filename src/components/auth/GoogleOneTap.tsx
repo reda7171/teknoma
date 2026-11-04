@@ -54,10 +54,14 @@ export default function GoogleOneTap() {
                     client_id: clientId,
                     callback: handleCredentialResponse,
                     auto_select: false,
-                    use_fedcm_for_prompt: true,
+
                     cancel_on_tap_outside: true,
                 })
-                window.google.accounts.id.prompt()
+                window.google.accounts.id.prompt((notification: any) => {
+                    if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
+                        // Moment ignoré ou non affiché (environnement restreint ou rejet)
+                    }
+                })
             } catch (err) {
                 // Silently ignore GSI initialization errors in headless/unsupported environments
             }

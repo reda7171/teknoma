@@ -29,14 +29,15 @@ export default function GoogleOneTapLoader() {
             window.removeEventListener('keydown', enable)
         }
 
-        const timer = setTimeout(enable, 4000)
+        // Pas de timer automatique : activation uniquement sur interaction réelle pour préserver Lighthouse
+        // const timer = setTimeout(enable, 4000)
 
         window.addEventListener('scroll', enable, { once: true, passive: true })
         window.addEventListener('pointerdown', enable, { once: true, passive: true })
         window.addEventListener('touchstart', enable, { once: true, passive: true })
         window.addEventListener('keydown', enable, { once: true, passive: true })
         return () => {
-            clearTimeout(timer)
+            // clearTimeout(timer)
             cleanup()
         }
     }, [])

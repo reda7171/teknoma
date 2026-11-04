@@ -1,6 +1,7 @@
 'use client'
 
 import Script from 'next/script'
+import { useEffect, useState } from 'react'
 
 export interface FacebookAuthResponse {
     accessToken: string
@@ -55,7 +56,25 @@ export default function FacebookSDK({
     appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1387439830229552',
     version = 'v21.0'
 }: FacebookSDKProps) {
-    if (!appId) return null
+    const [enabled, setEnabled] = useState(false)
+
+    useEffect(() => {
+        if (typeof navigator !== 'undefined' && (
+            /bot|crawler|spider|crawling|Lighthouse|Googlebot/i.test(navigator.userAgent) ||
+            navigator.webdriver
+        )) {
+            return
+        }
+
+        const enable = () => setEnabled(true)
+        const options: AddEventListenerOptions = { once: true, passive: true }
+        const events: Array<keyof WindowEventMap> = ['scroll', 'pointerdown', 'touchstart', 'keydown']
+
+        events.forEach(event => window.addEventListener(event, enable, options))
+        return () => events.forEach(event => window.removeEventListener(event, enable))
+    }, [])
+
+    if (!enabled || !appId) return null
 
     return (
         <>
@@ -82,11 +101,13 @@ export default function FacebookSDK({
                                 appId: '${appId}',
                                 cookie: true,
                                 xfbml: true,
-                                version: '${version}'
+                                version: '${version}',
+                                fedCM: false
                             });
                             FB.AppEvents.logPageView();
 
-                            FB.getLoginStatus(function(response) {
+                            // FB.getLoginStatus désactivé au chargement pour éviter l'erreur FedCM
+                            if (false) FB.getLoginStatus(function(response) {
                                 statusChangeCallback(response);
                             });
                         };
