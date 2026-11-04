@@ -318,7 +318,9 @@ export default function PredictiveSearch() {
                 <input
                     ref={inputRef}
                     type="text"
-                    role="searchbox"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    aria-controls="predictive-search-results"
                     autoComplete="off"
                     autoCorrect="off"
                     spellCheck="false"
@@ -413,7 +415,7 @@ export default function PredictiveSearch() {
 
             {/* Dropdown Results - Style Pixio */}
             {isOpen && (
-                <div className="absolute top-full inset-x-0 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 w-full sm:w-[120%] sm:min-w-[500px] mt-4 bg-white rounded-[2.5rem] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
+                <div id="predictive-search-results" className="absolute top-full inset-x-0 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 w-full sm:w-[120%] sm:min-w-[500px] mt-4 bg-white rounded-[2.5rem] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
 
                     {/* Bannière de confirmation de reconnaissance visuelle */}
                     {detectedCoverTitle && (
