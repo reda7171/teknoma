@@ -57,8 +57,26 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
     optimizeCss: true, // Réduit le CSS critique en pré-rendrant les styles
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      'framer-motion',
+      'clsx',
+      '@react-google-maps/api',
+    ],
   },
   output: process.env.OUTPUT_STANDALONE === 'false' ? undefined : 'standalone',
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve = config.resolve || {};
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        '../build/polyfills/polyfill-module': false,
+        'next/dist/build/polyfills/polyfill-module': false,
+      };
+    }
+    return config;
+  },
   poweredByHeader: false,
   // Keep Next's gzip fallback enabled. The reverse proxy can still serve
   // Brotli/gzip, but responses must never reach visitors uncompressed.

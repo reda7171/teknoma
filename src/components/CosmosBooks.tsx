@@ -46,8 +46,8 @@ export default function CosmosBooks({
                 sizes="(max-width: 640px) 112px, (max-width: 768px) 128px, (max-width: 1024px) 144px, 176px"
                 className="object-cover"
                 {...(idx === 0
-                  ? { preload: true, fetchPriority: 'high' as const }
-                  : { loading: 'eager' as const, fetchPriority: 'auto' as const })}
+                  ? { priority: true, fetchPriority: 'high' as const }
+                  : { loading: 'lazy' as const, fetchPriority: 'auto' as const })}
               />
             </div>
           </Link>
