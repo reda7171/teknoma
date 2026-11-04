@@ -9,6 +9,36 @@ interface ScrollRevealProps extends React.HTMLAttributes<HTMLDivElement> {
     delay?: number
 }
 
+// Instance unique d'IntersectionObserver pour minimiser la consommation CPU et le TBT
+let sharedObserver: IntersectionObserver | null = null
+const observerCallbacks = new Map<Element, () => void>()
+
+function getSharedObserver() {
+    if (typeof window === 'undefined') return null
+    if (!sharedObserver) {
+        sharedObserver = new IntersectionObserver(
+            (entries) => {
+                for (let i = 0; i < entries.length; i++) {
+                    const entry = entries[i]
+                    if (entry.isIntersecting) {
+                        const cb = observerCallbacks.get(entry.target)
+                        if (cb) {
+                            observerCallbacks.delete(entry.target)
+                            sharedObserver?.unobserve(entry.target)
+                            cb()
+                        }
+                    }
+                }
+            },
+            {
+                threshold: 0.05,
+                rootMargin: '50px 0px',
+            }
+        )
+    }
+    return sharedObserver
+}
+
 export default function ScrollReveal({
     children,
     className = "",
@@ -20,23 +50,29 @@ export default function ScrollReveal({
     const elementRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true)
-                }
-            },
-            {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            }
-        )
+        const el = elementRef.current
+        if (!el) return
 
-        if (elementRef.current) {
-            observer.observe(elementRef.current)
+        // Si l'élément est déjà visible dans le viewport, activer directement
+        const rect = el.getBoundingClientRect()
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+            setIsVisible(true)
+            return
         }
 
-        return () => observer.disconnect()
+        const observer = getSharedObserver()
+        if (!observer) {
+            setIsVisible(true)
+            return
+        }
+
+        observerCallbacks.set(el, () => setIsVisible(true))
+        observer.observe(el)
+
+        return () => {
+            observerCallbacks.delete(el)
+            observer.unobserve(el)
+        }
     }, [])
 
     return (

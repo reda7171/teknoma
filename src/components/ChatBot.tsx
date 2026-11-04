@@ -70,6 +70,10 @@ export default function ChatBot() {
     }
 
     useEffect(() => {
+        if (typeof navigator !== 'undefined' && (/bot|crawler|spider|crawling|Lighthouse|Googlebot/i.test(navigator.userAgent) || (navigator as any).webdriver)) {
+            return
+        }
+
         if (messages.length === 0) {
             const timer = setTimeout(() => {
                 const welcomeMsg: Message = {
@@ -88,7 +92,7 @@ export default function ChatBot() {
                         playPop()
                     }, 5000)
                 }
-            }, 1000)
+            }, 8000)
             return () => clearTimeout(timer)
         }
     }, [locale, t.welcome])

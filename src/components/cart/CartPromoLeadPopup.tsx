@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/store/cart'
 import { submitPromoLead } from '@/lib/actions/promo-leads'
 import { Tag, X, Check, Copy, Phone, Mail, Sparkles, Percent, ShieldCheck } from 'lucide-react'
-import Confetti from 'react-confetti'
+import dynamic from 'next/dynamic'
+const Confetti = dynamic(() => import('react-confetti'), { ssr: false })
 
 const POPUP_DISMISS_KEY = 'riwaya_promo_popup_dismissed_until'
 const POPUP_SUBSCRIBED_KEY = 'riwaya_promo_subscribed'
@@ -43,13 +44,13 @@ export default function CartPromoLeadPopup() {
 
     // Mesure de la taille d'écran pour les confettis
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (showConfetti && typeof window !== 'undefined') {
             setWindowDimensions({ width: window.innerWidth, height: window.innerHeight })
             const handleResize = () => setWindowDimensions({ width: window.innerWidth, height: window.innerHeight })
             window.addEventListener('resize', handleResize)
             return () => window.removeEventListener('resize', handleResize)
         }
-    }, [])
+    }, [showConfetti])
 
     // Détection de l'ajout au panier
     useEffect(() => {

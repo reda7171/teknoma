@@ -46,9 +46,14 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
 
     useEffect(() => {
         setMounted(true)
-        syncAgent()
-        const interval = setInterval(syncAgent, 10_000)
-        return () => clearInterval(interval)
+        const delayTimer = setTimeout(() => {
+            syncAgent()
+        }, 15_000)
+        const interval = setInterval(syncAgent, 30_000)
+        return () => {
+            clearTimeout(delayTimer)
+            clearInterval(interval)
+        }
     }, [])
 
     const phoneNumber = normalizePhone(activePhone || phone)
