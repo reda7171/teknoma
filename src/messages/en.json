@@ -1101,7 +1101,11 @@
       "EmptyLibraryTitle": "Your library is empty",
       "EmptyLibraryDesc": "Add the books you want to trade to earn credits or receive other books.",
       "StartAdding": "Get Started",
-      "GenerateCard": "Generate my reading card"
+      "GenerateCard": "Generate my reading card",
+      "ReadingListTitle": "My Reading List",
+      "ReadingListDesc": "Track your reading progress",
+      "AddBookTitle": "Add a Book",
+      "AddBookDesc": "List a book for exchange"
     },
     "BookForm": {
       "FormTitle": "Add a Book",

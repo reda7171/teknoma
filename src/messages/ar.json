@@ -1101,7 +1101,11 @@
       "EmptyLibraryTitle": "مكتبتك فارغة",
       "EmptyLibraryDesc": "أضف الكتب التي تريد مبادلتها لكسب الرصيد أو الحصول على كتب أخرى.",
       "StartAdding": "ابدأ الآن",
-      "GenerateCard": "إنشاء بطاقة القراءة الخاصة بي"
+      "GenerateCard": "إنشاء بطاقة القراءة الخاصة بي",
+      "ReadingListTitle": "قائمة قراءاتي",
+      "ReadingListDesc": "تتبع قراءاتك وتقدمك",
+      "AddBookTitle": "إضافة كتاب",
+      "AddBookDesc": "اعرض كتاباً للتبادل"
     },
     "BookForm": {
       "FormTitle": "إضافة كتاب",

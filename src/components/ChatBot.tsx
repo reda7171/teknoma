@@ -36,6 +36,17 @@ export default function ChatBot() {
             estimated: "التسليم المتوقع",
             suggestions: "اقتراحات لك"
         },
+        en: {
+            welcome: "Hello! ✨ I am Riwaya's smart assistant. Ask me about books, orders or delivery.",
+            quick: ['Delivery ?', 'New Arrivals', 'USB Key', 'Track Order', 'Suggest titles?', 'Categories ?'],
+            placeholder: "Ask your question here...",
+            online: "Online",
+            viewBook: "View Book",
+            addToCart: "Details",
+            trackOrder: "Track Order",
+            estimated: "Estimated Delivery",
+            suggestions: "Suggestions for you"
+        },
         fr: {
             welcome: "Bonjour ! ✨ Je suis l'assistant intelligent de **Riwaya**. Posez-moi vos questions sur nos livres, commandes ou livraison.",
             quick: ['Livraison ?', 'Nouveautés', 'Clé USB', 'Suivi Commande', 'Propose moi des titres?', 'Catégories ?'],
@@ -184,7 +195,7 @@ export default function ChatBot() {
             {/* Launcher Button */}
             <button 
                 onClick={() => setOpen(true)}
-                className={`fixed bottom-20 md:bottom-6 ltr:left-6 rtl:right-6 w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl z-[110] group border border-white/20 active:scale-90 ${open ? 'scale-0' : 'scale-100'}`}
+                className={`fixed bottom-24 md:bottom-6 left-6 w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl z-[110] group border border-white/20 active:scale-90 ${open ? 'scale-0' : 'scale-100'}`}
                 style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #3e3e5e 100%)' }}
                 aria-label="Ouvrir l'assistant"
             >
@@ -196,7 +207,8 @@ export default function ChatBot() {
             {/* Chat Window */}
             {open && (
                 <div 
-                    className="fixed bottom-20 md:bottom-6 ltr:left-6 rtl:right-6 w-[380px] max-w-[90vw] h-[600px] max-h-[80vh] bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col z-[115] border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-10 duration-500"
+                    className="fixed bottom-24 md:bottom-6 left-6 w-[380px] max-w-[90vw] h-[600px] max-h-[80vh] bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col z-[115] border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-10 duration-500"
+                    dir={locale === 'ar' ? 'rtl' : 'ltr'}
                 >
                     {/* Premium Header */}
                     <div 

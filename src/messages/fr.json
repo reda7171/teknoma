@@ -1081,7 +1081,11 @@
       "EmptyLibraryTitle": "Votre bibliothèque est vide",
       "EmptyLibraryDesc": "Ajoutez les livres que vous souhaitez échanger pour gagner des crédits ou recevoir d'autres livres.",
       "StartAdding": "Commencer",
-      "GenerateCard": "Générer ma carte de lecteur"
+      "GenerateCard": "Générer ma carte de lecteur",
+      "ReadingListTitle": "Ma Liste de Lecture",
+      "ReadingListDesc": "Suivez vos lectures et progrès",
+      "AddBookTitle": "Ajouter un Livre",
+      "AddBookDesc": "Proposez un livre à l'échange"
     },
     "BookForm": {
       "FormTitle": "Ajouter un livre",

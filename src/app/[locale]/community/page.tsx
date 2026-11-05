@@ -4,7 +4,7 @@ import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { Plus, BookOpen, Star, MapPin, Coins, Settings, RefreshCw, Instagram, Facebook, Twitter } from 'lucide-react'
+import { Plus, BookOpen, Star, MapPin, Coins, Settings, RefreshCw, Instagram, Facebook, Twitter, Clock, BookMarked } from 'lucide-react'
 import { getWishlist } from '@/lib/actions/community-wishlist'
 import WishlistSection from '@/components/community/WishlistSection'
 import TopReadersList from '@/components/community/TopReadersList'
@@ -12,6 +12,8 @@ import { getTopReaders, getUserExchangeCount } from '@/lib/actions/community'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { getPrimaryImage } from '@/lib/utils/image'
 import { getUserRecommendations } from '@/lib/actions/community-recommendations'
+import { getReadingList } from '@/lib/actions/reading-list'
+import { prisma } from '@/lib/prisma'
 import RecommendationsSection from '@/components/community/RecommendationsSection'
 import RegistrationTracker from '@/components/community/RegistrationTracker'
 import CityLocalizer from '@/components/community/CityLocalizer'
@@ -27,19 +29,23 @@ export default async function CommunityDashboard({ params, searchParams }: { par
         redirect('/community/login')
     }
 
-    const [t, wishlist, isEligible, topReaders, exchangeCount, exchangeEnabled, recommendations] = await Promise.all([
+    const [t, wishlist, isEligible, topReaders, exchangeCount, exchangeEnabled, recommendations, readingList, userOwnedBooks] = await Promise.all([
         getTranslations('Community'),
         getWishlist(),
         checkExchangeEligibility(user),
         getTopReaders(5),
         getUserExchangeCount(user.id),
         isFeatureEnabled('exchange'),
-        getUserRecommendations(locale)
+        getUserRecommendations(locale),
+        getReadingList(),
+        prisma.book.findMany({
+            where: { ownerId: user.id },
+            orderBy: { createdAt: 'desc' }
+        })
     ])
 
-
-
     const u = user as any
+    const ownedBooks = userOwnedBooks || []
 
     return (
         <main className="min-h-screen bg-pixio-cream flex flex-col">
@@ -62,9 +68,10 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                         </div>
                     </div>
                 )}
+
                 {/* Profile Header */}
-                <div className="bg-white rounded-[3rem] p-10 lg:p-12 shadow-xl shadow-black/5 border border-gray-100 mb-12 flex flex-col md:flex-row gap-10 items-center md:justify-between relative overflow-hidden">
-                    <div className="flex flex-col md:flex-row items-center gap-6 z-10 w-full md:w-auto">
+                <div className="bg-white rounded-[3rem] p-8 lg:p-12 shadow-xl shadow-black/5 border border-gray-100 mb-12 flex flex-col xl:flex-row gap-8 items-center xl:justify-between relative overflow-hidden">
+                    <div className="flex flex-col md:flex-row items-center gap-6 z-10 w-full xl:w-auto">
                         <div className="w-24 h-24 bg-pixio-yellow rounded-full flex items-center justify-center text-3xl font-black text-black uppercase shadow-lg transform rotate-3 border-4 border-white overflow-hidden flex-shrink-0">
                             {u.image ? (
                                 <img src={u.image} alt={u.fullName || 'User'} className="w-full h-full object-cover" />
@@ -121,24 +128,40 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                         </div>
                     </div>
 
-                    <div className="flex gap-4 z-10 flex-wrap justify-center md:justify-start">
-                        <Link href="/community/exchanges" className="bg-white border-2 border-gray-100 px-8 py-4 rounded-3xl flex flex-col items-center min-w-[120px] hover:border-black transition-all group hover:shadow-lg text-center">
-                            <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors">{t('ExchangesLabel')}</span>
-                            <span className="text-3xl font-black text-black tracking-tighter group-hover:scale-110 transition-transform">
+                    {/* 4 Boutons Statistiques / Badges */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 z-10 w-full xl:w-auto">
+                        {/* 1. Mes Livres */}
+                        <a href="#my-books" className="bg-white border-2 border-gray-100 px-5 py-4 rounded-3xl flex flex-col items-center min-w-[100px] hover:border-black transition-all group hover:shadow-lg text-center">
+                            <span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors">{t('MyBooks')}</span>
+                            <span className="text-2xl lg:text-3xl font-black text-black tracking-tighter group-hover:scale-110 transition-transform">
+                                {ownedBooks.length}
+                            </span>
+                        </a>
+
+                        {/* 2. Échanges */}
+                        <Link href="/community/exchanges" className="bg-white border-2 border-gray-100 px-5 py-4 rounded-3xl flex flex-col items-center min-w-[100px] hover:border-black transition-all group hover:shadow-lg text-center">
+                            <span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors">{t('ExchangesLabel')}</span>
+                            <span className="text-2xl lg:text-3xl font-black text-black tracking-tighter group-hover:scale-110 transition-transform">
                                 {exchangeCount}
                             </span>
                         </Link>
+
+                        {/* 3. Liste de Lecture */}
+                        <Link href="/community/reading-list" className="bg-white border-2 border-gray-100 px-5 py-4 rounded-3xl flex flex-col items-center min-w-[100px] hover:border-black transition-all group hover:shadow-lg text-center">
+                            <span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors">{t('ReadingList.Title')}</span>
+                            <span className="text-2xl lg:text-3xl font-black text-black tracking-tighter group-hover:scale-110 transition-transform">
+                                {readingList.length}
+                            </span>
+                        </Link>
                         
-                        <div className="bg-amber-100 border-2 border-transparent px-8 py-4 rounded-3xl flex flex-col items-center min-w-[120px] hover:border-amber-400 transition-all shadow-sm text-center">
-                            <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-amber-700 mb-1">{t('Credits')}</span>
-                            <span className="text-3xl font-black text-amber-900 tracking-tighter flex items-center gap-2" dir="ltr">
-                                {u.credits || 0} DH <Coins className="w-6 h-6 text-amber-600" />
+                        {/* 4. Solde / Crédits */}
+                        <div className="bg-amber-100 border-2 border-transparent px-5 py-4 rounded-3xl flex flex-col items-center min-w-[100px] hover:border-amber-400 transition-all shadow-sm text-center">
+                            <span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-amber-700 mb-1">{t('Credits')}</span>
+                            <span className="text-2xl lg:text-3xl font-black text-amber-900 tracking-tighter flex items-center gap-1" dir="ltr">
+                                {u.credits || 0} DH <Coins className="w-5 h-5 text-amber-600" />
                             </span>
                         </div>
                     </div>
-
-                    {/* Logout Button (Absolute Top Right) */}
-
                 </div>
 
                 {/* Wishlist Section */}
@@ -147,33 +170,55 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                 {/* Recommendations Section */}
                 <RecommendationsSection recommendations={recommendations} />
 
-                {/* Quick Actions - visible seulement si échange activé */}
+                {/* 4 Boutons d'Action Rapide */}
                 {exchangeEnabled && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                    <Link href="/community/market" className="bg-white rounded-[2.5rem] p-8 border border-gray-100 hover:border-black transition-all group hover:shadow-xl">
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="w-14 h-14 bg-black group-hover:bg-gray-800 rounded-2xl flex items-center justify-center transition-colors">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    {/* 1. Explorer le Marketplace */}
+                    <Link href="/community/market" className="bg-white rounded-[2.5rem] p-7 border border-gray-100 hover:border-black transition-all group hover:shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div className="w-14 h-14 bg-black group-hover:bg-gray-800 rounded-2xl flex items-center justify-center transition-colors mb-4">
                                 <BookOpen className="w-7 h-7 text-white" />
                             </div>
-                            <div>
-                                <h3 className="text-xl rtl:text-2xl font-black text-black group-hover:text-amber-600 transition-colors">{t('Dashboard.ExploreMarketTitle')}</h3>
-                                <p className="text-xs rtl:text-sm rtl:tracking-normal font-bold text-gray-400">{t('Dashboard.ExploreMarketDesc')}</p>
-                            </div>
+                            <h3 className="text-xl rtl:text-2xl font-black text-black group-hover:text-amber-600 transition-colors mb-1">{t('Dashboard.ExploreMarketTitle')}</h3>
+                            <p className="text-xs rtl:text-sm rtl:tracking-normal font-bold text-gray-400 mb-3">{t('Dashboard.ExploreMarketDesc')}</p>
                         </div>
-                        <p className="text-sm rtl:text-base text-gray-500">{t('Dashboard.ExploreMarketLong')}</p>
+                        <p className="text-sm rtl:text-base text-gray-500 line-clamp-2">{t('Dashboard.ExploreMarketLong')}</p>
                     </Link>
 
-                    <Link href="/community/exchanges" className="bg-white rounded-[2.5rem] p-8 border border-gray-100 hover:border-black transition-all group hover:shadow-xl">
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="w-14 h-14 bg-gray-100 group-hover:bg-black rounded-2xl flex items-center justify-center transition-colors">
+                    {/* 2. Mes Échanges */}
+                    <Link href="/community/exchanges" className="bg-white rounded-[2.5rem] p-7 border border-gray-100 hover:border-black transition-all group hover:shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div className="w-14 h-14 bg-gray-100 group-hover:bg-black rounded-2xl flex items-center justify-center transition-colors mb-4">
                                 <RefreshCw className="w-7 h-7 text-black group-hover:text-white transition-colors" />
                             </div>
-                            <div>
-                                <h3 className="text-xl rtl:text-2xl font-black text-black group-hover:text-amber-600 transition-colors">{t('Dashboard.ManageExchangesTitle')}</h3>
-                                <p className="text-xs rtl:text-sm rtl:tracking-normal font-bold text-gray-400">{t('Dashboard.ManageExchangesDesc')}</p>
-                            </div>
+                            <h3 className="text-xl rtl:text-2xl font-black text-black group-hover:text-amber-600 transition-colors mb-1">{t('Dashboard.ManageExchangesTitle')}</h3>
+                            <p className="text-xs rtl:text-sm rtl:tracking-normal font-bold text-gray-400 mb-3">{t('Dashboard.ManageExchangesDesc')}</p>
                         </div>
-                        <p className="text-sm rtl:text-base text-gray-500">{t('Dashboard.ManageExchangesLong')}</p>
+                        <p className="text-sm rtl:text-base text-gray-500 line-clamp-2">{t('Dashboard.ManageExchangesLong')}</p>
+                    </Link>
+
+                    {/* 3. Ma Liste de Lecture */}
+                    <Link href="/community/reading-list" className="bg-white rounded-[2.5rem] p-7 border border-gray-100 hover:border-black transition-all group hover:shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div className="w-14 h-14 bg-emerald-50 group-hover:bg-emerald-600 rounded-2xl flex items-center justify-center transition-colors mb-4">
+                                <BookMarked className="w-7 h-7 text-emerald-600 group-hover:text-white transition-colors" />
+                            </div>
+                            <h3 className="text-xl rtl:text-2xl font-black text-black group-hover:text-emerald-600 transition-colors mb-1">{t('Dashboard.ReadingListTitle')}</h3>
+                            <p className="text-xs rtl:text-sm rtl:tracking-normal font-bold text-gray-400 mb-3">{t('Dashboard.ReadingListDesc')}</p>
+                        </div>
+                        <p className="text-sm rtl:text-base text-gray-500 line-clamp-2">{t('ReadingList.Subtitle')}</p>
+                    </Link>
+
+                    {/* 4. Ajouter un Livre */}
+                    <Link href="/community/books/new" className="bg-white rounded-[2.5rem] p-7 border border-gray-100 hover:border-black transition-all group hover:shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div className="w-14 h-14 bg-amber-50 group-hover:bg-amber-500 rounded-2xl flex items-center justify-center transition-colors mb-4">
+                                <Plus className="w-7 h-7 text-amber-600 group-hover:text-white transition-colors" />
+                            </div>
+                            <h3 className="text-xl rtl:text-2xl font-black text-black group-hover:text-amber-600 transition-colors mb-1">{t('Dashboard.AddBookTitle')}</h3>
+                            <p className="text-xs rtl:text-sm rtl:tracking-normal font-bold text-gray-400 mb-3">{t('Dashboard.AddBookDesc')}</p>
+                        </div>
+                        <p className="text-sm rtl:text-base text-gray-500 line-clamp-2">{t('Dashboard.EmptyLibraryDesc')}</p>
                     </Link>
                 </div>
                 )}
@@ -181,7 +226,7 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                 {/* Mes Livres - visible seulement si échange activé */}
                 {exchangeEnabled && (
                 <>
-                <div className="flex items-center justify-between mb-8">
+                <div id="my-books" className="flex items-center justify-between mb-8 scroll-mt-24">
                     <h2 className="text-2xl font-black text-black uppercase tracking-normal flex items-center gap-3">
                         <BookOpen className="w-6 h-6" /> {t('MyBooks')}
                     </h2>
@@ -190,9 +235,9 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                     </Link>
                 </div>
 
-                {u.ownedBooks && u.ownedBooks.length > 0 ? (
+                {ownedBooks.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {u.ownedBooks.map((book: any) => (
+                        {ownedBooks.map((book: any) => (
                             <div key={book.id} className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm relative group hover:shadow-xl transition-all hover:-translate-y-1">
                                 {/* Status Badge */}
                                 <div className="absolute top-4 right-4 z-10">
@@ -237,6 +282,7 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                 )}
                 </>
                 )}
+
                 {/* Top Readers Section */}
                 <div className="mb-12 mt-40">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
