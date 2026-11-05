@@ -1310,7 +1310,10 @@
         "TitleEx": "مثال: الخيميائي",
         "Author": "المؤلف",
         "AuthorEx": "مثال: باولو كويلو",
-        "TotalPages": "عدد الصفحات"
+        "TotalPages": "عدد الصفحات",
+        "SearchBook": "البحث عن كتاب",
+        "ManualEntry": "إدخال يدوي",
+        "Search": "بحث"
       },
       "Leaderboard": {
         "Title": "🏆 متصدرو القراءة",
