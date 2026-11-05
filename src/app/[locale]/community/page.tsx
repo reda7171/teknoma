@@ -38,7 +38,7 @@ export default async function CommunityDashboard({ params, searchParams }: { par
         isFeatureEnabled('exchange'),
         getUserRecommendations(locale),
         getReadingList(),
-        prisma.book.findMany({
+        (prisma as any).exchangeBook.findMany({
             where: { ownerId: user.id },
             orderBy: { createdAt: 'desc' }
         })
