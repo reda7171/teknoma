@@ -41,6 +41,9 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Validate i18n Parity (Strict)
+        run: npm run validate:i18n
+
       - name: Setup Database Schema
         run: npx prisma db push --accept-data-loss
         env:

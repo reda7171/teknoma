@@ -626,7 +626,8 @@
     },
     "WarehouseSource": "Source de quel entrep�t ?",
     "SourceWarehouse": "Source entrep�t :",
-    "SelectWarehouse": "S�lectionner un entrep�t"
+    "SelectWarehouse": "S�lectionner un entrep�t",
+    "Loading": "Chargement..."
   },
   "Packs": {
     "Save": "Économisez",
@@ -834,7 +835,8 @@
     "FullName": "Nom complet",
     "BankInfoModalTitle": "Informations Bancaires",
     "ScanToPay": "Scanner pour payer",
-    "Close": "Fermer"
+    "Close": "Fermer",
+    "FastDelivery": "Livraison rapide <br /> sous 24-48h."
   },
   "Review": {
     "SuccessTitle": "Merci pour votre avis !",
@@ -1233,7 +1235,8 @@
       "Actions": {
         "Accept": "Accepter",
         "Reject": "Refuser",
-        "Contact": "Contacter"
+        "Contact": "Contacter",
+        "Chat": "Chat"
       },
       "ChatButton": "Discuter",
       "FinishButton": "Terminer",
@@ -1376,6 +1379,78 @@
       "CartImportSuccess": "Livres du panier synchronisés avec votre wishlist",
       "CartBooksReady": "Livres dans votre panier prêts à être ajoutés",
       "SyncingCart": "Synchronisation du panier..."
+    },
+    "Promotion": {
+      "SpecialPromotion": "Offre spéciale",
+      "GiftWaiting": "Un cadeau vous attend",
+      "GiftDescription": "Nous célébrons nos nouveaux lecteurs ! Recevez un marque-page exclusif ou un livre surprise avec votre prochaine commande.",
+      "BookmarksTitle": "Marque-pages élégants",
+      "BookmarksDesc": "Des designs uniques pour chaque type de lecteur.",
+      "RandomBookTitle": "Livre surprise offert",
+      "RandomBookDesc": "La chance vous sourit : recevez un livre gratuit.",
+      "ExploreBtn": "Découvrir la collection",
+      "Offered": "Offert",
+      "ValidToday": "* Valable pour toute commande aujourd'hui"
+    },
+    "DigitalBooks": {
+      "seo": {
+        "Title": "Livres Numériques PDF",
+        "Description": "Téléchargez vos livres PDF instantanément. Accès immédiat, lisez sur tous vos appareils."
+      },
+      "hero": {
+        "Badge": "Nouveau · Livres numériques",
+        "TitlePart1": "Lisez",
+        "TitlePart2": "Instantanément.",
+        "Description": "Téléchargez des livres PDF en quelques secondes. Lisez sur mobile, tablette et ordinateur, partout et à tout moment.",
+        "BrowseCatalog": "Parcourir le catalogue",
+        "LearnMore": "En savoir plus",
+        "InstantDownload": "Téléchargement immédiat",
+        "AllFormats": "Tous supports",
+        "stats": {
+          "Books": "titres disponibles",
+          "Digital": "format numérique",
+          "Access": "accès immédiat"
+        }
+      },
+      "Features": {
+        "DownloadTitle": "Téléchargement immédiat",
+        "DownloadDesc": "Recevez le lien PDF par email dès confirmation du paiement.",
+        "SecureTitle": "Paiement sécurisé",
+        "SecureDesc": "Paiement à la livraison ou virement. Lien envoyé après confirmation.",
+        "AccessTitle": "Multi-appareils",
+        "AccessDesc": "Lisez sur votre smartphone, tablette ou ordinateur sans contrainte."
+      },
+      "Catalog": {
+        "Subtitle": "Notre bibliothèque numérique",
+        "Title": "Catalogue PDF",
+        "Description": "{count} livres numériques disponibles en téléchargement direct.",
+        "Empty": "Catalogue à venir",
+        "EmptyDesc": "Notre équipe prépare une sélection unique de livres numériques."
+      },
+      "HowItWorks": {
+        "Subtitle": "Un processus simple",
+        "Title": "Comment ça marche",
+        "Step1Title": "Choisissez votre livre",
+        "Step1Desc": "Parcourez notre catalogue et sélectionnez les titres qui vous intéressent.",
+        "Step2Title": "Validez la commande",
+        "Step2Desc": "Remplissez le formulaire. Paiement par virement ou à la livraison.",
+        "Step3Title": "Téléchargez aussitôt",
+        "Step3Desc": "Recevez votre lien PDF par email dès validation. Accès instantané et à vie."
+      },
+      "CTA": {
+        "Title": "Votre prochaine lecture, maintenant.",
+        "Description": "Plus de 50 titres disponibles en format numérique. Téléchargez et lisez immédiatement.",
+        "Button": "Découvrir le catalogue"
+      },
+      "HomeSection": {
+        "Badge": "Nouveau",
+        "Title": "Livres numériques",
+        "Description": "Téléchargez vos livres PDF instantanément. Lisez sur tous vos appareils sans attendre.",
+        "Feature1": "Accès instantané",
+        "Feature2": "Format PDF",
+        "Feature3": "Prix réduits",
+        "CTA": "Voir les livres PDF"
+      }
     }
   },
   "PacksPage": {
@@ -1499,6 +1574,19 @@
         "Books": "Titres disponibles",
         "Digital": "Format numérique",
         "Access": "Accès immédiat"
+      },
+      "Navigation": {
+        "Home": "Accueil",
+        "Books": "Librairie",
+        "Packs": "Nos Packs",
+        "Digital": "Livres Numériques",
+        "Kids": "Espace Enfants",
+        "UsbKey": "Clé USB Culte",
+        "Journal": "Le Journal",
+        "Community": "Échange Communautaire",
+        "SellBook": "Vendre un livre",
+        "UsedBooks": "Livres d'occasion",
+        "BoardGames": "Jeux de société"
       }
     },
     "Features": {

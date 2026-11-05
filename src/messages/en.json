@@ -646,7 +646,8 @@
     },
     "WarehouseSource": "Source warehouse?",
     "SourceWarehouse": "Source warehouse:",
-    "SelectWarehouse": "Select a warehouse"
+    "SelectWarehouse": "Select a warehouse",
+    "BuyNow": "Buy Now"
   },
   "Packs": {
     "Save": "Save",
@@ -1254,7 +1255,8 @@
       "Actions": {
         "Accept": "Accept",
         "Reject": "Reject",
-        "Contact": "Contact"
+        "Contact": "Contact",
+        "Chat": "Chat"
       },
       "ChatButton": "Chat",
       "FinishButton": "Finish",
@@ -1397,6 +1399,78 @@
       "CartImportSuccess": "Cart books synced to your wishlist",
       "CartBooksReady": "Books in your cart ready to add",
       "SyncingCart": "Syncing cart..."
+    },
+    "Promotion": {
+      "SpecialPromotion": "Special offer",
+      "GiftWaiting": "A gift is waiting for you",
+      "GiftDescription": "We celebrate our new readers! Get an exclusive bookmark or a surprise book with your next order.",
+      "BookmarksTitle": "Elegant Bookmarks",
+      "BookmarksDesc": "Unique designs for every type of reader.",
+      "RandomBookTitle": "Free Surprise Book",
+      "RandomBookDesc": "Sometimes luck smiles: get a free book.",
+      "ExploreBtn": "Explore the collection",
+      "Offered": "Free",
+      "ValidToday": "* Valid for any order today"
+    },
+    "DigitalBooks": {
+      "seo": {
+        "Title": "Digital PDF Books",
+        "Description": "Download your PDF books instantly. Immediate access, read on all your devices."
+      },
+      "hero": {
+        "Badge": "New · Digital Books",
+        "TitlePart1": "Read",
+        "TitlePart2": "Instantly.",
+        "Description": "Download PDF books in seconds. Read on mobile, tablet and computer, anywhere, anytime.",
+        "BrowseCatalog": "Browse catalog",
+        "LearnMore": "Learn more",
+        "InstantDownload": "Instant download",
+        "AllFormats": "All devices",
+        "stats": {
+          "Books": "available titles",
+          "Digital": "digital format",
+          "Access": "instant access"
+        }
+      },
+      "Features": {
+        "DownloadTitle": "Instant download",
+        "DownloadDesc": "Receive the PDF link by email as soon as payment is confirmed.",
+        "SecureTitle": "Secure payment",
+        "SecureDesc": "Cash on delivery or bank transfer. Link sent upon confirmation.",
+        "AccessTitle": "Multi-device access",
+        "AccessDesc": "Read on your smartphone, tablet or computer with zero restrictions."
+      },
+      "Catalog": {
+        "Subtitle": "Our digital library",
+        "Title": "PDF Catalog",
+        "Description": "{count} digital books available for immediate download.",
+        "Empty": "Catalog coming soon",
+        "EmptyDesc": "Our team is curating a unique selection of digital books."
+      },
+      "HowItWorks": {
+        "Subtitle": "A simple process",
+        "Title": "How it works",
+        "Step1Title": "Choose your book",
+        "Step1Desc": "Browse our catalog and pick the titles you love.",
+        "Step2Title": "Confirm order",
+        "Step2Desc": "Fill the form. Pay by transfer or cash on delivery.",
+        "Step3Title": "Download right away",
+        "Step3Desc": "Get your PDF link via email upon confirmation. Instant, lifetime access."
+      },
+      "CTA": {
+        "Title": "Your next read, right now.",
+        "Description": "Over 50 titles available in digital format. Download and read immediately.",
+        "Button": "Explore catalog"
+      },
+      "HomeSection": {
+        "Badge": "New",
+        "Title": "Digital Books",
+        "Description": "Download PDF books instantly. Read on all your devices without waiting.",
+        "Feature1": "Instant access",
+        "Feature2": "PDF format",
+        "Feature3": "Discounted prices",
+        "CTA": "View PDF books"
+      }
     }
   },
   "PackDetail": {
@@ -1500,6 +1574,19 @@
         "Books": "Available titles",
         "Digital": "Digital format",
         "Access": "Immediate access"
+      },
+      "Navigation": {
+        "Home": "Home",
+        "Books": "Bookstore",
+        "Packs": "Our Packs",
+        "Digital": "Digital Books",
+        "Kids": "Kids Section",
+        "UsbKey": "Famous USB Key",
+        "Journal": "Journal",
+        "Community": "Community Exchange",
+        "SellBook": "Sell a book",
+        "UsedBooks": "Used books",
+        "BoardGames": "Board games"
       }
     },
     "Features": {
@@ -1550,95 +1637,6 @@
       "Fullscreen": "Full screen",
       "Exit": "Exit",
       "Close": "Close reader"
-    }
-  },
-  "Community_Overrides": {
-    "Exchanges": {
-      "Title": "My Exchanges",
-      "Subtitle": "Manage your sent and received book exchange requests.",
-      "Received": "Received Requests",
-      "Sent": "Sent Requests",
-      "Requests": "{count} request(s)",
-      "Status": {
-        "PENDING": "Pending",
-        "ACCEPTED": "Accepted",
-        "REJECTED": "Rejected",
-        "COMPLETED": "Completed",
-        "CANCELLED": "Cancelled"
-      },
-      "EmptyReceived": "No requests received yet.",
-      "EmptySent": "You haven't sent any exchange requests yet.",
-      "ExploreMarket": "Explore Community",
-      "Requested": "Requested book",
-      "Offered": "Offered book",
-      "Credits": "Virtual credits",
-      "MeetingDetails": "Meeting Details",
-      "Actions": {
-        "Reject": "Reject",
-        "Accept": "Accept"
-      },
-      "ChatButton": "Chat",
-      "FinishButton": "Complete",
-      "HistoryChat": "Chat History",
-      "RateExchange": "Rate this exchange"
-    },
-    "Dashboard": {
-      "EditProfile": "Edit Profile",
-      "RestrictedAccess": "Restricted Exchange Access",
-      "EligibilityDesc": "To exchange books, you must have completed at least one finalized order on Riwaya.",
-      "BrowseShop": "Browse Shop",
-      "ExploreMarketTitle": "Explore Community",
-      "ExploreMarketDesc": "View available books",
-      "ExploreMarketLong": "Discover hundreds of books made available by other passionate readers.",
-      "ManageExchangesTitle": "Manage Exchanges",
-      "ManageExchangesDesc": "Track ongoing requests",
-      "ManageExchangesLong": "Accept or reject requests and stay in touch with your exchange partners.",
-      "ManageBook": "Manage Book",
-      "EmptyLibraryTitle": "Your library is empty",
-      "EmptyLibraryDesc": "You haven't added any books for exchange yet.",
-      "StartAdding": "Add my first book"
-    },
-    "Credits": "Credits",
-    "ExchangesLabel": "Exchanges",
-    "MyBooks": "My Library",
-    "AddBook": "Add Book",
-    "TopReadersTitle": "Top Readers",
-    "TopReadersSubtitle": "The most active members of the community.",
-    "BookForm": {
-      "FormTitle": "Add a book",
-      "EditFormTitle": "Manage book",
-      "EligibilityError": "You are not authorized",
-      "Title": "Title",
-      "Author": "Author",
-      "Condition": "Condition",
-      "Conditions": {
-        "NEW": "New",
-        "GOOD": "Very good",
-        "USED": "Acceptable"
-      },
-      "Isbn": "ISBN",
-      "Description": "Description",
-      "Submit": "Publish book",
-      "SaveChanges": "Save Changes",
-      "Delete": "Delete",
-      "ConfirmDelete": "Are you sure you want to delete this book?",
-      "Status": {
-        "Label": "Status",
-        "AVAILABLE": "Available",
-        "HIDDEN": "Hidden",
-        "PENDING": "Pending",
-        "EXCHANGED": "Exchanged"
-      }
-    },
-    "Wishlist": {
-      "Title": "My Wishlist",
-      "Subtitle": "Books you are actively looking for",
-      "BookTitle": "Book Title",
-      "Author": "Author",
-      "AddBook": "Add to my list",
-      "Success": "Successfully added",
-      "Empty": "Your wishlist is empty",
-      "MatchingNote": "We will notify you if a member offers one of these books."
     }
   },
   "CookieConsent": {
@@ -2052,8 +2050,8 @@
   },
   "BoardGamesPage": {
     "HeroBadge": "Guaranteed fun",
-    "Title1": "",
-    "Title2": "Board Games",
+    "Title1": "Board ",
+    "Title2": "Games",
     "Desc": "Strategy, puzzle, party or cooperative — find the perfect game for your memorable evenings with family or friends.",
     "ProductsCount": "products",
     "FastShipping": "Fast shipping",
