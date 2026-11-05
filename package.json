@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
-    "prebuild": "node scripts/validate-i18n.js",
+    "prebuild": "node -e \"if (require('fs').existsSync('scripts/validate-i18n.js')) { require('./scripts/validate-i18n.js'); }\"",
     "build": "next build",
     "validate:i18n": "node scripts/validate-i18n.js",
     "start": "node server.js",

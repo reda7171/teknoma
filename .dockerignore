@@ -19,7 +19,8 @@ README.md
 *.zip
 *.rar
 *.7z
-scripts
+scripts/*
+!scripts/validate-i18n.js
 scratch
 docs
 .agent
