@@ -1,6 +1,9 @@
+'use client'
+
 import React from 'react'
 import { Trophy, Medal, Award, BookOpen } from 'lucide-react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 
 interface Reader {
     id: string;
@@ -12,6 +15,8 @@ interface Reader {
 }
 
 export default function ReadingLeaderboard({ topReaders }: { topReaders: Reader[] }) {
+    const t = useTranslations('Community.ReadingList.Leaderboard')
+
     if (!topReaders || topReaders.length === 0) return null
 
     const getMedal = (rank: number) => {
@@ -35,8 +40,8 @@ export default function ReadingLeaderboard({ topReaders }: { topReaders: Reader[
     return (
         <div className="w-full max-w-4xl mx-auto mb-16 px-4">
             <div className="text-center mb-8">
-                <h2 className="text-3xl sm:text-4xl font-black text-black uppercase tracking-tighter mb-3">🏆 Classement des Lecteurs</h2>
-                <p className="text-gray-500 font-medium max-w-xl mx-auto">Rejoignez le challenge ! Lisez plus, partagez plus, et montez dans le classement pour prouver votre passion pour la lecture.</p>
+                <h2 className="text-3xl sm:text-4xl font-black text-black uppercase tracking-tighter mb-3">{t('Title')}</h2>
+                <p className="text-gray-500 font-medium max-w-xl mx-auto">{t('Subtitle')}</p>
             </div>
 
             <div className="flex flex-col gap-3">
@@ -66,7 +71,7 @@ export default function ReadingLeaderboard({ topReaders }: { topReaders: Reader[
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-base sm:text-lg font-black text-black truncate">{reader.name || 'Lecteur Anonyme'}</h3>
+                            <h3 className="text-base sm:text-lg font-black text-black truncate">{reader.name || t('Anonymous')}</h3>
                             {reader.city && (
                                 <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">{reader.city}</p>
                             )}
@@ -75,7 +80,7 @@ export default function ReadingLeaderboard({ topReaders }: { topReaders: Reader[
                         <div className="flex items-center gap-1.5 sm:gap-2 bg-white/80 backdrop-blur px-3 sm:px-4 py-2 rounded-xl border border-gray-100 shadow-sm ml-auto">
                             <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
                             <span className="font-black text-blue-600 text-base sm:text-lg">{reader.booksRead}</span>
-                            <span className="text-[9px] sm:text-[10px] font-black text-gray-500 uppercase tracking-widest hidden sm:inline">Livres Lus</span>
+                            <span className="text-[9px] sm:text-[10px] font-black text-gray-500 uppercase tracking-widest hidden sm:inline">{t('BooksRead')}</span>
                         </div>
                     </div>
                 ))}

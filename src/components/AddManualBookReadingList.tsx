@@ -78,14 +78,14 @@ export default function AddManualBookReadingList() {
                             className="flex items-center justify-center gap-2 bg-[#f39c12]/10 text-[#f39c12] px-6 py-3 rounded-xl font-bold hover:bg-[#f39c12]/20 transition-all active:scale-95 shadow-lg shadow-[#f39c12]/5"
                         >
                             <Search className="w-5 h-5" />
-                            Rechercher un livre
+                            {t('ReadingList.ManualBook.SearchBook')}
                         </button>
                         <button
                             onClick={() => setIsOpen(true)}
                             className="flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
                         >
                             <Plus className="w-5 h-5" />
-                            Saisie manuelle
+                            {t('ReadingList.ManualBook.ManualEntry')}
                         </button>
                     </div>
 
@@ -119,7 +119,7 @@ export default function AddManualBookReadingList() {
                                 className="ml-4 text-xs font-bold px-3 py-1.5 bg-[#f39c12]/10 text-[#f39c12] rounded-lg hover:bg-[#f39c12]/20 transition-colors flex items-center gap-1.5"
                             >
                                 <Search className="w-3.5 h-3.5" />
-                                Chercher
+                                {t('ReadingList.ManualBook.Search')}
                             </button>
                         </div>
                         <button

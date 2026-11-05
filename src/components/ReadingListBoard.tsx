@@ -88,7 +88,7 @@ export default function ReadingListBoard({ initialItems, user, children }: Readi
                                         ) : (
                                             <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50/50">
                                                 <Book className="w-8 h-8 text-blue-200" />
-                                                <span className="text-[8px] font-black text-blue-300 mt-1 uppercase tracking-widest">Perso</span>
+                                                <span className="text-[8px] font-black text-blue-300 mt-1 uppercase tracking-widest">{t('Board.Personal')}</span>
                                             </div>
                                         );
                                     })()}

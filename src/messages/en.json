@@ -1299,7 +1299,8 @@
         "Read": "Read",
         "MarkFinished": "Mark as finished",
         "Delete": "Delete",
-        "ConfirmDelete": "Are you sure?"
+        "ConfirmDelete": "Are you sure?",
+        "Personal": "Custom"
       },
       "ManualBook": {
         "AddManual": "Add a custom book",
@@ -1308,7 +1309,16 @@
         "TitleEx": "Ex: The Alchemist",
         "Author": "Author",
         "AuthorEx": "Ex: Paulo Coelho",
-        "TotalPages": "Total pages"
+        "TotalPages": "Total pages",
+        "SearchBook": "Search a book",
+        "ManualEntry": "Manual entry",
+        "Search": "Search"
+      },
+      "Leaderboard": {
+        "Title": "🏆 Readers Leaderboard",
+        "Subtitle": "Join the challenge! Read more, share more, and climb the ranks to prove your passion for reading.",
+        "Anonymous": "Anonymous Reader",
+        "BooksRead": "Books Read"
       }
     },
     "Chat": {

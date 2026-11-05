@@ -1300,7 +1300,8 @@
         "Read": "قراءة",
         "MarkFinished": "تحديد كمقروء",
         "Delete": "حذف",
-        "ConfirmDelete": "هل أنت متأكد؟"
+        "ConfirmDelete": "هل أنت متأكد؟",
+        "Personal": "شخصي"
       },
       "ManualBook": {
         "AddManual": "إضافة كتاب خارج المتجر",
@@ -1310,6 +1311,12 @@
         "Author": "المؤلف",
         "AuthorEx": "مثال: باولو كويلو",
         "TotalPages": "عدد الصفحات"
+      },
+      "Leaderboard": {
+        "Title": "🏆 متصدرو القراءة",
+        "Subtitle": "انضم إلى التحدي! اقرأ أكثر وشارك أكثر لتصعد في الترتيب وتثبت شغفك بالقراءة.",
+        "Anonymous": "قارئ مجهول",
+        "BooksRead": "كتب مقروءة"
       }
     },
     "Promotion": {

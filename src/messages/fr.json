@@ -1278,7 +1278,8 @@
         "Read": "Lire",
         "MarkFinished": "Marquer comme terminé",
         "Delete": "Supprimer",
-        "ConfirmDelete": "Êtes-vous sûr ?"
+        "ConfirmDelete": "Êtes-vous sûr ?",
+        "Personal": "Perso"
       },
       "ManualBook": {
         "AddManual": "Ajouter un livre hors catalogue",
@@ -1287,7 +1288,16 @@
         "TitleEx": "Ex: L'Alchimiste",
         "Author": "Auteur",
         "AuthorEx": "Ex: Paulo Coelho",
-        "TotalPages": "Pages totales"
+        "TotalPages": "Pages totales",
+        "SearchBook": "Rechercher un livre",
+        "ManualEntry": "Saisie manuelle",
+        "Search": "Chercher"
+      },
+      "Leaderboard": {
+        "Title": "🏆 Classement des Lecteurs",
+        "Subtitle": "Rejoignez le challenge ! Lisez plus, partagez plus, et montez dans le classement pour prouver votre passion pour la lecture.",
+        "Anonymous": "Lecteur Anonyme",
+        "BooksRead": "Livres Lus"
       }
     },
     "Chat": {
