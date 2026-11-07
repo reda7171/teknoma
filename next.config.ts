@@ -47,6 +47,10 @@ const withPWA = withPWAInit({
 })
 
 const nextConfig: NextConfig = {
+  productionBrowserSourceMaps: false,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
   // Detect version skew between an open browser tab and a new Docker image.
   deploymentId: process.env.DEPLOYMENT_VERSION,
   typescript: {
@@ -152,6 +156,14 @@ const nextConfig: NextConfig = {
           {
             key: 'Cross-Origin-Opener-Policy',
             value: 'same-origin-allow-popups',
+          },
+          {
+            key: 'X-Permitted-Cross-Domain-Policies',
+            value: 'none',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
           },
           {
             key: 'Content-Security-Policy',

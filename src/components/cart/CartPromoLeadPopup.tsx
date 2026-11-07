@@ -20,7 +20,10 @@ export default function CartPromoLeadPopup() {
     const isExcludedRoute = Boolean(
         pathname?.includes('/admin') ||
         pathname?.includes('/seller') ||
-        pathname?.includes('/checkout')
+        pathname?.includes('/checkout') ||
+        pathname?.includes('/community') ||
+        pathname?.includes('/reading-list') ||
+        pathname?.includes('/profile')
     )
 
     const t = useTranslations('CartPromoPopup')

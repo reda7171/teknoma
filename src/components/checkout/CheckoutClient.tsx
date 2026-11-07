@@ -3,10 +3,12 @@
 import { useCartStore } from '@/store/cart'
 import { normalizeImage } from '@/lib/utils'
 import { useRouter } from '@/i18n/routing'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { createOrder } from '@/lib/actions/orders'
-import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift, ShieldCheck, Headset, X, Building2, QrCode, Zap } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Package, Truck, Wallet, Ticket, Loader2, ArrowRight, Gift, ShieldCheck, Headset, X, Building2, QrCode, Zap, Globe, Plane, MapPin, AlertTriangle } from 'lucide-react'
+import InternationalPhoneInput from './InternationalPhoneInput'
+import { Country, COUNTRIES, DEFAULT_COUNTRY } from '@/lib/constants/countries'
 import { Link } from '@/i18n/routing'
 import CouponInput from '@/components/CouponInput'
 import { useTranslations, useLocale } from 'next-intl'
@@ -41,11 +43,12 @@ export default function CheckoutClient({
     is3For4Active?: boolean;
 }) {
     const router = useRouter()
-    const { items, getTotalPrice, clearCart, discount: instantOfferDiscount, sessionId } = useCartStore()
+    const { items, getTotalPrice, clearCart, discount: instantOfferDiscount, sessionId, updateQuantity } = useCartStore()
     const { showNotification } = useUIStore()
     const [mounted, setMounted] = useState(false)
     const [hasHydrated, setHasHydrated] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [coupon, setCoupon] = useState<any>(null)
     const [gifts, setGifts] = useState<any[]>([])
@@ -53,8 +56,33 @@ export default function CheckoutClient({
     const [useCredits, setUseCredits] = useState(false)
     const [savedProfile, setSavedProfile] = useState<SavedDeliveryProfile | null>(null)
     const [rememberDetails, setRememberDetails] = useState(true)
+    const [shippingMethod, setShippingMethod] = useState<'STANDARD' | 'AMANA_WORLDWIDE'>('STANDARD')
+    const [destinationCountry, setDestinationCountry] = useState<Country>(DEFAULT_COUNTRY)
+    const isWorldwide = shippingMethod === 'AMANA_WORLDWIDE'
     const t = useTranslations('Checkout')
     const locale = useLocale()
+
+    // Calculs financiers globaux initialisés avant les hooks et retours anticipés (évite l'erreur ReferenceError TDZ)
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
+    const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
+    const shippingFee = (hasOnlyDigital) ? 0 : isWorldwide ? 200 : (hasFreeShippingItem || subtotal >= 500) ? 0 : 30
+
+    let discountAmount = 0
+    if (coupon) {
+        if (coupon.type === 'PERCENTAGE') {
+            discountAmount = (subtotal * coupon.discount) / 100
+        } else {
+            discountAmount = coupon.discount
+        }
+    }
+    const instantDiscount = instantOfferDiscount || 0
+    const promo3for4Discount = is3For4Active ? calculate3For4Discount(items) : 0
+    const totalDiscountAmount = discountAmount + instantDiscount + promo3for4Discount
+
+    const finalTotalBeforeCredits = Math.max(0, subtotal - totalDiscountAmount + shippingFee)
+    const creditsToUse = useCredits && user?.credits ? Math.min(user.credits, finalTotalBeforeCredits) : 0
+    const finalTotal = Math.max(0, finalTotalBeforeCredits - creditsToUse)
 
     const handleApplySavedProfile = () => {
         if (!savedProfile) return
@@ -89,8 +117,31 @@ export default function CheckoutClient({
     const [filteredCities, setFilteredCities] = useState<string[]>([])
     const [showCities, setShowCities] = useState(false)
     const watchedCity = watch('city')
+    const watchedPhone = watch('phone')
+
+    useEffect(() => {
+        register('phone', {
+            required: t('Errors.PhoneRequired')
+        })
+    }, [register, t])
 
     const [abandonedCartId, setAbandonedCartId] = useState<string | null>(null)
+    const abandonedCartIdRef = useRef<string | null>(null)
+    const isSubmittingRef = useRef(false)
+    const isSuccessRef = useRef(false)
+
+    useEffect(() => {
+        abandonedCartIdRef.current = abandonedCartId
+    }, [abandonedCartId])
+
+    useEffect(() => {
+        isSubmittingRef.current = isSubmitting
+    }, [isSubmitting])
+
+    useEffect(() => {
+        isSuccessRef.current = isSuccess
+    }, [isSuccess])
+
     useEffect(() => {
         if (user && (user.phone || user.email) && items.length > 0) {
             const timer = setTimeout(() => {
@@ -100,27 +151,50 @@ export default function CheckoutClient({
         }
     }, [user, items.length])
 
-
-    const saveAbandonedCart = async () => {
+    const saveAbandonedCart = async (useBeaconIfAvailable = false) => {
         const data = getValues()
         if (!data.phone && !data.email) return
+        if (isSubmittingRef.current || isSuccessRef.current) return
+
+        const payload = {
+            id: abandonedCartIdRef.current,
+            phone: data.phone,
+            email: data.email,
+            fullName: data.fullName,
+            city: data.city,
+            address: data.address,
+            comment: data.comment,
+            shippingMethod,
+            destinationCountry: destinationCountry ? {
+                code: destinationCountry.code,
+                name: destinationCountry.name,
+                nameAr: destinationCountry.nameAr,
+                dialCode: destinationCountry.dialCode,
+                flag: destinationCountry.flag,
+            } : null,
+            shippingFee,
+            paymentMethod: data.paymentMethod,
+            selectedBank: selectedBankIndex !== null && paymentSettings?.bankTransferAccounts ? paymentSettings.bankTransferAccounts[selectedBankIndex].bankName : null,
+            sessionId,
+            items,
+            total: finalTotal
+        }
+
+        // Transmission garantie via navigator.sendBeacon lors de la fermeture ou du masquage de l'onglet
+        if (useBeaconIfAvailable && typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+            try {
+                const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })
+                navigator.sendBeacon('/api/abandoned-cart', blob)
+                return
+            } catch {}
+        }
 
         try {
             const result = await withExponentialRetry(async () => {
                 const res = await fetch('/api/abandoned-cart', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: abandonedCartId,
-                        phone: data.phone,
-                        email: data.email,
-                        fullName: data.fullName,
-                        paymentMethod: data.paymentMethod,
-                        selectedBank: selectedBankIndex !== null && paymentSettings?.bankTransferAccounts ? paymentSettings.bankTransferAccounts[selectedBankIndex].bankName : null,
-                        sessionId,
-                        items,
-                        total: finalTotal
-                    })
+                    body: JSON.stringify(payload)
                 })
                 if (!res.ok && res.status >= 500) {
                     throw new Error(`Server error ${res.status}`)
@@ -130,11 +204,33 @@ export default function CheckoutClient({
 
             if (result?.success && result?.id) {
                 setAbandonedCartId(result.id)
+                abandonedCartIdRef.current = result.id
             }
         } catch (e) {
             console.error('Failed to save abandoned cart', e)
         }
     }
+
+    // Capture garantie via navigator.sendBeacon lors d'une fermeture brutale ou changement d'onglet mobile
+    useEffect(() => {
+        const handleUnloadBeacon = () => {
+            saveAbandonedCart(true)
+        }
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                saveAbandonedCart(true)
+            }
+        }
+
+        window.addEventListener('pagehide', handleUnloadBeacon)
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+
+        return () => {
+            window.removeEventListener('pagehide', handleUnloadBeacon)
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
+    }, [sessionId, items, finalTotal, selectedBankIndex, paymentSettings, getValues])
 
     const registerWithTracker = (name: keyof CheckoutForm, options?: any) => {
         const reg = register(name, options)
@@ -225,31 +321,13 @@ export default function CheckoutClient({
         }
     }, [mounted])
 
-    const [isSuccess, setIsSuccess] = useState(false)
-
     useEffect(() => {
         if (mounted && hasHydrated && !isSuccess) {
-            const currentSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-            const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
-            const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
-            const shippingFee = (hasOnlyDigital || hasFreeShippingItem || currentSubtotal >= 500) ? 0 : 30
-            let discountAmount = 0
-            if (coupon) {
-                if (coupon.type === 'PERCENTAGE') {
-                    discountAmount = (currentSubtotal * coupon.discount) / 100
-                } else {
-                    discountAmount = coupon.discount
-                }
-            }
-            const currentInstantDiscount = instantOfferDiscount || 0
-            const currentPromo3for4 = is3For4Active ? calculate3For4Discount(items) : 0
-            const currentFinalTotal = Math.max(0, currentSubtotal - discountAmount - currentInstantDiscount - currentPromo3for4 + shippingFee)
-
-            if (items.length === 0 || (minOrderAmount > 0 && currentFinalTotal < minOrderAmount)) {
+            if (items.length === 0 || (minOrderAmount > 0 && finalTotal < minOrderAmount)) {
                 router.replace('/cart')
             }
         }
-    }, [mounted, hasHydrated, items, minOrderAmount, router, isSuccess, getTotalPrice, coupon])
+    }, [mounted, hasHydrated, items.length, minOrderAmount, finalTotal, router, isSuccess])
 
     if (!mounted || !hasHydrated) {
         return (
@@ -263,28 +341,6 @@ export default function CheckoutClient({
         return null
     }
 
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
-    const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
-    const shippingFee = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30
-
-    let discountAmount = 0
-    if (coupon) {
-        if (coupon.type === 'PERCENTAGE') {
-            discountAmount = (subtotal * coupon.discount) / 100
-        } else {
-            discountAmount = coupon.discount
-        }
-    }
-    // Ajout de la remise de l'offre instantanée et 3=4
-    const instantDiscount = instantOfferDiscount || 0
-    const promo3for4Discount = is3For4Active ? calculate3For4Discount(items) : 0
-    const totalDiscountAmount = discountAmount + instantDiscount + promo3for4Discount
-
-    const finalTotalBeforeCredits = Math.max(0, subtotal - totalDiscountAmount + shippingFee)
-    const creditsToUse = useCredits && user?.credits ? Math.min(user.credits, finalTotalBeforeCredits) : 0
-    const finalTotal = Math.max(0, finalTotalBeforeCredits - creditsToUse)
-
     // Sélectionner le meilleur cadeau éligible
     const eligibleGift = gifts
         .filter(g => g.minAmount <= subtotal)
@@ -292,6 +348,7 @@ export default function CheckoutClient({
 
     const onSubmit = async (data: CheckoutForm) => {
         setIsSubmitting(true)
+        isSubmittingRef.current = true
         setError(null)
         fbPixelEvents.addPaymentInfo()
 
@@ -305,6 +362,7 @@ export default function CheckoutClient({
             setError(minAmountMsg)
             showNotification(minAmountMsg, 'error')
             setIsSubmitting(false)
+            isSubmittingRef.current = false
             return
         }
 
@@ -330,13 +388,25 @@ export default function CheckoutClient({
             const totalItems = items.reduce((acc, item) => acc + item.quantity, 0)
             let finalComment = data.comment || ''
 
+            const getCookie = (name: string) => {
+                if (typeof document === 'undefined') return undefined
+                const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'))
+                return match ? decodeURIComponent(match[1]) : undefined
+            }
+            const clientFbp = getCookie('_fbp')
+            const clientFbc = getCookie('_fbc') || (localStorage.getItem('fbclid') ? `fb.1.${Date.now()}.${localStorage.getItem('fbclid')}` : undefined)
+            const gaMatch = typeof document !== 'undefined' ? document.cookie.match(/(?:^|;\s*)_ga=GA\d\.\d\.(\d+\.\d+)/) : null
+            const clientGaId = gaMatch ? gaMatch[1] : undefined
+            const clientGclid = localStorage.getItem('gclid') || undefined
+
             const result = await withExponentialRetry(
                 () => createOrder({
                     fullName: data.fullName,
                     email: data.email,
                     phone: data.phone,
                     address: data.address,
-                    city: data.city,
+                    city: isWorldwide ? (data.city ? `${data.city}, ${destinationCountry.name}` : destinationCountry.name) : data.city,
+                    shippingCompany: isWorldwide ? 'Amana International' : undefined,
                     comment: finalComment,
                     items: orderItems,
                     couponCode: coupon?.code,
@@ -347,6 +417,10 @@ export default function CheckoutClient({
                     utmCampaign: localStorage.getItem('utm_campaign') || undefined,
                     fbclid: localStorage.getItem('fbclid') || undefined,
                     ttclid: localStorage.getItem('ttclid') || undefined,
+                    gclid: clientGclid,
+                    gaClientId: clientGaId,
+                    fbp: clientFbp,
+                    fbc: clientFbc,
                     paymentMethod: data.paymentMethod,
                 }),
                 { maxRetries: 3, baseDelayMs: 400, maxDelayMs: 2500 }
@@ -400,6 +474,7 @@ export default function CheckoutClient({
                 }
 
                 setIsSuccess(true)
+                isSuccessRef.current = true
                 if (data.paymentMethod === 'STRIPE' || data.paymentMethod === 'PAYPAL' || data.paymentMethod === 'CMI') {
                     const endpointMap = {
                         'STRIPE': '/api/checkout/stripe',
@@ -441,6 +516,7 @@ export default function CheckoutClient({
                 clearCart()
                 setCoupon(null)
                 setIsSuccess(true)
+                isSuccessRef.current = true
                 if (user) {
                     showNotification('Commande reussi...', 'success')
                     router.push('/orders')
@@ -516,11 +592,78 @@ export default function CheckoutClient({
                                 </div>
                             )}
 
+                            {/* Mode de livraison : Maroc Standard vs Worldwide by Amana */}
+                            <div className="mb-8 space-y-3">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">
+                                    {t('ShippingMethod')}
+                                </label>
+                                <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+                                    {/* Option 1: Maroc Standard */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShippingMethod('STANDARD')
+                                            setDestinationCountry(DEFAULT_COUNTRY)
+                                            setTimeout(saveAbandonedCart, 100)
+                                        }}
+                                        className={`p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left rtl:text-right transition-all relative flex flex-col justify-between h-full ${
+                                            shippingMethod === 'STANDARD'
+                                                ? 'border-black bg-white shadow-md'
+                                                : 'border-transparent bg-pixio-cream/50 hover:bg-white/80'
+                                        }`}
+                                    >
+                                        <div>
+                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-2">
+                                                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                                                    <Truck className="w-4 h-4 sm:w-5 sm:h-5 text-black shrink-0" />
+                                                    <span className="font-black text-xs sm:text-sm text-black truncate">{t('MoroccoShipping')}</span>
+                                                </div>
+                                                <span className="text-[10px] sm:text-xs font-black px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-emerald-100 text-emerald-800 w-fit shrink-0">
+                                                    {(hasFreeShippingItem || subtotal >= 500) ? t('Free') : '30 DH'}
+                                                </span>
+                                            </div>
+                                            <p className="text-[10px] sm:text-xs text-gray-500 font-medium leading-relaxed line-clamp-2 sm:line-clamp-none">
+                                                {t('MoroccoShippingDesc')}
+                                            </p>
+                                        </div>
+                                    </button>
+
+                                    {/* Option 2: Worldwide by Amana */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShippingMethod('AMANA_WORLDWIDE')
+                                            setTimeout(saveAbandonedCart, 100)
+                                        }}
+                                        className={`p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left rtl:text-right transition-all relative flex flex-col justify-between h-full ${
+                                            shippingMethod === 'AMANA_WORLDWIDE'
+                                                ? 'border-black bg-white shadow-md'
+                                                : 'border-transparent bg-pixio-cream/50 hover:bg-white/80'
+                                        }`}
+                                    >
+                                        <div>
+                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-2">
+                                                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                                                    <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
+                                                    <span className="font-black text-xs sm:text-sm text-black truncate">{t('WorldwideAmana')}</span>
+                                                </div>
+                                                <span className="text-[10px] sm:text-xs font-black px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-blue-100 text-blue-800 font-mono w-fit shrink-0">
+                                                    {t('WorldwideShippingFeeBadge')}
+                                                </span>
+                                            </div>
+                                            <p className="text-[10px] sm:text-xs text-gray-500 font-medium leading-relaxed line-clamp-2 sm:line-clamp-none">
+                                                {t('WorldwideAmanaDesc')}
+                                            </p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="space-y-3 mb-8">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('FullName')}</label>
                                 <input
                                     {...registerWithTracker('fullName', { required: t('Errors.FullNameRequired') })}
-                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
+                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
                                 />
                                 {errors.fullName && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.fullName.message}</p>}
                             </div>
@@ -532,38 +675,23 @@ export default function CheckoutClient({
                                 />
                             </div>
 
+                            {/* Téléphone avec détection de drapeau par indicatif ou sélecteur de pays */}
                             <div className="space-y-3 mb-8">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('MobileNumber')}</label>
-                                <input
-                                    {...(() => {
-                                        const reg = registerWithTracker('phone', {
-                                            required: t('Errors.PhoneRequired'),
-                                            pattern: {
-                                                value: /^\s*(?:(?:\+|00)212|0)\s*[5-7](?:\s*\d){8}\s*$/,
-                                                message: t('Errors.PhoneInvalid')
-                                            }
-                                        });
-                                        const originalOnChange = reg.onChange;
-                                        reg.onChange = (e: any) => {
-                                            let val = e.target.value.replace(/[^\d+]/g, '');
-                                            if (val.startsWith('0') && !val.includes('+')) {
-                                                val = val.replace(/(\d{2})(\d{2})?(\d{2})?(\d{2})?(\d{2})?/, (match: string, p1: string, p2?: string, p3?: string, p4?: string, p5?: string) => {
-                                                    let res = p1;
-                                                    if (p2) res += ' ' + p2;
-                                                    if (p3) res += ' ' + p3;
-                                                    if (p4) res += ' ' + p4;
-                                                    if (p5) res += ' ' + p5;
-                                                    return res;
-                                                });
-                                            }
-                                            e.target.value = val.substring(0, 14); // Max length for "06 12 34 56 78" is 14
-                                            return originalOnChange(e);
-                                        };
-                                        return reg;
-                                    })()}
-                                    placeholder="06 00 00 00 00"
-                                    dir="ltr"
-                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
+                                <InternationalPhoneInput
+                                    id="phone"
+                                    value={watchedPhone || ''}
+                                    onChange={(val) => {
+                                        setValue('phone', val, { shouldValidate: true })
+                                    }}
+                                    onCountryChange={(country) => {
+                                        setDestinationCountry(country)
+                                        if (country.code !== 'MA') {
+                                            setShippingMethod('AMANA_WORLDWIDE')
+                                        }
+                                        setTimeout(saveAbandonedCart, 100)
+                                    }}
+                                    error={errors.phone?.message}
                                 />
                                 {errors.phone && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.phone.message}</p>}
                             </div>
@@ -573,15 +701,15 @@ export default function CheckoutClient({
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('City')}</label>
                                     <input
                                         {...registerWithTracker('city', { required: t('Errors.CityRequired') })}
-                                        placeholder={t('ChooseCity')}
+                                        placeholder={isWorldwide ? 'Ex: Paris, Bruxelles, Montréal...' : t('ChooseCity')}
                                         autoComplete="off"
                                         onFocus={() => {
-                                            if (watchedCity && filteredCities.length > 0) setShowCities(true)
+                                            if (!isWorldwide && watchedCity && filteredCities.length > 0) setShowCities(true)
                                         }}
-                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
+                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
                                     />
                                     
-                                    {showCities && (
+                                    {!isWorldwide && showCities && (
                                         <div className="absolute z-[999] left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-gray-100 overflow-hidden max-h-[250px] overflow-y-auto custom-scrollbar">
                                             {filteredCities.map((city, idx) => (
                                                 <button
@@ -607,7 +735,7 @@ export default function CheckoutClient({
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('FullAddress')}</label>
                                     <input
                                         {...register('address', { required: t('Errors.AddressRequired') })}
-                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
+                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
                                     />
                                     {errors.address && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.address.message}</p>}
                                 </div>
@@ -617,7 +745,7 @@ export default function CheckoutClient({
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('NoteOptional')}</label>
                                 <textarea
                                     {...register('comment')}
-                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-transparent rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black min-h-[120px]"
+                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black min-h-[120px]"
                                 />
                             </div>
 
@@ -793,6 +921,25 @@ export default function CheckoutClient({
                     <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 shadow-xl border border-gray-100 lg:sticky lg:top-24 space-y-6 sm:space-y-10">
                         <div>
                             <h2 className="text-xl font-black text-black tracking-tight mb-4 sm:mb-8">{t('SelectionSummary')}</h2>
+                            {items.some((item) => item.quantity > 1) && (
+                                <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200/90 flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                        <span>{t('TwoCopiesWarning')}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            items.forEach((item) => {
+                                                if (item.quantity > 1) updateQuantity(item.id, 1)
+                                            })
+                                        }}
+                                        className="text-[10px] font-black text-amber-900 bg-amber-100 hover:bg-amber-200 active:scale-95 px-2.5 py-1 rounded-lg border border-amber-300 transition-all cursor-pointer whitespace-nowrap"
+                                    >
+                                        {t('ReduceToOneCopy')}
+                                    </button>
+                                </div>
+                            )}
                             <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                 {items.map((item) => (
                                     <div key={item.id} className="flex gap-5 group">
@@ -816,6 +963,21 @@ export default function CheckoutClient({
                                         <div className="flex-1 py-1">
                                             <p className="text-sm font-black text-black line-clamp-2 leading-tight tracking-tight">{item.title}</p>
                                             <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-2">{item.price} درهم</p>
+                                            {item.quantity > 1 && (
+                                                <div className="mt-2 p-2 rounded-xl bg-amber-50 border border-amber-200/90 flex flex-wrap items-center justify-between gap-1.5">
+                                                    <span className="inline-flex items-center gap-1 text-amber-900 text-[10px] font-bold">
+                                                        <Zap className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                                                        {t('TwoCopiesSelected')} (×{item.quantity})
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => updateQuantity(item.id, 1)}
+                                                        className="text-[10px] font-black text-amber-900 bg-amber-100 hover:bg-amber-200 active:scale-95 px-2 py-0.5 rounded-md border border-amber-300 transition-all cursor-pointer whitespace-nowrap"
+                                                    >
+                                                        {t('ReduceToOneCopy')}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -887,7 +1049,7 @@ export default function CheckoutClient({
                                 </div>
                             )}
                             <div className="flex justify-between items-center text-[11px] rtl:text-sm font-black uppercase tracking-widest rtl:tracking-normal text-gray-400">
-                                <span>{t('DeliveryFee')}</span>
+                                <span>{isWorldwide ? t('WorldwideAmana') : t('DeliveryFee')}</span>
                                 {shippingFee === 0 ? (
                                     <span className="text-black bg-pixio-yellow px-2 py-1 rounded-md">{t('Free')}</span>
                                 ) : (

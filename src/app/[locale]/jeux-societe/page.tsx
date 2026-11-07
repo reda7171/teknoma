@@ -97,7 +97,6 @@ export default async function JeuxSocietePage({ params }: { params: Promise<{ lo
 
     return (
         <div className="min-h-screen bg-[#FAFAF9]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            <link rel="canonical" href={pageUrl} />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(boardGamesSchema) }}

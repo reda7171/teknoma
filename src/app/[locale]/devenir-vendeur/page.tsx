@@ -3,6 +3,8 @@ import { Store, Truck, ShieldCheck, Wallet, ArrowRight, BookOpen, CheckCircle2, 
 import BecomeSellerForm from './BecomeSellerForm'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
+import ContactFaq, { FaqItem } from '@/components/contact/ContactFaq'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { isFeatureEnabled } from '@/lib/actions/site-settings'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -68,18 +70,125 @@ export default async function BecomeSellerPage({ params }: { params: Promise<{ l
     if (!enabled) notFound()
 
     const t = await getTranslations('DevenirVendeur')
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+
+    const sellerFaqItems: FaqItem[] = isAr
+        ? [
+            {
+                question: 'ما هي نسبة العمولة وتكاليف التسجيل للبيع عبر متجر رواية؟',
+                answer: 'التسجيل مجاني بنسبة 100% وبدون أي اشتراك شهري. تقتطع رواية عمولة رمزية فقط عند تسليم الطلب واستلام أمواله بنجاح دون أي مصاريف خفية.',
+                category: 'PAYMENT'
+            },
+            {
+                question: 'كيف تتم عملية الشحن واستلام الطرود من مقر البائع؟',
+                answer: 'بمجرد تأكيد الطلب، يقوم شريكنا اللوجستي باستلام الطرد مباشرة من عنوانكم والتكفل بالتوصيل السريع مع تحصيل المبلغ نقداً (COD) خلال 24-48 ساعة في كل مدن المغرب.',
+                category: 'SHIPPING'
+            },
+            {
+                question: 'متى وكيف يستلم البائعون أرباحهم المحصلة؟',
+                answer: 'يتم تحويل المبالغ المحصلة أسبوعياً عبر تحويل بنكي مباشر إلى حسابكم البنكي مصحوبة بتقرير مالي مفصل لكل عملية بيع.',
+                category: 'PAYMENT'
+            },
+            {
+                question: 'ما هي أصناف الكتب المسموح ببيعها على المنصة؟',
+                answer: 'يمكنكم بيع الكتب الجديدة والمستعملة بحالة جيدة، المقررات المدرسية والجامعية، الروايات والقصص المصورة بمختلف اللغات (العربية، الفرنسية والإنجليزية).',
+                category: 'GENERAL'
+            }
+        ]
+        : isEn
+        ? [
+            {
+                question: 'What are the commission rates and registration fees to sell on Riwaya?',
+                answer: 'Registration is 100% free with no monthly subscription. Riwaya only takes a transparent commission on delivered and paid orders, with zero hidden fees.',
+                category: 'PAYMENT'
+            },
+            {
+                question: 'How does parcel pickup and cash-on-delivery shipping work?',
+                answer: 'Once an order is confirmed, our courier partner picks up the package directly from your location and handles express delivery with cash collection across Morocco within 24 to 48 hours.',
+                category: 'SHIPPING'
+            },
+            {
+                question: 'When and how do sellers receive their payouts?',
+                answer: 'Funds collected upon delivery are transferred weekly via direct bank transfer to your account along with an itemized sales report.',
+                category: 'PAYMENT'
+            },
+            {
+                question: 'What kinds of books can I sell on the platform?',
+                answer: 'You can sell new books, pre-loved books in good condition, academic textbooks, comics and novels across all languages (Arabic, French, English).',
+                category: 'GENERAL'
+            }
+        ]
+        : [
+            {
+                question: 'Quelles sont les commissions et frais d\'inscription pour vendre sur Riwaya ?',
+                answer: 'L\'inscription au programme vendeur est 100% gratuite et sans abonnement fixe. Riwaya prélève uniquement une commission transparente sur les commandes livrées et payées, sans aucuns frais cachés.',
+                category: 'PAYMENT'
+            },
+            {
+                question: 'Comment fonctionne l\'expédition et la collecte des colis chez le vendeur ?',
+                answer: 'Dès qu\'une commande est confirmée, notre transporteur partenaire prend en charge la collecte du colis directement à votre adresse et assure la livraison avec encaissement en espèces (COD) sous 24 à 48h partout au Maroc.',
+                category: 'SHIPPING'
+            },
+            {
+                question: 'Quand et comment les vendeurs reçoivent-ils leurs gains ?',
+                answer: 'Les fonds collectés lors de la livraison sont reversés chaque semaine par virement bancaire direct sur votre compte professionnel ou personnel avec récapitulatif détaillé.',
+                category: 'PAYMENT'
+            },
+            {
+                question: 'Quels types de livres puis-je commercialiser (neufs, occasion, scolaire) ?',
+                answer: 'Vous pouvez vendre des livres neufs, d\'occasion en bon état, des manuels scolaires, des bandes dessinées et des romans littéraires dans toutes les langues (arabe, français, anglais).',
+                category: 'GENERAL'
+            }
+        ]
 
     const sellerSchema = {
         '@context': 'https://schema.org',
-        '@type': 'WebPage',
-        name: locale === 'ar' ? 'كن بائعاً أو موزعاً للكتب' : locale === 'en' ? 'Become a Book Seller & Partner' : 'Devenir Vendeur & Revendeur de Livres',
-        description: locale === 'ar' ? 'انضم إلى أكبر منصة ومكتبة لبيع الكتب في المغرب' : 'Rejoignez la première librairie en ligne du Maroc pour vendre et distribuer vos livres',
-        url: pageUrl,
+        '@graph': [
+            {
+                '@type': 'WebPage',
+                '@id': `${pageUrl}#webpage`,
+                name: locale === 'ar' ? 'كن بائعاً أو موزعاً للكتب | رواية' : locale === 'en' ? 'Become a Book Seller & Partner | Riwaya' : 'Devenir Vendeur & Revendeur de Livres | Riwaya',
+                description: locale === 'ar' ? 'انضم إلى أكبر منصة ومكتبة لبيع الكتب في المغرب' : 'Rejoignez la première librairie en ligne du Maroc pour vendre et distribuer vos livres',
+                url: pageUrl,
+                inLanguage: locale,
+                potentialAction: {
+                    '@type': 'JoinAction',
+                    target: `${pageUrl}#inscription`,
+                    name: t('BtnDevenirVendeur')
+                }
+            },
+            {
+                '@type': 'Service',
+                '@id': `${baseUrl}/#seller-service`,
+                name: 'Programme Vendeurs Partenaires Riwaya',
+                serviceType: 'Marketplace Seller Program',
+                provider: {
+                    '@type': 'Organization',
+                    name: 'Riwaya',
+                    url: baseUrl,
+                    logo: `${baseUrl}/logo.png`
+                },
+                areaServed: 'MA',
+                description: 'Vente et distribution de livres neufs et d’occasion avec encaissement COD et expédition locale.'
+            },
+            {
+                '@type': 'FAQPage',
+                '@id': `${pageUrl}#faq`,
+                mainEntity: sellerFaqItems.map((item) => ({
+                    '@type': 'Question',
+                    name: item.question,
+                    acceptedAnswer: {
+                        '@type': 'Answer',
+                        text: item.answer
+                    }
+                }))
+            }
+        ]
     }
 
     return (
         <div className="min-h-screen bg-white">
-            <link rel="canonical" href={pageUrl} />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(sellerSchema) }}
@@ -91,10 +200,11 @@ export default async function BecomeSellerPage({ params }: { params: Promise<{ l
                     {/* Background Pattern */}
                     <div className="absolute top-0 -left-1/4 w-96 h-96 bg-pixio-yellow rounded-full mix-blend-multiply filter blur-[128px] animate-blob"></div>
                     <div className="absolute top-0 -right-1/4 w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000"></div>
-                    <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000"></div>
+                    <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-amber-100 rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <Breadcrumbs items={[{ label: t('ProgrammeVendeurPartenaire') }]} className="mb-4 sm:mb-6" />
                     <div className="max-w-3xl">
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-black text-xs font-black uppercase tracking-widest mb-4 sm:mb-8 shadow-sm">
                             <Store className="w-4 h-4 text-pixio-yellow" />
@@ -290,6 +400,15 @@ export default async function BecomeSellerPage({ params }: { params: Promise<{ l
                         </div>
 
                         <BecomeSellerForm />
+
+                        {/* FAQ Vendeurs & Marchands */}
+                        <div className="mt-12 pt-8 border-t border-gray-100">
+                            <ContactFaq
+                                items={sellerFaqItems}
+                                title={isAr ? 'الأسئلة الشائعة للبائعين والتجار' : isEn ? 'Merchant & Seller FAQ' : 'Questions Fréquentes des Vendeurs'}
+                                subtitle={isAr ? 'العمولات، دورة الشحن، استلام الأرباح والكتب المقبولة' : isEn ? 'Commissions, shipping cycle, payouts & accepted books' : 'Commissions, logistique COD, versements & types de livres'}
+                            />
+                        </div>
                     </div>
                 </div>
             </section>

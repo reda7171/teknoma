@@ -16,8 +16,12 @@ export const metadata: Metadata = {
 }
 
 export default async function NotFound() {
-  const messages = await getMessages()
-  const locale = await getLocale()
+  let messages = {}
+  let locale = 'fr'
+  try {
+    messages = await getMessages()
+    locale = await getLocale()
+  } catch {}
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>

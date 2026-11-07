@@ -17,6 +17,8 @@ import { DashboardPrivacyProvider } from '@/components/admin/DashboardPrivacyCon
 import DashboardPrivacyToggle from '@/components/admin/DashboardPrivacyToggle'
 import SensitiveValue from '@/components/admin/SensitiveValue'
 import { getCoverCacheStats } from '@/lib/actions/gemini-cache'
+import CampaignCodAnalyticsWidget from '@/components/admin/CampaignCodAnalyticsWidget'
+import AdminOrdersEvolutionChart from '@/components/admin/AdminOrdersEvolutionChart'
 
 
 async function getStats(role: string | null, userId: string | null) {
@@ -412,6 +414,30 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
 
     const n8nBaseUrl = await getSetting('n8n_base_url') || 'http://167.86.108.246:5678/'
 
+    const sellerOrderWhere: any = role === 'SELLER' && userId ? { items: { some: { sellerId: userId } } } : {}
+    const ordersForEvolution = await prisma.order.findMany({
+        where: {
+            status: { notIn: ['CANCELLED', 'RETURNED'] },
+            ...sellerOrderWhere
+        },
+        select: {
+            createdAt: true,
+            total: true,
+        },
+        orderBy: { createdAt: 'asc' }
+    })
+
+    const evolutionMap: Record<string, { date: string; count: number; revenue: number }> = {}
+    for (const order of ordersForEvolution) {
+        const dateStr = order.createdAt.toISOString().split('T')[0]
+        if (!evolutionMap[dateStr]) {
+            evolutionMap[dateStr] = { date: dateStr, count: 0, revenue: 0 }
+        }
+        evolutionMap[dateStr].count++
+        evolutionMap[dateStr].revenue += order.total
+    }
+    const evolutionData = Object.values(evolutionMap)
+
     const currency = locale === 'ar' ? 'درهم' : 'MAD'
 
     const statCards = [
@@ -543,10 +569,16 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
 
             <StatsGridController cards={statCards} colorClasses={colorClasses} />
 
+            {/* Évolution des Commandes (1 mois | 3 mois | 1 an | All time) */}
+            <AdminOrdersEvolutionChart data={evolutionData} initialPeriod="all" />
+
             {/* Charts Section */}
             <div className="bg-white rounded-[2rem] sm:rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-4 sm:p-6 lg:p-10">
                 <DashboardAnalytics />
             </div>
+
+            {/* Campaign COD Analytics & Attribution Widget */}
+            <CampaignCodAnalyticsWidget />
 
 
 

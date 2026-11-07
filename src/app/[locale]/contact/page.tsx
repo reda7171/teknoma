@@ -1,10 +1,70 @@
 import { getTranslations } from 'next-intl/server'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
-import { Mail, Phone, MapPin, MessageCircle, Send, Clock, Globe, Instagram, Facebook, Linkedin, Twitter, Youtube, AtSign } from 'lucide-react'
+import { Link } from '@/i18n/routing'
+import { Mail, Phone, MapPin, MessageCircle, Clock, Globe, Instagram, Facebook, Linkedin, Twitter, Youtube, AtSign, ChevronRight } from 'lucide-react'
 import { getAllSettings } from '@/lib/actions/site-settings'
+import { Metadata } from 'next'
+import ContactForm from '@/components/contact/ContactForm'
+import ContactFaq, { FaqItem } from '@/components/contact/ContactFaq'
 
-export default async function ContactPage() {
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+    const { locale } = await params
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+
+    const title = isAr
+        ? 'تواصل معنا | خدمة العملاء والدعم | رواية'
+        : isEn
+        ? 'Contact Us | Customer Support & Assistance | Riwaya'
+        : 'Contactez-nous | Service Client & Support | Riwaya'
+
+    const description = isAr
+        ? 'فريق رواية رهن إشارتكم لجميع استفساراتكم حول الكتب، الطلبات والتوصيل عبر واتساب، الهاتف أو البريد الإلكتروني.'
+        : isEn
+        ? 'Riwaya customer care team is available for all your book inquiries, order tracking, and delivery support via WhatsApp, phone, or email.'
+        : 'L’équipe Riwaya est à votre écoute pour toute question sur nos livres, vos commandes et nos livraisons par WhatsApp, téléphone ou email.'
+
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+
+    return {
+        title,
+        description,
+        alternates: {
+            canonical: `${siteUrl}/${locale}/contact`,
+            languages: {
+                'fr': `${siteUrl}/fr/contact`,
+                'ar': `${siteUrl}/ar/contact`,
+                'en': `${siteUrl}/en/contact`,
+                'x-default': `${siteUrl}/fr/contact`
+            }
+        },
+        openGraph: {
+            title,
+            description,
+            url: `${siteUrl}/${locale}/contact`,
+            siteName: 'Riwaya',
+            locale: locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_US' : 'fr_FR',
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary',
+            title,
+            description,
+        }
+    }
+}
+
+export default async function ContactPage({
+    params,
+}: {
+    params: Promise<{ locale: string }>
+}) {
+    const { locale } = await params
     const t = await getTranslations('ContactPage')
 
     // Récupérer les paramètres du site
@@ -12,6 +72,159 @@ export default async function ContactPage() {
     const email = settings.contact_email || 'contact@riwaya.store'
     const phone = settings.contact_phone || '+212 702-220575'
     const address = settings.contact_address || 'Rabat, Maroc'
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+
+    const faqItems: FaqItem[] = isAr
+        ? [
+            {
+                question: 'ما هي شروط وإجراءات إرجاع أو استبدال الكتب؟',
+                answer: 'لديكم مهلة 3 أيام بعد الاستلام لطلب الإرجاع أو الاستبدال إذا كان الكتاب لا يطابق توقعاتكم. يتم استرجاع المبلغ عبر تحويل بنكي أو قسيمة شراء فورية دون أي تعقيد.',
+                category: 'RETURN'
+            },
+            {
+                question: 'ما هي مواعيد الشحن وتكاليف التوصيل في المغرب؟',
+                answer: 'يتم تجهيز وشحن الطلبات خلال 24 ساعة. التوصيل يستغرق من 24 إلى 48 ساعة في كافة مدن المغرب بسعر 30 درهم (ومجاني للطلبات فوق 500 درهم). كما يتوفر الشحن الدولي السريع عبر أمانة.',
+                category: 'SHIPPING'
+            },
+            {
+                question: 'كيف يعمل الدفع عند الاستلام (COD)؟',
+                answer: 'الدفع عند الاستلام آمن بنسبة 100% ودون أي تسبيق مالي: تسلمون المبلغ نقداً للمندوب عند استلام ومعاينة طردكم مباشرة في أيديكم.',
+                category: 'PAYMENT'
+            }
+        ]
+        : isEn
+        ? [
+            {
+                question: 'What are the return and exchange terms?',
+                answer: 'You have 3 calendar days after receipt to request a free return or exchange if a book does not match your expectations. Refunds are issued via bank transfer or an instant store voucher.',
+                category: 'RETURN'
+            },
+            {
+                question: 'What are the shipping times and delivery fees?',
+                answer: 'Orders are dispatched within 24h. Delivery takes 24h to 48h throughout Morocco for 30 MAD (free for orders above 500 MAD). Worldwide express shipping is handled via Amana International.',
+                category: 'SHIPPING'
+            },
+            {
+                question: 'How does Cash on Delivery (COD) work?',
+                answer: 'Cash on Delivery is 100% secure with zero upfront fees: you pay the courier directly in cash upon personal receipt and inspection of your package.',
+                category: 'PAYMENT'
+            }
+        ]
+        : [
+            {
+                question: 'Quelles sont les modalités de retour et d\'échange ?',
+                answer: 'Vous disposez de 3 jours calendaires après réception pour demander un retour ou un échange sans frais si le livre présente un défaut ou ne correspond pas à vos attentes. Le remboursement s\'effectue par virement bancaire ou bon d\'achat immédiat.',
+                category: 'RETURN'
+            },
+            {
+                question: 'Quels sont les délais d\'expédition et frais de livraison ?',
+                answer: 'Les commandes sont préparées et expédiées sous 24h. La livraison s\'effectue en 24h à 48h partout au Maroc pour 30 DH (offerte dès 500 DH d\'achat). Les envois internationaux express sont pris en charge par Amana International.',
+                category: 'SHIPPING'
+            },
+            {
+                question: 'Comment fonctionne le paiement à la livraison (COD) ?',
+                answer: 'Le paiement à la livraison (Cash on Delivery) est 100% sécurisé et sans avance : vous payez directement le livreur en espèces lors de la remise de votre colis en main propre. Vous pouvez également payer en ligne par carte bancaire.',
+                category: 'PAYMENT'
+            }
+        ]
+
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': 'ContactPage',
+                '@id': `${siteUrl}/${locale}/contact#webpage`,
+                url: `${siteUrl}/${locale}/contact`,
+                name: `${t('Title1')} ${t('Title2')}`,
+                description: t('Description'),
+                inLanguage: locale,
+                isPartOf: {
+                    '@type': 'WebSite',
+                    '@id': `${siteUrl}/#website`,
+                    name: 'Riwaya',
+                    url: siteUrl
+                },
+                breadcrumb: {
+                    '@id': `${siteUrl}/${locale}/contact#breadcrumb`
+                },
+                mainEntity: {
+                    '@type': 'Organization',
+                    '@id': `${siteUrl}/#organization`,
+                    name: 'Riwaya',
+                    url: siteUrl,
+                    logo: `${siteUrl}/logo.png`,
+                    contactPoint: [
+                        {
+                            '@type': 'ContactPoint',
+                            telephone: phone,
+                            contactType: 'Customer Service',
+                            email: email,
+                            areaServed: 'MA',
+                            availableLanguage: ['French', 'Arabic', 'English'],
+                            contactOption: 'TollFree',
+                            hoursAvailable: {
+                                '@type': 'OpeningHoursSpecification',
+                                dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                                opens: '09:00',
+                                closes: '19:00'
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                '@type': 'BreadcrumbList',
+                '@id': `${siteUrl}/${locale}/contact#breadcrumb`,
+                itemListElement: [
+                    {
+                        '@type': 'ListItem',
+                        position: 1,
+                        name: t('BreadcrumbHome'),
+                        item: `${siteUrl}/${locale}`
+                    },
+                    {
+                        '@type': 'ListItem',
+                        position: 2,
+                        name: t('BreadcrumbContact'),
+                        item: `${siteUrl}/${locale}/contact`
+                    }
+                ]
+            },
+            {
+                '@type': 'FAQPage',
+                '@id': `${siteUrl}/${locale}/contact#faq`,
+                mainEntity: faqItems.map((item) => ({
+                    '@type': 'Question',
+                    name: item.question,
+                    acceptedAnswer: {
+                        '@type': 'Answer',
+                        text: item.answer
+                    }
+                }))
+            },
+            {
+                '@type': 'BookStore',
+                '@id': `${siteUrl}/#localbusiness`,
+                name: 'Librairie Riwaya',
+                image: `${siteUrl}/og-image.jpg`,
+                url: siteUrl,
+                telephone: phone,
+                email: email,
+                priceRange: '50 MAD - 500 MAD',
+                address: {
+                    '@type': 'PostalAddress',
+                    streetAddress: address,
+                    addressLocality: 'Rabat',
+                    addressRegion: 'Rabat-Salé-Kénitra',
+                    postalCode: '10000',
+                    addressCountry: 'MA'
+                }
+            }
+        ]
+    }
 
     // Réseaux sociaux
     const socials = {
@@ -31,7 +244,18 @@ export default async function ContactPage() {
         <div className="min-h-screen bg-pixio-cream">
             <Header />
 
-            <main className="max-w-7xl mx-auto px-4 py-8 sm:py-16 md:py-24 pb-20 sm:pb-32">
+            <main className="max-w-7xl mx-auto px-4 py-6 sm:py-10 md:py-14 pb-20 sm:pb-32">
+                {/* Fil d'Ariane SEO & Ergonomie */}
+                <nav aria-label="Breadcrumb" className="mb-6 sm:mb-8 flex items-center gap-2 text-xs sm:text-sm text-gray-500 font-medium">
+                    <Link href="/" className="hover:text-black transition-colors">
+                        {t('BreadcrumbHome')}
+                    </Link>
+                    <ChevronRight className="h-3.5 w-3.5 text-gray-400 rtl:rotate-180" />
+                    <span className="font-bold text-gray-900" aria-current="page">
+                        {t('BreadcrumbContact')}
+                    </span>
+                </nav>
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-start">
 
                     {/* Contact Info */}
@@ -100,6 +324,13 @@ export default async function ContactPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Accordéon interactif FAQ directement sous les coordonnées de contact */}
+                        <ContactFaq
+                            items={faqItems}
+                            title={isAr ? 'الأسئلة الشائعة حول الطلبات' : isEn ? 'Orders & Delivery FAQ' : 'Questions Fréquentes'}
+                            subtitle={isAr ? 'المرتجعات، مواعيد الشحن والدفع عند الاستلام' : isEn ? 'Returns, shipping & cash on delivery' : 'Modalités de retour, délais d\'expédition & paiement COD'}
+                        />
 
                         {/* WhatsApp Channel Invite */}
                         <div className="mt-8 md:mt-12 bg-green-50 border border-green-100 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 group hover:bg-green-100 transition-colors">
@@ -197,34 +428,16 @@ export default async function ContactPage() {
                             <MessageCircle className="w-8 h-8 md:w-10 md:h-10 text-black" />
                         </div>
 
-                        <form className="space-y-6 md:space-y-8 mt-4 md:mt-0">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mx-4">{t('FullName')}</label>
-                                    <input type="text" className="w-full px-8 py-5 bg-gray-50 border-none rounded-[2rem] text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all" placeholder={t('YourName')} />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mx-4">{t('EmailLabel')}</label>
-                                    <input type="email" className="w-full px-8 py-5 bg-gray-50 border-none rounded-[2rem] text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all" placeholder={t('EmailPlaceholder')} />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mx-4">{t('Subject')}</label>
-                                <input type="text" className="w-full px-8 py-5 bg-gray-50 border-none rounded-[2rem] text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all" placeholder={t('SubjectPlaceholder')} />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mx-4">{t('MessageLabel')}</label>
-                                <textarea rows={5} className="w-full px-8 py-6 bg-gray-50 border-none rounded-[2.5rem] text-sm font-bold focus:ring-2 focus:ring-black outline-none transition-all resize-none" placeholder={t('MessagePlaceholder')}></textarea>
-                            </div>
-                            <button className="w-full py-6 bg-black text-white text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-[2rem] shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group">
-                                {t('SendMessage')}
-                                <Send className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform rtl:rotate-180" />
-                            </button>
-                        </form>
+                        <ContactForm />
                     </div>
 
                 </div>
             </main>
+
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
 
             <Footer />
         </div>

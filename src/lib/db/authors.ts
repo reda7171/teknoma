@@ -81,9 +81,13 @@ export async function getAuthorsData(): Promise<AuthorData[]> {
  * Récupère le profil d'un auteur spécifique par son nom
  */
 export async function getAuthorProfile(name: string) {
-    return prisma.authorProfile.findUnique({
-        where: { name }
-    })
+    try {
+        return await prisma.authorProfile.findUnique({
+            where: { name }
+        })
+    } catch {
+        return null
+    }
 }
 
 /**

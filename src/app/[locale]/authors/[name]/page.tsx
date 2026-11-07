@@ -23,7 +23,24 @@ export async function generateMetadata({
     params: Promise<{ name: string; locale: string }>
 }): Promise<Metadata> {
     const { name, locale } = await params
-    const authorName = decodeURIComponent(name)
+    let authorName: string
+    try {
+        authorName = decodeURIComponent(name)
+    } catch {
+        authorName = name
+    }
+
+    const [authorProfile, books] = await Promise.all([
+        getAuthorProfile(authorName).catch(() => null),
+        getBooks({ author: authorName, active: true, limit: 1 }).catch(() => [])
+    ])
+
+    if (!authorProfile && books.length === 0) {
+        return {
+            title: 'Auteur introuvable | Riwaya',
+            robots: { index: false, follow: false },
+        }
+    }
 
     const baseUrl = getBaseUrl()
 
@@ -105,18 +122,27 @@ export default async function AuthorPage({
     params: Promise<{ name: string; locale: string }>
 }) {
     const { name, locale } = await params
-    const authorName = decodeURIComponent(name)
+    let authorName: string
+    try {
+        authorName = decodeURIComponent(name)
+    } catch {
+        authorName = name
+    }
     const tAuthor = await getTranslations('AuthorsPage')
     const tBook = await getTranslations('BookDetail')
     const tCommon = await getTranslations('Common')
-    const isAuth = await isAuthenticated()
+    const isAuth = await isAuthenticated().catch(() => false)
 
     const [books, authorProfile, similarAuthors, quotes] = await Promise.all([
-        getBooks({ author: authorName, active: true, limit: 100 }),
-        getAuthorProfile(authorName),
-        getSimilarAuthors(authorName),
-        getQuotesByAuthorExact(authorName, locale)
+        getBooks({ author: authorName, active: true, limit: 100 }).catch(() => []),
+        getAuthorProfile(authorName).catch(() => null),
+        getSimilarAuthors(authorName).catch(() => []),
+        getQuotesByAuthorExact(authorName, locale).catch(() => [])
     ])
+
+    if (books.length === 0 && !authorProfile) {
+        notFound()
+    }
 
     const profile = authorProfile
     const displayImage = profile?.image || (books.length > 0 ? books[0].image : null);
@@ -298,7 +324,7 @@ export default async function AuthorPage({
                     {/* Books Grid */}
                     {books.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-                            {books.map((book) => (
+                            {books.map((book, idx) => (
                                 <BookCard 
                                     key={book.id} 
                                     id={book.id}
@@ -311,6 +337,7 @@ export default async function AuthorPage({
                                     category={book.category}
                                     language={book.language}
                                     stock={book.stock}
+                                    priority={idx < 2}
                                 />
                             ))}
                         </div>
@@ -374,6 +401,30 @@ export default async function AuthorPage({
                             </div>
                         </div>
                     )}
+
+                    {/* Merchant & Seller Internal Linking Callout */}
+                    <div className="mt-20 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden shadow-xl border border-slate-700">
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="max-w-2xl text-center md:text-left rtl:md:text-right">
+                                <span className="inline-block px-3.5 py-1 rounded-full bg-amber-400/20 text-amber-300 font-bold text-xs uppercase tracking-wider mb-3">
+                                    {locale === 'ar' ? 'برنامج البائعين والناشرين' : locale === 'en' ? 'Sellers & Publishers Program' : 'Programme Libraires & Vendeurs'}
+                                </span>
+                                <h3 className="text-xl sm:text-2xl font-black text-white mb-2 tracking-tight">
+                                    {tAuthor('SellerCtaTitle')}
+                                </h3>
+                                <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                                    {tAuthor('SellerCtaDesc')}
+                                </p>
+                            </div>
+                            <Link
+                                href="/devenir-vendeur"
+                                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold rounded-2xl transition-all duration-200 shadow-lg hover:shadow-amber-400/20 hover:-translate-y-0.5 text-sm sm:text-base"
+                            >
+                                <span>{tAuthor('SellerCtaBtn')}</span>
+                                <ArrowLeft className="w-4 h-4 rtl:rotate-0 rotate-180" />
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </main>
 

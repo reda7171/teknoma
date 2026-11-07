@@ -12,14 +12,16 @@ import { allocateOrderItemStock } from '@/lib/actions/warehouse'
 import * as crypto from 'crypto'
 import { resolveStorefrontChannel } from '@/lib/sales-channel'
 import type { SalesChannel } from '@prisma/client'
+import { generateAmanaTrackingId } from '@/lib/shipping/amana-tracking'
 
 const OrderSchema = z.object({
     fullName: z.string().min(1, 'Nom complet requis').max(100),
     email: z.string().optional().default(''),
-    phone: z.string().min(8, 'Téléphone invalide').max(20),
+    phone: z.string().min(8, 'Téléphone invalide').max(30),
     address: z.string().min(5, 'Adresse trop courte').max(500),
     city: z.string().min(1, 'Ville requise').max(100),
     comment: z.string().max(1000).optional(),
+    shippingCompany: z.string().max(100).optional(),
     items: z.array(z.object({
         productId: z.string().uuid(),
         quantity: z.number().int().positive('La quantité doit être supérieure à 0').max(100),
@@ -35,6 +37,10 @@ const OrderSchema = z.object({
     fbclid: z.string().max(255).optional(),
     ttclid: z.string().max(255).optional(),
     utmttclid: z.string().max(255).optional(),
+    gclid: z.string().max(255).optional(),
+    gaClientId: z.string().max(255).optional(),
+    fbp: z.string().max(255).optional(),
+    fbc: z.string().max(255).optional(),
     paymentMethod: z.enum(['COD', 'STRIPE', 'PAYPAL', 'CMI', 'BANK_TRANSFER']).optional(),
     useCredits: z.boolean().optional()
 })
@@ -211,8 +217,9 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 return { ...item, costPrice, sellerId, isMissing }
             })
 
-            // Logique de livraison synchronisée avec le client
-            let shippingFees = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30
+            // Logique de livraison synchronisée avec le client (Maroc Standard vs Worldwide Amana)
+            const isWorldwideShipping = sanitizedData.shippingCompany === 'Amana International' || sanitizedData.shippingCompany === 'AMANA_WORLDWIDE'
+            let shippingFees = hasOnlyDigital ? 0 : isWorldwideShipping ? 200 : (hasFreeShippingItem || subtotal >= 500) ? 0 : 30
             
             // Add serverPromo3For4Discount to discount if it wasn't already included or just force the server-side value
             // Since discount might already include it from the frontend, we should ensure we don't double count.
@@ -372,6 +379,8 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                     address: sanitizedData.address,
                     city: sanitizedData.city,
                     comment: sanitizedData.comment,
+                    shippingCompany: sanitizedData.shippingCompany || (isWorldwideShipping ? 'Amana International' : undefined),
+                    trackingID: isWorldwideShipping ? generateAmanaTrackingId(orderId) : undefined,
                     subtotal: subtotal,
                     shippingFees: shippingFees,
                     discount: discount,
@@ -442,33 +451,78 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 const orderWithSource = { ...fullOrder, source }
                 const telegramPromise = sendOrderNotification(orderWithSource as any).catch(console.error)
 
-                // Envoi CAPI Facebook (Server-Side)
+                // Préparation commune des signaux PII et serveur (CAPI Facebook & GA4 Measurement Protocol)
                 const { getSetting } = await import('@/lib/actions/site-settings')
+                const hash = (str: string) => crypto.createHash('sha256').update(str.toLowerCase().trim()).digest('hex')
+
+                // Normalisation internationale du numéro de téléphone (E.164)
+                let normalizedPhone = fullOrder.phone.replace(/\D/g, '')
+                if (normalizedPhone.startsWith('00')) normalizedPhone = normalizedPhone.slice(2)
+                if (normalizedPhone.startsWith('0') && normalizedPhone.length >= 9) {
+                    normalizedPhone = '212' + normalizedPhone.slice(1)
+                } else if ((normalizedPhone.startsWith('6') || normalizedPhone.startsWith('7')) && normalizedPhone.length === 9) {
+                    normalizedPhone = '212' + normalizedPhone
+                }
+
+                const cleanEmail = (fullOrder.email || '').trim().toLowerCase()
+                const nameParts = (fullOrder.fullName || '').trim().split(/\s+/).filter(Boolean)
+                const fn = nameParts.length > 0 ? [hash(nameParts[0].toLowerCase())] : undefined
+                const ln = nameParts.length > 1 ? [hash(nameParts.slice(1).join(' ').toLowerCase())] : undefined
+                const rawCity = (fullOrder.city || '').split(',')[0].trim().toLowerCase()
+
+                const clientIp = requestHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() || requestHeaders.get('x-real-ip') || ip
+                const clientUserAgent = requestHeaders.get('user-agent') || undefined
+                const cookieHeader = requestHeaders.get('cookie') || ''
+
+                // Envoi CAPI Facebook (Server-Side) avec déduplication event_id et enrichissement EMQ
                 const fbPixelId = await getSetting('facebook_pixel_id')
                 const fbAccessToken = await getSetting('facebook_access_token') || process.env.FACEBOOK_ACCESS_TOKEN
                 
                 let fbPromise = Promise.resolve()
                 if (fbPixelId && fbAccessToken) {
-                    const crypto = require('crypto')
-                    const hash = (str: string) => crypto.createHash('sha256').update(str.toLowerCase().trim()).digest('hex')
-                    
+                    const em = cleanEmail && cleanEmail.includes('@') ? [hash(cleanEmail)] : undefined
+                    const ph = normalizedPhone.length >= 9 ? [hash(normalizedPhone)] : undefined
+                    const ct = rawCity ? [hash(rawCity)] : undefined
+                    const country = [hash('ma')]
+
+                    const headerFbp = cookieHeader.match(/(?:^|;\s*)_fbp=([^;]+)/)?.[1]
+                    const headerFbc = cookieHeader.match(/(?:^|;\s*)_fbc=([^;]+)/)?.[1]
+                    const resolvedFbp = data.fbp || headerFbp || undefined
+                    const resolvedFbc = data.fbc || (data.fbclid ? `fb.1.${Date.now()}.${data.fbclid}` : headerFbc) || undefined
+
+                    const userData: Record<string, any> = {
+                        client_ip_address: clientIp,
+                        client_user_agent: clientUserAgent,
+                    }
+                    if (em) userData.em = em
+                    if (ph) userData.ph = ph
+                    if (fn) userData.fn = fn
+                    if (ln) userData.ln = ln
+                    if (ct) userData.ct = ct
+                    if (country) userData.country = country
+                    if (resolvedFbp) userData.fbp = resolvedFbp
+                    if (resolvedFbc) userData.fbc = resolvedFbc
+
+                    const eventSourceUrl = requestHeaders.get('referer') || `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'}/checkout`
                     const eventData = {
                         data: [{
                             event_name: 'Purchase',
                             event_time: Math.floor(Date.now() / 1000),
+                            event_id: fullOrder.id,
+                            event_source_url: eventSourceUrl,
                             action_source: 'website',
-                            user_data: {
-                                em: [hash(fullOrder.email || '')],
-                                ph: [hash(fullOrder.phone.replace(/[^0-9]/g, ''))],
-                                client_ip_address: ip,
-                                client_user_agent: 'Server/Next.js',
-                                fbc: data.fbclid ? `fb.1.${Date.now()}.${data.fbclid}` : undefined
-                            },
+                            user_data: userData,
                             custom_data: {
                                 currency: 'MAD',
-                                value: fullOrder.total,
-                                content_ids: fullOrder.items.map((i: any) => i.bookId || i.packId),
-                                content_type: 'product'
+                                value: Number(fullOrder.total),
+                                content_type: 'product',
+                                content_ids: fullOrder.items.map((i: any) => i.bookId || i.packId || i.extraProductId || i.giftId || i.id).filter(Boolean),
+                                contents: fullOrder.items.map((i: any) => ({
+                                    id: i.bookId || i.packId || i.extraProductId || i.giftId || i.id,
+                                    quantity: i.quantity || 1,
+                                    item_price: Number(i.price) || 0
+                                })),
+                                num_items: fullOrder.items.reduce((sum: number, i: any) => sum + (i.quantity || 1), 0)
                             }
                         }]
                     }
@@ -477,7 +531,78 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(eventData)
-                    }).then(() => {}).catch(console.error)
+                    }).then(async (res) => {
+                        if (!res.ok) {
+                            const errBody = await res.text().catch(() => '')
+                            console.error('Meta CAPI Error:', res.status, errBody)
+                        }
+                    }).catch(console.error)
+                }
+
+                // Envoi Google Analytics 4 Measurement Protocol avec Enhanced Conversions (Server-Side)
+                const gaMeasurementId = await getSetting('google_analytics_id') || process.env.NEXT_PUBLIC_GA_ID || process.env.GA_MEASUREMENT_ID
+                const gaApiSecret = await getSetting('google_analytics_api_secret') || process.env.GA_API_SECRET || process.env.GOOGLE_ANALYTICS_API_SECRET
+
+                let gaPromise = Promise.resolve()
+                if (gaMeasurementId && gaApiSecret) {
+                    const gaCookieMatch = cookieHeader.match(/(?:^|;\s*)_ga=GA\d\.\d\.(\d+\.\d+)/)
+                    const clientId = data.gaClientId || (gaCookieMatch ? gaCookieMatch[1] : undefined) || `${Math.floor(Math.random() * 1000000000)}.${Math.floor(Date.now() / 1000)}`
+
+                    const googleE164Phone = normalizedPhone.startsWith('+') ? normalizedPhone : `+${normalizedPhone}`
+                    const gaHashedPhone = normalizedPhone.length >= 9 ? [hash(googleE164Phone)] : undefined
+                    const gaHashedEmail = cleanEmail && cleanEmail.includes('@') ? [hash(cleanEmail)] : undefined
+
+                    const gaUserData: Record<string, any> = {
+                        address: [{
+                            city: rawCity || undefined,
+                            country: 'MA',
+                            sha256_first_name: fn ? fn[0] : undefined,
+                            sha256_last_name: ln ? ln[0] : undefined,
+                        }]
+                    }
+                    if (gaHashedEmail) gaUserData.sha256_email_address = gaHashedEmail
+                    if (gaHashedPhone) gaUserData.sha256_phone_number = gaHashedPhone
+
+                    const gaEventParams: Record<string, any> = {
+                        transaction_id: fullOrder.id,
+                        value: Number(fullOrder.total),
+                        currency: 'MAD',
+                        shipping: Number(fullOrder.shippingFees || 0),
+                        coupon: fullOrder.couponCode || undefined,
+                        engagement_time_msec: 100,
+                        items: fullOrder.items.map((i: any, index: number) => ({
+                            item_id: i.bookId || i.packId || i.extraProductId || i.giftId || i.id,
+                            item_name: i.book?.title || i.pack?.name || i.extraProduct?.name || 'Article',
+                            price: Number(i.price) || 0,
+                            quantity: i.quantity || 1,
+                            item_category: i.type || 'Books',
+                            index
+                        }))
+                    }
+                    if (data.gclid) {
+                        gaEventParams.gclid = data.gclid
+                    }
+
+                    const gaPayload = {
+                        client_id: clientId,
+                        user_id: fullOrder.customerId || undefined,
+                        user_data: gaUserData,
+                        events: [{
+                            name: 'purchase',
+                            params: gaEventParams
+                        }]
+                    }
+
+                    gaPromise = fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${gaMeasurementId}&api_secret=${gaApiSecret}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(gaPayload)
+                    }).then(async (res) => {
+                        if (!res.ok) {
+                            const errBody = await res.text().catch(() => '')
+                            console.error('GA4 Measurement Protocol Error:', res.status, errBody)
+                        }
+                    }).catch(console.error)
                 }
 
                 // Tâches en arrière-plan liées au stock (déplacées hors de la transaction pour éviter d'épuiser le pool de connexions)
@@ -516,10 +641,10 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 }
 
                 // Attendre la fin des requêtes asynchrones pour éviter qu'elles ne soient coupées par l'environnement Serverless (Vercel)
-                await Promise.all([telegramPromise, fbPromise, lowStockPromise, jumiaSyncPromise, autoEmailPromise])
+                await Promise.all([telegramPromise, fbPromise, gaPromise, lowStockPromise, jumiaSyncPromise, autoEmailPromise])
             }
         } catch (e) {
-            console.error('Erreur Telegram Notification / CAPI / Stock Sync / AutoEmail:', e)
+            console.error('Erreur Telegram Notification / CAPI / GA4 / Stock Sync / AutoEmail:', e)
         }
 
         return { success: true, orderId: order.id }

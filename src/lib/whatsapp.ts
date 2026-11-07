@@ -12,15 +12,19 @@ export interface WhatsAppNotificationPayload {
 }
 
 /**
- * Nettoie et formate le numéro au format international (212...)
+ * Nettoie et formate le numéro au format international (Maroc ou étranger)
  */
 export function formatMoroccanPhone(phone: string): string {
-    let clean = phone.replace(/\D/g, '')
-    if (clean.startsWith('0')) {
-        clean = '212' + clean.slice(1)
-    } else if (!clean.startsWith('212') && clean.length === 9) {
-        clean = '212' + clean
+    let clean = (phone || '').replace(/\D/g, '')
+    // Si numéro local marocain commençant par 0 (ex: 06... ou 07...)
+    if (clean.startsWith('0') && clean.length === 10) {
+        return '212' + clean.slice(1)
     }
+    // Si numéro marocain 9 chiffres sans préfixe
+    if (clean.length === 9 && (clean.startsWith('5') || clean.startsWith('6') || clean.startsWith('7'))) {
+        return '212' + clean
+    }
+    // Sinon renvoyer le numéro nettoyé tel quel (pour les pays étrangers ex: France 33..., Belgique 32...)
     return clean
 }
 
@@ -29,24 +33,37 @@ export function formatMoroccanPhone(phone: string): string {
  */
 export function getWhatsAppStatusMessage(payload: WhatsAppNotificationPayload): string {
     const { orderId, fullName, status, trackingID, shippingCompanyName, locale = 'fr' } = payload
-    const shortId = orderId.slice(0, 8)
+    const shortId = orderId.slice(0, 8).toUpperCase()
     const trackingLink = `https://riwaya.store/${locale}/track/${orderId}`
 
     if (status === 'SHIPPED') {
         const carrierInfo = shippingCompanyName ? ` via ${shippingCompanyName}` : ''
-        const trackingInfo = trackingID ? ` (N° suivi: ${trackingID})` : ''
-        return `Salam ${fullName} ! 📦\n\nBonne nouvelle ! Votre colis Riwaya #${shortId} vient d'être expédié${carrierInfo}${trackingInfo}.\n\nLe livreur vous contactera par téléphone pour la livraison à domicile (Paiement à la livraison 💵).\n\nVous pouvez suivre votre livraison en direct : ${trackingLink}\n\nMerci infiniment de votre confiance ! 📚✨\nL'équipe Riwaya.store`
+        const trackingInfo = trackingID ? ` (N° de suivi : ${trackingID})` : ''
+        return `Salam ${fullName} ! 📦\n\nBonne nouvelle ! Votre colis Riwaya #${shortId} vient d'être expédié${carrierInfo}${trackingInfo}.\n\nVous pouvez suivre l'acheminement de votre livraison en temps réel ici : ${trackingLink}\n\nMerci infiniment de votre confiance ! 📚✨\nL'équipe Riwaya.store`
     }
 
     if (status === 'DELIVERED') {
-        return `Salam ${fullName} ! 🎉\n\nVotre commande Riwaya #${shortId} a été livrée avec succès !\n\nToute l'équipe Riwaya vous remercie chaleureusement pour votre confiance. Nous espérons que vos livres vous apporteront beaucoup de plaisir et d'inspiration 📖✨.\n\nN'hésitez pas à nous laisser votre avis sur le site : https://riwaya.store\n\nMerci de votre confiance et à très bientôt pour de nouvelles lectures ! 📚`
+        return `Salam ${fullName} ! 🎉\n\nVotre commande Riwaya #${shortId} a été livrée avec succès !\n\nConsultez les détails et la facture de votre commande : ${trackingLink}\n\nToute l'équipe Riwaya vous remercie chaleureusement pour votre confiance. Nous espérons que vos livres vous apporteront beaucoup de plaisir et d'inspiration 📖✨.\n\nN'hésitez pas à nous laisser votre avis sur le site : https://riwaya.store\n\nMerci de votre confiance et à très bientôt pour de nouvelles lectures ! 📚`
     }
 
     if (status === 'CONFIRMED') {
-        return `Salam ${fullName} !\n\nVotre commande Riwaya #${shortId} est confirmée et en cours de préparation dans notre dépôt 📦.\n\nSuivi de commande : ${trackingLink}\nMerci de votre confiance ! 📚✨`
+        return `Salam ${fullName} !\n\nVotre commande Riwaya #${shortId} est confirmée et en cours de préparation dans notre dépôt 📦.\n\nSuivez l'état d'avancement de votre commande en direct : ${trackingLink}\n\nMerci de votre confiance ! 📚✨`
     }
 
-    return `Salam ${fullName} !\n\nLe statut de votre commande Riwaya #${shortId} a été mis à jour : ${status}.\nSuivi : ${trackingLink}\nMerci de votre confiance ! 📚`
+    return `Salam ${fullName} !\n\nLe statut de votre commande Riwaya #${shortId} a été mis à jour : ${status}.\n\nAccédez au suivi en direct : ${trackingLink}\n\nMerci de votre confiance ! 📚`
+}
+
+/**
+ * Construit un lien WhatsApp direct avec lien de suivi personnalisé
+ */
+export function buildOrderTrackingWhatsAppUrl(order: { id: string, fullName: string, phone: string, trackingID?: string | null, shippingCompany?: string | null }, locale: string = 'fr'): string {
+    const cleanPhone = formatMoroccanPhone(order.phone)
+    const trackingLink = `https://riwaya.store/${locale}/track/${order.id}`
+    const shortId = order.id.slice(0, 8).toUpperCase()
+    const trackingNotice = order.trackingID ? ` (N° de suivi : ${order.trackingID})` : ''
+
+    const message = `Salam ${order.fullName} !\n\nVoici le lien pour suivre votre colis Riwaya #${shortId}${trackingNotice} en direct :\n🔗 ${trackingLink}\n\nMerci de votre confiance et bonne lecture ! 📚✨`
+    return cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`
 }
 
 /**

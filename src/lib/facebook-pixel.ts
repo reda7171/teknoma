@@ -60,7 +60,7 @@ export const fbPixelEvents = {
             value: order.total,
             currency: 'MAD',
             num_items: order.items.reduce((sum, item) => sum + item.quantity, 0)
-        })
+        }, { eventID: order.id })
     },
 
     // Recherche

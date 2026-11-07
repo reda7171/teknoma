@@ -1,0 +1,4 @@
+#!/bin/sh
+node scripts/check-jsx-syntax.js
+node scripts/validate-i18n.js
+

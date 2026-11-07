@@ -18,6 +18,7 @@ import RecommendationsSection from '@/components/community/RecommendationsSectio
 import RegistrationTracker from '@/components/community/RegistrationTracker'
 import CityLocalizer from '@/components/community/CityLocalizer'
 import PostLoginLocalizer from '@/components/community/PostLoginLocalizer'
+import GenerateReadingCard from '@/components/GenerateReadingCard'
 
 export default async function CommunityDashboard({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const { locale } = await params
@@ -53,15 +54,15 @@ export default async function CommunityDashboard({ params, searchParams }: { par
             <PostLoginLocalizer hasCity={!!(u.city)} isNewRegistration={isNewRegistration} />
             <HeaderWithUser />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32 flex-grow w-full">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-12 pb-24 sm:pb-32 flex-grow w-full">
                 {/* Eligibility Notice */}
                 {!isEligible && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 mb-8 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
-                            <RefreshCw className="w-6 h-6 text-amber-600" />
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+                            <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
                         </div>
                         <div>
-                            <p className="text-amber-700 text-sm md:text-base font-bold leading-relaxed">
+                            <p className="text-amber-700 text-xs sm:text-sm md:text-base font-bold leading-relaxed">
                                 {t('Dashboard.EligibilityDesc')}
                                 <Link href="/" className="ml-2 underline hover:text-amber-900">{t('Dashboard.BrowseShop')} →</Link>
                             </p>
@@ -70,18 +71,18 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                 )}
 
                 {/* Profile Header */}
-                <div className="bg-white rounded-[3rem] p-8 lg:p-12 shadow-xl shadow-black/5 border border-gray-100 mb-12 flex flex-col xl:flex-row gap-8 items-center xl:justify-between relative overflow-hidden">
-                    <div className="flex flex-col md:flex-row items-center gap-6 z-10 w-full xl:w-auto">
-                        <div className="w-24 h-24 bg-pixio-yellow rounded-full flex items-center justify-center text-3xl font-black text-black uppercase shadow-lg transform rotate-3 border-4 border-white overflow-hidden flex-shrink-0">
+                <div className="bg-white rounded-2xl sm:rounded-[3rem] p-5 sm:p-8 lg:p-12 shadow-xl shadow-black/5 border border-gray-100 mb-8 sm:mb-12 flex flex-col xl:flex-row gap-6 sm:gap-8 items-center xl:justify-between relative overflow-hidden">
+                    <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 z-10 w-full xl:w-auto">
+                        <div className="w-16 h-16 sm:w-24 sm:h-24 bg-pixio-yellow rounded-full flex items-center justify-center text-xl sm:text-3xl font-black text-black uppercase shadow-lg transform rotate-3 border-4 border-white overflow-hidden flex-shrink-0">
                             {u.image ? (
                                 <img src={u.image} alt={u.fullName || 'User'} className="w-full h-full object-cover" />
                             ) : (
                                 u.fullName?.[0] || 'U'
                             )}
                         </div>
-                        <div className="space-y-3 text-center md:text-left min-w-0 w-full md:w-auto">
-                            <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-                                <h1 className="text-3xl lg:text-4xl font-black text-black tracking-tighter capitalize max-w-full truncate">
+                        <div className="space-y-2 sm:space-y-3 text-center md:text-left min-w-0 w-full md:w-auto">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-center md:justify-start">
+                                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-black tracking-tighter capitalize max-w-full truncate">
                                     {u.fullName}
                                 </h1>
                                 <span className="text-xs rtl:text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal font-bold shrink-0">
@@ -125,6 +126,11 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                                     {u.bio}
                                 </p>
                             )}
+
+                            {/* Générer ma carte de lecteur */}
+                            <div className="pt-3 flex justify-center md:justify-start">
+                                <GenerateReadingCard user={u} items={readingList} className="w-full sm:w-auto" />
+                            </div>
                         </div>
                     </div>
 

@@ -52,7 +52,7 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
         seo_pinterest_verification: d['seo_pinterest_verification'] || '',
         // Technique
         seo_favicon_url: d['seo_favicon_url'] || '/favicon.ico',
-        seo_robots_txt: d['seo_robots_txt'] || 'User-agent: *\nAllow: /\nSitemap: https://riwaya.store/sitemap.xml',
+        seo_robots_txt: d['seo_robots_txt'] || 'User-agent: *\nAllow: /\nSitemap: https://riwaya.store/sitemap.xml\nSitemap: https://riwaya.store/sitemap-sellers.xml',
         seo_robots_meta: d['seo_robots_meta'] || 'index, follow',
         seo_viewport: d['seo_viewport'] || 'width=device-width, initial-scale=1',
         seo_theme_color: d['seo_theme_color'] || '#000000',
@@ -440,9 +440,14 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono bg-gray-50 resize-none"
                                     />
                                 </div>
-                                <a href="/sitemap.xml" target="_blank" className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                                    <Map className="w-4 h-4" /> Voir le Sitemap XML
-                                </a>
+                                <div className="flex flex-wrap gap-2.5">
+                                    <a href="/sitemap.xml" target="_blank" className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                                        <Map className="w-3.5 h-3.5 text-blue-600" /> Sitemap Général
+                                    </a>
+                                    <a href="/sitemap-sellers.xml" target="_blank" className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                                        <Map className="w-3.5 h-3.5 text-emerald-600" /> Sitemap Marchands & Vendeurs
+                                    </a>
+                                </div>
 
                                 <div className="pt-4 border-t border-gray-100 space-y-3">
                                     <div className="flex items-center justify-between">
@@ -612,11 +617,29 @@ export default function SeoConfigForm({ initialData }: SeoExpertFormProps) {
                     <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
                         <SectionHeader s="verification" />
                         {openSection === 'verification' && (
-                            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {field('Google Search Console', 'seo_google_verification', 'Token Google')}
-                                {field('Bing Webmaster', 'seo_bing_verification', 'Token Bing')}
-                                {field('Yandex Webmaster', 'seo_yandex_verification', 'Token Yandex')}
-                                {field('Pinterest', 'seo_pinterest_verification', 'Token Pinterest')}
+                            <div className="p-6 space-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {field('Google Search Console', 'seo_google_verification', 'Token Google')}
+                                    {field('Bing Webmaster', 'seo_bing_verification', 'Token Bing')}
+                                    {field('Yandex Webmaster', 'seo_yandex_verification', 'Token Yandex')}
+                                    {field('Pinterest', 'seo_pinterest_verification', 'Token Pinterest')}
+                                </div>
+                                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-xs space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-blue-900">Google Search Console — Audit Indexation & Canoniques</span>
+                                        <a
+                                            href={`https://search.google.com/search-console/index?resource_id=${encodeURIComponent(form.seo_canonical_url || 'https://riwaya.store')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-3 py-1.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors inline-flex items-center gap-1.5"
+                                        >
+                                            <Globe className="w-3.5 h-3.5" /> Ouvrir Search Console
+                                        </a>
+                                    </div>
+                                    <p className="text-blue-700 leading-relaxed">
+                                        Surveillez le rapport <strong>Indexation &gt; Pages &gt; « Page en double sans URL canonique sélectionnée par l&apos;utilisateur »</strong> pour valider la consolidation du PageRank vers vos URL canoniques propres (UTM et fbclid exclus).
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>

@@ -28,11 +28,12 @@ export async function generateMetadata({
     params: Promise<{ id: string; locale: string }>
 }): Promise<Metadata> {
     const { id, locale } = await params
-    const pack = await getPackById(id)
+    const pack = await getPackById(id).catch(() => null)
 
     if (!pack) {
         return {
             title: 'Pack introuvable | Riwaya',
+            robots: { index: false, follow: false },
         }
     }
 
@@ -458,6 +459,7 @@ export default async function PackDetailPage({
                                             src={pack.image}
                                             alt={displayName}
                                             className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
+                                            priority={true}
                                         />
                                     </div>
                                 ) : (
@@ -468,6 +470,7 @@ export default async function PackDetailPage({
                                                     src={pb.book.image}
                                                     alt={getLocalizedTitle(pb.book, locale)}
                                                     className="w-full h-full object-cover"
+                                                    priority={i === 0}
                                                 />
                                             </div>
                                         ))}

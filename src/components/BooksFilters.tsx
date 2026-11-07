@@ -72,13 +72,68 @@ interface BooksFiltersProps {
     totalCount: number
 }
 
+const CATALOG_STORAGE_KEY = 'riwaya_catalog_filters'
+
 export default function BooksFilters({ params, categoryTree, categoryCounts, authors, languages, totalCount }: BooksFiltersProps) {
+    const router = useRouter()
     const isUsed = params.isUsed === 'true' || params.usedOnly === 'true'
     const t = useTranslations('BooksPage')
     const tCats = useTranslations('Categories')
     const tCommon = useTranslations('Common')
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [isAllCatsRevealed, setIsAllCatsRevealed] = useState(false)
+    const isRestoringRef = useRef(false)
+
+    // Restauration et mémorisation locale des filtres et critères préférés du catalogue
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        if (typeof navigator !== 'undefined' && /bot|crawler|spider|crawling|googlebot|bingbot/i.test(navigator.userAgent)) return
+
+        const activeFilters: Record<string, string> = {}
+        if (params.language) activeFilters.language = params.language
+        if (params.category) activeFilters.category = params.category
+        if (params.subCategory) activeFilters.subCategory = params.subCategory
+        if (params.inStock !== undefined) activeFilters.inStock = params.inStock
+        if (isUsed) activeFilters.isUsed = 'true'
+        if (params.newArrivals === 'true') activeFilters.newArrivals = 'true'
+        if (params.author) activeFilters.author = params.author
+
+        // Si l'acheteur a des critères actifs dans l'URL, on les mémorise pour ses prochaines sessions
+        if (Object.keys(activeFilters).length > 0) {
+            try {
+                localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(activeFilters))
+            } catch {}
+            return
+        }
+
+        // Si aucun critère n'est présent dans l'URL (visiteur accédant directement à /books sans query)
+        const currentSearch = window.location.search
+        if ((!currentSearch || currentSearch === '' || currentSearch === '?') && !isRestoringRef.current) {
+            try {
+                const saved = localStorage.getItem(CATALOG_STORAGE_KEY)
+                if (saved) {
+                    const parsed = JSON.parse(saved)
+                    if (parsed && typeof parsed === 'object') {
+                        const newParams = new URLSearchParams()
+                        if (parsed.language) newParams.set('language', parsed.language)
+                        if (parsed.category) newParams.set('category', parsed.category)
+                        if (parsed.subCategory) newParams.set('subCategory', parsed.subCategory)
+                        if (parsed.inStock !== undefined) newParams.set('inStock', parsed.inStock)
+                        if (parsed.isUsed) newParams.set('isUsed', 'true')
+                        if (parsed.newArrivals) newParams.set('newArrivals', 'true')
+                        if (parsed.author) newParams.set('author', parsed.author)
+
+                        const queryString = newParams.toString()
+                        if (queryString) {
+                            isRestoringRef.current = true
+                            router.replace(`/books?${queryString}`)
+                        }
+                    }
+                }
+            } catch {}
+        }
+    }, [params, isUsed, router])
+
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
         const initial: Record<string, boolean> = {};
         if (params.category) {
@@ -92,7 +147,6 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
         e.stopPropagation();
         setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
     }
-    const router = useRouter()
 
     const handleSearchChange = (value: string) => {
         const newParams = new URLSearchParams()
@@ -115,6 +169,10 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
     }
 
     const resetFilters = () => {
+        try {
+            localStorage.removeItem(CATALOG_STORAGE_KEY)
+        } catch {}
+        isRestoringRef.current = true
         router.push('/books')
         setIsMobileMenuOpen(false)
     }
@@ -185,7 +243,22 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                 ? 'bg-black text-white shadow-lg'
                                 : 'bg-[#F8F9FA] text-gray-700 hover:text-black'
                             }`}
-                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                            onClick={() => {
+                                try {
+                                    const saved = localStorage.getItem(CATALOG_STORAGE_KEY)
+                                    if (saved) {
+                                        const parsed = JSON.parse(saved)
+                                        delete parsed.category
+                                        delete parsed.subCategory
+                                        if (Object.keys(parsed).length > 0) {
+                                            localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(parsed))
+                                        } else {
+                                            localStorage.removeItem(CATALOG_STORAGE_KEY)
+                                        }
+                                    }
+                                } catch {}
+                                if (isMobile) setIsMobileMenuOpen(false)
+                            }}
                         >
                             {t('AllLanguages')}
                         </Link>
@@ -205,7 +278,22 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                         ? (langBadgeStyle[lang.code] || 'bg-black text-white') + ' shadow-lg'
                                         : 'bg-[#F8F9FA] text-gray-700 hover:text-black'
                                 }`}
-                                onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                onClick={() => {
+                                try {
+                                    const saved = localStorage.getItem(CATALOG_STORAGE_KEY)
+                                    if (saved) {
+                                        const parsed = JSON.parse(saved)
+                                        delete parsed.category
+                                        delete parsed.subCategory
+                                        if (Object.keys(parsed).length > 0) {
+                                            localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(parsed))
+                                        } else {
+                                            localStorage.removeItem(CATALOG_STORAGE_KEY)
+                                        }
+                                    }
+                                } catch {}
+                                if (isMobile) setIsMobileMenuOpen(false)
+                            }}
                             >
                                 <span className={`inline-block text-[8px] font-black px-1.5 py-0.5 rounded ${
                                     params.language === lang.code
@@ -328,7 +416,22 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                 ? 'bg-black text-white shadow-lg'
                                 : 'bg-[#F8F9FA] text-gray-700 hover:text-black lg:hover:bg-pixio-cream/50'
                                 }`}
-                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                            onClick={() => {
+                                try {
+                                    const saved = localStorage.getItem(CATALOG_STORAGE_KEY)
+                                    if (saved) {
+                                        const parsed = JSON.parse(saved)
+                                        delete parsed.category
+                                        delete parsed.subCategory
+                                        if (Object.keys(parsed).length > 0) {
+                                            localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(parsed))
+                                        } else {
+                                            localStorage.removeItem(CATALOG_STORAGE_KEY)
+                                        }
+                                    }
+                                } catch {}
+                                if (isMobile) setIsMobileMenuOpen(false)
+                            }}
                         >
                             {tCats('All')}
                         </Link>
@@ -354,7 +457,22 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                                 ? 'bg-black text-white shadow-lg'
                                                 : 'bg-[#F8F9FA] text-gray-700 hover:text-black lg:hover:bg-pixio-cream/50'
                                                 }`}
-                                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                            onClick={() => {
+                                try {
+                                    const saved = localStorage.getItem(CATALOG_STORAGE_KEY)
+                                    if (saved) {
+                                        const parsed = JSON.parse(saved)
+                                        delete parsed.category
+                                        delete parsed.subCategory
+                                        if (Object.keys(parsed).length > 0) {
+                                            localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(parsed))
+                                        } else {
+                                            localStorage.removeItem(CATALOG_STORAGE_KEY)
+                                        }
+                                    }
+                                } catch {}
+                                if (isMobile) setIsMobileMenuOpen(false)
+                            }}
                                         >
                                             <span>{tCats.has(category as any) ? tCats(category as any) : category}</span>
                                             {countInfo && (
@@ -397,7 +515,22 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                                             ? 'bg-gray-800 text-white shadow-md'
                                                             : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-black'
                                                             }`}
-                                                        onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                                        onClick={() => {
+                                try {
+                                    const saved = localStorage.getItem(CATALOG_STORAGE_KEY)
+                                    if (saved) {
+                                        const parsed = JSON.parse(saved)
+                                        delete parsed.category
+                                        delete parsed.subCategory
+                                        if (Object.keys(parsed).length > 0) {
+                                            localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(parsed))
+                                        } else {
+                                            localStorage.removeItem(CATALOG_STORAGE_KEY)
+                                        }
+                                    }
+                                } catch {}
+                                if (isMobile) setIsMobileMenuOpen(false)
+                            }}
                                                     >
                                                         <span>{sub}</span>
                                                         {subCount !== undefined && (
@@ -452,8 +585,8 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
             </aside>
 
             {/* Mobile Sticky Top Bar */}
-            <div className="lg:hidden sticky top-[64px] z-40 bg-[#FDFBF7] -mx-4 px-4 pb-4 pt-4">
-                <div className="bg-white border border-gray-100 shadow-lg shadow-black/5 rounded-2xl px-4 py-3">
+            <div className="lg:hidden sticky top-[64px] z-40 bg-[#FDFBF7] -mx-4 px-4 pb-2 pt-1 sm:pb-3 sm:pt-2">
+                <div className="bg-white border border-gray-100 shadow-md shadow-black/5 rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5">
                     <div className="max-w-7xl mx-auto flex items-center gap-2">
                         {/* General Search (Condensed) */}
                         <SearchInput 

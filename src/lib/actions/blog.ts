@@ -69,11 +69,17 @@ export async function getPostCategories(language: string = 'fr') {
  * Récupère un article par son slug
  */
 export async function getPostBySlug(slug: string, language?: string) {
-    const decodedSlug = decodeURIComponent(slug);
+    try {
+        let decodedSlug = slug;
+        try {
+            decodedSlug = decodeURIComponent(slug);
+        } catch {
+            decodedSlug = slug;
+        }
 
-    // Try exact match first (important for Arabic and non-Latin slugs)
-    let post = await prisma.post.findFirst({
-        where: { slug: decodedSlug, published: true },
+        // Try exact match first (important for Arabic and non-Latin slugs)
+        let post = await prisma.post.findFirst({
+            where: { slug: decodedSlug, published: true },
         include: {
             author: {
                 select: {
@@ -170,6 +176,9 @@ export async function getPostBySlug(slug: string, language?: string) {
     }
 
     return post;
+    } catch {
+        return null;
+    }
 }
 
 // Admin / Internal Actions (Simplified for now)

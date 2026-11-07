@@ -5,6 +5,11 @@ export default function robots(): MetadataRoute.Robots {
 
     return {
         rules: [
+            // Blocage explicite des aspirateurs de sites et outils de clonage automatisé
+            {
+                userAgent: ['HTTrack', 'SiteSucker', 'Scrapy', 'Teleport', 'WebCopier', 'CyotekWebCopy'],
+                disallow: ['/'],
+            },
             // Règle générale pour TOUS les bots (y compris Google, Bing, etc.)
             {
                 userAgent: '*',
@@ -68,6 +73,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
         sitemap: [
             `${baseUrl}/sitemap.xml`,
+            `${baseUrl}/sitemap-sellers.xml`,
             `${baseUrl}/feed.xml`,
             `${baseUrl}/nouveautes.xml`,
             `${baseUrl}/nouveautes.atom`,

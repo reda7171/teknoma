@@ -403,3 +403,178 @@ export async function getOrderStatusDistribution() {
         return []
     }
 }
+
+/**
+ * Analyse des campagnes marketing corrélées aux conversions COD
+ * Traite les sources UTM, fbclid et ttclid sans impacter les URLs canoniques publiques
+ */
+export async function getCampaignCodAnalytics() {
+    try {
+        await verifyAdmin()
+
+        const orders = await prisma.order.findMany({
+            select: {
+                id: true,
+                total: true,
+                status: true,
+                utmSource: true,
+                utmMedium: true,
+                utmCampaign: true,
+                fbclid: true,
+                ttclid: true,
+                createdAt: true,
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 2000,
+        })
+
+        let totalTrackedOrders = 0
+        let totalTrackedDeliveredRevenue = 0
+        let totalTrackedGrossRevenue = 0
+        let totalDirectOrders = 0
+        let totalDirectRevenue = 0
+
+        const sourceMap: Record<
+            string,
+            {
+                source: string
+                medium: string
+                totalOrders: number
+                deliveredOrders: number
+                cancelledOrders: number
+                pendingOrders: number
+                deliveredRevenue: number
+                grossRevenue: number
+            }
+        > = {}
+
+        const campaignMap: Record<
+            string,
+            {
+                campaign: string
+                source: string
+                totalOrders: number
+                deliveredOrders: number
+                deliveredRevenue: number
+                grossRevenue: number
+            }
+        > = {}
+
+        for (const o of orders) {
+            let src = o.utmSource ? o.utmSource.toLowerCase().trim() : null
+            if (!src) {
+                if (o.fbclid) src = 'facebook'
+                else if (o.ttclid) src = 'tiktok'
+                else src = 'direct_organique'
+            }
+
+            const isDelivered = o.status === 'DELIVERED'
+            const isCancelled = o.status === 'CANCELLED' || o.status === 'RETURNED'
+            const orderTotal = o.total || 0
+
+            if (src !== 'direct_organique') {
+                totalTrackedOrders++
+                totalTrackedGrossRevenue += orderTotal
+                if (isDelivered) {
+                    totalTrackedDeliveredRevenue += orderTotal
+                }
+            } else {
+                totalDirectOrders++
+                if (isDelivered) {
+                    totalDirectRevenue += orderTotal
+                }
+            }
+
+            if (!sourceMap[src]) {
+                sourceMap[src] = {
+                    source: src,
+                    medium: o.utmMedium || 'cpc/social',
+                    totalOrders: 0,
+                    deliveredOrders: 0,
+                    cancelledOrders: 0,
+                    pendingOrders: 0,
+                    deliveredRevenue: 0,
+                    grossRevenue: 0,
+                }
+            }
+
+            sourceMap[src].totalOrders++
+            sourceMap[src].grossRevenue += orderTotal
+            if (isDelivered) {
+                sourceMap[src].deliveredOrders++
+                sourceMap[src].deliveredRevenue += orderTotal
+            } else if (isCancelled) {
+                sourceMap[src].cancelledOrders++
+            } else {
+                sourceMap[src].pendingOrders++
+            }
+
+            if (o.utmCampaign) {
+                const cmp = o.utmCampaign.trim()
+                if (!campaignMap[cmp]) {
+                    campaignMap[cmp] = {
+                        campaign: cmp,
+                        source: src,
+                        totalOrders: 0,
+                        deliveredOrders: 0,
+                        deliveredRevenue: 0,
+                        grossRevenue: 0,
+                    }
+                }
+                campaignMap[cmp].totalOrders++
+                campaignMap[cmp].grossRevenue += orderTotal
+                if (isDelivered) {
+                    campaignMap[cmp].deliveredOrders++
+                    campaignMap[cmp].deliveredRevenue += orderTotal
+                }
+            }
+        }
+
+        const sources = Object.values(sourceMap)
+            .map((s) => ({
+                ...s,
+                deliveryRate: s.totalOrders > 0 ? Math.round((s.deliveredOrders / s.totalOrders) * 100) : 0,
+                aov: s.deliveredOrders > 0 ? Math.round(s.deliveredRevenue / s.deliveredOrders) : 0,
+            }))
+            .sort((a, b) => b.totalOrders - a.totalOrders)
+
+        const topCampaigns = Object.values(campaignMap)
+            .map((c) => ({
+                ...c,
+                deliveryRate: c.totalOrders > 0 ? Math.round((c.deliveredOrders / c.totalOrders) * 100) : 0,
+            }))
+            .sort((a, b) => b.totalOrders - a.totalOrders)
+            .slice(0, 10)
+
+        const allOrdersCount = orders.length
+        const trackedShare = allOrdersCount > 0 ? Math.round((totalTrackedOrders / allOrdersCount) * 100) : 0
+
+        return {
+            summary: {
+                totalTrackedOrders,
+                totalTrackedDeliveredRevenue,
+                totalTrackedGrossRevenue,
+                totalDirectOrders,
+                totalDirectRevenue,
+                trackedShare,
+                allOrdersCount,
+            },
+            sources,
+            topCampaigns,
+        }
+    } catch (error) {
+        return {
+            summary: {
+                totalTrackedOrders: 0,
+                totalTrackedDeliveredRevenue: 0,
+                totalTrackedGrossRevenue: 0,
+                totalDirectOrders: 0,
+                totalDirectRevenue: 0,
+                trackedShare: 0,
+                allOrdersCount: 0,
+            },
+            sources: [],
+            topCampaigns: [],
+        }
+    }
+}

@@ -1,5 +1,7 @@
 import { getSetting } from '@/lib/actions/site-settings'
+import { checkAdSenseEligibility } from '@/lib/actions/adsense-checker'
 import AdsenseConfigForm from './AdSenseConfigForm'
+import AdSenseEligibilityTester from './AdSenseEligibilityTester'
 
 export const metadata = {
     title: 'Configuration Google AdSense | Admin',
@@ -10,8 +12,8 @@ export default async function AdsenseConfigPage() {
     const enabledStr = await getSetting('adsense_enabled')
     const enabled = enabledStr === 'true'
     
-    const publisherId = await getSetting('adsense_publisher_id') || ''
-    const adsTxtContent = await getSetting('adsense_ads_txt') || ''
+    const publisherId = await getSetting('adsense_publisher_id') || 'pub-6513929866629555'
+    const adsTxtContent = await getSetting('adsense_ads_txt') || 'google.com, pub-6513929866629555, DIRECT, f08c47fec0942fa0'
     const autoAdsEnabledStr = await getSetting('adsense_auto_ads_enabled')
     const autoAdsEnabled = autoAdsEnabledStr === 'true'
 
@@ -23,6 +25,9 @@ export default async function AdsenseConfigPage() {
     const slotFooter = await getSetting('adsense_slot_footer') || ''
     const slotInFeed = await getSetting('adsense_slot_in_feed') || ''
     const slotMultiplex = await getSetting('adsense_slot_multiplex') || ''
+
+    // Pré-calculer le rapport d'éligibilité pour un affichage SSR instantané
+    const initialReport = await checkAdSenseEligibility().catch(() => null)
 
     const initialSettings = {
         enabled,
@@ -44,9 +49,12 @@ export default async function AdsenseConfigPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">Google AdSense</h1>
-                    <p className="text-slate-500 mt-1">Configurez l'affichage des bannières publicitaires sur votre plateforme.</p>
+                    <p className="text-slate-500 mt-1">Configurez l'affichage des bannières publicitaires et vérifiez l'éligibilité du site.</p>
                 </div>
             </div>
+
+            {/* Testeur d'éligibilité et de conformité AdSense */}
+            <AdSenseEligibilityTester initialReport={initialReport} />
 
             <AdsenseConfigForm initialSettings={initialSettings} />
         </div>

@@ -44,6 +44,7 @@ export default function ImageWithFallback({
                 quality={quality}
                 className={`${className} transition-opacity duration-300 ${!isLoaded && !priority ? 'opacity-0' : 'opacity-100'}`}
                 priority={priority}
+                {...(priority ? { fetchPriority: 'high' as const } : {})}
                 onLoad={() => setIsLoaded(true)}
                 onError={(e) => {
                     const target = e.target as HTMLImageElement;

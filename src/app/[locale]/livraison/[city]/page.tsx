@@ -10,7 +10,12 @@ import { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string, city: string }> }): Promise<Metadata> {
     const { locale, city } = await params;
-    const decodedCity = decodeURIComponent(city).replace(/-/g, ' ');
+    let decodedCity = city;
+    try {
+        decodedCity = decodeURIComponent(city).replace(/-/g, ' ');
+    } catch {
+        decodedCity = city.replace(/-/g, ' ');
+    }
     const cityName = decodedCity.charAt(0).toUpperCase() + decodedCity.slice(1).toLowerCase();
 
     return {
@@ -35,10 +40,15 @@ export default async function DeliveryCityPage({ params }: { params: Promise<{ l
     const t = await getTranslations('Common');
     
     // Format city name from URL (e.g. casablanca -> Casablanca)
-    const decodedCity = decodeURIComponent(city).replace(/-/g, ' ');
+    let decodedCity = city;
+    try {
+        decodedCity = decodeURIComponent(city).replace(/-/g, ' ');
+    } catch {
+        decodedCity = city.replace(/-/g, ' ');
+    }
     const cityName = decodedCity.charAt(0).toUpperCase() + decodedCity.slice(1).toLowerCase();
 
-    // Fetch popular books
+    // Fetch popular books safely
     const popularBooks = await prisma.book.findMany({
         where: { active: true },
         orderBy: [
@@ -46,7 +56,7 @@ export default async function DeliveryCityPage({ params }: { params: Promise<{ l
             { createdAt: 'desc' }
         ],
         take: 8
-    });
+    }).catch(() => []);
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store';
 
@@ -163,9 +173,9 @@ export default async function DeliveryCityPage({ params }: { params: Promise<{ l
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {popularBooks.map(book => (
+                    {popularBooks.map((book, idx) => (
                         <div key={book.id}>
-                            <BookCard {...book} />
+                            <BookCard {...book} priority={idx === 0} />
                         </div>
                     ))}
                 </div>

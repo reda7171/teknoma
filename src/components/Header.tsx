@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCartStore } from '@/store/cart'
 import PredictiveSearch from './PredictiveSearch'
 import LanguageSwitcher from './LanguageSwitcher'
@@ -107,6 +107,35 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
         closeMobileMenu()
         setMobileSearchOpen(false)
     }, [pathname, closeMobileMenu])
+
+    // Gestionnaires tactiles natifs avec touch-pan-y pour optimiser l'INP sur mobile
+    const menuTouchStartX = useRef<number | null>(null)
+    const menuTouchStartY = useRef<number | null>(null)
+
+    const handleMenuTouchStart = (e: React.TouchEvent) => {
+        menuTouchStartX.current = e.targetTouches[0]?.clientX ?? null
+        menuTouchStartY.current = e.targetTouches[0]?.clientY ?? null
+    }
+
+    const handleMenuTouchEnd = (e: React.TouchEvent) => {
+        if (menuTouchStartX.current === null || menuTouchStartY.current === null) return
+        const endX = e.changedTouches[0]?.clientX
+        const endY = e.changedTouches[0]?.clientY
+        if (typeof endX !== 'number' || typeof endY !== 'number') return
+
+        const deltaX = endX - menuTouchStartX.current
+        const deltaY = endY - menuTouchStartY.current
+        menuTouchStartX.current = null
+        menuTouchStartY.current = null
+
+        // Ignorer si le geste est principalement vertical
+        if (Math.abs(deltaY) > Math.abs(deltaX)) return
+
+        const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+        if ((!isRTL && deltaX > 50) || (isRTL && deltaX < -50)) {
+            closeMobileMenu()
+        }
+    }
 
     // Éviter les problèmes d'hydratation et synchroniser l'état d'authentification
     useEffect(() => {
@@ -634,7 +663,9 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 />
             )}
             <div
-                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-[85vw] md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl ${isMobileMenuOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
+                onTouchStart={handleMenuTouchStart}
+                onTouchEnd={handleMenuTouchEnd}
+                className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-[85vw] md:w-96 bg-white z-[150] flex flex-col transform transition-transform duration-300 ease-in-out shadow-2xl touch-pan-y ${isMobileMenuOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
                     }`}
                 suppressHydrationWarning
             >

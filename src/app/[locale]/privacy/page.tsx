@@ -52,7 +52,7 @@ export default async function PrivacyPage() {
                                 <Bell className="w-5 h-5 rtl:ml-4 rtl:mr-0" /> {t('Section4Title')}
                             </h2>
                             <p className="leading-relaxed">
-                                {t.rich('Section4Desc', { bold: (chunks) => <strong>{chunks}</strong>, link: (chunks) => <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">{chunks}</a>, contact: (chunks) => <a href="mailto:contact@riwaya.store" className="text-blue-500 underline">{chunks}</a> })}
+                                {t.rich('Section4Desc', { bold: (chunks) => <strong>{chunks}</strong>, link: (chunks) => <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">{chunks}</a>, aboutads: (chunks) => <a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">{chunks}</a>, contact: (chunks) => <a href="mailto:contact@riwaya.store" className="text-blue-500 underline">{chunks}</a> })}
                             </p>
                         </section>
 

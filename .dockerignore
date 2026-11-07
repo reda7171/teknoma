@@ -21,6 +21,7 @@ README.md
 *.7z
 scripts/*
 !scripts/validate-i18n.js
+!scripts/check-jsx-syntax.js
 scratch
 docs
 .agent

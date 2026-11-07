@@ -445,10 +445,14 @@ export default function OrderInvoiceModal({
         }
 
         let cleanPhone = phone.replace(/\D/g, '')
-        if (cleanPhone.startsWith('0')) cleanPhone = '212' + cleanPhone.slice(1)
-        if (!cleanPhone.startsWith('212') && cleanPhone.length === 9) cleanPhone = '212' + cleanPhone
+        if (cleanPhone.startsWith('0') && cleanPhone.length === 10 && (cleanPhone.startsWith('06') || cleanPhone.startsWith('07') || cleanPhone.startsWith('05'))) {
+            cleanPhone = '212' + cleanPhone.slice(1)
+        } else if (!cleanPhone.startsWith('212') && cleanPhone.length === 9 && (cleanPhone.startsWith('5') || cleanPhone.startsWith('6') || cleanPhone.startsWith('7'))) {
+            cleanPhone = '212' + cleanPhone
+        }
 
         const itemsSummary = items.map(it => `• ${it.quantity}x ${it.title} (${(Number(it.price) * Number(it.quantity)).toFixed(0)} DH)`).join('\n')
+        const trackingLink = `https://riwaya.store/${locale}/track/${order.id}`
 
         const message = 
             `Bonjour *${fullName}*,\n\n` +
@@ -460,6 +464,7 @@ export default function OrderInvoiceModal({
             `✅ *Acompte Payé : ${paidAmount.toFixed(2)} DH*\n` +
             `💵 *RESTE À PAYER À LA LIVRAISON : ${remainingAmount.toFixed(2)} DH*\n\n` +
             `📍 Adresse : ${address}, ${city}\n\n` +
+            `🔗 Suivre votre colis en direct : ${trackingLink}\n\n` +
             `Merci de votre confiance et bonne lecture ! ✨`
 
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank')

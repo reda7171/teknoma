@@ -3,8 +3,9 @@
 import { useTranslations } from 'next-intl'
 import { useState, useEffect, useRef } from 'react'
 import { trackOrder, TrackingResult } from '@/lib/actions/tracking'
-import { Search, Loader2, Package, CheckCircle2, Truck, XCircle, Clock } from 'lucide-react'
+import { Search, Loader2, Package, CheckCircle2, Truck, XCircle, Clock, ExternalLink } from 'lucide-react'
 import { useParams, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
 export default function TrackingClient() {
     const t = useTranslations('Tracking')
@@ -47,7 +48,7 @@ export default function TrackingClient() {
         switch (status) {
             case 'PENDING': return <Clock className="w-8 h-8 text-yellow-500" />
             case 'CONFIRMED': return <CheckCircle2 className="w-8 h-8 text-blue-500" />
-            case 'SHIPPED': return <Truck className="w-8 h-8 text-purple-500" />
+            case 'SHIPPED': return <Truck className="w-8 h-8 text-blue-600" />
             case 'DELIVERED': return <Package className="w-8 h-8 text-green-500" />
             case 'CANCELLED': return <XCircle className="w-8 h-8 text-red-500" />
             default: return <Clock className="w-8 h-8 text-gray-500" />
@@ -67,7 +68,7 @@ export default function TrackingClient() {
     }
 
     return (
-        <div className="bg-white rounded-[2.5rem] p-8 lg:p-12 shadow-xl shadow-black/5 border border-gray-100">
+        <div className="bg-white rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-12 shadow-xl shadow-black/5 border border-gray-100">
             <form ref={formRef} onSubmit={onSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -161,6 +162,16 @@ export default function TrackingClient() {
                             <div className="flex justify-between items-center pt-6 border-t border-gray-200 mt-6">
                                 <span className="text-xs font-black uppercase tracking-widest text-gray-400">{t('Total')}</span>
                                 <span className="text-xl font-black text-black">{result.order.total} درهم</span>
+                            </div>
+
+                            <div className="pt-4 flex flex-wrap justify-end gap-3">
+                                <Link
+                                    href={`/${locale}/track/${result.order.id}`}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95"
+                                >
+                                    <Truck className="w-4 h-4" />
+                                    <span>Suivi en direct (Amana / Étapes)</span>
+                                </Link>
                             </div>
                         </div>
                     </div>

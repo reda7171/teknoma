@@ -1,5 +1,6 @@
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import Script from 'next/script'
 import { HelpCircle, Truck, CreditCard, RotateCcw, ShieldCheck, ChevronDown, BookOpen, Users, Package } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
@@ -175,6 +176,7 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
             <div className="pt-32 pb-20 bg-gray-50 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-pixio-yellow/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                    <Breadcrumbs items={[{ label: locale === 'ar' ? 'الأسئلة الشائعة' : locale === 'en' ? 'FAQ' : 'Questions Fréquentes' }]} className="mb-6 flex justify-center" />
                     <div className="inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full text-black text-[10px] font-black uppercase tracking-[0.2em] shadow-sm border border-gray-100 mb-8">
                         <HelpCircle className="w-4 h-4 text-pixio-yellow" />
                         <span>

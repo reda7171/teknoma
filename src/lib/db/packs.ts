@@ -75,17 +75,21 @@ export async function adminGetPacks() {
  * Récupère un pack par son ID avec ses livres
  */
 export async function getPackById(id: string) {
-    return prisma.pack.findUnique({
-        where: { id },
-        include: {
-            books: {
-                include: {
-                    book: true,
+    try {
+        return await prisma.pack.findUnique({
+            where: { id },
+            include: {
+                books: {
+                    include: {
+                        book: true,
+                    },
                 },
+                extraProducts: { include: { extraProduct: true } },
             },
-            extraProducts: { include: { extraProduct: true } },
-        },
-    })
+        })
+    } catch {
+        return null
+    }
 }
 
 /**

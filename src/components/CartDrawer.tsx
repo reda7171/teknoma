@@ -3,7 +3,7 @@
 import { useCartStore } from '@/store/cart'
 import { normalizeImage } from '@/lib/utils'
 // import Link from 'next/link' <-- remove standard next link
-import { X, Minus, Plus, ShoppingCart, Trash2, ArrowRight } from 'lucide-react'
+import { X, Minus, Plus, ShoppingCart, Trash2, ArrowRight, AlertTriangle } from 'lucide-react'
 import { useEffect, useState, useRef } from 'react'
 import { Link, useRouter } from '@/i18n/routing'
 import { useTranslations, useLocale } from 'next-intl'
@@ -39,9 +39,9 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         }
     }, [pathname, onClose])
 
-    // Swipe to close states
-    const [touchStart, setTouchStart] = useState<number | null>(null)
-    const [touchEnd, setTouchEnd] = useState<number | null>(null)
+    // Swipe to close refs (pas de re-render à 60fps pour préserver l'INP)
+    const touchStartXRef = useRef<number | null>(null)
+    const touchStartYRef = useRef<number | null>(null)
 
     // Éviter les problèmes d'hydratation avec localStorage
     useEffect(() => {
@@ -98,26 +98,30 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         router.push('/checkout')
     }
 
-    // Swipe handlers
+    // Swipe handlers natifs avec touch-pan-y pour éviter les blocages INP
     const minSwipeDistance = 50 
 
     const onTouchStartEvent = (e: React.TouchEvent) => {
-        setTouchEnd(null)
-        setTouchStart(e.targetTouches[0].clientX)
+        touchStartXRef.current = e.targetTouches[0]?.clientX ?? null
+        touchStartYRef.current = e.targetTouches[0]?.clientY ?? null
     }
 
-    const onTouchMoveEvent = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX)
+    const onTouchEndEvent = (e: React.TouchEvent) => {
+        if (touchStartXRef.current === null || touchStartYRef.current === null) return
+        const endX = e.changedTouches[0]?.clientX
+        const endY = e.changedTouches[0]?.clientY
+        if (typeof endX !== 'number' || typeof endY !== 'number') return
 
-    const onTouchEndEvent = () => {
-        if (!touchStart || !touchEnd) return
-        const distance = touchStart - touchEnd
-        const isLeftSwipe = distance > minSwipeDistance
-        const isRightSwipe = distance < -minSwipeDistance
-        
-        const isRTL = document.documentElement.dir === 'rtl'
-        if (isRTL && isLeftSwipe) {
-            onClose()
-        } else if (!isRTL && isRightSwipe) {
+        const deltaX = endX - touchStartXRef.current
+        const deltaY = endY - touchStartYRef.current
+        touchStartXRef.current = null
+        touchStartYRef.current = null
+
+        // Ne rien faire si le geste est principalement vertical
+        if (Math.abs(deltaY) > Math.abs(deltaX)) return
+
+        const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+        if ((!isRTL && deltaX > minSwipeDistance) || (isRTL && deltaX < -minSwipeDistance)) {
             onClose()
         }
     }
@@ -137,9 +141,8 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
             {/* Drawer */}
             <div
                 onTouchStart={onTouchStartEvent}
-                onTouchMove={onTouchMoveEvent}
                 onTouchEnd={onTouchEndEvent}
-                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full h-[100dvh] w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[180] transform transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
+                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full h-[100dvh] w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[180] transform transition-transform duration-500 ease-in-out touch-pan-y ${isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
                     }`}
             >
                 <div className="flex flex-col h-full">
@@ -294,6 +297,22 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                                                     </button>
                                                 </div>
                                             </div>
+
+                                            {item.quantity > 1 && (
+                                                <div className="mt-2.5 px-2.5 py-1.5 bg-amber-50 border border-amber-200/80 rounded-xl flex items-center justify-between gap-1.5 text-[10px] text-amber-900 font-bold">
+                                                    <div className="flex items-center gap-1.5 min-w-0">
+                                                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                                        <span className="truncate">{t('TwoCopiesWarning')}</span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => updateQuantity(item.id, 1)}
+                                                        className="shrink-0 text-[10px] font-black text-amber-900 bg-amber-100 hover:bg-amber-200 active:scale-95 px-2 py-0.5 rounded-lg border border-amber-300 transition-all cursor-pointer whitespace-nowrap"
+                                                    >
+                                                        {t('ReduceToOneCopy')}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

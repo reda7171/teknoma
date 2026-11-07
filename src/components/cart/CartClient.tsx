@@ -177,6 +177,21 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                                                 </ul>
                                             </div>
                                         )}
+                                        {item.quantity > 1 && (
+                                            <div className="mt-2.5 px-3 py-1.5 bg-amber-50 border border-amber-200/80 rounded-xl inline-flex flex-wrap items-center gap-2 text-[11px] text-amber-900 font-bold">
+                                                <div className="inline-flex items-center gap-1.5">
+                                                    <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                                    <span>{t('TwoCopiesWarning')}</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => updateQuantity(item.id, 1)}
+                                                    className="text-[10px] font-black text-amber-900 bg-amber-100 hover:bg-amber-200 active:scale-95 px-2.5 py-1 rounded-lg border border-amber-300 transition-all cursor-pointer whitespace-nowrap"
+                                                >
+                                                    {t('ReduceToOneCopy')}
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 mt-4 sm:mt-0">

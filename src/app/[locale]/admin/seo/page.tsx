@@ -7,6 +7,8 @@ import ImageInjectorForm from './ImageInjectorForm'
 import ImageInjectorMetaForm from './ImageInjectorMetaForm'
 import BlogImageInjectorMetaForm from './BlogImageInjectorMetaForm'
 import MarketingImageInjectorMetaForm from './MarketingImageInjectorMetaForm'
+import SitemapSyncStatusWidget from '@/components/admin/SitemapSyncStatusWidget'
+import { getSitemapsSyncStatus } from '@/lib/actions/seo-sitemaps'
 import { Search, Image as ImageIcon, Zap, Code } from 'lucide-react'
 
 export const metadata = {
@@ -27,9 +29,10 @@ export default async function SeoConfigPage({
     const sp = await searchParams
     const activeTab = sp?.tab === 'head' ? 'head' : sp?.tab === 'images' ? 'images' : 'general'
 
-    const [seoSettings, injectedTags] = await Promise.all([
+    const [seoSettings, injectedTags, sitemapsOverview] = await Promise.all([
         getSettingsByCategory('seo'),
         getSetting('seo_injected_head_tags'),
+        getSitemapsSyncStatus(),
     ])
 
     // Livres pour l'onglet Image Injector Tools
@@ -94,6 +97,9 @@ export default async function SeoConfigPage({
                     })}
                 </div>
             </div>
+
+            {/* Widget Moniteur Sitemaps & Détection Googlebot */}
+            <SitemapSyncStatusWidget initialData={sitemapsOverview} />
 
             <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-8 md:p-12 overflow-hidden">
                 <div className="w-full mx-auto">

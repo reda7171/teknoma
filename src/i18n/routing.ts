@@ -3,13 +3,16 @@ import { createNavigation } from 'next-intl/navigation';
 
 export const routing = defineRouting({
     // A list of all locales that are supported
-    locales: ['en', 'fr', 'ar'],
+    locales: ['ar', 'fr', 'en'],
 
     // Used when no locale matches
     defaultLocale: 'ar',
-    localeDetection: false,
+    localeDetection: true,
     localeCookie: {
-        secure: process.env.NODE_ENV === 'production'
+        name: 'NEXT_LOCALE',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 365 * 24 * 60 * 60, // 1 an
+        sameSite: 'lax',
     }
 });
 

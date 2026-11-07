@@ -147,7 +147,9 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
     }
 
     if (!mounted) return null
-    if (pathname?.includes('/admin')) return null
+    if (pathname?.includes('/admin') || pathname?.includes('/checkout')) return null
+    // Masquer sur les pages profil, communauté et suivi de lecture
+    if (pathname?.includes('/community') || pathname?.includes('/reading-list') || pathname?.includes('/profile')) return null
     // Masquer sur les pages produit (déjà un bouton WhatsApp sur la page)
     if (pathname?.match(/\/(books|packs|mon-enfant|fourniture-bureau|blog)\/[^/]+$/)) return null
 

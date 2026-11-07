@@ -2,14 +2,21 @@ import { getQuotes } from '@/lib/actions/quotes'
 import QuoteCard from '@/components/quotes/QuoteCard'
 import { Hash } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
 
 export async function generateMetadata(props: { params: Promise<{ locale: string; tag: string }> }) {
     const { locale, tag } = await props.params
-    const decoded = decodeURIComponent(tag)
+    let decoded = tag
+    try {
+        decoded = decodeURIComponent(tag)
+    } catch {
+        decoded = tag
+    }
     const t = await getTranslations({ locale, namespace: 'QuotesPage' })
     return {
         title: `${decoded} ${t('TagQuotes')} | Riwaya`,
         description: `${t('HeroDesc')} — #${decoded}`,
+        alternates: getCanonicalAlternates(`/quotes/tag/${encodeURIComponent(decoded)}`, locale),
     }
 }
 
@@ -17,9 +24,14 @@ export default async function QuotesTagPage(props: {
     params: Promise<{ locale: string; tag: string }>
 }) {
     const { locale, tag } = await props.params
-    const decoded = decodeURIComponent(tag)
+    let decoded = tag
+    try {
+        decoded = decodeURIComponent(tag)
+    } catch {
+        decoded = tag
+    }
     const t = await getTranslations({ locale, namespace: 'QuotesPage' })
-    const quotes = await getQuotes(undefined, decoded)
+    const quotes = await getQuotes(undefined, decoded).catch(() => [])
     const activeQuotes = quotes.filter((q: any) => q.isActive)
 
     return (

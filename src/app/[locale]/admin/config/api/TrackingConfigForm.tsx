@@ -14,6 +14,7 @@ interface Props {
     initialTiktokClientSecret: string
     initialGoogleSearchConsoleId: string
     initialGoogleAnalyticsId: string
+    initialGoogleAnalyticsApiSecret: string
     initialFbMarketingAccessToken: string
     initialFbAdAccountId: string
     initialFbPageId: string
@@ -28,6 +29,7 @@ export default function TrackingConfigForm({
     initialTiktokClientSecret,
     initialGoogleSearchConsoleId,
     initialGoogleAnalyticsId,
+    initialGoogleAnalyticsApiSecret,
     initialFbMarketingAccessToken,
     initialFbAdAccountId,
     initialFbPageId
@@ -40,6 +42,7 @@ export default function TrackingConfigForm({
     const [tiktokClientSecret, setTiktokClientSecret] = useState(initialTiktokClientSecret)
     const [googleSearchConsoleId, setGoogleSearchConsoleId] = useState(initialGoogleSearchConsoleId)
     const [googleAnalyticsId, setGoogleAnalyticsId] = useState(initialGoogleAnalyticsId)
+    const [googleAnalyticsApiSecret, setGoogleAnalyticsApiSecret] = useState(initialGoogleAnalyticsApiSecret)
     const [fbMarketingAccessToken, setFbMarketingAccessToken] = useState(initialFbMarketingAccessToken)
     const [fbAdAccountId, setFbAdAccountId] = useState(initialFbAdAccountId)
     const [fbPageId, setFbPageId] = useState(initialFbPageId)
@@ -47,6 +50,7 @@ export default function TrackingConfigForm({
     const [showApiKey, setShowApiKey] = useState(false)
     const [showTiktokToken, setShowTiktokToken] = useState(false)
     const [showTiktokSecret, setShowTiktokSecret] = useState(false)
+    const [showGaSecret, setShowGaSecret] = useState(false)
     
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
@@ -65,6 +69,7 @@ export default function TrackingConfigForm({
             await updateSetting('tiktok_client_secret', tiktokClientSecret, 'api', 'TikTok Client Secret')
             await updateSetting('google_search_console_id', googleSearchConsoleId, 'tracking', 'Google Search Console Verification ID')
             await updateSetting('google_analytics_id', googleAnalyticsId, 'tracking', 'Google Analytics Measurement ID')
+            await updateSetting('google_analytics_api_secret', googleAnalyticsApiSecret, 'tracking', 'Google Analytics Measurement Protocol API Secret')
             await updateSetting('fb_marketing_access_token', fbMarketingAccessToken, 'api', 'Facebook Marketing API Token')
             await updateSetting('fb_ad_account_id', fbAdAccountId, 'api', 'Facebook Ad Account ID')
             await updateSetting('fb_page_id', fbPageId, 'api', 'Facebook Page ID')
@@ -342,6 +347,31 @@ export default function TrackingConfigForm({
                         />
                         <p className="mt-2 text-[11px] text-gray-400 font-medium ml-1 italic">
                             L'identifiant de mesure GA4 commence généralement par 'G-'.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-[13px] font-black text-gray-700 uppercase tracking-wider mb-2 ml-1">
+                            Clé secrète API Measurement Protocol (Enhanced Conversions)
+                        </label>
+                        <div className="relative">
+                            <input
+                                type={showGaSecret ? "text" : "password"}
+                                value={googleAnalyticsApiSecret}
+                                onChange={(e) => setGoogleAnalyticsApiSecret(e.target.value)}
+                                placeholder="Ex: abcd1234efgh..."
+                                className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-mono text-sm pr-14"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowGaSecret(!showGaSecret)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-slate-900 transition-colors"
+                            >
+                                {showGaSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                        <p className="mt-2 text-[11px] text-gray-400 font-medium ml-1 italic">
+                            Générée dans GA4 : Admin &gt; Flux de données &gt; Secrets d'API Measurement Protocol. Active les conversions d'achat serveur et Google Enhanced Conversions.
                         </p>
                     </div>
                 </div>

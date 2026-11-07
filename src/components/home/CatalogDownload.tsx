@@ -23,7 +23,7 @@ export default function CatalogDownload() {
             onClick={handleDownload}
             className="group relative flex items-center gap-3 px-6 py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl text-black font-bold transition-all hover:scale-105 active:scale-95 shadow-xl"
         >
-            <div className="p-2 bg-purple-600 rounded-lg group-hover:rotate-12 transition-transform shadow-lg">
+            <div className="p-2 bg-amber-500 rounded-lg group-hover:rotate-12 transition-transform shadow-lg">
                 <BookOpen className="w-5 h-5 text-white" />
             </div>
             <span className="tracking-tight">{dict}</span>

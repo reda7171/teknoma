@@ -498,6 +498,9 @@ export default async function LocaleLayout({
   const siteUrl = siteUrlRaw || 'https://riwaya.store';
   const fbPixelId = fbPixelIdRaw || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
   const googleSearchConsoleId = googleSearchConsoleIdRaw || googleSearchConsoleIdFallback;
+  const rawAdsenseId = adsenseId || process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-6513929866629555';
+  const effectiveAdsenseId = rawAdsenseId.startsWith('ca-pub-') ? rawAdsenseId : `ca-pub-${rawAdsenseId.replace(/^pub-/, '')}`;
+  const isAdsenseActive = adsenseEnabled !== 'false';
 
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no" data-scroll-behavior="smooth">
@@ -506,6 +509,14 @@ export default async function LocaleLayout({
         {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
         {googleSearchConsoleId && (
           <meta name="google-site-verification" content={googleSearchConsoleId} />
+        )}
+        {isAdsenseActive && effectiveAdsenseId && (
+          <Script
+            id="google-adsense"
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${effectiveAdsenseId}`}
+            crossOrigin="anonymous"
+          />
         )}
         {injectedHeadTags && (
           <Script

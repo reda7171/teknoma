@@ -24,16 +24,26 @@ const MobileSectionNavigation = dynamic(() => import('@/components/blog/MobileSe
 import FontSizeRegulator from '@/components/blog/FontSizeRegulator'
 import { getTranslations } from 'next-intl/server'
 import { getSetting } from '@/lib/actions/site-settings'
-import AdBanner from '@/components/AdBanner'
+import AdUnit from '@/components/AdUnit'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
 import { getOgImageUrl, getBaseUrl, normalizeImage } from '@/lib/utils'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
     const { slug: rawSlug, locale } = await params
-    const decodedSlug = decodeURIComponent(rawSlug)
-    const post = await getPostBySlug(decodedSlug, locale)
+    let decodedSlug = rawSlug
+    try {
+        decodedSlug = decodeURIComponent(rawSlug)
+    } catch {
+        decodedSlug = rawSlug
+    }
+    const post = await getPostBySlug(decodedSlug, locale).catch(() => null)
 
-    if (!post) return {}
+    if (!post) {
+        return {
+            title: 'Article introuvable | Riwaya',
+            robots: { index: false, follow: false },
+        }
+    }
 
     const siteUrl = getBaseUrl()
     const canonicalUrl = `${siteUrl}/${locale}/blog/${decodedSlug}`
@@ -83,8 +93,13 @@ function getDisplayAuthor(name: string | null | undefined, locale: string): stri
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
     const { slug: rawSlug, locale } = await params
-    const decodedSlug = decodeURIComponent(rawSlug)
-    const post = await getPostBySlug(decodedSlug, locale)
+    let decodedSlug = rawSlug
+    try {
+        decodedSlug = decodeURIComponent(rawSlug)
+    } catch {
+        decodedSlug = rawSlug
+    }
+    const post = await getPostBySlug(decodedSlug, locale).catch(() => null)
     const t = await getTranslations('BlogArticle')
     const tPost = await getTranslations({ locale: post?.language || 'fr', namespace: 'BlogArticle' })
 
@@ -569,15 +584,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                     {/* Colonne article (8 colonnes sur Desktop) */}
                     <div className="lg:col-span-8 w-full min-w-0">
-                        {/* AdSense haut */}
-                        {adsenseEnabled && (
-                            <AdBanner
-                                publisherId={adsensePublisherId}
-                                slotId={slotTop}
-                                label={t('AdTopArticle')}
-                            />
-                        )}
-
                         {/* Corps de l'article */}
                         <article
                             id="article-content"
@@ -617,6 +623,18 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             <div className="not-prose lg:hidden">
                                 <TableOfContents language={post.language} />
                             </div>
+
+                            {/* Encart Publicitaire Haut d'article */}
+                            {adsenseEnabled && slotTop && (
+                                <div className="not-prose my-6">
+                                    <AdUnit 
+                                        publisherId={adsensePublisherId || ""} 
+                                        slot={slotTop} 
+                                        isEnabled={adsenseEnabled} 
+                                        lazy={false}
+                                    />
+                                </div>
+                            )}
 
                             {(() => {
                                 if (post.books && post.books.length > 0) {
@@ -667,15 +685,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 return <BlogDynamicContent html={contentHtml} />;
                             })()}
                         </article>
-
-                        {/* AdSense bas */}
-                        {adsenseEnabled && (
-                            <AdBanner
-                                publisherId={adsensePublisherId}
-                                slotId={slotBottom}
-                                label={t('AdBottomArticle')}
-                            />
-                        )}
 
                         {/* === Tags & Partage === */}
                         <div className="mt-10 md:mt-14 pt-8 md:pt-10 border-t-2 border-gray-100">
@@ -834,6 +843,18 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         );
                                     })}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Encart Publicitaire Différé (Bas d'article via IntersectionObserver) */}
+                        {adsenseEnabled && slotBottom && (
+                            <div className="not-prose my-10">
+                                <AdUnit 
+                                    publisherId={adsensePublisherId || ""} 
+                                    slot={slotBottom} 
+                                    isEnabled={adsenseEnabled} 
+                                    lazy={true}
+                                />
                             </div>
                         )}
 
