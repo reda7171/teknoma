@@ -1,5 +1,8 @@
 import { Metadata } from 'next'
 import { Mail, Phone, MapPin, Send } from 'lucide-react'
+import HeaderWithUser from '@/components/HeaderWithUser'
+import Footer from '@/components/Footer'
+import Breadcrumbs from '@/components/Breadcrumbs'
 
 export const metadata: Metadata = {
     title: 'Partenariats B2B | Riwaya',
@@ -15,9 +18,11 @@ export const metadata: Metadata = {
 export default function B2BPage() {
     return (
         <div className="min-h-screen bg-white">
+            <HeaderWithUser />
             {/* Hero */}
-            <section className="bg-gradient-to-br from-black via-gray-900 to-black text-white py-32">
+            <section className="bg-gradient-to-br from-black via-gray-900 to-black text-white py-16 sm:py-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <Breadcrumbs items={[{ label: 'Partenariats B2B' }]} className="mb-8" />
                     <div className="max-w-3xl">
                         <h1 className="text-6xl md:text-7xl font-black tracking-tight mb-6">
                             Partenariats<span className="text-pixio-yellow">.</span>
@@ -277,6 +282,7 @@ export default function B2BPage() {
                     </div>
                 </div>
             </section>
+            <Footer />
         </div>
     )
 }

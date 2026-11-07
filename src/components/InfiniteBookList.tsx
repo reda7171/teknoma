@@ -122,22 +122,22 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                         if (ctaType === 'PACK' && randomPack) {
                             const pack = randomPack;
                             ctaBlock = (
-                                <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-purple-900 to-indigo-900 rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 shadow-2xl my-4">
+                                <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-gray-900 via-slate-900 to-black rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 shadow-2xl my-4 border border-slate-800">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+                                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
                                     <div className="flex-1 relative z-10 text-center md:text-left">
                                         <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md mb-4 border border-white/10">
-                                            <Sparkles className="w-4 h-4 text-purple-300" />
-                                            <span className="text-xs font-bold uppercase tracking-widest text-purple-100">{tCommon('SpecialOffer')}</span>
+                                            <Sparkles className="w-4 h-4 text-amber-300" />
+                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-100">{tCommon('SpecialOffer')}</span>
                                         </div>
                                         <h3 className="text-2xl md:text-4xl font-black mb-3">{pack.name}</h3>
                                         <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
-                                            <span className="text-3xl md:text-4xl font-black text-purple-300">{pack.price} {tCommon('Currency')}</span>
+                                            <span className="text-3xl md:text-4xl font-black text-amber-300">{pack.price} {tCommon('Currency')}</span>
                                         </div>
                                         <Link
                                             href={`/packs/${pack.id}`}
-                                            className="inline-flex items-center gap-2 bg-white text-purple-900 px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-gray-100 transition-all hover:scale-105 active:scale-95 shadow-xl"
+                                            className="inline-flex items-center gap-2 bg-amber-400 text-slate-950 px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-amber-300 transition-all hover:scale-105 active:scale-95 shadow-xl"
                                         >
                                             {tCommon('DiscoverPack')}
                                             <ArrowRight className="w-4 h-4" />
@@ -163,20 +163,20 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                             );
                         } else if (ctaType === 'BOARD_GAMES') {
                             ctaBlock = (
-                                <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-purple-100 to-fuchsia-50 rounded-[2.5rem] p-6 md:p-10 border border-purple-200 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm my-4">
+                                <div className="col-span-2 md:col-span-3 xl:col-span-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-[2.5rem] p-6 md:p-10 border border-amber-200 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm my-4">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                                     <div className="flex-1 text-center md:text-left relative z-10">
-                                        <div className="inline-flex items-center gap-2 bg-purple-500/10 px-4 py-2 rounded-full mb-4">
-                                            <Gamepad2 className="w-4 h-4 text-purple-600" />
-                                            <span className="text-xs font-bold uppercase tracking-widest text-purple-700">{tCommon('Navigation.BoardGames')}</span>
+                                        <div className="inline-flex items-center gap-2 bg-amber-500/10 px-4 py-2 rounded-full mb-4">
+                                            <Gamepad2 className="w-4 h-4 text-amber-600" />
+                                            <span className="text-xs font-bold uppercase tracking-widest text-amber-800">{tCommon('Navigation.BoardGames')}</span>
                                         </div>
-                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-purple-900">{tCTA('BoardGamesTitle')}</h3>
-                                        <p className="text-purple-800/80 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
+                                        <h3 className="text-2xl md:text-3xl font-black mb-3 text-slate-900">{tCTA('BoardGamesTitle')}</h3>
+                                        <p className="text-slate-600 text-sm font-medium mb-6 max-w-md mx-auto md:mx-0">
                                             {tCTA('BoardGamesDesc')}
                                         </p>
                                         <Link
                                             href="/jeux-societe"
-                                            className="inline-flex items-center gap-2 bg-purple-600 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-purple-700 transition-all shadow-xl hover:scale-105 active:scale-95"
+                                            className="inline-flex items-center gap-2 bg-amber-500 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-amber-600 transition-all shadow-xl hover:scale-105 active:scale-95"
                                         >
                                             {tCTA('DiscoverBoardGames')}
                                             <ArrowRight className="w-4 h-4" />
@@ -206,7 +206,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                                                 ))}
                                             </div>
                                         ) : (
-                                            <Gamepad2 className="w-24 h-24 text-purple-500 drop-shadow-md" />
+                                            <Gamepad2 className="w-24 h-24 text-amber-500 drop-shadow-md" />
                                         )}
                                     </div>
                                 </div>
@@ -319,7 +319,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
 
                     return (
                         <React.Fragment key={book.id}>
-                            <BookCard {...book} />
+                            <BookCard {...book} priority={index < 2} />
                             {ctaBlock}
                             {showAd && (
                                 <div className="col-span-2 md:col-span-3 xl:col-span-4 py-4">

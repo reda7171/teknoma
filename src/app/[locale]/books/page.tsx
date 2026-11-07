@@ -10,6 +10,7 @@ import Footer from '@/components/Footer'
 import BookCard from '@/components/BookCard'
 import InfiniteBookList from '@/components/InfiniteBookList'
 import BooksFilters from '@/components/BooksFilters'
+import CatalogViewSwitcher from '@/components/books/CatalogViewSwitcher'
 import KidsProductsClient from '../mon-enfant/KidsProductsClient'
 import { Filter, SlidersHorizontal, Quote, Banknote, Globe, User } from 'lucide-react'
 import { Link } from '@/i18n/routing'
@@ -174,7 +175,7 @@ export default async function BooksPage({
 
     const isUsedOnly = sParams.usedOnly === 'true' || sParams.isUsed === 'true'
     const baseUrl = getBaseUrl()
-    const pageUrl = isUsedOnly ? `${baseUrl}/${locale}/books?isUsed=true` : `${baseUrl}/${locale}/books`
+    const pageUrl = isUsedOnly ? `${baseUrl}/${locale}/books?usedOnly=true` : `${baseUrl}/${locale}/books`
 
     let usedBooksSchema = null
     if (isUsedOnly) {
@@ -203,7 +204,6 @@ export default async function BooksPage({
 
     return (
         <div className="min-h-screen bg-[#FDFBF7]">
-            {isUsedOnly && <link rel="canonical" href={pageUrl} />}
             {usedBooksSchema && (
                 <script
                     type="application/ld+json"
@@ -212,10 +212,24 @@ export default async function BooksPage({
             )}
             <Header />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-4 pt-0 lg:py-10 lg:mt-10">
-                <h1 className="sr-only">
-                    {sParams.category ? `Livres ${sParams.category}` : tBooksPage('Title')}
-                </h1>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-4 pt-2 sm:pt-4 lg:py-8">
+                {/* En-tête Catalogue avec titre visible et Sélecteur rapide */}
+                <div className="mb-3 sm:mb-4 lg:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-black tracking-tight">
+                            {sParams.category ? (tCats.has(sParams.category as any) ? tCats(sParams.category as any) : sParams.category) : tBooksPage('Title')}
+                            <span className="text-gray-300">.</span>
+                        </h1>
+                        <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5">
+                            {tBooksPage('ItemsAvailable', { count: totalCount })}
+                        </p>
+                    </div>
+
+                    {/* Sélecteur rapide : Vue par défaut vs Ma vue personnalisée */}
+                    <div className="shrink-0">
+                        <CatalogViewSwitcher activeParams={sParams as any} />
+                    </div>
+                </div>
                 
                 <div className="flex flex-col lg:flex-row gap-4 xl:gap-6">
                     {/* Sidebar / Mobile Sticky Filters */}

@@ -35,6 +35,21 @@ interface CartStore {
 
 const MAX_ITEM_QUANTITY = 2
 
+function notifyDuplicateQuantity(title: string) {
+    if (typeof window === 'undefined') return
+    try {
+        const { useUIStore } = require('./ui')
+        const isArabic = document.documentElement.lang === 'ar' || document.documentElement.dir === 'rtl'
+        const isEnglish = document.documentElement.lang === 'en'
+        const message = isArabic
+            ? `تنبيه: لقد قمت بإضافة نسختين (2) من « ${title} » إلى سلتك.`
+            : isEnglish
+            ? `Notice: You have added 2 copies of "${title}" to your cart.`
+            : `Attention : vous venez d'ajouter 2 exemplaires de « ${title} » dans votre panier.`
+        useUIStore.getState().showNotification(message, 'warning')
+    } catch {}
+}
+
 export const useCartStore = create<CartStore>()(
     persist(
         (set, get) => ({
@@ -50,14 +65,15 @@ export const useCartStore = create<CartStore>()(
                 const existingItem = items.find((i) => i.id === sanitizedItem.id)
 
                 if (existingItem) {
-                    // Incrémenter la quantité si l'item existe déjà
+                    const nextQty = Math.min(existingItem.quantity + 1, MAX_ITEM_QUANTITY)
                     set({
                         items: items.map((i) =>
                             i.id === sanitizedItem.id
-                                ? { ...i, price: roundedPrice, quantity: Math.min(i.quantity + 1, MAX_ITEM_QUANTITY) }
+                                ? { ...i, price: roundedPrice, quantity: nextQty }
                                 : i
                         ),
                     })
+                    notifyDuplicateQuantity(sanitizedItem.title)
                 } else {
                     // Ajouter le nouvel item
                     set({
@@ -79,9 +95,16 @@ export const useCartStore = create<CartStore>()(
                     // Si quantité <= 0, supprimer l'item
                     get().removeItem(id)
                 } else {
+                    const item = get().items.find((i) => i.id === id)
+                    const targetQty = Math.min(quantity, MAX_ITEM_QUANTITY)
+
+                    if (item && targetQty > 1 && item.quantity < targetQty) {
+                        notifyDuplicateQuantity(item.title)
+                    }
+
                     set({
                         items: get().items.map((item) =>
-                            item.id === id ? { ...item, price: Math.round(item.price), quantity: Math.min(quantity, MAX_ITEM_QUANTITY) } : item
+                            item.id === id ? { ...item, price: Math.round(item.price), quantity: targetQty } : item
                         ),
                     })
                 }

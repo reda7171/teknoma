@@ -227,7 +227,6 @@ export default async function MarketPage({
 
     return (
         <div className="min-h-screen bg-pixio-cream flex flex-col">
-            <link rel="canonical" href={pageUrl} />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

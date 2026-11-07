@@ -3,7 +3,7 @@ import { getCommunityUser } from '@/lib/actions/community-auth'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { getTranslations } from 'next-intl/server'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getBaseUrl, normalizeImage } from '@/lib/utils'
 import { BookOpen, MapPin, Star, Calendar, RefreshCw, ArrowLeft, ShieldCheck, MessageCircle, Edit } from 'lucide-react'
 import { Link } from '@/i18n/routing'
@@ -21,6 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     if (!book) {
         return {
             title: 'Livre introuvable | Riwaya Community',
+            robots: { index: false, follow: false },
         }
     }
 
@@ -63,7 +64,7 @@ export default async function CommunityBookDetailPage({
     const tCommon = await getTranslations('Common')
 
     if (!book) {
-        redirect('/community/market')
+        notFound()
     }
 
     const user = await getCommunityUser()
@@ -141,7 +142,6 @@ export default async function CommunityBookDetailPage({
 
     return (
         <div className="min-h-screen bg-pixio-cream flex flex-col">
-            <link rel="canonical" href={pageUrl} />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(bookSchema) }}

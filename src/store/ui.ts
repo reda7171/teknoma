@@ -22,10 +22,10 @@ interface UIStore {
     // Notifications system
     notification: {
         message: string
-        type: 'success' | 'error' | 'info'
+        type: 'success' | 'error' | 'info' | 'warning'
         id: number
     } | null
-    showNotification: (message: string, type?: 'success' | 'error' | 'info') => void
+    showNotification: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void
     hideNotification: () => void
 }
 

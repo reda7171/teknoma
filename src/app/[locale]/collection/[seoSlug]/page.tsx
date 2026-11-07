@@ -380,8 +380,8 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
             {locale === 'ar' ? `${popularBooks.length} كتاباً في هذه المجموعة` : locale === 'en' ? `${popularBooks.length} books in this collection` : `${popularBooks.length} livres dans cette collection`}
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {popularBooks.map((book: any) => (
-              <BookCard key={book.id} {...book} />
+            {popularBooks.map((book: any, idx: number) => (
+              <BookCard key={book.id} {...book} priority={idx < 2} />
             ))}
           </div>
           <div className="text-center mt-10">
@@ -438,6 +438,30 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
             </div>
           </article>
         </details>
+
+        {/* Merchant & Partner Internal Linking Section */}
+        <section className="mt-16 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden shadow-xl border border-slate-700">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="max-w-2xl text-center md:text-left rtl:md:text-right">
+              <span className="inline-block px-3.5 py-1 rounded-full bg-amber-400/20 text-amber-300 font-bold text-xs uppercase tracking-wider mb-3">
+                {locale === 'ar' ? 'شبكة المكتبات الشريكة' : locale === 'en' ? 'Partner Booksellers Network' : 'Réseau Libraires & Marchands'}
+              </span>
+              <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
+                {t('SellerCtaTitle')}
+              </h3>
+              <p className="text-slate-300 text-base leading-relaxed">
+                {t('SellerCtaDesc')}
+              </p>
+            </div>
+            <Link
+              href="/devenir-vendeur"
+              className="shrink-0 inline-flex items-center gap-2 px-7 py-4 bg-amber-400 hover:bg-amber-300 text-slate-900 font-black rounded-2xl transition-all duration-200 shadow-lg hover:shadow-amber-400/20 hover:-translate-y-0.5 text-base"
+            >
+              <span>{t('SellerCtaBtn')}</span>
+              <ChevronRight className="w-5 h-5 rtl:rotate-180" />
+            </Link>
+          </div>
+        </section>
       </main>
       
       <Footer />

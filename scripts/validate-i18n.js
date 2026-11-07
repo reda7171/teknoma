@@ -88,4 +88,3 @@ if (hasErrors) {
 }
 
 console.log(`[i18n-validator] OK: 100% strict parity verified across ${locales.join(', ')} (${sortedKeys.length} keys total).`);
-process.exit(0);

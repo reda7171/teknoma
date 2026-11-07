@@ -29,9 +29,13 @@ function sanitizePixelData(data?: Record<string, unknown>) {
     return sanitized
 }
 
-export const trackEvent = (eventName: string, data?: Record<string, unknown>) => {
+export const trackEvent = (eventName: string, data?: Record<string, unknown>, options?: { eventID?: string }) => {
     if (typeof window !== 'undefined' && window.fbq) {
-        window.fbq('track', eventName, sanitizePixelData(data))
+        if (options?.eventID) {
+            window.fbq('track', eventName, sanitizePixelData(data), { eventID: options.eventID })
+        } else {
+            window.fbq('track', eventName, sanitizePixelData(data))
+        }
     }
 }
 

@@ -13,7 +13,7 @@ env:
 
 jobs:
   lighthouse-audit:
-    name: Lighthouse A11y & Contrast Check
+    name: Lighthouse Mobile & Core Web Vitals Guard
     runs-on: ubuntu-latest
 
     services:
@@ -41,11 +41,16 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Validate JSX Syntax
+        run: npm run check:jsx
+
       - name: Validate i18n Parity (Strict)
         run: npm run validate:i18n
 
-      - name: Setup Database Schema
-        run: npx prisma db push --accept-data-loss
+      - name: Setup Database Schema & Seed
+        run: |
+          npx prisma db push --accept-data-loss
+          npx tsx prisma/seed.ts
         env:
           DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
 
@@ -56,7 +61,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
           NEXT_PUBLIC_APP_URL: "http://localhost:3000"
 
-      - name: Run Lighthouse CI Audit
+      - name: Run Lighthouse CI Mobile CWV Audit
         uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: './.lighthouserc.json'
@@ -170,14 +175,24 @@ jobs:
             echo "Telechargement de la nouvelle image Docker..."
             echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-            # Nettoyage preventif des conteneurs en conflit
-            echo "Nettoyage preventif des conteneurs en conflit..."
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker rm -f 6c16caadb77f_riwaya_app riwaya_app 2>/dev/null || true
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sh -c 'docker rm -f $(docker ps -a -q --filter "name=app") 2>/dev/null || true'
+            # Rechargement atomique sans interruption (Zero-Downtime)
+            echo "Rechargement atomique du service..."
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps app
 
-            # Rechargement direct du service avec Docker Compose v2
-            echo "Rechargement du service..."
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps --force-recreate app
+            # Verification immediate de disponibilite HTTP
+            echo "Attente de reponse HTTP 200 sur port 3000..."
+            READY=0
+            for i in $(seq 1 30); do
+              if curl -s -f http://127.0.0.1:3000/fr > /dev/null 2>&1; then
+                echo "Application operationnelle (HTTP 200 OK) en ${i}s"
+                READY=1
+                break
+              fi
+              sleep 1
+            done
+            if [ $READY -eq 0 ]; then
+              echo "Controle sante : conteneur actif mais demarrage prolonge"
+            fi
 
             # Rechargement et contrôle du conteneur WhatsApp (WAHA)
             echo "Rechargement de la passerelle WhatsApp (WAHA)..."

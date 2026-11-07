@@ -2,6 +2,7 @@ import { getCommunityUser } from '@/lib/actions/community-auth'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import CheckoutClient from '@/components/checkout/CheckoutClient'
+import CheckoutErrorBoundary from '@/components/checkout/CheckoutErrorBoundary'
 import { getSetting } from '@/lib/actions/site-settings'
 
 export default async function CheckoutPage() {
@@ -30,12 +31,14 @@ export default async function CheckoutPage() {
     return (
         <div className="min-h-screen bg-pixio-cream">
             <HeaderWithUser />
-            <CheckoutClient 
-                user={userProps} 
-                minOrderAmount={Number(minAmount)} 
-                paymentSettings={{ stripeEnabled, codEnabled, paypalEnabled, cmiEnabled, bankTransferEnabled, bankTransferAccounts }}
-                is3For4Active={feature3For4 === 'true'}
-            />
+            <CheckoutErrorBoundary>
+                <CheckoutClient 
+                    user={userProps} 
+                    minOrderAmount={Number(minAmount)} 
+                    paymentSettings={{ stripeEnabled, codEnabled, paypalEnabled, cmiEnabled, bankTransferEnabled, bankTransferAccounts }}
+                    is3For4Active={feature3For4 === 'true'}
+                />
+            </CheckoutErrorBoundary>
             <Footer />
         </div>
     )

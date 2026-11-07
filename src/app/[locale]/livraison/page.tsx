@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { Truck, MapPin, Clock, ShieldCheck, CreditCard, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Script from 'next/script'
@@ -110,6 +111,7 @@ export default async function DeliveryPage({ params }: { params: Promise<{ local
             {/* Hero Header */}
             <section className="pt-28 pb-16 bg-white border-b border-gray-100 relative overflow-hidden">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                    <Breadcrumbs items={[{ label: t('Title') }]} className="mb-6 flex justify-center" />
                     <div className="inline-flex items-center gap-2 px-5 py-2 bg-emerald-50 text-emerald-800 rounded-full text-xs font-black uppercase tracking-widest mb-6">
                         <Truck className="w-4 h-4" />
                         <span>{isAr ? 'توصيل موثوق لجميع أنحاء المغرب' : isEn ? 'Reliable delivery across Morocco' : 'Expédition nationale rapide'}</span>

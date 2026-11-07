@@ -10,10 +10,10 @@ export default async function TrackingPage() {
         <div className="min-h-screen bg-pixio-cream flex flex-col">
             <Header />
 
-            <main className="flex-grow container mx-auto px-4 py-6 sm:py-10 md:py-16 max-w-3xl">
-                <div className="text-center mb-6 sm:mb-10 md:mb-12">
-                    <h1 className="text-4xl lg:text-5xl font-black text-black mb-4 tracking-tighter">{t('Title')}<span className="text-gray-300">.</span></h1>
-                    <p className="text-gray-500 font-medium">{t('Subtitle')}</p>
+            <main className="flex-grow container mx-auto px-4 py-4 sm:py-8 md:py-14 max-w-3xl">
+                <div className="text-center mb-4 sm:mb-8 md:mb-12">
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-black mb-2 sm:mb-4 tracking-tighter">{t('Title')}<span className="text-gray-300">.</span></h1>
+                    <p className="text-gray-500 font-medium text-sm sm:text-base">{t('Subtitle')}</p>
                 </div>
 
                 <TrackingClient />

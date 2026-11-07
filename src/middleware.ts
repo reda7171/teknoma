@@ -2,10 +2,32 @@ import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getCanonicalUrl, buildCanonicalLinkHeader } from './lib/seo/canonical';
 
 const intlMiddleware = createMiddleware(routing);
 
+const BLOCKED_SCRAPERS = [
+  'httrack',
+  'sitesucker',
+  'teleport',
+  'offline explorer',
+  'webcopier',
+  'cyotek',
+  'scrapy',
+  'webharvest',
+  'grabnet',
+  'nikto',
+  'sqlmap',
+  'wpscan',
+  'libwww-perl',
+];
+
 export default function middleware(request: NextRequest) {
+  const userAgent = (request.headers.get('user-agent') || '').toLowerCase();
+  if (BLOCKED_SCRAPERS.some((bot) => userAgent.includes(bot))) {
+    return new NextResponse('Access Denied', { status: 403 });
+  }
+
   const pathname = request.nextUrl.pathname;
   
   // Force admin routes to always use French locale
@@ -13,13 +35,28 @@ export default function middleware(request: NextRequest) {
     const newPathname = pathname.replace(/^\/(ar|en)\/admin/, '/fr/admin').replace(/^\/admin/, '/fr/admin');
     const url = request.nextUrl.clone();
     url.pathname = newPathname;
-    return NextResponse.redirect(url, 301);
+    const redirectRes = NextResponse.redirect(url, 301);
+    redirectRes.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    return redirectRes;
   }
   
   const response = intlMiddleware(request);
   if (pathname.includes('/opengraph-image')) {
     response.headers.set('X-Robots-Tag', 'noindex, noarchive');
   }
+
+  // Bloquer l'indexation de l'espace administration pour préserver 100% du crawl budget
+  if (pathname.includes('/admin')) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  }
+
+  // Set HTTP Canonical Link header (RFC 5988 / Google Search Central)
+  // Strips all campaign and tracking query parameters (UTM, fbclid, etc.)
+  if (!pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.includes('.')) {
+    const canonicalUrl = getCanonicalUrl(pathname, request.nextUrl.searchParams, ['usedOnly']);
+    response.headers.set('Link', buildCanonicalLinkHeader(canonicalUrl));
+  }
+
   return response;
 }
 

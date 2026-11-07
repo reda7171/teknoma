@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
-    "prebuild": "node -e \"if (require('fs').existsSync('scripts/validate-i18n.js')) { require('./scripts/validate-i18n.js'); }\"",
+    "prebuild": "node -e \"const fs=require('fs'); if(fs.existsSync('scripts/check-jsx-syntax.js')){ require('./scripts/check-jsx-syntax.js'); } if(fs.existsSync('scripts/validate-i18n.js')){ require('./scripts/validate-i18n.js'); }\"",
     "build": "next build",
+    "check:jsx": "node scripts/check-jsx-syntax.js",
     "validate:i18n": "node scripts/validate-i18n.js",
+    "audit:lighthouse": "npx @lhci/cli autorun --config=./.lighthouserc.json",
+    "prepare": "node -e \"try { require('child_process').execSync('git config core.hooksPath .husky'); } catch {}\"",
     "start": "node server.js",
     "lint": "eslint",
     "docker:up": "docker-compose up -d",

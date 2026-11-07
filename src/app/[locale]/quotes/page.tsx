@@ -2,6 +2,7 @@ import { getQuotes } from '@/lib/actions/quotes'
 import QuoteCard from '@/components/quotes/QuoteCard'
 import { Quote } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params
@@ -9,6 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     return {
         title: `${t('HeroBadge')} | Riwaya`,
         description: t('HeroDesc'),
+        alternates: getCanonicalAlternates('/quotes', locale),
     }
 }
 

@@ -54,7 +54,7 @@ export default function TiltImage({
             onMouseMove={handleMouseMove} 
             onMouseLeave={handleMouseLeave} 
             style={{ transformStyle: 'preserve-3d' }} 
-            className="w-full h-full relative overflow-hidden rounded-[2rem] shadow-xl group bg-slate-100"
+            className="w-full h-full relative overflow-hidden rounded-[2rem] shadow-xl group bg-slate-100 touch-pan-y"
         >
             {/* Shimmer skeleton sous la couverture pour 0 CLS et rendu instantané */}
             <div className="absolute inset-0 bg-gradient-to-r from-slate-100 via-slate-200/50 to-slate-100 animate-pulse pointer-events-none rounded-[2rem]" aria-hidden="true" />

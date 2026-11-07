@@ -23,23 +23,29 @@ const getNotificationLinks = (order: any) => {
 
     switch (order.status) {
         case 'PENDING':
-            text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement ici : ${trackingLink}`
+            text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement en direct ici : ${trackingLink}`
             break
         case 'CONFIRMED':
-            text = `Bonjour ${order.fullName}, votre commande Riwaya est confirmée et en cours de préparation. Suivi : ${trackingLink}`
+            text = `Bonjour ${order.fullName}, votre commande Riwaya est confirmée et en cours de préparation. Suivi en direct : ${trackingLink}`
             break
         case 'SHIPPED':
-            text = `Bonne nouvelle ${order.fullName}, votre commande a été expédiée${order.shippingCompanyName ? ` avec ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Suivi: ${order.trackingID})` : ''} ! Lien : ${trackingLink}`
+            text = `Bonne nouvelle ${order.fullName}, votre commande a été expédiée${order.shippingCompanyName ? ` avec ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Suivi: ${order.trackingID})` : ''} ! Suivre mon colis : ${trackingLink}`
             break
         case 'DELIVERED':
-            text = `Bonjour ${order.fullName}, votre commande a été livrée ! Bonne lecture et n'hésitez pas à nous laisser un avis.`
+            text = `Bonjour ${order.fullName}, votre commande a été livrée ! Retrouvez le suivi complet et votre reçu ici : ${trackingLink} . Bonne lecture et n'hésitez pas à nous laisser un avis.`
             break
         default:
-            text = `Bonjour ${order.fullName}, voici le lien de suivi de votre commande Riwaya : ${trackingLink}`
+            text = `Bonjour ${order.fullName}, voici le lien de suivi en direct de votre commande Riwaya : ${trackingLink}`
     }
 
-    const phone = order.phone.replace(/^0+/, '').replace(/\s+/g, '')
-    const waLink = `https://wa.me/212${phone}?text=${encodeURIComponent(text)}`
+    let clean = (order.phone || '').replace(/\D/g, '')
+    if (clean.startsWith('0') && clean.length === 10) {
+        clean = '212' + clean.slice(1)
+    } else if (clean.length === 9 && (clean.startsWith('5') || clean.startsWith('6') || clean.startsWith('7'))) {
+        clean = '212' + clean
+    }
+
+    const waLink = clean ? `https://wa.me/${clean}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`
     const mailLink = order.email ? `mailto:${order.email}?subject=${encodeURIComponent('Suivi de votre commande Riwaya')}&body=${encodeURIComponent(text)}` : null
 
     return { waLink, mailLink }

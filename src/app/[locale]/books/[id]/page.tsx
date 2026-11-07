@@ -30,7 +30,6 @@ import BookSubNav from '@/components/BookSubNav'
 import ReserveBookButton from '@/components/ReserveBookButton'
 import { BookJsonLd } from '@/components/BookJsonLd'
 import { getGoogleAvailability } from '@/lib/product-availability'
-import AdBanner from '@/components/AdBanner'
 import TestimonialsTabs from '@/components/home/TestimonialsTabs'
 import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
@@ -77,12 +76,20 @@ export async function generateMetadata({
     const { id, locale } = await params
     const uuidMatch = id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
     const bookId = uuidMatch ? uuidMatch[0] : id.slice(0, 36)
-    const initialBook = await getBookById(bookId).catch(() => null).catch(() => null)
+    const initialBook = await getBookById(bookId).catch(() => null)
 
     if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && bookId !== '08f41f86-a23c-48f6-b486-109383b0f6e0') {
         return {
             title: 'Livre introuvable | Riwaya',
             description: 'Ce livre est introuvable ou n\'est plus disponible sur Riwaya.',
+            robots: { index: false, follow: false },
+        }
+    }
+
+    if (initialBook && !initialBook.active) {
+        return {
+            title: 'Livre indisponible | Riwaya',
+            description: 'Ce livre n\'est plus disponible à la vente sur Riwaya.',
             robots: { index: false, follow: false },
         }
     }
@@ -257,6 +264,10 @@ export default async function BookDetailPage({
     const isAdmin = user?.role === 'ADMIN' || user?.email === 'contact@riwaya.store'
 
     if (!initialBook && !process.env.CI && process.env.NODE_ENV === 'production' && bookId !== '08f41f86-a23c-48f6-b486-109383b0f6e0') {
+        notFound()
+    }
+
+    if (initialBook && !initialBook.active && !isAdmin) {
         notFound()
     }
 
@@ -491,17 +502,6 @@ export default async function BookDetailPage({
                     <div className="mb-6 md:mb-10">
                         <PredictiveSearch />
                     </div>
-
-                    {/* Bloc publicitaire AdSense avant le fil d'Ariane */}
-                    {adsenseEnabled && (
-                        <AdBanner
-                            publisherId={adsensePublisherId}
-                            slotId={adsenseSidebarSlot}
-                            label={locale === 'ar' ? 'إعلان — صفحة الكتاب' : locale === 'en' ? 'Advertisement — Book Page' : 'Publicité — Page Livre'}
-                            format="horizontal"
-                            className="!my-3"
-                        />
-                    )}
 
                     {/* Product Detail */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-20 mb-8 sm:mb-16 md:mb-32">

@@ -5,14 +5,17 @@ import Link from 'next/link'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { normalizeImage } from '@/lib/utils'
 import { downloadOrderInvoicePdf } from '@/lib/utils/invoiceGenerator'
+import { AmanaTrackingResult } from '@/lib/shipping/amana-tracking'
+import AmanaLiveTrackingWidget from '@/components/shipping/AmanaLiveTrackingWidget'
 
 interface OrderTrackingClientProps {
     order: any
     shippingCompany: any
+    amanaTracking?: AmanaTrackingResult | null
     locale: string
 }
 
-export default function OrderTrackingClient({ order, shippingCompany, locale }: OrderTrackingClientProps) {
+export default function OrderTrackingClient({ order, shippingCompany, amanaTracking, locale }: OrderTrackingClientProps) {
     const t = {
         fr: {
             backToStore: "Retour à la boutique",
@@ -172,11 +175,11 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
     ]
 
     return (
-        <div className="min-h-screen bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8 font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
-            <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
+        <div className="min-h-screen bg-gray-50/50 py-4 sm:py-8 px-3 sm:px-6 lg:px-8 font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
+            <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
                 
                 {/* Header */}
-                <div className="relative flex items-center justify-center py-4 mb-4">
+                <div className="relative flex items-center justify-center py-2 sm:py-4 mb-2 sm:mb-4">
                     <Link 
                         href={`/${locale}`} 
                         className={`absolute ${isRtl ? 'right-0' : 'left-0'} text-gray-500 hover:text-gray-900 flex items-center gap-1 sm:gap-2 font-medium transition-colors`}
@@ -185,17 +188,17 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                         <span className="hidden sm:inline">{t.backToStore}</span>
                         <span className="sm:hidden text-sm">Retour</span>
                     </Link>
-                    <img src="/logo.png" alt="Riwaya" className="h-12 sm:h-16 w-auto object-contain" />
+                    <img src="/logo.png" alt="Riwaya" className="h-10 sm:h-16 w-auto object-contain" />
                 </div>
 
-                <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100/60 p-6 sm:p-10 relative overflow-hidden backdrop-blur-xl">
+                <div className="bg-white rounded-2xl sm:rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100/60 p-4 sm:p-10 relative overflow-hidden backdrop-blur-xl">
                     {/* Decorative gradient top bar */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-emerald-600"></div>
                     
-                    <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="mb-6 sm:mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="text-center sm:text-start">
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t.trackingTitle}</h1>
-                            <p className="text-gray-500 mt-2 text-sm sm:text-base">
+                            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">{t.trackingTitle}</h1>
+                            <p className="text-gray-500 mt-1 sm:mt-2 text-xs sm:text-base">
                                 {t.order} <span className="font-mono font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md">#{order.id.split('-')[0].toUpperCase()}</span>
                                 {' • '}
                                 {t.placedOn} {new Date(order.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
@@ -204,7 +207,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                         <button
                             type="button"
                             onClick={handleDownloadInvoice}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/10 text-sm transition-all self-center sm:self-auto shrink-0"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/10 text-xs sm:text-sm transition-all self-center sm:self-auto shrink-0"
                             title={t.downloadInvoice}
                         >
                             <FileText className="w-4 h-4" />
@@ -297,8 +300,19 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                         </div>
                     )}
 
+                    {/* Suivi en direct Amana International */}
+                    {amanaTracking && (
+                        <div className="mb-10">
+                            <AmanaLiveTrackingWidget
+                                orderId={order.id}
+                                initialTracking={amanaTracking}
+                                locale={locale}
+                            />
+                        </div>
+                    )}
+
                     {/* Shipping Info */}
-                    {shippingCompany && order.trackingID && (
+                    {shippingCompany && order.trackingID && !amanaTracking && (
                         <div className="bg-gradient-to-br from-gray-50 to-white rounded-[1.5rem] p-5 sm:p-6 mb-10 flex flex-col sm:flex-row items-center gap-6 justify-between border border-gray-100 shadow-sm transition-all hover:shadow-md">
                             <div className="flex items-center gap-4 w-full sm:w-auto">
                                 {shippingCompany.logo ? (

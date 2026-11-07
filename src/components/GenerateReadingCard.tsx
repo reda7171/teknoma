@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { toPng } from 'html-to-image'
-import { Share2, Download, Loader2, Award, BookOpen, Clock, Users } from 'lucide-react'
+import { Share2, Download, Loader2, Award, BookOpen, Clock, Users, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import { normalizeImage } from '@/lib/utils'
 import { getUserReadingRank } from '@/lib/actions/reading-rank'
@@ -11,20 +11,28 @@ import { useTranslations } from 'next-intl'
 interface GenerateReadingCardProps {
     user: any
     items: any[]
+    className?: string
+    buttonClassName?: string
 }
 
-export default function GenerateReadingCard({ user, items }: GenerateReadingCardProps) {
+export default function GenerateReadingCard({
+    user,
+    items,
+    className = 'mt-4',
+    buttonClassName
+}: GenerateReadingCardProps) {
     const t = useTranslations('Community.Dashboard')
     const [generating, setGenerating] = useState(false)
     const [showPreview, setShowPreview] = useState(false)
     const [rank, setRank] = useState<number | null>(null)
     const cardRef = useRef<HTMLDivElement>(null)
 
-    const totalBooks = items.length
-    const completedBooks = items.filter(i => i.status === 'COMPLETED').length
-    const totalPages = items.reduce((acc, i) => acc + i.totalPages, 0)
-    const pagesRead = items.reduce((acc, i) => acc + i.currentPage, 0)
-    const uniqueAuthors = new Set(items.map(i => i.author)).size
+    const safeItems = items || []
+    const totalBooks = safeItems.length
+    const completedBooks = safeItems.filter(i => i.status === 'COMPLETED').length
+    const totalPages = safeItems.reduce((acc, i) => acc + (i.totalPages || 0), 0)
+    const pagesRead = safeItems.reduce((acc, i) => acc + (i.currentPage || 0), 0)
+    const uniqueAuthors = new Set(safeItems.map(i => i.author)).size
     // Estimation : 1 page = 1.5 min
     const hoursRead = Math.round((pagesRead * 1.5) / 60)
 
@@ -47,7 +55,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                         skipFonts: false,
                     })
                     const link = document.createElement('a')
-                    link.download = `riwaya-challenge-${user?.fullName || 'reader'}.png`
+                    link.download = `riwaya-carte-lecteur-${user?.fullName || 'reader'}.png`
                     link.href = dataUrl
                     link.click()
                 } catch (err) {
@@ -62,24 +70,30 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
     if (!user) return null
 
     return (
-        <div className="mt-4">
+        <div className={className}>
             <button
+                type="button"
                 onClick={handleGenerate}
                 disabled={generating}
-                className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black hover:bg-emerald-700 transition-all active:scale-95 shadow-lg shadow-emerald-600/20"
+                className={buttonClassName || "inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-emerald-600/20 group"}
             >
-                {generating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Share2 className="w-5 h-5" />}
-                {t('GenerateCard')}
+                {generating ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : (
+                    <Sparkles className="w-4 h-4 text-emerald-200 group-hover:rotate-12 transition-transform" />
+                )}
+                <span>{t('GenerateCard')}</span>
             </button>
 
             {/* Hidden Card for Generation (or visible preview) */}
             <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all ${showPreview ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
                 <div className="relative max-w-md w-full">
                     <button
+                        type="button"
                         onClick={() => setShowPreview(false)}
-                        className="absolute -top-12 right-0 text-white p-2 hover:bg-white/10 rounded-full"
+                        className="absolute -top-12 right-0 text-white p-2 hover:bg-white/10 rounded-full text-xs font-bold"
                     >
-                        Fermer
+                        Fermer ✕
                     </button>
 
                     <div 
@@ -105,7 +119,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                                     </div>
                                 </div>
                                 <div className="bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                    Lecteur Passionné
+                                    Carte de Lecteur
                                 </div>
                             </div>
 
@@ -152,13 +166,13 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                                     <div className="text-xl font-black text-black">{hoursRead}h</div>
                                     <div className="text-[10px] uppercase font-bold text-gray-500">Temps total</div>
                                 </div>
-                                <div className="bg-orange-50 p-4 rounded-3xl border border-orange-100 shadow-sm w-[calc(50%-6px)]">
-                                    <div className="text-orange-600 font-black text-xs mb-1 font-sans">PP</div>
+                                <div className="bg-amber-50 p-4 rounded-3xl border border-amber-100 shadow-sm w-[calc(50%-6px)]">
+                                    <div className="text-amber-600 font-black text-xs mb-1 font-sans">PP</div>
                                     <div className="text-xl font-black text-black">{totalPages.toLocaleString('fr-FR')}</div>
                                     <div className="text-[10px] uppercase font-bold text-gray-500">Pages</div>
                                 </div>
-                                <div className="bg-purple-50 p-4 rounded-3xl border border-purple-100 shadow-sm w-[calc(50%-6px)]">
-                                    <Users className="w-4 h-4 text-purple-600 mb-1" />
+                                <div className="bg-teal-50 p-4 rounded-3xl border border-teal-100 shadow-sm w-[calc(50%-6px)]">
+                                    <Users className="w-4 h-4 text-teal-600 mb-1" />
                                     <div className="text-xl font-black text-black">{uniqueAuthors}</div>
                                     <div className="text-[10px] uppercase font-bold text-gray-500">Auteurs</div>
                                 </div>
@@ -184,6 +198,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
 
                     <div className="mt-6 flex justify-center">
                         <button
+                            type="button"
                             onClick={handleGenerate}
                             disabled={generating}
                             className="bg-white text-black px-8 py-3 rounded-full font-bold flex items-center gap-2 shadow-xl hover:scale-105 transition-transform"

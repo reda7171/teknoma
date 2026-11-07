@@ -106,6 +106,12 @@ export async function addExchangeBook(formData: FormData): Promise<BookResult> {
             .catch(err => console.error('[WishlistAlerts] Background trigger error:', err))
 
         revalidatePath('/community')
+
+        // Notification instantanée IndexNow pour la bourse aux livres
+        import('@/lib/indexnow')
+            .then(m => m.submitCommunityMarketToIndexNow(book.id, `Nouveau livre d'échange: ${book.title}`))
+            .catch(err => console.error('[IndexNow] Erreur notification nouveau livre échange:', err))
+
         return { success: true, bookId: book.id }
 
     } catch (error) {
@@ -182,8 +188,13 @@ export async function updateExchangeBook(id: string, formData: FormData): Promis
 
         revalidatePath('/community')
         revalidatePath(`/community/books/${id}`)
-        return { success: true, bookId: id }
 
+        // Notification instantanée IndexNow pour la bourse aux livres
+        import('@/lib/indexnow')
+            .then(m => m.submitCommunityMarketToIndexNow(id, `Mise à jour livre d'échange ${id}`))
+            .catch(err => console.error('[IndexNow] Erreur notification mise à jour livre échange:', err))
+
+        return { success: true, bookId: id }
     } catch (error) {
         if (error instanceof z.ZodError) {
             return { success: false, error: error.issues[0].message }
@@ -230,6 +241,12 @@ export async function deleteExchangeBook(id: string): Promise<BookResult> {
         })
 
         revalidatePath('/community')
+
+        // Notification instantanée IndexNow lors du retrait d'un livre d'échange
+        import('@/lib/indexnow')
+            .then(m => m.submitCommunityMarketToIndexNow(undefined, `Retrait livre d'échange ${id}`))
+            .catch(err => console.error('[IndexNow] Erreur notification retrait livre échange:', err))
+
         return { success: true, bookId: id }
     } catch (error) {
         return { success: false, error: "Erreur lors de la suppression du livre" }
