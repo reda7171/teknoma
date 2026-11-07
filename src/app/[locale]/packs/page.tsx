@@ -62,7 +62,7 @@ export async function PacksContent({
     const { locale } = await params;
     const [packs, availableBooks] = await Promise.all([
         getPacks(),
-        getAvailableBooksForCustomPack()
+        openCustomBuilder ? getAvailableBooksForCustomPack() : Promise.resolve([])
     ])
 
     const t = await getTranslations({ locale, namespace: 'PacksPage' })

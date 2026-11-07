@@ -62,6 +62,14 @@ export default function AdUnit({
     useEffect(() => {
         if (!isEnabled || !publisherId || !slot || !isVisible) return
 
+        // Les annonces AdSense ne s'exécutent pas sur localhost ou en environnement CI/tests
+        if (typeof window !== 'undefined') {
+            const hostname = window.location.hostname
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
+                return
+            }
+        }
+
         const insElement = adRef.current
         if (!insElement) return
 

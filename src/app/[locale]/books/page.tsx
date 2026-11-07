@@ -218,9 +218,9 @@ export default async function BooksPage({
                     <div>
                         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-black tracking-tight">
                             {sParams.category ? (tCats.has(sParams.category as any) ? tCats(sParams.category as any) : sParams.category) : tBooksPage('Title')}
-                            <span className="text-gray-300">.</span>
+                            <span className="text-gray-400" aria-hidden="true">.</span>
                         </h1>
-                        <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5">
+                        <p className="text-xs sm:text-sm text-gray-700 font-medium mt-0.5">
                             {tBooksPage('ItemsAvailable', { count: totalCount })}
                         </p>
                     </div>
@@ -260,7 +260,7 @@ export default async function BooksPage({
                                     <Filter className="w-10 h-10 text-black/10" />
                                 </div>
                                 <h2 className="text-2xl font-black text-black mb-4">{tBooksPage('NoVolumes')}</h2>
-                                <p className="text-gray-400 font-bold uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal text-[10px] rtl:text-sm mb-10">
+                                <p className="text-gray-700 font-bold uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal text-[10px] rtl:text-sm mb-10">
                                     {tBooksPage('EmptyCollection')}
                                 </p>
                                 <Link
@@ -276,7 +276,7 @@ export default async function BooksPage({
                                 <div className="flex items-center justify-between mb-4 px-2">
                                     <div className="flex items-center gap-3">
                                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                                        <h2 className="text-xs rtl:text-sm font-bold uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal text-gray-500">
+                                        <h2 className="text-xs rtl:text-sm font-bold uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal text-gray-700">
                                             <span className="text-gray-900 font-black">{totalCount}</span> {tBooksPage('Results')}
                                         </h2>
                                     </div>

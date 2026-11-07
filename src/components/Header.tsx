@@ -438,7 +438,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                                         <div className={`absolute top-0 left-full rtl:left-auto rtl:right-full w-[200%] h-full opacity-0 invisible group-hover/mega-item:opacity-100 group-hover/mega-item:visible group-hover/mega-item:z-10 z-0 p-8 transition-all duration-300 cursor-default rounded-r-2xl rtl:rounded-l-2xl rtl:rounded-r-none ${c.rightBg}`}>
                                                                             <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200/50">
                                                                                 <h3 className={`text-xl font-black ${c.text.replace('group-hover/mega-item:', '')}`}>{tCat.has(mainCat as any) ? tCat(mainCat as any) : mainCat}</h3>
-                                                                                <Link href={mainCatItem.url} className="text-[11px] font-bold uppercase tracking-wider text-gray-400 hover:text-black transition-colors bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
+                                                                                <Link href={mainCatItem.url} className="text-[11px] font-bold uppercase tracking-wider text-gray-700 hover:text-black transition-colors bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
                                                                                     Voir tout
                                                                                 </Link>
                                                                             </div>

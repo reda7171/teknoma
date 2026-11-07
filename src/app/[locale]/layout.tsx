@@ -500,7 +500,9 @@ export default async function LocaleLayout({
   const googleSearchConsoleId = googleSearchConsoleIdRaw || googleSearchConsoleIdFallback;
   const rawAdsenseId = adsenseId || process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-6513929866629555';
   const effectiveAdsenseId = rawAdsenseId.startsWith('ca-pub-') ? rawAdsenseId : `ca-pub-${rawAdsenseId.replace(/^pub-/, '')}`;
-  const isAdsenseActive = adsenseEnabled !== 'false';
+  const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+  const isLocalOrCI = isCI || process.env.NODE_ENV === 'development' || (siteUrl && siteUrl.includes('localhost'));
+  const isAdsenseActive = adsenseEnabled !== 'false' && !isLocalOrCI;
 
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no" data-scroll-behavior="smooth">
@@ -513,7 +515,7 @@ export default async function LocaleLayout({
         {isAdsenseActive && effectiveAdsenseId && (
           <Script
             id="google-adsense"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${effectiveAdsenseId}`}
             crossOrigin="anonymous"
           />
