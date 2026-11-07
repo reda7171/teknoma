@@ -123,13 +123,13 @@ export default function BookCard({
                             </span>
                         )}
                         {(isTrending || (views !== undefined && views >= 450)) && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-600 text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-md">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-700 text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-md">
                                 <TrendingUp className="w-2.5 h-2.5" />
                                 <span>{t('Trending')}</span>
                             </span>
                         )}
                         {showBestSeller && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-600 text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-md">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-800 text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-md">
                                 <Sparkles className="w-2.5 h-2.5" />
                                 <span>{t('BestSeller')}</span>
                             </span>
@@ -145,7 +145,7 @@ export default function BookCard({
                         }`}>
                         {displayTitle}
                     </h3>
-                    <p className={`text-gray-500 font-bold ${isCompact ? 'text-[10px] rtl:text-xs' : 'text-xs rtl:text-sm'}`}>
+                    <p className={`text-gray-700 font-bold ${isCompact ? 'text-[10px] rtl:text-xs' : 'text-xs rtl:text-sm'}`}>
                         {t('By')} {author}
                     </p>
                 </Link>
@@ -153,7 +153,7 @@ export default function BookCard({
                 {/* Price & Action */}
                 <div className="mt-auto flex flex-col items-center gap-4 w-full pt-4">
                     <p className={`font-black text-gray-900 leading-none tracking-tighter ${isCompact ? 'text-xl' : isFeatured ? 'text-4xl' : 'text-3xl'}`}>
-                        {price} <span className="text-[10px] rtl:text-xs font-black text-gray-500 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
+                        {price} <span className="text-[10px] rtl:text-xs font-black text-gray-700 uppercase tracking-widest rtl:tracking-normal">{locale === 'ar' ? 'درهم' : 'MAD'}</span>
                     </p>
 
                     {stock > 0 && (

@@ -339,7 +339,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                             params.inStock === undefined || params.inStock === 'true'
                             ? 'bg-black text-white border-black shadow-md' 
-                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                         }`}
                     >
                         {tCommon('Available')}
@@ -358,8 +358,8 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         }}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                             isUsed
-                            ? 'bg-amber-100 text-amber-700 border-amber-200 shadow-md' 
-                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                            ? 'bg-amber-100 text-amber-900 border-amber-200 shadow-md' 
+                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                         }`}
                     >
                         {tCommon('UsedBook') || "Livre d'occasion"}
@@ -378,8 +378,8 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                         }}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border flex items-center gap-1 ${
                             (params as any).newArrivals === 'true'
-                            ? 'bg-emerald-100 text-emerald-700 border-emerald-200 shadow-md' 
-                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                            ? 'bg-emerald-100 text-emerald-900 border-emerald-200 shadow-md' 
+                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                         }`}
                     >
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -513,7 +513,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                                         scroll={false}
                                                         className={`flex justify-between items-center px-4 py-2.5 rounded-xl text-[9px] rtl:text-xs rtl:tracking-normal font-bold uppercase tracking-widest transition-all ${isSubSelected
                                                             ? 'bg-gray-800 text-white shadow-md'
-                                                            : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-black'
+                                                            : 'bg-transparent text-gray-700 hover:bg-gray-50 hover:text-black'
                                                             }`}
                                                         onClick={() => {
                                 try {
@@ -534,7 +534,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
                                                     >
                                                         <span>{sub}</span>
                                                         {subCount !== undefined && (
-                                                            <span className={`text-[8px] px-2 py-0.5 rounded-full ${isSubSelected ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                                            <span className={`text-[8px] px-2 py-0.5 rounded-full ${isSubSelected ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-800 font-bold'}`}>
                                                                 {subCount}
                                                             </span>
                                                         )}
@@ -562,7 +562,7 @@ export default function BooksFilters({ params, categoryTree, categoryCounts, aut
             {(params.category || params.subCategory || params.search || params.language || params.inStock || isUsed || (params as any).newArrivals) && (
                 <div className="mt-6 pt-6 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{t('Active')}</span>
+                        <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-700">{t('Active')}</span>
                         <button
                             onClick={resetFilters}
                             className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-[9px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest hover:bg-red-100 transition-all"

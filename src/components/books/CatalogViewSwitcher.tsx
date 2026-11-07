@@ -78,11 +78,11 @@ export default function CatalogViewSwitcher({ activeParams = {} }: CatalogViewSw
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
                     !hasActiveFilters
                         ? 'bg-white text-black shadow-md shadow-black/5'
-                        : 'text-gray-600 hover:text-black hover:bg-white/50'
+                        : 'text-gray-800 hover:text-black hover:bg-white/50'
                 }`}
                 aria-pressed={!hasActiveFilters}
             >
-                <LayoutGrid className={`w-3.5 h-3.5 ${!hasActiveFilters ? 'text-black' : 'text-gray-400'}`} />
+                <LayoutGrid className={`w-3.5 h-3.5 ${!hasActiveFilters ? 'text-black' : 'text-gray-700'}`} />
                 <span>{t('DefaultView')}</span>
             </button>
 
@@ -93,14 +93,14 @@ export default function CatalogViewSwitcher({ activeParams = {} }: CatalogViewSw
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
                     hasActiveFilters
                         ? 'bg-black text-white shadow-md shadow-black/20'
-                        : 'text-gray-600 hover:text-black hover:bg-white/50'
+                        : 'text-gray-800 hover:text-black hover:bg-white/50'
                 }`}
                 aria-pressed={hasActiveFilters}
             >
-                <Sparkles className={`w-3.5 h-3.5 ${hasActiveFilters ? 'text-amber-400 fill-amber-400' : 'text-gray-400'}`} />
+                <Sparkles className={`w-3.5 h-3.5 ${hasActiveFilters ? 'text-amber-400 fill-amber-400' : 'text-gray-700'}`} />
                 <span>{t('CustomView')}</span>
                 {savedPreferences && Object.keys(savedPreferences).length > 0 && (
-                    <span className={`w-1.5 h-1.5 rounded-full ${hasActiveFilters ? 'bg-emerald-400 animate-pulse' : 'bg-gray-400'}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${hasActiveFilters ? 'bg-emerald-400 animate-pulse' : 'bg-gray-600'}`} />
                 )}
             </button>
         </div>
