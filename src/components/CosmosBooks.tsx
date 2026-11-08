@@ -30,6 +30,7 @@ export default function CosmosBooks({
           <Link
             key={book.id}
             href={`/books/${book.id}`}
+            prefetch={false}
             aria-label={book.title}
             className="group relative cursor-pointer transition-transform duration-300 hover:-translate-y-4 hover:rotate-2 shrink-0"
             style={{ 

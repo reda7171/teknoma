@@ -351,7 +351,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
             )}
 
             {!hasMore && books.length > 0 && (
-                <div className="text-center p-10 text-gray-400 text-xs rtl:text-lg font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal">
+                <div className="text-center p-10 text-gray-700 text-xs rtl:text-lg font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal">
                     {tCommon('EndOfCollection')}
                 </div>
             )}

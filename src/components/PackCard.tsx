@@ -100,7 +100,7 @@ export default function PackCard({
             </div>
 
             {/* Image Section */}
-            <Link href={`/packs/${id}`} className="block">
+            <Link href={`/packs/${id}`} prefetch={false} className="block">
                 <div className="relative h-64 bg-gray-50 overflow-hidden">
                     {image ? (
                         <ImageWithFallback
@@ -131,7 +131,7 @@ export default function PackCard({
 
             {/* Content */}
             <div className="p-8">
-                <Link href={`/packs/${id}`}>
+                <Link href={`/packs/${id}`} prefetch={false}>
                     <div className="flex flex-col items-center text-center mb-6">
                         <span className="text-xs rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-600 mb-2">{t('Exclusive')}</span>
                         <h3 className="text-3xl md:text-2xl font-black text-black tracking-tighter mb-2 group-hover:translate-y-1 transition-transform">
