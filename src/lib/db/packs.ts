@@ -5,51 +5,57 @@ import { getCached } from '@/lib/cache'
  * Récupère tous les packs actifs avec leurs livres
  */
 export async function getPacks() {
-    return prisma.pack.findMany({
-        where: { active: true },
-        select: {
-            id: true,
-            name: true,
-            nameFr: true,
-            nameEn: true,
-            language: true,
-            description: true,
-            price: true,
-            originalPrice: true,
-            image: true,
-            shippingFees: true,
-            createdAt: true,
-            books: {
+    return getCached(
+        'packs:all:active',
+        async () => {
+            return prisma.pack.findMany({
+                where: { active: true },
                 select: {
-                    book: {
+                    id: true,
+                    name: true,
+                    nameFr: true,
+                    nameEn: true,
+                    language: true,
+                    description: true,
+                    price: true,
+                    originalPrice: true,
+                    image: true,
+                    shippingFees: true,
+                    createdAt: true,
+                    books: {
                         select: {
-                            id: true,
-                            title: true,
-                            author: true,
-                            price: true,
-                            image: true,
-                            stock: true,
+                            book: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    author: true,
+                                    price: true,
+                                    image: true,
+                                    stock: true,
+                                }
+                            }
                         }
-                    }
-                }
-            },
-            extraProducts: {
-                select: {
-                    extraProduct: {
+                    },
+                    extraProducts: {
                         select: {
-                            id: true,
-                            name: true,
-                            price: true,
-                            image: true,
+                            extraProduct: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    price: true,
+                                    image: true,
+                                }
+                            }
                         }
-                    }
-                }
-            },
+                    },
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            })
         },
-        orderBy: {
-            createdAt: 'desc',
-        },
-    })
+        300 // Cache 5 minutes
+    )
 }
 
 /**
