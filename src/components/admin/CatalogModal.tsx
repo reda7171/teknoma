@@ -11,12 +11,13 @@ interface CatalogModalProps {
     isOpen: boolean
     onClose: () => void
     triggerEvent?: string // New prop for external triggers
+    visitor?: boolean
 }
 
-export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEvent }: CatalogModalProps) {
+export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEvent, visitor = false }: CatalogModalProps) {
     const [isOpen, setIsOpen] = useState(initialIsOpen)
     const [isGenerating, setIsGenerating] = useState(false)
-    const [isVisitor, setIsVisitor] = useState(false)
+    const [isVisitor, setIsVisitor] = useState(visitor)
     const [allBooks, setAllBooks] = useState<any[]>([])
     const [categories, setCategories] = useState<string[]>([])
     const [warehouses, setWarehouses] = useState<any[]>([])

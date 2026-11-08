@@ -1,83 +1,27 @@
-'use client'
+import type { HTMLAttributes, ReactNode } from 'react'
 
-import { useEffect, useRef, useState } from 'react'
-
-interface ScrollRevealProps extends React.HTMLAttributes<HTMLDivElement> {
-    children: React.ReactNode
+interface ScrollRevealProps extends HTMLAttributes<HTMLDivElement> {
+    children: ReactNode
     className?: string
     animation?: 'animate-reveal-up' | 'animate-reveal-right' | 'animate-reveal-left'
     delay?: number
 }
 
-// Instance unique d'IntersectionObserver pour minimiser la consommation CPU et le TBT
-let sharedObserver: IntersectionObserver | null = null
-const observerCallbacks = new Map<Element, () => void>()
-
-function getSharedObserver() {
-    if (typeof window === 'undefined') return null
-    if (!sharedObserver) {
-        sharedObserver = new IntersectionObserver(
-            (entries) => {
-                for (let i = 0; i < entries.length; i++) {
-                    const entry = entries[i]
-                    if (entry.isIntersecting) {
-                        const cb = observerCallbacks.get(entry.target)
-                        if (cb) {
-                            observerCallbacks.delete(entry.target)
-                            sharedObserver?.unobserve(entry.target)
-                            cb()
-                        }
-                    }
-                }
-            },
-            {
-                threshold: 0.05,
-                rootMargin: '50px 0px',
-            }
-        )
-    }
-    return sharedObserver
-}
-
+// Content is visible from the server render. CSS handles the entrance animation;
+// no observer, effect, or hydration boundary is needed for this wrapper.
 export default function ScrollReveal({
     children,
-    className = "",
-    animation = "animate-reveal-up",
+    className = '',
+    animation = 'animate-reveal-up',
     delay = 0,
+    style,
     ...props
 }: ScrollRevealProps) {
-    const [isVisible, setIsVisible] = useState(true)
-    const elementRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        const el = elementRef.current
-        if (!el) return
-
-        const observer = getSharedObserver()
-        if (!observer) {
-            setIsVisible(true)
-            return
-        }
-
-        observerCallbacks.set(el, () => setIsVisible(true))
-        observer.observe(el)
-
-        return () => {
-            observerCallbacks.delete(el)
-            observer.unobserve(el)
-        }
-    }, [])
-
     return (
         <div
-            ref={elementRef}
-            className={`${className} ${!isVisible ? 'reveal-hidden' : animation}`}
-            style={{
-                animationDelay: `${delay}ms`,
-                animationFillMode: 'forwards',
-                ...props.style
-            }}
             {...props}
+            className={`${className} ${animation}`}
+            style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards', ...style }}
         >
             {children}
         </div>
