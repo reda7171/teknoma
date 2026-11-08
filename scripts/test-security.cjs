@@ -45,6 +45,42 @@ let count = 0;
 async function test(name, run) { await run(); count++; console.log('PASS ' + name); }
 async function main() {
   const session = load('src/lib/session-token.ts');
+  await test('production CSP requires per-document nonces and blocks inline handlers and objects', () => {
+    const {contentSecurityPolicy}=load('src/lib/content-security-policy.ts');
+    const nonce=require('node:crypto').randomBytes(16).toString('base64');
+    const policy=contentSecurityPolicy(nonce);
+    const scripts=policy.split('; ').find(d=>d.startsWith('script-src '));
+    assert.ok(scripts.includes(`'nonce-${nonce}'`));
+    assert.ok(scripts.includes("'strict-dynamic'"));
+    assert.ok(!/unsafe-inline|unsafe-eval|data:|blob:|(?:^| )https:(?: |$)/.test(scripts));
+    assert.ok(policy.includes("object-src 'none'"));
+    assert.ok(policy.includes("script-src-attr 'none'"));
+    assert.ok(policy.includes("base-uri 'self'"));
+    assert.throws(()=>contentSecurityPolicy("bad' 'unsafe-inline"));
+    assert.ok(contentSecurityPolicy(nonce,true).includes("'unsafe-eval'"));
+    assert.ok(!contentSecurityPolicy().includes("'unsafe-inline' https://www.googletagmanager"));
+  });
+  await test('middleware replaces supplied nonces and forwards the same policy to Next and browser', async () => {
+    const filename=path.join(root,'src/middleware.ts'),source=fs.readFileSync(filename,'utf8');
+    const ast=ts.createSourceFile(filename,source,ts.ScriptTarget.Latest,true);
+    const fn=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='middleware');
+    const context={exports:{},Buffer,URL,crypto:require('node:crypto').webcrypto,Uint8Array,process,
+      BLOCKED_SCRAPERS:[],NextResponse:{ next:()=>new Response(null,{headers:{'x-test-next':'1'}}), redirect:url=>new Response(null,{status:307,headers:{location:String(url)}}) },
+      contentSecurityPolicy:load('src/lib/content-security-policy.ts').contentSecurityPolicy,
+      intlMiddleware:()=>new Response(),getCanonicalUrl:()=> 'https://example.invalid/fr',buildCanonicalLinkHeader:()=> '<https://example.invalid/fr>; rel="canonical"'};
+    vm.runInNewContext(ts.transpileModule(fn.getText(ast),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
+    const run=()=>{const req={headers:new Headers({'x-nonce':'attacker','content-security-policy':"script-src 'unsafe-inline'"}),nextUrl:new URL('https://example.invalid/fr')};return {req,response:context.exports.default(req)};};
+    const a=run(),b=run();
+    assert.notEqual(a.req.headers.get('x-nonce'),'attacker');
+    assert.notEqual(a.req.headers.get('x-nonce'),b.req.headers.get('x-nonce'));
+    assert.equal(a.response.headers.get('content-security-policy'),a.req.headers.get('content-security-policy'));
+    assert.equal(a.response.headers.get('referrer-policy'),'strict-origin-when-cross-origin');
+    assert.equal(a.response.headers.get('cache-control'),'private, no-store');
+    const publicImage={headers:new Headers(),nextUrl:new URL('https://example.invalid/uploads/books/cover.jpg')};
+    assert.equal(context.exports.default(publicImage).headers.get('x-test-next'),'1');
+    const privateFile={headers:new Headers(),url:'https://example.invalid/uploads/%73chool-lists/private.pdf',nextUrl:new URL('https://example.invalid/uploads/%73chool-lists/private.pdf')};
+    assert.equal(context.exports.default(privateFile).headers.get('location'),'https://example.invalid/api/admin/school-lists/files/private.pdf');
+  });
   await test('sessions reject changed passwords, purpose confusion, expiry and tampering', () => {
     const token = session.createSessionToken('user1','hash1','admin',1000);
     assert.equal(session.verifySessionToken(token,'hash1','admin',5000,2000),true);

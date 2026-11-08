@@ -3,6 +3,7 @@ import { routing } from './i18n/routing';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getCanonicalUrl, buildCanonicalLinkHeader } from './lib/seo/canonical';
+import { contentSecurityPolicy } from './lib/content-security-policy';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -37,6 +38,9 @@ export default function middleware(request: NextRequest) {
     return response;
   }
 
+  // Public image URLs must keep their path; only school documents are private.
+  if (pathname.startsWith('/uploads/')) return NextResponse.next();
+
   // Force admin routes to always use French locale
   if (pathname.includes('/admin') && !pathname.startsWith('/fr/admin')) {
     const newPathname = pathname.replace(/^\/(ar|en)\/admin/, '/fr/admin').replace(/^\/admin/, '/fr/admin');
@@ -47,7 +51,16 @@ export default function middleware(request: NextRequest) {
     return redirectRes;
   }
 
+  // Overwrite any client-supplied nonce and forward the policy to Next's renderer.
+  // next-intl preserves these request headers on its rewrites and next responses.
+  const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64');
+  const policy = contentSecurityPolicy(nonce, process.env.NODE_ENV === 'development');
+  request.headers.set('x-nonce', nonce);
+  request.headers.set('Content-Security-Policy', policy);
   const response = intlMiddleware(request);
+  response.headers.set('Content-Security-Policy', policy);
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Cache-Control', 'private, no-store');
   if (pathname.includes('/opengraph-image')) {
     response.headers.set('X-Robots-Tag', 'noindex, noarchive');
   }

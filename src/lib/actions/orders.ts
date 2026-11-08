@@ -35,7 +35,7 @@ const OrderSchema = z.object({
         replacedBooks: z.record(z.string(), z.object({ id: z.string(), title: z.string() })).optional()
     })).min(1, 'Panier vide').max(50),
     couponCode: z.string().max(50).optional(),
-    cartSessionId: z.string().uuid().optional(),
+    cartSessionId: z.string().regex(/^[A-Za-z0-9_-]{16,100}$/).optional(),
     discount: z.number().optional(),
     utmSource: z.string().max(100).optional(),
     utmMedium: z.string().max(100).optional(),

@@ -27,7 +27,8 @@
     "build:safe": "node scripts/build-safe.js",
     "whatsapp:gateway": "node scripts/whatsapp-gateway.js",
     "test:e2e": "tsx scripts/test-cod-checkout-e2e.ts",
-    "test:security": "node scripts/test-security.cjs"
+    "test:security": "node scripts/test-security.cjs",
+    "test:csp:browser": "node scripts/test-csp-browser.cjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

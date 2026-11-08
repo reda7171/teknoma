@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import Script from 'next/script'
+import Script from '@/components/CspScript'
 import { useEffect, useState } from 'react'
 
 const AdSense = dynamic(() => import('./AdSense'))

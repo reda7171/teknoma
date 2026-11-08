@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         const body = await req.json()
         const { offerId, status, sessionId } = body
 
-        if (!offerId || typeof sessionId !== 'string' || !/^[a-f0-9-]{36}$/i.test(sessionId) || !['ACCEPTED', 'REJECTED'].includes(status)) {
+        if (!offerId || typeof sessionId !== 'string' || !/^[A-Za-z0-9_-]{16,100}$/.test(sessionId) || !['ACCEPTED', 'REJECTED'].includes(status)) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
         }
 

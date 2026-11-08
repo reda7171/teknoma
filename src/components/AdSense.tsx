@@ -1,6 +1,6 @@
 'use client'
 
-import Script from 'next/script'
+import Script from '@/components/CspScript'
 
 interface AdSenseProps {
     publisherId: string

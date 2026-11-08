@@ -1,3 +1,5 @@
+import { headers } from 'next/headers'
+import { CspNonceProvider } from '@/components/CspScript'
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { outfit } from '../fonts';
@@ -419,6 +421,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const nonce = (await headers()).get('x-nonce') || undefined;
 
   const localeConfig: Record<string, { lang: string, dir: string }> = {
     ar: { lang: 'ar', dir: 'rtl' },
@@ -501,16 +504,14 @@ export default async function LocaleLayout({
           <meta name="google-site-verification" content={googleSearchConsoleId} />
         )}
         {isAdsenseActive && effectiveAdsenseId && (
-          <Script
-            id="google-adsense"
+          <Script nonce={nonce} id="google-adsense"
             strategy="lazyOnload"
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${effectiveAdsenseId}`}
             crossOrigin="anonymous"
           />
         )}
         {injectedHeadTags && (
-          <Script
-            id="injected-head-tags"
+          <Script nonce={nonce} id="injected-head-tags"
             strategy="beforeInteractive"
             dangerouslySetInnerHTML={{ __html: injectedHeadTags }}
           />
@@ -623,6 +624,7 @@ export default async function LocaleLayout({
             })
           }}
         ></script>
+        <CspNonceProvider nonce={nonce}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <main id="main-content">
             {children}
@@ -645,6 +647,7 @@ export default async function LocaleLayout({
             googleAnalyticsId={googleAnalyticsId || ''}
           />
         </NextIntlClientProvider>
+        </CspNonceProvider>
 
 
       </body>
