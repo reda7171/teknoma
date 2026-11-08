@@ -103,7 +103,7 @@ export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
                             >
                                 {/* Rank Header */}
                                 <div className="flex items-center gap-4 mb-6">
-                                    <span className="text-6xl font-black text-amber-400/40 leading-none group-hover/card:text-amber-400 transition-colors duration-500">
+                                    <span className="text-6xl font-black text-amber-700 leading-none group-hover/card:text-amber-800 transition-colors duration-500">
                                         0{idx + 1}
                                     </span>
                                     <div className="h-px flex-grow bg-gray-100 group-hover/card:bg-amber-100 transition-colors"></div>
@@ -139,13 +139,13 @@ export default function AuthorsCarousel({ authors }: AuthorsCarouselProps) {
                                         <div className="w-full grid grid-cols-2 gap-4">
                                             <div className="relative p-6 bg-pixio-cream rounded-[2rem] overflow-hidden group/stat">
                                                 <p className="text-2xl font-black text-black tracking-tighter mb-0.5 relative z-10">{author.totalSold}</p>
-                                                <p className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em] relative z-10">
+                                                <p className="text-[9px] font-black uppercase text-gray-600 tracking-[0.2em] relative z-10">
                                                     {t('BooksSold')}
                                                 </p>
                                             </div>
                                             <div className="relative p-6 bg-pixio-yellow/30 rounded-[2rem] overflow-hidden group/stat">
                                                 <p className="text-2xl font-black text-amber-600 tracking-tighter mb-0.5 relative z-10">{author.bookCount}</p>
-                                                <p className="text-[9px] font-black uppercase text-gray-400 tracking-[0.2em] relative z-10">
+                                                <p className="text-[9px] font-black uppercase text-gray-600 tracking-[0.2em] relative z-10">
                                                     {author.bookCount > 1 ? t('BooksPlural') : t('BookSingular')}
                                                 </p>
                                             </div>
