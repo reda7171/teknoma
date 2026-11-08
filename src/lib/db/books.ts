@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import Fuse from 'fuse.js'
-import { getCached, generateCacheKey } from '@/lib/cache'
+import { getCached, generateCacheKey, invalidateCacheKey, invalidateCachePattern } from '@/lib/cache'
 import { matchWithLevenshtein } from '@/lib/utils/levenshtein'
 
 // Types pour les filtres
@@ -24,9 +24,31 @@ export interface BookFilters {
 }
 
 /**
- * Récupère tous les livres avec filtres optionnels
+ * Invalide le cache distribué Redis et local du catalogue
+ */
+export async function invalidateCatalogCache(bookId?: string) {
+    await Promise.all([
+        invalidateCachePattern('catalog:*'),
+        invalidateCachePattern('book:categories*'),
+        invalidateCachePattern('book:authors*'),
+        invalidateCachePattern('book:popular*'),
+        invalidateCachePattern('book:bestsellers*'),
+        bookId ? invalidateCacheKey(`book:detail:${bookId}`) : Promise.resolve(),
+    ]).catch(() => {})
+}
+
+/**
+ * Récupère tous les livres avec filtres optionnels (mis en cache dans Redis)
  */
 export async function getBooks(filters?: BookFilters) {
+    if (filters?.search) {
+        return fetchBooksDirect(filters)
+    }
+    const cacheKey = generateCacheKey('catalog:books:list', (filters || {}) as Record<string, any>)
+    return getCached(cacheKey, () => fetchBooksDirect(filters), 180)
+}
+
+async function fetchBooksDirect(filters?: BookFilters) {
     try {
         const page = filters?.page || 1
         const limit = filters?.limit || 12
@@ -246,9 +268,17 @@ export async function getSeoCategoryBookOptions() {
 }
 
 /**
- * Compte le nombre total de livres correspondant aux filtres
+ * Compte le nombre total de livres correspondant aux filtres (avec cache Redis)
  */
 export async function getBooksCount(filters?: BookFilters) {
+    if (filters?.search) {
+        return fetchBooksCountDirect(filters)
+    }
+    const cacheKey = generateCacheKey('catalog:books:count', (filters || {}) as Record<string, any>)
+    return getCached(cacheKey, () => fetchBooksCountDirect(filters), 180)
+}
+
+async function fetchBooksCountDirect(filters?: BookFilters) {
     try {
         const where: Prisma.BookWhereInput = {}
 
@@ -332,46 +362,49 @@ export async function getBooksCount(filters?: BookFilters) {
 }
 
 /**
- * Récupère un livre par son ID
+ * Récupère un livre par son ID (avec cache Redis distribué)
  */
 export async function getBookById(id: string) {
-    try {
-        const book = await prisma.book.findUnique({
-            where: { id },
-            include: {
-                customerSeller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
-                seller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
-                inventories: { include: { warehouse: true } },
-            },
-        })
-        if (book) return book
-
-        // Fallback for CI/testing book ID if exact UUID is not yet in DB
-        if (id === '08f41f86-a23c-48f6-b486-109383b0f6e0') {
-            return await prisma.book.findFirst({
-                where: { active: true },
+    if (!id) return null
+    return getCached(`book:detail:${id}`, async () => {
+        try {
+            const book = await prisma.book.findUnique({
+                where: { id },
                 include: {
                     customerSeller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
                     seller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
                     inventories: { include: { warehouse: true } },
                 },
             })
+            if (book) return book
+
+            // Fallback for CI/testing book ID if exact UUID is not yet in DB
+            if (id === '08f41f86-a23c-48f6-b486-109383b0f6e0') {
+                return await prisma.book.findFirst({
+                    where: { active: true },
+                    include: {
+                        customerSeller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
+                        seller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
+                        inventories: { include: { warehouse: true } },
+                    },
+                })
+            }
+            return null
+        } catch (e) {
+            console.error('Error in getBookById:', e)
+            if (id === '08f41f86-a23c-48f6-b486-109383b0f6e0') {
+                return await prisma.book.findFirst({
+                    where: { active: true },
+                    include: {
+                        customerSeller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
+                        seller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
+                        inventories: { include: { warehouse: true } },
+                    },
+                }).catch(() => null)
+            }
+            return null
         }
-        return null
-    } catch (e) {
-        console.error('Error in getBookById:', e)
-        if (id === '08f41f86-a23c-48f6-b486-109383b0f6e0') {
-            return await prisma.book.findFirst({
-                where: { active: true },
-                include: {
-                    customerSeller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
-                    seller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
-                    inventories: { include: { warehouse: true } },
-                },
-            }).catch(() => null)
-        }
-        return null
-    }
+    }, 300)
 }
 
 /**

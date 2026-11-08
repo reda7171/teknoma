@@ -10,7 +10,7 @@ import { createAuditLog } from "@/lib/server/audit"
 import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 
 // Schéma de validation pour un livre
-import { getBooks as getBooksDb, BookFilters, getAllAuthors } from '@/lib/db/books'
+import { getBooks as getBooksDb, BookFilters, getAllAuthors, invalidateCatalogCache } from '@/lib/db/books'
 
 const BookSchemaBase = z.object({
     title: z.string().optional().default(""),
@@ -160,6 +160,7 @@ export async function createBook(input: BookInput): Promise<BookResult> {
         revalidatePath('/[locale]/books', 'page')
         revalidatePath('/books')
         revalidatePath('/')
+        await invalidateCatalogCache(book.id)
 
         await createAuditLog({
             action: 'CREATE',
@@ -377,6 +378,7 @@ export async function updateBook(
         revalidatePath('/[locale]/books', 'page')
         revalidatePath('/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'UPDATE',
@@ -496,6 +498,7 @@ export async function updateBookQuick(
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'UPDATE',
@@ -538,6 +541,7 @@ export async function deleteBook(id: string): Promise<BookResult> {
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'DELETE',
@@ -576,6 +580,7 @@ export async function toggleBookStatus(
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'TOGGLE_STATUS',
@@ -619,6 +624,7 @@ export async function approveBook(id: string): Promise<BookResult> {
         revalidatePath('/admin/books/pending')
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         return { success: true, bookId: id }
     } catch (error: any) {
@@ -701,6 +707,7 @@ export async function bulkDeleteBooks(ids: string[]) {
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'BULK_DELETE',
@@ -787,6 +794,7 @@ export async function deleteAllBooks(): Promise<BookResult> {
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'DELETE_ALL',
@@ -823,6 +831,7 @@ export async function updateBookOrder(orderedIds: string[], pageOffset: number =
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         return { success: true }
     } catch (error: any) {
@@ -850,6 +859,7 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'BULK_UPDATE_PRICE',
@@ -897,6 +907,7 @@ export async function bulkUpdateBookLanguages(ids: string[], language: string) {
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'BULK_UPDATE_LANGUAGE',
@@ -998,6 +1009,7 @@ export async function bulkUpdateBookStock(ids: string[], newStock: number, wareh
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'BULK_UPDATE_STOCK',
@@ -1107,6 +1119,7 @@ export async function bulkUpdateBooksFromAi(booksData: AiBookUpdateData[]) {
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
         revalidatePath('/books')
 
         await createAuditLog({
@@ -1252,6 +1265,7 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
 
         revalidatePath('/admin/books')
         revalidatePath('/')
+        await invalidateCatalogCache(id)
 
         await createAuditLog({
             action: 'BULK_GENERATE_SKU',

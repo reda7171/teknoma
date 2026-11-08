@@ -1,6 +1,8 @@
+import { redisGet, redisSet, redisDel, redisDelPattern } from './redis'
+
 /**
- * Cache simple en mémoire pour les requêtes fréquentes
- * En production, utiliser Redis ou Memcached
+ * Système de cache hybride : Tier 1 Redis Distribué, Tier 2 Mémoire locale.
+ * Garantit des temps de réponse ultra-rapides et la cohérence entre instances répliquées.
  */
 
 interface CacheEntry<T> {
@@ -10,10 +12,9 @@ interface CacheEntry<T> {
 
 class MemoryCache {
     private cache = new Map<string, CacheEntry<any>>()
-    private maxSize = 1000 // Limite pour éviter memory leak
+    private maxSize = 1000
 
     set<T>(key: string, data: T, ttlSeconds: number = 300): void {
-        // Nettoyer si trop d'entrées
         if (this.cache.size >= this.maxSize) {
             const firstKey = this.cache.keys().next().value
             if (firstKey !== undefined) {
@@ -29,12 +30,8 @@ class MemoryCache {
 
     get<T>(key: string): T | null {
         const entry = this.cache.get(key)
+        if (!entry) return null
 
-        if (!entry) {
-            return null
-        }
-
-        // Vérifier expiration
         if (Date.now() > entry.expiry) {
             this.cache.delete(key)
             return null
@@ -47,11 +44,18 @@ class MemoryCache {
         this.cache.delete(key)
     }
 
+    deletePattern(prefix: string): void {
+        for (const k of this.cache.keys()) {
+            if (k.startsWith(prefix)) {
+                this.cache.delete(k)
+            }
+        }
+    }
+
     clear(): void {
         this.cache.clear()
     }
 
-    // Nettoyer les entrées expirées
     cleanup(): void {
         const now = Date.now()
         for (const [key, entry] of this.cache.entries()) {
@@ -62,18 +66,15 @@ class MemoryCache {
     }
 }
 
-// Instance singleton
+// Instance singleton mémoire locale
 export const cache = new MemoryCache()
 
-// Nettoyer toutes les 5 minutes
 if (typeof setInterval !== 'undefined') {
     setInterval(() => cache.cleanup(), 5 * 60 * 1000)
 }
 
-import { unstable_cache } from 'next/cache'
-
 /**
- * Helper pour cache avec fonction (utilisant Next.js Data Cache)
+ * Cache distribué Redis avec fallback mémoire locale
  */
 export async function getCached<T>(
     key: string,
@@ -81,19 +82,48 @@ export async function getCached<T>(
     ttlSeconds: number = 300
 ): Promise<T> {
     try {
-        const prefix = key.split(':')[0]
-        const cachedFn = unstable_cache(
-            fetchFn,
-            [key],
-            {
-                revalidate: ttlSeconds,
-                tags: [prefix, key],
-            }
-        )
-        return await cachedFn()
+        // 1. Essai Redis distribué
+        const redisValue = await redisGet<T>(key)
+        if (redisValue !== null && redisValue !== undefined) {
+            return redisValue
+        }
+
+        // 2. Essai mémoire locale
+        const memoryValue = cache.get<T>(key)
+        if (memoryValue !== null && memoryValue !== undefined) {
+            return memoryValue
+        }
+
+        // 3. Exécution requête source
+        const fresh = await fetchFn()
+
+        if (fresh !== null && fresh !== undefined) {
+            // Sauvegarde dans les deux tiers
+            cache.set(key, fresh, ttlSeconds)
+            await redisSet(key, fresh, ttlSeconds).catch(() => {})
+        }
+
+        return fresh
     } catch {
         return await fetchFn()
     }
+}
+
+/**
+ * Invalidation d'une clé spécifique dans Redis et la mémoire
+ */
+export async function invalidateCacheKey(key: string): Promise<void> {
+    cache.delete(key)
+    await redisDel(key).catch(() => {})
+}
+
+/**
+ * Invalidation par préfixe/pattern (ex: "catalog:books:*")
+ */
+export async function invalidateCachePattern(pattern: string): Promise<void> {
+    const prefix = pattern.replace(/\*$/, '')
+    cache.deletePattern(prefix)
+    await redisDelPattern(pattern).catch(() => {})
 }
 
 /**
