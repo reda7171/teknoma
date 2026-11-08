@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import DigitalProductForm from '../../DigitalProductForm'
@@ -7,6 +8,8 @@ export default async function EditDigitalProductPage({
 }: {
   params: Promise<{ id: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
   const { id } = await params
   const product = await prisma.digitalProduct.findUnique({ where: { id } })
   if (!product) notFound()

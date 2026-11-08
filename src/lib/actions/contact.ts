@@ -5,7 +5,7 @@ import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sanitizeInput } from '@/lib/security'
 import { transporter } from '@/lib/email'
 import { sendTelegramMessage } from '@/lib/telegram'
-import { getAllSettings } from '@/lib/actions/site-settings'
+import { getAllSettings } from '@/lib/server/site-settings'
 
 const ContactSchema = z.object({
     fullName: z.string().min(2, 'Le nom doit comporter au moins 2 caractères').max(100),
@@ -86,4 +86,3 @@ export async function sendContactMessage(input: ContactInput) {
         return { success: false, error: 'Une erreur est survenue lors de l\'envoi du message.' }
     }
 }
-

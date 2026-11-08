@@ -1,4 +1,5 @@
-import { getSetting } from '@/lib/actions/site-settings'
+import { requirePageRole } from '@/lib/page-authorization'
+import { getSetting } from '@/lib/server/site-settings'
 import { checkAdSenseEligibility } from '@/lib/actions/adsense-checker'
 import AdsenseConfigForm from './AdSenseConfigForm'
 import AdSenseEligibilityTester from './AdSenseEligibilityTester'
@@ -8,10 +9,12 @@ export const metadata = {
 }
 
 export default async function AdsenseConfigPage() {
+    await requirePageRole(["ADMIN"])
+
     // Récupérer les paramètres actuels
     const enabledStr = await getSetting('adsense_enabled')
     const enabled = enabledStr === 'true'
-    
+
     const publisherId = await getSetting('adsense_publisher_id') || 'pub-6513929866629555'
     const adsTxtContent = await getSetting('adsense_ads_txt') || 'google.com, pub-6513929866629555, DIRECT, f08c47fec0942fa0'
     const autoAdsEnabledStr = await getSetting('adsense_auto_ads_enabled')

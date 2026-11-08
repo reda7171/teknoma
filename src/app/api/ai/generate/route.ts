@@ -1,7 +1,11 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from "next/server";
 import { generateText } from "@/lib/gemini";
 
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
   try {
     const { prompt } = await req.json();
 

@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedAdmin, hasAdminRole, ORDER_OPERATION_ROLES } from '@/lib/admin-auth'
 
 export async function POST(request: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER","CONFIRMATOR"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })

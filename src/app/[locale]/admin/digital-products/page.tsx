@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Plus, FileText, Download, Star, Eye } from 'lucide-react'
@@ -8,6 +9,8 @@ export default async function DigitalProductsAdminPage({
 }: {
   searchParams: Promise<{ page?: string; search?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
   const params = await searchParams
   const currentPage = Number(params.page) || 1
   const searchQuery = params.search || ''
@@ -52,7 +55,7 @@ export default async function DigitalProductsAdminPage({
                         eBooks, PDFs & Ressources Numériques
                     </p>
                 </div>
-                
+
                 <Link
                     href="/admin/digital-products/new"
                     className="flex items-center gap-3 px-8 py-4 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 transition-all shadow-xl active:scale-95 w-fit"

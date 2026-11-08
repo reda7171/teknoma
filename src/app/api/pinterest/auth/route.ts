@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/actions/auth';
-import { getSetting } from '@/lib/actions/site-settings';
+import { getSetting } from '@/lib/server/site-settings'
 
 export async function GET(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin();
     } catch {
@@ -16,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/pinterest/callback`;
     const scope = 'boards:read,boards:write,pins:read,pins:write,user_accounts:read';
-    
+
     const authUrl = `https://www.pinterest.com/oauth/?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}`;
 
     return NextResponse.redirect(authUrl);

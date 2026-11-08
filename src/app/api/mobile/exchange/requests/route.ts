@@ -1,25 +1,16 @@
+import { getMobileCustomer } from '@/lib/mobile-auth'
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
+import { getJwtSecret } from '@/lib/jwt-secret';
 
-function getCustomerId(req: Request) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    return decoded.id;
-  } catch (e) {
-    return null;
-  }
-}
+async function getCustomerId(req: Request) { return (await getMobileCustomer(req))?.id || null }
 
 // GET: Mes demandes d'échange (reçues et envoyées)
 export async function GET(req: Request) {
   try {
-    const customerId = getCustomerId(req);
+    const customerId = await getCustomerId(req);
     if (!customerId) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }

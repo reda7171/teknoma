@@ -1,5 +1,10 @@
 'use server'
 
+import { publicOrderSelect } from '@/lib/public-order'
+import { priceCheckoutItems, couponDiscount } from '@/lib/checkout-pricing'
+
+import { canReadOrder, getGuestOrderIds, grantOrderAccess } from '@/lib/order-access'
+
 import { prisma } from '@/lib/prisma'
 import { cookies, headers } from 'next/headers'
 import { getCommunityUser } from './community-auth'
@@ -8,7 +13,7 @@ import { z } from 'zod'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sanitizeInput } from '@/lib/security'
 import { calculate3For4Discount } from '@/lib/utils'
-import { allocateOrderItemStock } from '@/lib/actions/warehouse'
+import { allocateOrderItemStock } from "@/lib/server/warehouse"
 import * as crypto from 'crypto'
 import { resolveStorefrontChannel } from '@/lib/sales-channel'
 import type { SalesChannel } from '@prisma/client'
@@ -30,6 +35,7 @@ const OrderSchema = z.object({
         replacedBooks: z.record(z.string(), z.object({ id: z.string(), title: z.string() })).optional()
     })).min(1, 'Panier vide').max(50),
     couponCode: z.string().max(50).optional(),
+    cartSessionId: z.string().uuid().optional(),
     discount: z.number().optional(),
     utmSource: z.string().max(100).optional(),
     utmMedium: z.string().max(100).optional(),
@@ -46,55 +52,15 @@ const OrderSchema = z.object({
 })
 
 export async function getOrders() {
-    const cookieStore = await cookies()
-    const userEmail = cookieStore.get('userEmail')?.value
-    const user = await getCommunityUser()
-
-    const hasEmail = user?.email || userEmail
-    const hasPhone = user?.phone
-
-    if (!hasEmail && !hasPhone) {
-        return null
-    }
+    const accessibleIds = await getGuestOrderIds()
+    if (!accessibleIds.length) return []
 
     try {
-        const conditions: any[] = []
-        
-        if (user?.email) conditions.push({ email: user.email })
-        if (userEmail && userEmail !== user?.email) conditions.push({ email: userEmail })
-        if (user?.phone) conditions.push({ phone: user.phone })
-
         const orders = await (prisma.order as any).findMany({
             where: {
-                OR: conditions.length > 0 ? conditions : undefined
+                id: { in: accessibleIds }
             },
-            include: {
-                items: {
-                    include: {
-                        book: {
-                            select: {
-                                id: true,
-                                title: true,
-                                image: true,
-                            }
-                        },
-                        pack: {
-                            select: {
-                                id: true,
-                                name: true,
-                            }
-                        },
-                        digitalProduct: {
-                            select: {
-                                id: true,
-                                title: true,
-                                image: true,
-                                pdfUrl: true
-                            }
-                        }
-                    }
-                }
-            },
+            select: publicOrderSelect,
             orderBy: {
                 createdAt: 'desc'
             }
@@ -123,6 +89,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
 
         // OWASP A03: Injection / Validation
         const data = OrderSchema.parse(input)
+        data.items = await priceCheckoutItems(data.items)
 
         // Check for replaced books and append to comment
         let appendedComment = data.comment ? sanitizeInput(data.comment) : ''
@@ -150,7 +117,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
         // Validation du montant minimum du panier sera faite après calcul du total
 
         // Appliquer la réduction si elle est fournie par le client (après validation)
-        let discount = sanitizedData.discount || 0
+        let discount = await couponDiscount(sanitizedData.couponCode, subtotal)
 
         const hasOnlyDigital = sanitizedData.items.length > 0 && sanitizedData.items.every(item => item.type === 'DIGITAL')
 
@@ -193,7 +160,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 let costPrice = 0
                 let sellerId: string | null = null
                 let isMissing = false
-                
+
                 if (item.type === 'BOOK') {
                     const book = bookMap.get(item.productId)
                     costPrice = book?.costPrice || 0
@@ -220,16 +187,16 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
             // Logique de livraison synchronisée avec le client (Maroc Standard vs Worldwide Amana)
             const isWorldwideShipping = sanitizedData.shippingCompany === 'Amana International' || sanitizedData.shippingCompany === 'AMANA_WORLDWIDE'
             let shippingFees = hasOnlyDigital ? 0 : isWorldwideShipping ? 200 : (hasFreeShippingItem || subtotal >= 500) ? 0 : 30
-            
-            // Add serverPromo3For4Discount to discount if it wasn't already included or just force the server-side value
-            // Since discount might already include it from the frontend, we should ensure we don't double count.
-            // Wait, the client sends `totalDiscountAmount` which already includes promo3for4Discount.
-            // Let's ensure the server discount is AT LEAST the promo discount, or we re-validate the entire discount.
-            // For now, if serverPromo3For4Discount > 0, we can add a comment. The client's discount is validated visually.
-            // But to be secure, if the client didn't send enough discount, we could override, but `sanitizedData.discount` is trusted from the client for now (as it was before).
-            // Actually, we should just ensure `discount` includes it if it doesn't.
-            if (serverPromo3For4Discount > 0 && discount < serverPromo3For4Discount) {
-                discount = serverPromo3For4Discount
+
+            // Apply only discounts calculated from trusted server records.
+            discount = Math.min(subtotal, discount + serverPromo3For4Discount)
+            if (data.cartSessionId) {
+                const offer = await tx.instantOffer.findFirst({ where: { sessionId: data.cartSessionId, status: 'ACCEPTED', expiresAt: { gt: new Date() } }, orderBy: { createdAt: 'desc' } })
+                if (offer) {
+                    const consumed = await tx.instantOffer.updateMany({ where: { id: offer.id, status: 'ACCEPTED' }, data: { status: 'USED' } })
+                    if (consumed.count !== 1) throw new Error('Offre déjà utilisée')
+                    discount = Math.min(subtotal, discount + Math.max(0, offer.discount))
+                }
             }
 
             let total = Math.max(0, subtotal - discount + shippingFees)
@@ -240,48 +207,28 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 if (creditsToUse > 0) {
                     total = total - creditsToUse
                     discount = discount + creditsToUse
-                    sanitizedData.comment = sanitizedData.comment 
+                    sanitizedData.comment = sanitizedData.comment
                         ? `${sanitizedData.comment}\n[Payé avec solde: ${creditsToUse} DH]`
                         : `[Payé avec solde: ${creditsToUse} DH]`
-                    
+
                     // Décrémenter les crédits de l'utilisateur
-                    await tx.user.update({
-                        where: { id: userForCredits.id },
+                    const debit = await tx.user.updateMany({
+                        where: { id: userForCredits.id, credits: { gte: creditsToUse } },
                         data: { credits: { decrement: creditsToUse } }
                     })
+                    if (debit.count !== 1) throw new Error('Solde insuffisant')
                 }
             }
 
             // Validation du montant minimum et vérification des emails en parallèle
-            const [minOrderAmountSetting, googleEmailsSetting] = await Promise.all([
-                tx.siteSettings.findUnique({ where: { key: 'min_order_amount' } }),
-                tx.siteSettings.findUnique({ where: { key: 'google_reviews_emails' } })
-            ])
+            const minOrderAmountSetting = await tx.siteSettings.findUnique({ where: { key: 'min_order_amount' } })
             const minOrderAmount = minOrderAmountSetting ? Number(minOrderAmountSetting.value) : 0
             if (minOrderAmount > 0 && total < minOrderAmount) {
                 throw new Error(`Le montant minimum du panier pour passer commande est de ${minOrderAmount} MAD.`)
             }
 
-            // Gestion automatique des emails pour Google Avis
-            let finalEmail = sanitizedData.email;
-            if (googleEmailsSetting && googleEmailsSetting.value) {
-                try {
-                    const emailsList = JSON.parse(googleEmailsSetting.value);
-                    const unusedIndex = emailsList.findIndex((e: any) => !e.used);
-                    if (unusedIndex !== -1) {
-                        finalEmail = emailsList[unusedIndex].email;
-                        emailsList[unusedIndex].used = true;
-                        await tx.siteSettings.update({
-                            where: { key: 'google_reviews_emails' },
-                            data: { value: JSON.stringify(emailsList) }
-                        });
-                    }
-                } catch (e) {
-                    console.error("Erreur parsing google_reviews_emails", e);
-                }
-            }
+            const finalEmail = sanitizedData.email
 
-                        // G�n�rer l'ID de commande pour liaison atomique des mouvements
             const orderId = crypto.randomUUID()
             const impactedBookIds: string[] = []
             const lowStockAlerts: { id: string, title: string, stock: number }[] = []
@@ -391,10 +338,8 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                     utmCampaign: data.utmCampaign,
                     fbclid: data.fbclid,
                     ttclid: data.ttclid,
-                    status: ['STRIPE', 'PAYPAL', 'CMI'].includes(sanitizedData.paymentMethod || '') ? 'PENDING_PAYMENT' : 'PENDING',
-                    paymentMethod: sanitizedData.items.every(item => item.type === 'DIGITAL')
-                        ? 'DIGITAL_PAYMENT'
-                        : (sanitizedData.paymentMethod || 'COD'),
+                    status: 'PENDING',
+                    paymentMethod: sanitizedData.paymentMethod || (sanitizedData.items.every(item => item.type === 'DIGITAL') ? 'DIGITAL_PAYMENT' : 'COD'),
                     items: {
                         create: itemsWithWarehouse.map(item => ({
                             type: item.type,
@@ -425,11 +370,12 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'lax',
-                    maxAge: 60 * 60 * 24 * 30 // 30 jours 
+                    maxAge: 60 * 60 * 24 * 30 // 30 jours
                 })
             }
-            
+
             // Sauvegarder l'ID de la commande pour éviter l'erreur 404 sur la page de succès
+            await grantOrderAccess(order.id)
             cookieStore.set('lastOrderId', order.id, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -452,7 +398,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 const telegramPromise = sendOrderNotification(orderWithSource as any).catch(console.error)
 
                 // Préparation commune des signaux PII et serveur (CAPI Facebook & GA4 Measurement Protocol)
-                const { getSetting } = await import('@/lib/actions/site-settings')
+                const { getSetting } = await import('@/lib/server/site-settings')
                 const hash = (str: string) => crypto.createHash('sha256').update(str.toLowerCase().trim()).digest('hex')
 
                 // Normalisation internationale du numéro de téléphone (E.164)
@@ -477,7 +423,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 // Envoi CAPI Facebook (Server-Side) avec déduplication event_id et enrichissement EMQ
                 const fbPixelId = await getSetting('facebook_pixel_id')
                 const fbAccessToken = await getSetting('facebook_access_token') || process.env.FACEBOOK_ACCESS_TOKEN
-                
+
                 let fbPromise = Promise.resolve()
                 if (fbPixelId && fbAccessToken) {
                     const em = cleanEmail && cleanEmail.includes('@') ? [hash(cleanEmail)] : undefined
@@ -615,18 +561,18 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
 
                 let jumiaSyncPromise = Promise.resolve()
                 if (impactedBookIds && impactedBookIds.length > 0) {
-                    jumiaSyncPromise = import('@/lib/actions/jumia').then(({ syncJumiaStockForBooksBackground }) => {
+                    jumiaSyncPromise = import("@/lib/server/jumia").then(({ syncJumiaStockForBooksBackground }) => {
                         return syncJumiaStockForBooksBackground(impactedBookIds).catch(console.error)
                     }).then(() => {}).catch(console.error)
                 }
 
                 let autoEmailPromise = Promise.resolve()
                 if (fullOrder.email) {
-                    const articlesList = (fullOrder.items || []).map((i: any) => 
+                    const articlesList = (fullOrder.items || []).map((i: any) =>
                         `• ${i.quantity}x ${i.book?.title || i.pack?.name || 'Article'} (${i.price} DH)`
                     ).join('<br/>')
 
-                    const { sendTriggerEmail } = await import('@/lib/actions/email-templates')
+                    const { sendTriggerEmail } = await import("@/lib/server/email-templates")
                     autoEmailPromise = sendTriggerEmail('order_created', fullOrder.email, {
                         client_nom: fullOrder.fullName,
                         customer_name: fullOrder.fullName,
@@ -657,7 +603,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
             return { success: false, error: error.message }
         }
         console.error('Erreur createOrder:', error)
-        return { success: false, error: "Erreur serveur: " + (error.message || String(error)) }
+        return { success: false, error: "Impossible de cr?er la commande" }
     }
 }
 
@@ -669,47 +615,12 @@ export async function getOrderById(orderId: string) {
             where: {
                 id: orderId
             },
-            include: {
-                items: {
-                    include: {
-                        book: true,
-                        pack: true,
-                        extraProduct: true,
-                        digitalProduct: true
-                    }
-                }
-            }
+            select: publicOrderSelect
         })
 
         if (!order) return null
 
-        // OWASP A01: Broken Access Control
-        // Seul l'admin ou le propriétaire de la commande peut voir les détails
-        const isAdmin = await isAuthenticated()
-        if (!isAdmin) {
-            let lastOrderId: string | undefined
-            let guestEmail: string | undefined
-            try {
-                const cookieStore = await cookies()
-                lastOrderId = cookieStore?.get('lastOrderId')?.value
-                guestEmail = cookieStore?.get('userEmail')?.value
-            } catch {}
-            
-            // Allow access if this is the order they just placed
-            if (lastOrderId && lastOrderId === order.id) {
-                return order
-            }
-
-            const communityUser = await getCommunityUser().catch(() => null)
-            const emailToCheck = communityUser?.email || guestEmail
-
-            const emailMatches = emailToCheck && order.email === emailToCheck
-            const phoneMatches = communityUser?.phone && order.phone === communityUser.phone
-
-            if (!emailMatches && !phoneMatches) {
-                return null
-            }
-        }
+        if (!(await canReadOrder(order))) return null
 
         return order
     } catch (error) {
@@ -720,7 +631,9 @@ export async function getOrderById(orderId: string) {
 
 export async function updateOrderEmail(orderId: string, email: string) {
     try {
+        if (typeof email !== 'string' || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { success: false, error: 'Email invalide' }
         const order = await (prisma.order as any).findUnique({ where: { id: orderId } })
+        if (!order || !(await canReadOrder(order))) return { success: false, error: 'Accès interdit' }
         if (!order) return { success: false, error: 'Commande introuvable' }
 
         // Mettre à jour l'email dans la DB
@@ -735,7 +648,7 @@ export async function updateOrderEmail(orderId: string, email: string) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 30 // 30 jours 
+            maxAge: 60 * 60 * 24 * 30 // 30 jours
         })
 
         return { success: true }
@@ -777,25 +690,12 @@ export async function getOrderStats() {
 }
 
 export async function cancelMyOrder(orderId: string) {
-    const cookieStore = await cookies()
-    const userEmail = cookieStore.get('userEmail')?.value
-    const user = await getCommunityUser()
-
-    const emailToUse = user ? user.email : userEmail
-
-    if (!emailToUse) {
-        throw new Error('Non autorisé')
-    }
-
     try {
         const order = await prisma.order.findUnique({
             where: { id: orderId }
         })
 
-        const emailMatches = emailToUse && order?.email === emailToUse
-        const phoneMatches = user?.phone && order?.phone === user.phone
-
-        if (!order || (!emailMatches && !phoneMatches)) {
+        if (!order || !(await canReadOrder(order))) {
             throw new Error('Commande introuvable')
         }
 
@@ -803,10 +703,8 @@ export async function cancelMyOrder(orderId: string) {
             throw new Error('Cette commande ne peut plus être annulée')
         }
 
-        await prisma.order.update({
-            where: { id: orderId },
-            data: { status: 'CANCELLED' }
-        })
+        const changed = await prisma.order.updateMany({ where: { id: orderId, status: 'PENDING' }, data: { status: 'CANCELLED' } })
+        if (changed.count !== 1) throw new Error('Commande non annulable')
 
         return { success: true }
     } catch (error: any) {

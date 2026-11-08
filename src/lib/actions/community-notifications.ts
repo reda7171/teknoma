@@ -16,39 +16,7 @@ interface CreateNotificationParams {
 import { sendPushNotification } from '@/lib/expo-push'
 
 // Créer une notification
-export async function createNotification(params: CreateNotificationParams) {
-    try {
-        const notification = await prisma.notification.create({
-            data: {
-                userId: params.userId,
-                type: params.type as NotificationType,
-                title: params.title,
-                message: params.message,
-                link: params.link
-            }
-        })
 
-        // Send Push Notification if user has an expoPushToken
-        const userWithToken = await prisma.customer.findUnique({
-            where: { id: params.userId },
-            select: { expoPushToken: true }
-        })
-
-        if (userWithToken?.expoPushToken) {
-            await sendPushNotification(
-                userWithToken.expoPushToken, 
-                params.title, 
-                params.message, 
-                { url: params.link }
-            )
-        }
-
-        revalidatePath('/community')
-        return { success: true, notification }
-    } catch (error) {
-        return { success: false, error: "Erreur lors de la création de la notification" }
-    }
-}
 
 // Récupérer les notifications de l'utilisateur
 export async function getUserNotifications() {

@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { isAuthenticated } from '@/lib/actions/auth'
 import { getExpenses, getFinancialStats, getChartData, getFinanceArchives, getInvoices } from '@/lib/actions/finance'
 import { Plus, Trash2, TrendingUp, TrendingDown, Wallet, Archive } from 'lucide-react'
@@ -12,6 +13,8 @@ import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 
 export default async function FinancePage(props: { params: Promise<{ locale: string }>, searchParams?: Promise<{ month?: string, year?: string }> }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const params = await props.params
     const searchParams = await props.searchParams
     const { locale } = params
@@ -63,9 +66,9 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                         Rapports de rentabilité et gestion des flux
                     </p>
                 </div>
-                
+
                 <div className="flex flex-col md:flex-row items-center gap-4">
-                    <ArchivePeriodButton 
+                    <ArchivePeriodButton
                         stats={{
                             netProfit,
                             revenue: grossRevenue,
@@ -115,7 +118,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
             {/* Partenaires (Reda & Amine) Premium Layout */}
             <div className="bg-black rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-                
+
                 <div className="relative z-10 space-y-8">
                     <div className="flex items-center gap-4">
                         <div className="w-2 h-8 bg-emerald-500 rounded-full" />
@@ -182,7 +185,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                                         {new Date(archive.createdAt).toLocaleDateString('fr-FR')}
                                     </span>
                                 </div>
-                                
+
                                 <div className="space-y-3 mb-6">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500 font-medium">Commandes</span>

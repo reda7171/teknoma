@@ -21,7 +21,7 @@ import ImageWithFallback from '@/components/ImageWithFallback'
 import TiltImage from '@/components/TiltImage'
 import StickyBottomActions from '@/components/StickyBottomActions'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
 import { getPostsByBookId } from '@/lib/actions/blog'
 import Image from 'next/image'
@@ -177,7 +177,7 @@ export async function generateMetadata({
             'acheter des livres au maroc'
         ]
     }
-    
+
     keywords = [...keywords, ...baseKeywords]
 
     const ogTitle = locale === 'ar'
@@ -253,7 +253,7 @@ export default async function BookDetailPage({
     const { id, locale } = await params
     const uuidMatch = id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
     const bookId = uuidMatch ? uuidMatch[0] : id.slice(0, 36)
-    
+
     const tBook = await getTranslations('BookDetail');
     const tCommon = await getTranslations('Common');
     const tNav = await getTranslations('Navigation');
@@ -445,7 +445,7 @@ export default async function BookDetailPage({
             }
         }))
     }
-    
+
     jsonLd.push(faqSchema as any)
 
     const audioTestimonials = audioTestimonialsResult?.success ? (audioTestimonialsResult.testimonials || []) : []
@@ -453,9 +453,9 @@ export default async function BookDetailPage({
 
     return (
         <>
-            <BookJsonLd 
-                book={book} 
-                locale={locale} 
+            <BookJsonLd
+                book={book}
+                locale={locale}
                 displayTitle={displayTitle}
                 displayDescription={displayDescription}
                 imageUrl={imageUrl}
@@ -491,7 +491,7 @@ export default async function BookDetailPage({
                     totalInCategory={adjacentCategoryBooks.totalInCategory}
                 />
 
-                <BookSubNav 
+                <BookSubNav
                     bookTitle={book.title}
                     homeLabel={tNav('Home')}
                     booksLabel={tNav('Books')}
@@ -571,7 +571,7 @@ export default async function BookDetailPage({
                                             {authorProfile.bio}
                                         </p>
                                     )}
-                                    <Link 
+                                    <Link
                                         href={`/authors/${encodeURIComponent(book.author)}`}
                                         className="inline-flex items-center gap-1.5 text-[9px] rtl:text-sm rtl:tracking-normal rtl:uppercase-none font-black uppercase tracking-widest text-black bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors"
                                     >
@@ -743,7 +743,7 @@ export default async function BookDetailPage({
                                             {tBook('SoldBy')}
                                         </p>
                                         <p className="text-sm font-black text-black truncate">
-                                            {book.seller.fullName || book.seller.email}
+                                            {book.seller.fullName || 'Riwaya'}
                                         </p>
                                         {book.seller.city && (
                                             <p className="text-[10px] font-medium text-gray-500 flex items-center gap-1 mt-0.5">
@@ -784,11 +784,11 @@ export default async function BookDetailPage({
                             {/* CTA */}
                             <div className="md:space-y-8">
                                 {book.stock <= 0 && (
-                                    
-                                        
-                                        
-                                    
-                                
+
+
+
+
+
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 bg-gray-200 rounded-full" />
                                         <p className="text-[10px] rtl:text-sm rtl:tracking-normal rtl:uppercase-none font-black text-gray-500 uppercase tracking-widest">{tBook('OutOfStock')}</p>
@@ -803,13 +803,13 @@ export default async function BookDetailPage({
                                             rel="noopener noreferrer"
                                             className="w-full flex items-center justify-center gap-3 font-bold rounded-full transition-all duration-300 py-4 md:py-6 px-8 bg-orange-500 text-white hover:bg-orange-600 text-xs md:text-sm uppercase tracking-widest shadow-2xl shadow-orange-500/20"
                                         >
-                                            <Image 
-                                                src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" 
-                                                alt="Amazon" 
-                                                width={75} 
-                                                height={22} 
-                                                className="brightness-0 invert object-contain" 
-                                                unoptimized 
+                                            <Image
+                                                src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg"
+                                                alt="Amazon"
+                                                width={75}
+                                                height={22}
+                                                className="brightness-0 invert object-contain"
+                                                unoptimized
                                             />
                                             {locale === 'ar' ? 'اطلب من أمازون' : 'Commander sur Amazon'}
                                         </a>
@@ -989,7 +989,7 @@ export default async function BookDetailPage({
                                             {authorProfile.bio}
                                         </p>
                                     )}
-                                    <Link 
+                                    <Link
                                         href={`/authors/${encodeURIComponent(book.author)}`}
                                         className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-black bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors"
                                     >
@@ -1113,10 +1113,10 @@ export default async function BookDetailPage({
                                     <Link key={post.id} href={`/blog/${post.slug}`} className="group flex flex-col bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300">
                                         <div className="relative aspect-[4/3] w-full overflow-hidden">
                                             {post.coverImage ? (
-                                                <ImageWithFallback 
-                                                    src={normalizeImage(post.coverImage)} 
-                                                    alt={post.title} 
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                                <ImageWithFallback
+                                                    src={normalizeImage(post.coverImage)}
+                                                    alt={post.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full bg-gray-50 flex items-center justify-center">
@@ -1187,4 +1187,3 @@ export default async function BookDetailPage({
         </>
     )
 }
-

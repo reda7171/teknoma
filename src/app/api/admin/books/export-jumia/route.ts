@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
@@ -5,6 +6,9 @@ import ExcelJS from 'exceljs'
 import { generateText } from '@/lib/gemini'
 
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return new NextResponse('Authentication required', { status: 401 })
@@ -26,12 +30,12 @@ export async function POST(req: Request) {
         // Transcription des titres arabes via Gemini
         const transliterations: Record<string, string> = {}
         const arabicBooks = books.filter(b => /[\u0600-\u06FF]/.test(b.title))
-        
+
         if (arabicBooks.length > 0) {
-            const prompt = `Transliterate these Arabic book titles into Latin characters (Transcription style used in Morocco/Maghreb, e.g., using numbers for some letters like 3, 7, 9 if common, or standard transcription). 
+            const prompt = `Transliterate these Arabic book titles into Latin characters (Transcription style used in Morocco/Maghreb, e.g., using numbers for some letters like 3, 7, 9 if common, or standard transcription).
             Return ONLY a JSON object where keys are the original titles and values are the transliterated versions.
             Titles: ${JSON.stringify(arabicBooks.map(b => b.title))}`
-            
+
             const aiResult = await generateText(prompt)
             if (aiResult) {
                 try {
@@ -46,16 +50,16 @@ export async function POST(req: Request) {
         }
 
         const columns = [
-            'Name', 'Name_AR', 'Name_FR', 'Description', 'Description_AR', 'Description_FR', 
-            'SellerSKU', 'ParentSKU', 'Brand', 'PrimaryCategory', 'AdditionalCategory', 'GTIN_Barcode', 'Price_درهم', 
-            'Sale_Price_درهم', 'Sale_Price_Start_At', 'Sale_Price_End_At', 'Stock', 'isbn', 'pages', 
-            'variation', 'age_range', 'author', 'book_type', 'certifications', 'color', 'color_AR', 
-            'color_FR', 'color_family', 'genre', 'language', 'main_material', 'manufacturer_txt', 
-            'material_family', 'model', 'note', 'package_content', 'package_content_AR', 
-            'package_content_FR', 'product_line', 'product_measures', 'product_warranty', 
-            'product_weight', 'production_country', 'short_description', 'short_description_AR', 
-            'short_description_FR', 'warranty_address', 'warranty_duration', 'warranty_type', 
-            'year_of_publication', 'youtube_id', 'MainImage', 'Image2', 'Image3', 'Image4', 'Image5', 
+            'Name', 'Name_AR', 'Name_FR', 'Description', 'Description_AR', 'Description_FR',
+            'SellerSKU', 'ParentSKU', 'Brand', 'PrimaryCategory', 'AdditionalCategory', 'GTIN_Barcode', 'Price_درهم',
+            'Sale_Price_درهم', 'Sale_Price_Start_At', 'Sale_Price_End_At', 'Stock', 'isbn', 'pages',
+            'variation', 'age_range', 'author', 'book_type', 'certifications', 'color', 'color_AR',
+            'color_FR', 'color_family', 'genre', 'language', 'main_material', 'manufacturer_txt',
+            'material_family', 'model', 'note', 'package_content', 'package_content_AR',
+            'package_content_FR', 'product_line', 'product_measures', 'product_warranty',
+            'product_weight', 'production_country', 'short_description', 'short_description_AR',
+            'short_description_FR', 'warranty_address', 'warranty_duration', 'warranty_type',
+            'year_of_publication', 'youtube_id', 'MainImage', 'Image2', 'Image3', 'Image4', 'Image5',
             'Image6', 'Image7', 'Image8'
         ]
 
@@ -72,10 +76,10 @@ export async function POST(req: Request) {
             const rowData: any = {}
             const hasArabic = /[\u0600-\u06FF]/.test(book.title)
             const transliterated = transliterations[book.title] || book.title
-            
+
             for (const col of columns) {
                 let val: any = ''
-                
+
                 switch (col) {
                     case 'Name':
                         val = hasArabic ? transliterated : book.title
@@ -170,5 +174,3 @@ export async function POST(req: Request) {
         return new NextResponse('Internal Server Error', { status: 500 })
     }
 }
-
-

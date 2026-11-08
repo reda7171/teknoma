@@ -1,5 +1,6 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { getAllSettings } from '@/lib/actions/site-settings'
+import { getAllSettings } from '@/lib/server/site-settings'
 import { redirect } from 'next/navigation'
 import SiteSettingsForm from '@/components/admin/SiteSettingsForm'
 import AdvancedSettingsForm from '@/components/admin/AdvancedSettingsForm'
@@ -17,6 +18,8 @@ export default async function AdminSettingsPage({
 }: {
     searchParams: Promise<{ tab?: string }>
 }) {
+    await requirePageRole(["ADMIN"])
+
     try {
         await verifyAdmin()
     } catch {
@@ -24,10 +27,10 @@ export default async function AdminSettingsPage({
     }
 
     const sp = await searchParams
-    const activeTab = sp?.tab === 'advanced' 
-        ? 'advanced' 
-        : sp?.tab === 'templates' 
-        ? 'templates' 
+    const activeTab = sp?.tab === 'advanced'
+        ? 'advanced'
+        : sp?.tab === 'templates'
+        ? 'templates'
         : sp?.tab === 'gemini-cache'
         ? 'gemini-cache'
         : 'general'

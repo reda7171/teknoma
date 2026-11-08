@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getAuthorProfile } from '@/lib/db/authors'
 import { getBooks } from '@/lib/db/books'
 import { redirect } from 'next/navigation'
@@ -11,6 +12,8 @@ export default async function EditAuthorPage({
 }: {
     params: Promise<{ name: string; locale: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER","BLOG_MODERATOR"])
+
     const { name, locale } = await params
     const decodedName = decodeURIComponent(name)
     const [authorProfile, books] = await Promise.all([
@@ -48,9 +51,9 @@ export default async function EditAuthorPage({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 {/* Left Column: Edit Form */}
                 <div className="lg:col-span-2 bg-white rounded-[2.5rem] md:rounded-[4rem] shadow-xl shadow-black/5 overflow-hidden border border-gray-100">
-                    <EditAuthorClient 
-                        authorName={decodedName} 
-                        initialProfile={authorProfile} 
+                    <EditAuthorClient
+                        authorName={decodedName}
+                        initialProfile={authorProfile}
                     />
                 </div>
 
@@ -69,12 +72,12 @@ export default async function EditAuthorPage({
                             </p>
                         </div>
                     </div>
-                    
+
                     {books.length > 0 ? (
                         <div className="grid grid-cols-1 gap-3 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
                             {books.map((book) => (
-                                <Link 
-                                    key={book.id} 
+                                <Link
+                                    key={book.id}
                                     href={`/${locale}/books/${book.id}`}
                                     target="_blank"
                                     className="group flex gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-300 transition-all items-center"

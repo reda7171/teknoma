@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Plus, Upload, AlertTriangle } from 'lucide-react'
@@ -20,6 +21,8 @@ import DashboardPrivacyToggle from '@/components/admin/DashboardPrivacyToggle'
 import SensitiveValue from '@/components/admin/SensitiveValue'
 
 export default async function BooksPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, status?: string, type?: string, lang?: string, sort?: string, limit?: string, jumia?: string, condition?: string, category?: string, subCategory?: string, seoScore?: string, linked?: string }> }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const params = await searchParams
     const currentPage = Number(params.page) || 1
     const ITEMS_PER_PAGE = Number(params.limit) || 20
@@ -195,7 +198,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }
         if (linkedParam === 'linked') packWhere.isSyncedWithJumia = true
         if (linkedParam === 'unlinked') packWhere.isSyncedWithJumia = false
-        
+
         if (statusParam.split(',').includes('no-image')) {
             packWhere.image = { in: ['', '/book-placeholder.png'] }
         }
@@ -287,11 +290,11 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }
         if (linkedParam === 'linked') extraWhere.isSyncedWithJumia = true
         if (linkedParam === 'unlinked') extraWhere.isSyncedWithJumia = false
-        
+
         if (!productTypes.includes('all') && accessoryTypes.length > 0) {
             extraWhere.category = { in: accessoryTypes.map(t => t.toUpperCase()) }
         }
-        
+
         const extras = await prisma.extraProduct.findMany({
             where: extraWhere,
             include: {
@@ -481,7 +484,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
 
             <div className="flex flex-col gap-8">
                 {/* Search & Filters */}
-                <BookFilters 
+                <BookFilters
                     activeFilters={activeFilters}
                     totalCount={totalBooks}
                     categories={mainCategories}
@@ -491,12 +494,12 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 {/* Table Content */}
                 <div className="w-full">
                     <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
-                        <BooksTable 
-                            books={normalizedBooks} 
-                            pageNumber={currentPage} 
-                            totalProviderPages={totalPages} 
+                        <BooksTable
+                            books={normalizedBooks}
+                            pageNumber={currentPage}
+                            totalProviderPages={totalPages}
                             activeFilters={activeFilters}
-                            limit={ITEMS_PER_PAGE} 
+                            limit={ITEMS_PER_PAGE}
                             warehouses={warehouses}
                         />
                     </div>

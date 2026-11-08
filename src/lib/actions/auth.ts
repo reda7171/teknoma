@@ -3,12 +3,14 @@
 import { prisma } from '@/lib/prisma'
 import { cookies, headers } from 'next/headers'
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import { getJwtSecret } from '@/lib/jwt-secret'
 import { z } from 'zod'
 import crypto from 'crypto'
-import { createAuditLog } from './audit'
+import { createAuditLog } from "@/lib/server/audit"
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sendTelegramMessage } from '@/lib/telegram'
-import { JWT_SECRET } from '@/lib/jwt-secret'
+import { createSessionToken, readSessionSubject, verifySessionToken } from '@/lib/session-token'
 
 const LoginSchema = z.object({
     email: z.string().email('Email invalide'),
@@ -30,7 +32,7 @@ export type LoginResult =
 export async function login(formData: FormData): Promise<LoginResult> {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
-    
+
     const ip = await getIpIdentifier()
     const limiter = await rateLimit(`login_${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 }) // 5 essais par 15 min
 
@@ -71,24 +73,10 @@ export async function login(formData: FormData): Promise<LoginResult> {
         }
 
         // Sécurisation OWASP: Token signé avec HMAC
-        const timestamp = Date.now().toString()
-        const payload = `${user.id}:${timestamp}`
-        // OWASP: JWT_SECRET obligatoire en production
-        if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-            console.error('[SECURITY] JWT_SECRET manquant en production !')
-            return { success: false, error: 'Erreur de configuration serveur.' }
-        }
-        const secret = JWT_SECRET
-        
-        let signature = ''
-        if (typeof crypto !== 'undefined' && crypto.createHmac) {
-            signature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-        }
-        
-        const token = Buffer.from(`${payload}:${signature}`).toString('base64')
+        const token = createSessionToken(user.id, user.password, 'admin')
 
         const isProd = process.env.NODE_ENV === 'production'
-        
+
         if (user.role !== 'INFLUENCER' && user.role !== 'SELLER') {
             // Créer une requête d'approbation
             const request = await prisma.adminAuthRequest.create({
@@ -103,7 +91,7 @@ export async function login(formData: FormData): Promise<LoginResult> {
             `👤 <b>Utilisateur:</b> ${user.email}\n` +
             `🕒 <b>Date:</b> ${new Date().toLocaleString('fr-FR')}\n` +
             `🌐 <b>IP:</b> ${ip || 'Inconnue'}`
-            
+
             const replyMarkup = {
                 inline_keyboard: [
                     [
@@ -231,14 +219,7 @@ export async function checkApprovalStatus(requestId: string): Promise<LoginResul
             return { success: false, error: 'Rôle administrateur non autorisé' }
         }
 
-        const timestamp = Date.now().toString()
-        const payload = `${user.id}:${timestamp}`
-        const secret = JWT_SECRET
-        let signature = ''
-        if (typeof crypto !== 'undefined' && crypto.createHmac) {
-            signature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-        }
-        const token = Buffer.from(`${payload}:${signature}`).toString('base64')
+        const token = createSessionToken(user.id, user.password, 'admin')
 
         const cookieStore = await cookies()
         cookieStore.set('admin-token', token, {
@@ -327,54 +308,22 @@ export async function logout() {
  * Vérifier si l'utilisateur est authentifié avec une validation basique du token
  */
 export async function isAuthenticated(): Promise<boolean> {
-    let cookieStore: any = null
-    try { cookieStore = await cookies() } catch { return false }
-    const token = cookieStore?.get('admin-token')?.value
-
-
-
-    if (!token) return false
-
     try {
-        // Décodage du token (format base64(userId:timestamp:signature))
-        const decoded = Buffer.from(token, 'base64').toString('ascii')
-        const [userId, timestamp, signature] = decoded.split(':')
-
-        if (!userId || !timestamp || !signature) return false
-
-        // Vérification de la signature HMAC
-        const payload = `${userId}:${timestamp}`
-        const secret = JWT_SECRET
-        // OWASP: avertir si secret par défaut utilisé en production
-        if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-            console.error('[SECURITY] JWT_SECRET manquant — token verification compromise!')
-            return false
-        }
-        if (typeof crypto !== 'undefined' && crypto.createHmac) {
-            const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-            const expectedBuffer = Buffer.from(expectedSignature)
-            const suppliedBuffer = Buffer.from(signature)
-            if (expectedBuffer.length !== suppliedBuffer.length || !crypto.timingSafeEqual(expectedBuffer, suppliedBuffer)) return false
-        }
-
-        // Vérifier si le token a moins de 7 jours (sécurité supplémentaire)
-        const tokenTime = Number(timestamp)
-        const sevenDays = 7 * 24 * 60 * 60 * 1000
-        const tokenAge = Date.now() - tokenTime
-        if (!Number.isFinite(tokenTime) || tokenAge < 0 || tokenAge > sevenDays) return false
-
-        return true
-    } catch (e) {
-        console.error(`[DEBUG] isAuthenticated error:`, e)
-        return false
-    }
+        const token = (await cookies()).get('admin-token')?.value
+        if (!token) return false
+        const id = readSessionSubject(token)
+        if (!id) return false
+        const user = await prisma.user.findUnique({ where: { id }, select: { password: true, role: true, isBanned: true } })
+        if (!user || user.isBanned || !['ADMIN', 'MANAGER', 'SELLER', 'CONFIRMATOR', 'BLOG_MODERATOR', 'INFLUENCER'].includes(user.role)) return false
+        return verifySessionToken(token, user.password, 'admin', 7 * 24 * 60 * 60 * 1000)
+    } catch { return false }
 }
 
 /**
  * Assurer que l'utilisateur est un admin (lance une erreur sinon)
  * À utiliser au début des Server Actions sensibles
  */
-export async function verifyAdmin() {
+export async function verifyAdmin(allowedRoles: readonly string[] = ['ADMIN', 'MANAGER']) {
     const isAuth = await isAuthenticated()
 
     if (!isAuth) {
@@ -392,9 +341,7 @@ export async function verifyAdmin() {
         where: { id: userId },
         select: { role: true }
     })
-    const staffRoles = ['ADMIN', 'MANAGER', 'SELLER', 'CONFIRMATOR', 'BLOG_MODERATOR']
-
-    if (!user || !staffRoles.includes(user.role)) {
+    if (!user || !allowedRoles.includes(user.role)) {
         throw new Error('Interdit - Permission administrateur requise')
     }
 }
@@ -427,13 +374,14 @@ export async function getAdminRole() {
     return user?.role || null
 }
 
-export async function resetPassword(email: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+export async function resetPassword(email: string, newPassword: string, token?: string): Promise<{ success: boolean; error?: string }> {
     try {
+        const privileged = (await getAdminRole()) === 'ADMIN'
         if (!email || !newPassword) {
             return { success: false, error: 'Email et mot de passe requis' }
         }
-        if (newPassword.length < 6) {
-            return { success: false, error: 'Le mot de passe doit contenir au moins 6 caractères' }
+        if (newPassword.length < 12 || Buffer.byteLength(newPassword) > 72) {
+            return { success: false, error: 'Le mot de passe doit contenir au moins 12 caractères' }
         }
 
         const user = await prisma.user.findUnique({ where: { email } })
@@ -441,12 +389,16 @@ export async function resetPassword(email: string, newPassword: string): Promise
             return { success: false, error: 'Utilisateur introuvable' }
         }
 
+        if (!privileged) {
+            if (!token) return { success: false, error: 'Lien invalide' }
+            const payload = jwt.verify(token, getJwtSecret(), { algorithms: ['HS256'], audience: 'password-setup' })
+            const version = crypto.createHash('sha256').update(user.password).digest('hex')
+            if (typeof payload === 'string' || payload.sub !== user.id || payload.ver !== version) return { success: false, error: 'Lien invalide' }
+        }
         const hashedPassword = await bcrypt.hash(newPassword, 10)
 
-        await prisma.user.update({
-            where: { email },
-            data: { password: hashedPassword }
-        })
+        const changed = await prisma.user.updateMany({ where: { id: user.id, password: user.password }, data: { password: hashedPassword } })
+        if (changed.count !== 1) return { success: false, error: 'Lien expir?' }
 
         await createAuditLog({
             action: 'UPDATE',
@@ -461,3 +413,10 @@ export async function resetPassword(email: string, newPassword: string): Promise
     }
 }
 
+
+export async function createPasswordSetupToken(email: string) {
+    await verifyAdmin(['ADMIN'])
+    const user = await prisma.user.findUnique({ where: { email }, select: { id: true, password: true } })
+    if (!user) throw new Error('Compte introuvable')
+    return jwt.sign({ ver: crypto.createHash('sha256').update(user.password).digest('hex') }, getJwtSecret(), { algorithm: 'HS256', subject: user.id, audience: 'password-setup', expiresIn: '24h' })
+}

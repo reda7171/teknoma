@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import ExcelJS from 'exceljs'
 import { verifyAdmin } from './auth'
-import { createAuditLog } from './audit'
+import { createAuditLog } from "@/lib/server/audit"
 import { sendTelegramMessage } from '@/lib/telegram'
 
 /**

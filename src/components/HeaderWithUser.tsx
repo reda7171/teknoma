@@ -2,7 +2,7 @@ import { getCommunityUser } from '@/lib/actions/community-auth'
 import Header from './Header'
 import NotificationDropdownWrapper from './NotificationDropdownWrapper'
 import { getActiveMenuBySlug } from '@/lib/actions/menus'
-import { getSettingsByCategory } from '@/lib/actions/site-settings'
+import { getSettingsByCategory } from '@/lib/server/site-settings'
 import { getHeaderSeoCategories } from '@/lib/actions/seo-categories'
 import { getLocale } from 'next-intl/server'
 

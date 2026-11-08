@@ -1,8 +1,11 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { Link } from '@/i18n/routing'
 import { ArrowLeft } from 'lucide-react'
 import CreateExchangeForm from '@/components/admin/CreateExchangeForm'
 
-export default function CreateExchangePage() {
+export default async function CreateExchangePage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     return (
         <div className="max-w-4xl mx-auto">
             {/* Header */}

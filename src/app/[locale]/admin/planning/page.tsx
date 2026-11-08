@@ -1,17 +1,20 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import PlanningClient from './PlanningClient'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PlanningPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     let initialPosts: any[] = []
     let availableBooks: any[] = []
-    
+
     try {
         const posts = await prisma.scheduledPost.findMany({
             orderBy: { date: 'asc' }
         })
-        
+
         initialPosts = posts.map(p => ({
             id: p.id,
             date: p.date,

@@ -1,15 +1,18 @@
 'use server'
 
+import { createSession } from '@/lib/server/community-session'
+import { oauthLoginOrRegister } from '@/lib/server/community-oauth'
+
 import { prisma } from '@/lib/prisma'
 import { cookies, headers } from 'next/headers'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import crypto from 'crypto'
-import { JWT_SECRET } from '@/lib/jwt-secret'
+import { readSessionSubject, verifySessionToken } from '@/lib/session-token'
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { OAuth2Client } from 'google-auth-library'
 import { getCached } from '@/lib/cache'
-import { addGmailReaderToGoogleReviews } from '@/lib/actions/site-settings'
+import { addGmailReaderToGoogleReviews } from '@/lib/server/site-settings'
 
 const RegisterSchema = z.object({
     fullName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
@@ -86,7 +89,7 @@ export async function register(formData: FormData): Promise<AuthResult> {
                     isActive: true,
                 }
             })
-            
+
             await prisma.notification.create({
                 data: {
                     userId: user.id,
@@ -207,7 +210,7 @@ export async function login(formData: FormData): Promise<AuthResult> {
             return { success: true, redirect: '/influencer' }
         }
 
-        const isGmail = provider === 'google' || (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com')))
+        const isGmail = false
         return { success: true, redirect: isGmail ? '/community?gmail_reward=true' : '/community' }
 
     } catch (error) {
@@ -227,119 +230,7 @@ export async function logout() {
 /**
  * Connexion ou Inscription via OAuth (Google / Facebook)
  */
-export async function oauthLoginOrRegister({ email, fullName, provider }: { email: string, fullName: string, provider: 'google' | 'facebook' }): Promise<AuthResult> {
-    const ip = await getIpIdentifier()
-    const limiter = await rateLimit(`community_oauth_${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 })
 
-    if (!limiter.success) {
-        return { success: false, error: 'Trop de tentatives. Veuillez réessayer plus tard.' }
-    }
-
-    try {
-        let user = await prisma.user.findUnique({
-            where: { email }
-        })
-
-        if (!user) {
-            // Générer un mot de passe aléatoire très complexe (64 chars) pour sécuriser le compte
-            const randomPassword = crypto.randomBytes(32).toString('hex')
-            const hashedPassword = await bcrypt.hash(randomPassword, 10)
-
-            user = await prisma.user.create({
-                data: {
-                    fullName,
-                    email,
-                    password: hashedPassword,
-                    role: 'USER' as any,
-                    credits: 10,
-                }
-            })
-
-            // Notification Telegram Optionnelle
-            try {
-                const { sendUserRegistrationNotification } = await import('@/lib/telegram')
-                await sendUserRegistrationNotification({
-                    fullName: user.fullName || '',
-                    email: user.email,
-                    phone: `OAuth (${provider})`,
-                    city: 'Inconnue',
-                    role: `LECTEUR (${provider})`
-                })
-            } catch (e) {
-                console.error('Telegram notification error:', e)
-            }
-
-            // Inscription automatique à la newsletter pour les nouveaux inscrits OAuth
-            try {
-                await prisma.newsletterSubscriber.create({
-                    data: { email: user.email }
-                })
-            } catch (e) {
-                console.error('Error adding new OAuth user to newsletter:', e)
-            }
-
-            if (provider === 'google' || (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com')))) {
-                addGmailReaderToGoogleReviews(user.email).catch(console.error)
-            }
-            await createSession(user.id)
-            return { success: true, redirect: '/community?registered=true&gmail_reward=true' }
-        }
-
-        // Historique
-        try {
-            const headersList = await headers()
-            const userAgent = headersList.get('user-agent')
-            await prisma.loginHistory.create({
-                data: {
-                    userId: user.id,
-                    ip: ip,
-                    userAgent: `${userAgent} (${provider} OAuth)`
-                }
-            })
-        } catch (e) {
-            console.error('Error recording login history:', e)
-        }
-
-        // Inscription à la newsletter (Automatique pour Google/OAuth)
-        try {
-            const existingSub = await prisma.newsletterSubscriber.findUnique({
-                where: { email: user.email }
-            })
-            if (!existingSub) {
-                await prisma.newsletterSubscriber.create({
-                    data: { email: user.email }
-                })
-            }
-        } catch (e) {
-            console.error('Error adding OAuth user to newsletter:', e)
-        }
-
-        if (provider === 'google' || (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com')))) {
-            addGmailReaderToGoogleReviews(user.email).catch(console.error)
-        }
-        await createSession(user.id)
-
-        if (user.role === 'SELLER') {
-            try {
-                const { notifyAdminOnSellerLogin } = await import('@/lib/whatsapp')
-                notifyAdminOnSellerLogin(user, ip).catch(console.error)
-            } catch (notifyErr) {
-                console.error('Error triggering seller login notification:', notifyErr)
-            }
-            return { success: true, redirect: '/seller' }
-        }
-        if (user.role === 'INFLUENCER' || user.role === 'influencer' as any) {
-            return { success: true, redirect: '/influencer' }
-        }
-
-        const isGmail = provider === 'google' || (user.email && (user.email.toLowerCase().endsWith('@gmail.com') || user.email.toLowerCase().endsWith('@googlemail.com')))
-        return { success: true, redirect: isGmail ? '/community?gmail_reward=true' : '/community' }
-
-    } catch (error) {
-        console.error('OAuth Login Error:', error)
-        return { success: false, error: 'Une erreur est survenue lors de l\'authentification' }
-    }
-}
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
@@ -353,7 +244,7 @@ export async function googleOneTapLogin(credential: string): Promise<AuthResult>
             audience: process.env.GOOGLE_CLIENT_ID,
         })
         const payload = ticket.getPayload()
-        if (!payload || !payload.email) {
+        if (!payload || !payload.email || payload.email_verified !== true) {
             return { success: false, error: 'Token Google invalide' }
         }
 
@@ -371,84 +262,24 @@ export async function googleOneTapLogin(credential: string): Promise<AuthResult>
 /**
  * Session Management (Basic)
  */
-async function createSession(userId: string) {
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { locale: true }
-    })
 
-    const timestamp = Date.now().toString()
-    const payload = `${userId}:${timestamp}`
-    const secret = JWT_SECRET
-    
-    let signature = ''
-    if (typeof crypto !== 'undefined' && crypto.createHmac) {
-        signature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-    }
-    
-    const token = Buffer.from(`${payload}:${signature}`).toString('base64')
-    
-    const cookieStore = await cookies()
-    cookieStore.set('community-token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30,
-        path: '/',
-    })
-    cookieStore.set('riwaya_authenticated', '1', {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30,
-        path: '/',
-    })
-
-    if (user?.locale) {
-        cookieStore.set('NEXT_LOCALE', user.locale, { path: '/', secure: process.env.NODE_ENV === 'production' })
-    }
-}
 
 export async function getCommunityUser() {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('community-token')
-
-    if (!token) return null
-
     try {
-        // Decode token format: userId:timestamp:signature
-        const decoded = Buffer.from(token.value, 'base64').toString('utf-8')
-        const [userId, timestamp, signature] = decoded.split(':')
-
-        if (!userId || !timestamp || !signature) return null
-
-        // Vérification signature
-        const payload = `${userId}:${timestamp}`
-        const secret = JWT_SECRET
-        if (typeof crypto !== 'undefined' && crypto.createHmac) {
-            const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-            const expectedBuffer = Buffer.from(expectedSignature)
-            const suppliedBuffer = Buffer.from(signature)
-            if (expectedBuffer.length !== suppliedBuffer.length || !crypto.timingSafeEqual(expectedBuffer, suppliedBuffer)) return null
-        }
-
-        const tokenTime = Number(timestamp)
-        const tokenAge = Date.now() - tokenTime
-        const thirtyDays = 30 * 24 * 60 * 60 * 1000
-        if (!Number.isFinite(tokenTime) || tokenAge < 0 || tokenAge > thirtyDays) return null
-
-        const user = await prisma.user.findUnique({
-            where: { id: userId }
-        })
-
-        return user
-    } catch {
-        return null
-    }
+        const token = (await cookies()).get('community-token')?.value
+        if (!token) return null
+        const id = readSessionSubject(token)
+        if (!id) return null
+        const user = await prisma.user.findUnique({ where: { id } })
+        if (!user || user.isBanned || !verifySessionToken(token, user.password, 'community', 30 * 24 * 60 * 60 * 1000)) return null
+        const { password: _password, expoPushToken: _pushToken, ...publicUser } = user
+        return publicUser
+    } catch { return null }
 }
 
 
-export async function getUserOrderCount(user: any): Promise<number> {
+export async function getUserOrderCount(_user?: unknown): Promise<number> {
+    const user = await getCommunityUser()
     if (!user) return 0
     if (user.role === 'ADMIN') return 999
 
@@ -472,7 +303,8 @@ export async function getUserOrderCount(user: any): Promise<number> {
  * Règle: Avoir passé au moins une commande (basé sur l'email ou le téléphone)
  * ET n'avoir jamais fait d'échange (1 seule fois)
  */
-export async function checkExchangeEligibility(user: any): Promise<boolean> {
+export async function checkExchangeEligibility(_user?: unknown): Promise<boolean> {
+    const user = await getCommunityUser()
     if (!user) return false
     if (user.role === 'ADMIN') return true
 

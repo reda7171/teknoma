@@ -1,4 +1,4 @@
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { NextResponse } from 'next/server'
 
 export async function GET() {

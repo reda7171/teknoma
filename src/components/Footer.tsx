@@ -1,5 +1,5 @@
 // Server Component — lit les features et les passe au Footer client
-import { getSetting, isFeatureEnabled } from '@/lib/actions/site-settings'
+import { getSetting, isFeatureEnabled } from '@/lib/server/site-settings'
 import FooterClient from './FooterClient'
 
 export default async function Footer() {
@@ -46,7 +46,7 @@ export default async function Footer() {
         getSetting('developer_name'),
         getSetting('developer_link')
     ])
- 
+
     const features = {
         seller: featureSeller,
         exchange: featureExchange,

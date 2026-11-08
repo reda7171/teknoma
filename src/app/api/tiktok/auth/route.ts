@@ -1,6 +1,7 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/actions/auth';
-import { getSetting } from '@/lib/actions/site-settings';
+import { getSetting } from '@/lib/server/site-settings'
 import crypto from 'crypto';
 
 function base64URLEncode(buffer: Buffer) {
@@ -11,6 +12,9 @@ function base64URLEncode(buffer: Buffer) {
 }
 
 export async function GET(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin();
     } catch {
@@ -26,7 +30,7 @@ export async function GET(req: NextRequest) {
     // Toujours utiliser l'URL de production — TikTok vérifie l'URI exacte enregistrée
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'}/api/tiktok/callback`;
     const scope = 'user.info.profile,user.info.stats,video.list,video.upload';
-    
+
     // Generate random state for CSRF protection
     const state = Math.random().toString(36).substring(7);
 
@@ -43,6 +47,6 @@ export async function GET(req: NextRequest) {
         maxAge: 60 * 10, // 10 minutes
         path: '/'
     });
-    
+
     return response;
 }

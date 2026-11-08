@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse, NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -6,6 +7,9 @@ export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const { id } = await params
@@ -23,6 +27,9 @@ export async function PATCH(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const { id } = await params
@@ -77,6 +84,9 @@ export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const { id } = await params

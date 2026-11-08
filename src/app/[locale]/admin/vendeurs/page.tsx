@@ -1,8 +1,11 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getSellerRequests } from '@/lib/actions/seller-requests'
 import { Store } from 'lucide-react'
 import SellerRequestsTable from './SellerRequestsTable'
 
 export default async function AdminSellersPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const res = await getSellerRequests()
     const requests = res.success ? (res.requests ?? []) : []
 
@@ -20,7 +23,7 @@ export default async function AdminSellersPage() {
                         Gestion des demandes de partenariat & Marketplace
                     </p>
                 </div>
-                
+
                 <div className="flex items-center gap-4 bg-blue-50/50 px-8 py-4 rounded-[1.5rem] border border-blue-100 shadow-sm transition-all hover:shadow-blue-200/20">
                     <Store className="w-5 h-5 text-blue-600" />
                     <span className="text-blue-600 text-[11px] font-black uppercase tracking-widest">

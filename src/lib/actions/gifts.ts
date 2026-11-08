@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -15,6 +17,8 @@ const GiftSchema = z.object({
 })
 
 export async function getGifts() {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         return await prisma.gift.findMany({
             orderBy: { createdAt: 'desc' }
@@ -36,6 +40,8 @@ export async function getActiveGifts() {
 }
 
 export async function createGift(data: z.infer<typeof GiftSchema>) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const validated = GiftSchema.parse(data)
@@ -52,6 +58,8 @@ export async function createGift(data: z.infer<typeof GiftSchema>) {
 }
 
 export async function updateGift(id: string, data: z.infer<typeof GiftSchema>) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const validated = GiftSchema.parse(data)
@@ -69,6 +77,8 @@ export async function updateGift(id: string, data: z.infer<typeof GiftSchema>) {
 }
 
 export async function toggleGiftStatus(id: string, active: boolean) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         await prisma.gift.update({
@@ -83,6 +93,8 @@ export async function toggleGiftStatus(id: string, active: boolean) {
 }
 
 export async function deleteGift(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         await prisma.gift.delete({ where: { id } })

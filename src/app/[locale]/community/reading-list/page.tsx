@@ -7,7 +7,7 @@ import Header from '@/components/HeaderWithUser'
 import { getCommunityUser, getTopReaders } from '@/lib/actions/community-auth'
 import Footer from '@/components/Footer'
 import ReadingLeaderboard from '@/components/community/ReadingLeaderboard'
-import { isFeatureEnabled } from '@/lib/actions/site-settings'
+import { isFeatureEnabled } from '@/lib/server/site-settings'
 import { notFound } from 'next/navigation'
 
 export default async function ReadingListPage() {

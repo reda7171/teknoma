@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +49,7 @@ export async function GET() {
             const escapedDesc = (book.description || book.title).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             const escapedTitle = book.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             const brand = (book.author || 'Riwaya').replace(/&/g, '&amp;')
-            
+
             xml += `        <item>
             <g:id>${book.id}</g:id>
             <g:title>${escapedTitle}</g:title>
@@ -67,7 +67,7 @@ export async function GET() {
         packs.forEach((pack) => {
             const escapedDesc = (pack.description || pack.name).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             const escapedTitle = pack.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            
+
             xml += `        <item>
             <g:id>${pack.id}</g:id>
             <g:title>${escapedTitle}</g:title>

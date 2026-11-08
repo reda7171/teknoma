@@ -1,10 +1,12 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { verifyAdmin, getAdminRole, getAdminUser } from '@/lib/actions/auth'
-import { createAuditLog } from './audit'
+import { createAuditLog } from "@/lib/server/audit"
 import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 
 // Schéma de validation pour un livre
@@ -81,6 +83,8 @@ export type BookResult =
  * Créer un nouveau livre
  */
 export async function createBook(input: BookInput): Promise<BookResult> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const validatedData = BookSchema.parse(input)
@@ -106,7 +110,7 @@ export async function createBook(input: BookInput): Promise<BookResult> {
 
         const role = await getAdminRole()
         const userId = await getAdminUser()
-        
+
         let additionalData: any = {}
         if (role === 'SELLER' && userId) {
             additionalData = {
@@ -228,6 +232,8 @@ export async function createBook(input: BookInput): Promise<BookResult> {
  * Récupérer un livre par son ID
  */
 export async function getBookById(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         const book = await prisma.book.findUnique({
             where: { id },
@@ -306,19 +312,21 @@ export async function updateBook(
     id: string,
     input: BookInput
 ): Promise<BookResult> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const validatedData = BookSchema.parse(input)
-        
+
         const existingBook = await prisma.book.findUnique({ where: { id } })
-        
+
         if (!existingBook) {
             throw new Error('Livre introuvable')
         }
 
         const role = await getAdminRole()
         const userId = await getAdminUser()
-        
+
         if (role === 'SELLER' && existingBook.sellerId !== userId) {
             throw new Error('Non autorisé - Ce livre ne vous appartient pas')
         }
@@ -352,9 +360,9 @@ export async function updateBook(
 
         if (existingBook && existingBook.stock !== validatedData.stock && existingBook.sellerSku) {
             try {
-                const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
+                const { syncJumiaStockForBooksBackground } = await import("@/lib/server/jumia")
                 syncJumiaStockForBooksBackground([existingBook.id]).catch(console.error)
-                
+
                 const { sendTelegramMessage } = await import('@/lib/telegram')
                 await sendTelegramMessage(`🔄 <b>Stock Jumia Mis à Jour (Édition)</b>\n\n📖 Livre: ${validatedData.title || existingBook.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${validatedData.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
             } catch (err) {
@@ -444,17 +452,19 @@ export async function updateBookQuick(
     id: string,
     data: { price: number; stock: number; active: boolean }
 ): Promise<BookResult> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const existingBook = await prisma.book.findUnique({ where: { id } })
-        
+
         if (!existingBook) {
             throw new Error('Livre introuvable')
         }
 
         const role = await getAdminRole()
         const userId = await getAdminUser()
-        
+
         if (role === 'SELLER' && existingBook.sellerId !== userId) {
             throw new Error('Non autorisé - Ce livre ne vous appartient pas')
         }
@@ -469,9 +479,9 @@ export async function updateBookQuick(
 
         if (existingBook && existingBook.stock !== updated.stock && existingBook.sellerSku) {
             try {
-                const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
+                const { syncJumiaStockForBooksBackground } = await import("@/lib/server/jumia")
                 syncJumiaStockForBooksBackground([existingBook.id]).catch(console.error)
-                
+
                 const { sendTelegramMessage } = await import('@/lib/telegram')
                 await sendTelegramMessage(`⚡ <b>Stock Jumia Mis à Jour (Édition Rapide)</b>\n\n📖 Livre: ${updated.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${updated.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
             } catch (err) {
@@ -505,9 +515,11 @@ export async function updateBookQuick(
  * Supprimer un livre
  */
 export async function deleteBook(id: string): Promise<BookResult> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
-        
+
         const existingBook = await prisma.book.findUnique({ where: { id } })
         if (!existingBook) {
             throw new Error('Livre introuvable')
@@ -515,7 +527,7 @@ export async function deleteBook(id: string): Promise<BookResult> {
 
         const role = await getAdminRole()
         const userId = await getAdminUser()
-        
+
         if (role === 'SELLER' && existingBook.sellerId !== userId) {
             throw new Error('Non autorisé - Ce livre ne vous appartient pas')
         }
@@ -553,6 +565,8 @@ export async function toggleBookStatus(
     id: string,
     active: boolean
 ): Promise<BookResult> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         await prisma.book.update({
@@ -587,6 +601,8 @@ export async function toggleBookStatus(
  * Approuver un livre (Admin)
  */
 export async function approveBook(id: string): Promise<BookResult> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const book = await prisma.book.update({
@@ -614,9 +630,11 @@ export async function approveBook(id: string): Promise<BookResult> {
  * Rejeter un livre (Admin)
  */
 export async function rejectBook(id: string): Promise<BookResult> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
-        
+
         const book = await prisma.book.findUnique({
             where: { id },
             include: { customerSeller: true, seller: true }
@@ -660,7 +678,8 @@ export async function fetchAllAuthors() {
  */
 export async function fetchBooks(filters: BookFilters) {
     try {
-        const books = await getBooksDb(filters)
+        if (filters?.includeInactive || filters?.active === false) await requireRole()
+        const books = await getBooksDb({ ...filters, limit: Math.max(1, Math.min(100, Number(filters?.limit) || 12)), page: Math.max(1, Number(filters?.page) || 1) })
         return { success: true, data: books }
     } catch (error) {
         console.error('Error fetching books:', error)
@@ -672,6 +691,8 @@ export async function fetchBooks(filters: BookFilters) {
  * Supprimer plusieurs livres en masse
  */
 export async function bulkDeleteBooks(ids: string[]) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         await prisma.book.deleteMany({
@@ -698,6 +719,8 @@ export async function bulkDeleteBooks(ids: string[]) {
  * Récupérer tous les livres actifs pour le catalogue PDF ou Image (avec support entrepôt)
  */
 export async function getAllBooksForCatalog(warehouseId?: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const whereClause: any = { active: true }
@@ -756,6 +779,8 @@ export async function getAllBooksForCatalog(warehouseId?: string) {
  * Vider toute la bibliothèque (Supprimer tous les livres)
  */
 export async function deleteAllBooks(): Promise<BookResult> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         await prisma.book.deleteMany({})
@@ -780,13 +805,15 @@ export async function deleteAllBooks(): Promise<BookResult> {
  * Mettre à jour l'ordre d'affichage des livres
  */
 export async function updateBookOrder(orderedIds: string[], pageOffset: number = 0) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
-        
+
         const MANUAL_ORDER_BASE = -1000000
         // Mise à jour groupée de l'ordre avec une base négative pour passer devant le par défaut (0)
         await prisma.$transaction(
-            orderedIds.map((id, index) => 
+            orderedIds.map((id, index) =>
                 prisma.book.update({
                     where: { id },
                     data: { displayOrder: MANUAL_ORDER_BASE + pageOffset + index }
@@ -796,7 +823,7 @@ export async function updateBookOrder(orderedIds: string[], pageOffset: number =
 
         revalidatePath('/admin/books')
         revalidatePath('/')
-        
+
         return { success: true }
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour de l\'ordre:', error)
@@ -807,6 +834,8 @@ export async function updateBookOrder(orderedIds: string[], pageOffset: number =
  * Mettre à jour les prix en masse
  */
 export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         await prisma.book.updateMany({
@@ -839,6 +868,8 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
  * Mettre à jour la langue de plusieurs livres.
  */
 export async function bulkUpdateBookLanguages(ids: string[], language: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
 
@@ -884,6 +915,8 @@ export async function bulkUpdateBookLanguages(ids: string[], language: string) {
  * Mettre à jour le stock en masse (par entrepôt ou global)
  */
 export async function bulkUpdateBookStock(ids: string[], newStock: number, warehouseId?: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const role = await getAdminRole()
@@ -959,7 +992,7 @@ export async function bulkUpdateBookStock(ids: string[], newStock: number, wareh
 
         // Déclencher la synchronisation Jumia en arrière-plan si applicable
         try {
-            const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
+            const { syncJumiaStockForBooksBackground } = await import("@/lib/server/jumia")
             syncJumiaStockForBooksBackground(ids).catch(() => null)
         } catch {}
 
@@ -1012,6 +1045,8 @@ export interface AiBookUpdateData {
  * Mettre à jour des livres en masse depuis la réponse IA (ChatGPT)
  */
 export async function bulkUpdateBooksFromAi(booksData: AiBookUpdateData[]) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         if (!Array.isArray(booksData) || booksData.length === 0) {
@@ -1096,6 +1131,8 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
     error?: string
     updatedMap?: Record<string, string>
 }> {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
         const role = await getAdminRole()
@@ -1129,11 +1166,11 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
                 where: bookWhere,
                 select: { id: true, title: true, sellerSku: true }
             }),
-            isBulkAllMissing 
-                ? Promise.resolve([]) 
+            isBulkAllMissing
+                ? Promise.resolve([])
                 : prisma.pack.findMany({ where: packWhere, select: { id: true, name: true, sellerSku: true } }),
-            isBulkAllMissing 
-                ? Promise.resolve([]) 
+            isBulkAllMissing
+                ? Promise.resolve([])
                 : prisma.extraProduct.findMany({ where: extraWhere, select: { id: true, name: true, sellerSku: true } }),
             prisma.book.findMany({ where: { sellerSku: { not: null } }, select: { sellerSku: true } }),
             prisma.pack.findMany({ where: { sellerSku: { not: null } }, select: { sellerSku: true } }),
@@ -1237,7 +1274,7 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
             where: { id },
             data: { views: { increment: 1 } }
         })
-        
+
 
 
         return { success: true }

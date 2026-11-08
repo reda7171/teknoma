@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { createAuditLog } from './audit'
+import { createAuditLog } from "@/lib/server/audit"
 
 const optionalNonEmptyString = z.preprocess(
     value => typeof value === 'string' && value.trim() === '' ? undefined : value,

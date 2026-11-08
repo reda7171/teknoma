@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 
 // Cron toutes les 5 minutes — envoie les posts programmés à n8n (fire & forget)
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
         // Fire & forget : on n'attend pas la réponse de n8n
         const webhookUrl = N8N_WEBHOOK_URL
-        
+
         const facebookAccessToken = await getSetting('facebook_access_token')
         const instagramAccountId = await getSetting('instagram_account_id')
         const tiktokAccessToken = await getSetting('tiktok_access_token')

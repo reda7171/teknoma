@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { hasHeaderSecret } from '@/lib/header-secret'
 
 export async function POST(req: NextRequest) {
+    if (!hasHeaderSecret(req, process.env.WHATSAPP_WEBHOOK_SECRET)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     try {
         const body = await req.json().catch(() => null)
         if (!body) {
@@ -87,7 +91,7 @@ export async function POST(req: NextRequest) {
                                 .replace(/{customerName}/g, customerName)
                                 .replace(/{siteUrl}/g, siteUrl)
 
-                            const { sendWhatsAppMessageDirect } = await import('@/lib/actions/whatsapp-gateway')
+                            const { sendWhatsAppMessageDirect } = await import("@/lib/server/whatsapp-gateway")
                             await sendWhatsAppMessageDirect(phone, replyText, {
                                 type: 'WELCOME_AUTO',
                                 session: session || 'default',

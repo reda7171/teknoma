@@ -1,4 +1,5 @@
-import { getSetting } from '@/lib/actions/site-settings'
+import { requirePageRole } from '@/lib/page-authorization'
+import { getSetting } from '@/lib/server/site-settings'
 import JumiaConfigForm from './JumiaConfigForm'
 import { ShoppingBag } from 'lucide-react'
 
@@ -7,6 +8,8 @@ export const metadata = {
 }
 
 export default async function JumiaConfigPage() {
+    await requirePageRole(["ADMIN"])
+
     const jumiaEnabled = await getSetting('jumia_enabled', 'false')
     const jumiaEmail = await getSetting('jumia_email', '')
     const jumiaApiKey = await getSetting('jumia_api_key', '')
@@ -25,7 +28,7 @@ export default async function JumiaConfigPage() {
             </div>
 
             <div className="bg-white rounded-[3rem] p-10 shadow-xl shadow-black/5 border border-gray-100">
-                <JumiaConfigForm 
+                <JumiaConfigForm
                     initialEnabled={jumiaEnabled === 'true'}
                     initialEmail={jumiaEmail || ''}
                     initialApiKey={jumiaApiKey || ''}

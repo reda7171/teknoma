@@ -1,5 +1,5 @@
 import { getActiveMenuBySlug } from '@/lib/actions/menus'
-import { getSettingsByCategory } from '@/lib/actions/site-settings'
+import { getSettingsByCategory } from '@/lib/server/site-settings'
 import BlogHeader from './BlogHeader'
 
 export default async function BlogHeaderWithUser() {

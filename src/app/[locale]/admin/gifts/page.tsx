@@ -1,9 +1,12 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getGifts } from '@/lib/actions/gifts'
 import GiftsTable from '@/components/admin/GiftsTable'
 import GiftForm from '@/components/admin/GiftForm'
 import { Gift } from 'lucide-react'
 
 export default async function AdminGiftsPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const gifts = await getGifts()
 
     return (

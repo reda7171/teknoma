@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
@@ -22,6 +24,8 @@ export interface SupplierContactData {
  * Récupère tous les fournisseurs et contacts externes avec filtres optionnels
  */
 export async function getSupplierContacts(filters?: { search?: string; domain?: string; activeOnly?: boolean }) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         // Tentative via le modèle Prisma typé
         let contacts: any[] = []
@@ -77,6 +81,8 @@ export async function getSupplierContacts(filters?: { search?: string; domain?: 
  * Créer ou mettre à jour un contact fournisseur
  */
 export async function saveSupplierContact(data: SupplierContactData) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         if (!data.name?.trim()) return { success: false, error: 'Le nom du contact est obligatoire' }
         if (!data.phone?.trim()) return { success: false, error: 'Le numéro de téléphone est obligatoire' }
@@ -143,6 +149,8 @@ export async function saveSupplierContact(data: SupplierContactData) {
  * Supprimer un contact
  */
 export async function deleteSupplierContact(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         if (!id) return { success: false, error: 'Identifiant manquant' }
 
@@ -164,6 +172,8 @@ export async function deleteSupplierContact(id: string) {
  * Activer / Désactiver un contact
  */
 export async function toggleSupplierContactStatus(id: string, nextStatus: boolean) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         if ((prisma as any).supplierContact) {
             await (prisma as any).supplierContact.update({

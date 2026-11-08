@@ -1,7 +1,7 @@
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import CartClient from '@/components/cart/CartClient'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { getPopularBooks } from '@/lib/db/books'
 
 import { Metadata } from 'next'
@@ -22,9 +22,9 @@ export default async function CartPage() {
         <div className="min-h-screen bg-pixio-cream text-black">
             <Header />
 
-            <CartClient 
-                minOrderAmount={Number(minAmount)} 
-                recommendedBooks={JSON.parse(JSON.stringify(recommendedBooks))} 
+            <CartClient
+                minOrderAmount={Number(minAmount)}
+                recommendedBooks={JSON.parse(JSON.stringify(recommendedBooks))}
                 is3For4Active={feature3For4 === 'true'}
             />
 

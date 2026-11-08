@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
@@ -27,6 +29,8 @@ export async function addRequestedBook(title: string, author?: string) {
 }
 
 export async function getRequestedBooks() {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         const books = await prisma.requestedBook.findMany({
             orderBy: { requestCount: 'desc' }
@@ -38,6 +42,8 @@ export async function getRequestedBooks() {
 }
 
 export async function updateRequestedBookStatus(id: string, status: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await prisma.requestedBook.update({
             where: { id },

@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getCashflowData } from '@/lib/actions/cashflow'
 import { TrendingUp, TrendingDown, Wallet, Clock, AlertTriangle, ArrowUpRight, ArrowDownRight, ShoppingBag } from 'lucide-react'
 import CashflowAddButton from '@/components/admin/CashflowAddButton'
@@ -26,6 +27,8 @@ export default async function CashflowPage({
 }: {
     searchParams: Promise<{ periode?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const params = await searchParams
     const periode = parseInt(params.periode || '30')
 

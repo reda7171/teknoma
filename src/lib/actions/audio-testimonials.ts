@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { deleteAudioFile } from './upload-audio'
@@ -7,6 +9,8 @@ import { revalidatePath } from 'next/cache'
 import { getCached } from '@/lib/cache'
 
 export async function getAudioTestimonials() {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         const testimonials = await prisma.audioTestimonial.findMany({
             orderBy: { createdAt: 'desc' }
@@ -37,7 +41,7 @@ export async function getApprovedAudioTestimonials(limit?: number) {
 export async function createAudioTestimonial(data: { customerName: string, audioUrl: string, duration?: number }) {
     try {
         await verifyAdmin()
-        
+
         if (!data.customerName || !data.audioUrl) {
             return { success: false, error: 'Le nom du client et l\'URL audio sont requis' }
         }
@@ -75,7 +79,7 @@ export async function toggleAudioTestimonialStatus(id: string, isApproved: boole
 export async function deleteAudioTestimonial(id: string) {
     try {
         await verifyAdmin()
-        
+
         // Retrieve testimonial first to get the audio URL
         const testimonial = await prisma.audioTestimonial.findUnique({
             where: { id }

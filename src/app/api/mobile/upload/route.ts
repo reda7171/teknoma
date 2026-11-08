@@ -1,3 +1,4 @@
+import { getMobileCustomer } from '@/lib/mobile-auth'
 import { writeFile, mkdir } from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
@@ -6,7 +7,7 @@ import { sanitizeFilename } from '@/lib/security'
 import { createHash } from 'crypto'
 import jwt from 'jsonwebtoken'
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
+import { getJwtSecret } from '@/lib/jwt-secret';
 
 const ALLOWED_MIME_TYPES = [
     'image/jpeg',
@@ -20,16 +21,19 @@ const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
 export async function POST(request: NextRequest) {
+    const mobileCustomer = await getMobileCustomer(request)
+    if (!mobileCustomer) return NextResponse.json({ error: 'Non autoris�' }, { status: 401 })
+
     try {
         const authHeader = request.headers.get('authorization');
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
           return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
         }
         const token = authHeader.split(' ')[1];
-        
+
         let decoded: any;
         try {
-          decoded = jwt.verify(token, JWT_SECRET);
+          decoded = jwt.verify(token, getJwtSecret());
         } catch (e) {
           return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
         }
@@ -70,15 +74,15 @@ export async function POST(request: NextRequest) {
         }
 
         const safeBaseName = sanitizeFilename(path.basename(originalName, ext))
-        
+
         const timestamp = Date.now()
         const randomString = Math.random().toString(36).substring(2, 15)
         const hash = createHash('md5').update(`${timestamp}-${randomString}`).digest('hex').substring(0, 16)
-        
+
         const finalFilename = `${hash}-${safeBaseName}_${timestamp}${ext}`
 
         const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars')
-        
+
         try {
             await mkdir(uploadDir, { recursive: true })
         } catch (err) {
@@ -88,7 +92,7 @@ export async function POST(request: NextRequest) {
         const filepath = path.join(uploadDir, finalFilename)
         await writeFile(filepath, buffer)
 
-        return NextResponse.json({ 
+        return NextResponse.json({
             success: true,
             url: `/uploads/avatars/${finalFilename}`
         })

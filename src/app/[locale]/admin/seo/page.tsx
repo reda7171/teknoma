@@ -1,5 +1,6 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { getSetting, getSettingsByCategory } from '@/lib/actions/site-settings'
+import { getSetting, getSettingsByCategory } from '@/lib/server/site-settings'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import SeoConfigForm from './SeoConfigForm'
@@ -20,6 +21,8 @@ export default async function SeoConfigPage({
 }: {
     searchParams: Promise<{ tab?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
     } catch {
@@ -77,7 +80,7 @@ export default async function SeoConfigPage({
                         Optimisation tactique & Visibilité organique
                     </p>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2 p-2 bg-gray-100 rounded-[2.5rem] w-fit shadow-inner">
                     {tabs.map(tab => {
                         const Icon = tab.icon
@@ -127,7 +130,7 @@ export default async function SeoConfigPage({
                                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Édition en masse des balises ALT & TITLE</p>
                                 </div>
                             </div>
-                            
+
                             {/* Onglets secondaires pour Images */}
                             <div className="flex gap-2 border-b border-gray-100 pb-4">
                                 <a href="?tab=images&sub=livres" className={`px-4 py-2 text-sm font-bold rounded-xl ${!sp?.sub || sp?.sub === 'livres' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Images Livres</a>

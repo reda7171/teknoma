@@ -1,4 +1,4 @@
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 
 export class JumiaAPI {
     private baseUrl: string
@@ -9,8 +9,8 @@ export class JumiaAPI {
     constructor(email: string, apiKey: string, environment: string) {
         this.email = email // Now holds Client ID
         this.apiKey = apiKey // Now holds Refresh Token
-        this.baseUrl = environment === 'live' 
-            ? 'https://vendor-api.jumia.com' 
+        this.baseUrl = environment === 'live'
+            ? 'https://vendor-api.jumia.com'
             : 'https://vendor-api-staging.jumia.com'
     }
 
@@ -70,21 +70,21 @@ export class JumiaAPI {
 
         if (!response.ok) {
             const errText = await response.text()
-            
+
             if (response.status === 429 && retries > 0) {
                 console.warn(`Rate limit Jumia atteint. Nouvelle tentative dans 2 secondes... (${retries} restantes)`);
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 return this.request(endpoint, method, body, retries - 1);
             }
-            
+
             console.warn(`Erreur API Jumia (${response.status}):`, errText)
-            
+
             throw new Error(`Erreur API Jumia: ${response.statusText} - ${errText}`)
         }
 
         const contentType = response.headers.get('content-type') || ''
         let data: any
-        
+
         if (contentType.includes('application/pdf') || contentType.includes('application/zip') || contentType.includes('application/octet-stream') || contentType.includes('application/x-zip-compressed')) {
             const arrayBuffer = await response.arrayBuffer()
             const base64 = Buffer.from(arrayBuffer).toString('base64')
@@ -111,10 +111,10 @@ export class JumiaAPI {
 
 
     async getToken(clientId: string, clientSecret: string) {
-        return this.request('/token', 'POST', { 
-            client_id: clientId, 
-            client_secret: clientSecret, 
-            grant_type: 'client_credentials' 
+        return this.request('/token', 'POST', {
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: 'client_credentials'
         })
     }
 
@@ -132,7 +132,7 @@ export class JumiaAPI {
         if (createdBefore) url += `&createdBefore=${encodeURIComponent(formatDate(createdBefore))}`
         if (sortBy) url += `&sortBy=${sortBy}`
         if (sortDirection) url += `&sortDirection=${sortDirection}`
-        
+
         return this.request(url)
     }
 

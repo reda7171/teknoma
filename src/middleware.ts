@@ -28,8 +28,15 @@ export default function middleware(request: NextRequest) {
     return new NextResponse('Access Denied', { status: 403 });
   }
 
-  const pathname = request.nextUrl.pathname;
-  
+  let pathname: string;
+  try { pathname = decodeURIComponent(request.nextUrl.pathname) } catch { return new NextResponse(null, { status: 400 }) }
+  if (pathname.startsWith('/uploads/school-lists/')) {
+    const filename = pathname.slice('/uploads/school-lists/'.length);
+    const response = NextResponse.redirect(new URL(`/api/admin/school-lists/files/${filename}`, request.url));
+    response.headers.set('Cache-Control', 'private, no-store');
+    return response;
+  }
+
   // Force admin routes to always use French locale
   if (pathname.includes('/admin') && !pathname.startsWith('/fr/admin')) {
     const newPathname = pathname.replace(/^\/(ar|en)\/admin/, '/fr/admin').replace(/^\/admin/, '/fr/admin');
@@ -39,7 +46,7 @@ export default function middleware(request: NextRequest) {
     redirectRes.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
     return redirectRes;
   }
-  
+
   const response = intlMiddleware(request);
   if (pathname.includes('/opengraph-image')) {
     response.headers.set('X-Robots-Tag', 'noindex, noarchive');
@@ -62,5 +69,5 @@ export default function middleware(request: NextRequest) {
 
 export const config = {
   // Match only internationalized pathnames
-  matcher: ['/', '/(ar|en|fr)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)']
+  matcher: ['/', '/uploads/:path*', '/(ar|en|fr)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)']
 };

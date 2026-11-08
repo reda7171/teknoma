@@ -1,13 +1,17 @@
+import { getMobileCustomer } from '@/lib/mobile-auth'
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
+import { getJwtSecret } from '@/lib/jwt-secret';
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+    const mobileCustomer = await getMobileCustomer(request)
+    if (!mobileCustomer) return NextResponse.json({ error: 'Non autoris�' }, { status: 401 })
+
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -15,7 +19,7 @@ export async function PUT(
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token, getJwtSecret()) as { id: string };
 
     const { id } = await params;
     const body = await request.json();
@@ -64,6 +68,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+    const mobileCustomer = await getMobileCustomer(request)
+    if (!mobileCustomer) return NextResponse.json({ error: 'Non autoris�' }, { status: 401 })
+
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -71,7 +78,7 @@ export async function DELETE(
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token, getJwtSecret()) as { id: string };
 
     const { id } = await params;
 

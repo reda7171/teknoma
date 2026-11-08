@@ -63,7 +63,7 @@ async function handleSecureUpload(file: File, subDir: string, prefix: string) {
     // 4. Sanitize Filename & Génération nom unique
     const baseName = sanitizeFilename(file.name).split('.')[0]
     const hash = createHash('sha256').update(processedBuffer).update(Date.now().toString()).digest('hex').substring(0, 12)
-    
+
     // On force l'extension .jpg pour toutes les images (compatibilité Instagram)
     const filename = `${prefix}_${hash}_${baseName}.jpg`
 
@@ -74,7 +74,7 @@ async function handleSecureUpload(file: File, subDir: string, prefix: string) {
     }
 
     const filepath = normalize(join(uploadDir, filename))
-    
+
     // Anti-Path Traversal check
     if (!filepath.startsWith(uploadDir)) {
         throw new Error("Chemin de fichier invalide")
@@ -88,7 +88,7 @@ async function handleSecureUpload(file: File, subDir: string, prefix: string) {
 
 export async function uploadBookImage(formData: FormData) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR","SELLER"])
         const file = formData.get('image') as File
         const imageUrl = await handleSecureUpload(file, 'books', 'book')
         return { success: true, imageUrl }
@@ -100,7 +100,7 @@ export async function uploadBookImage(formData: FormData) {
 
 export async function uploadPostImage(formData: FormData) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR","SELLER"])
         const file = formData.get('image') as File
         const imageUrl = await handleSecureUpload(file, 'posts', 'post')
         return { success: true, imageUrl }
@@ -112,7 +112,7 @@ export async function uploadPostImage(formData: FormData) {
 
 export async function uploadGiftImage(formData: FormData) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR","SELLER"])
         const file = formData.get('image') as File
         const imageUrl = await handleSecureUpload(file, 'gifts', 'gift')
         return { success: true, imageUrl }
@@ -124,7 +124,7 @@ export async function uploadGiftImage(formData: FormData) {
 
 export async function uploadAuthorImage(formData: FormData) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR","SELLER"])
         const file = formData.get('image') as File
         const imageUrl = await handleSecureUpload(file, 'authors', 'author')
         return { success: true, imageUrl }
@@ -136,7 +136,7 @@ export async function uploadAuthorImage(formData: FormData) {
 
 export async function uploadUserImage(formData: FormData) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR","SELLER"])
         const file = formData.get('image') as File
         const imageUrl = await handleSecureUpload(file, 'profiles', 'profile')
         return { success: true, imageUrl }
@@ -151,7 +151,7 @@ export async function uploadUserImage(formData: FormData) {
  */
 export async function deleteBookImage(imageUrl: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR","SELLER"])
 
         if (!imageUrl || !imageUrl.startsWith('/uploads/')) {
             return { success: false, error: "URL d'image invalide" }

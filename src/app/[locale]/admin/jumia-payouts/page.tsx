@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { Metadata } from "next"
 import JumiaPayoutsClient from "./JumiaPayoutsClient"
 
@@ -5,7 +6,9 @@ export const metadata: Metadata = {
     title: "Relevés de paiement Jumia | Administration"
 }
 
-export default function JumiaPayoutsPage() {
+export default async function JumiaPayoutsPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
@@ -14,7 +17,7 @@ export default function JumiaPayoutsPage() {
                     <p className="text-sm text-gray-500 mt-1">Consultez l'historique et l'état de vos paiements</p>
                 </div>
             </div>
-            
+
             <JumiaPayoutsClient />
         </div>
     )

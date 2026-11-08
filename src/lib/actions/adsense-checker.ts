@@ -1,6 +1,7 @@
 'use server'
 
-import { getSetting, updateSetting } from './site-settings'
+import { getSetting } from '@/lib/server/site-settings'
+import { updateSetting } from './site-settings'
 import fs from 'fs'
 import path from 'path'
 
@@ -87,7 +88,7 @@ export async function checkAdSenseEligibility(): Promise<AdSenseEligibilityRepor
         const publicAdsTxtPath = path.join(process.cwd(), 'public', 'ads.txt')
         const fileExists = fs.existsSync(publicAdsTxtPath)
         const fileContent = fileExists ? fs.readFileSync(publicAdsTxtPath, 'utf-8') : ''
-        
+
         const expectedEntry = `google.com, ${cleanId}, DIRECT, f08c47fec0942fa0`
         const hasCaPub = fileContent.includes('ca-pub-')
         const hasExpected = fileContent.includes(cleanId) && fileContent.includes('DIRECT') && fileContent.includes('f08c47fec0942fa0')
@@ -190,4 +191,3 @@ export async function checkAdSenseEligibility(): Promise<AdSenseEligibilityRepor
         timestamp: new Date().toISOString()
     }
 }
-

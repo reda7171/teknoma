@@ -1,20 +1,24 @@
+import { getMobileCustomer } from '@/lib/mobile-auth'
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
+import { getJwtSecret } from '@/lib/jwt-secret';
 
 export async function GET(req: Request) {
+    const mobileCustomer = await getMobileCustomer(req)
+    if (!mobileCustomer) return NextResponse.json({ error: 'Non autoris�' }, { status: 401 })
+
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
     const token = authHeader.split(' ')[1];
-    
+
     let decoded: any;
     try {
-      decoded = jwt.verify(token, JWT_SECRET);
+      decoded = jwt.verify(token, getJwtSecret());
     } catch (e) {
       return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
     }
@@ -52,7 +56,7 @@ export async function GET(req: Request) {
       : 5.0; // Default rating 5.0
 
     const { ratingsReceived, _count, ...customerData } = customer;
-    
+
     // Logique de gamification
     const booksRead = _count.reading_list;
     let level = 1;
@@ -82,10 +86,10 @@ export async function GET(req: Request) {
       progress = ((booksRead - 3) / (10 - 3)) * 100;
     }
 
-    return NextResponse.json({ 
-      customer: { 
-        ...customerData, 
-        averageRating, 
+    return NextResponse.json({
+      customer: {
+        ...customerData,
+        averageRating,
         reviewsCount,
         gamification: {
           level,
@@ -94,7 +98,7 @@ export async function GET(req: Request) {
           nextLevelThreshold,
           progress: Math.min(100, Math.max(0, progress))
         }
-      } 
+      }
     });
   } catch (error) {
     console.error('Error in /api/mobile/auth/me:', error);
@@ -103,16 +107,19 @@ export async function GET(req: Request) {
 }
 
 export async function PUT(req: Request) {
+    const mobileCustomer = await getMobileCustomer(req)
+    if (!mobileCustomer) return NextResponse.json({ error: 'Non autoris�' }, { status: 401 })
+
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
     const token = authHeader.split(' ')[1];
-    
+
     let decoded: any;
     try {
-      decoded = jwt.verify(token, JWT_SECRET);
+      decoded = jwt.verify(token, getJwtSecret());
     } catch (e) {
       return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
     }

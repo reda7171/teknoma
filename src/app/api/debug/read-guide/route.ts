@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
 import path from 'path'
@@ -5,6 +6,10 @@ import path from 'path'
 import { verifyAdmin } from '@/lib/actions/auth'
 
 export async function GET() {
+    if (process.env.NODE_ENV === 'production') return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
@@ -13,20 +18,20 @@ export async function GET() {
 
     const filePath = 'C:\\Users\\HP\\Desktop\\Guide_jumia.xlsx'
     const workbook = new ExcelJS.Workbook()
-    
+
     try {
         await workbook.xlsx.readFile(filePath)
         const result: any = []
-        
+
         workbook.eachSheet((worksheet) => {
             const headers: any = []
             const rows: any = []
-            
+
             const headerRow = worksheet.getRow(1)
             headerRow.eachCell((cell) => {
                 headers.push(cell.value)
             })
-            
+
             // On prend les 5 premières lignes de données pour comprendre le format
             for (let i = 2; i <= 6; i++) {
                 const row = worksheet.getRow(i)
@@ -41,14 +46,14 @@ export async function GET() {
                     rows.push(rowData)
                 }
             }
-            
+
             result.push({
                 name: worksheet.name,
                 headers,
                 sample: rows
             })
         })
-        
+
         const brandsSheet = workbook.getWorksheet('Brands')
         let genericBrand = 'Generic'
         if (brandsSheet) {

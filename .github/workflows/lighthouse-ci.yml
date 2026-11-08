@@ -48,11 +48,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+
+      - name: Security regression tests
+        run: npm run test:security
 
       - name: Setup Database Schema
         run: npx prisma db push --accept-data-loss

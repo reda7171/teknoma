@@ -1,8 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server';
-import { getSetting, updateSetting } from '@/lib/actions/site-settings';
+import { getSetting } from '@/lib/server/site-settings'
+import { updateSetting } from '@/lib/actions/site-settings'
 import axios from 'axios';
 
 export async function GET(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     const code = req.nextUrl.searchParams.get('code');
     const error = req.nextUrl.searchParams.get('error');
 
@@ -25,7 +30,7 @@ export async function GET(req: NextRequest) {
         }
 
         const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/pinterest/callback`;
-        
+
         const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
         const params = new URLSearchParams();
@@ -41,10 +46,10 @@ export async function GET(req: NextRequest) {
         });
 
         const data = response.data;
-        
+
         if (data.access_token) {
             await updateSetting('pinterest_access_token', data.access_token, 'config', 'Pinterest Access Token (OAuth)');
-            
+
             if (data.refresh_token) {
                 await updateSetting('pinterest_refresh_token', data.refresh_token, 'config', 'Pinterest Refresh Token (OAuth)');
             }

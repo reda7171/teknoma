@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 
 export async function POST(req: Request) {
     const stripeSecretKey = await getSetting('payment_stripe_secret_key')
@@ -11,9 +11,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 })
     }
 
-    const stripe = new Stripe(stripeSecretKey, {
-        apiVersion: '2025-01-27.acacia'
-    })
+    const stripe = new Stripe(stripeSecretKey)
 
     const body = await req.text()
     const signature = req.headers.get('stripe-signature') as string
@@ -34,17 +32,13 @@ export async function POST(req: Request) {
                 const session = event.data.object as Stripe.Checkout.Session
                 const orderId = session.metadata?.orderId
 
-                if (orderId) {
-                    await prisma.order.update({
-                        where: { id: orderId },
-                        data: {
-                            status: 'CONFIRMED', // ou 'PAID' selon la logique métier
-                        }
-                    })
-                    void(`Order ${orderId} marked as CONFIRMED via Stripe webhook.`)
+                if (orderId && session.payment_status === 'paid') {
+                    const order = await prisma.order.findUnique({ where: { id: orderId }, select: { total: true, paymentMethod: true } })
+                    if (!order || order.paymentMethod !== 'STRIPE' || session.currency !== 'mad' || session.amount_total !== Math.round(order.total * 100)) return NextResponse.json({ error: 'Payment mismatch' }, { status: 400 })
+                    await prisma.order.updateMany({ where: { id: orderId, status: 'PENDING', isPaid: false }, data: { status: 'CONFIRMED', isPaid: true } })
                 }
                 break
-            
+
             // Add other event types as needed
             default:
                 void(`Unhandled event type ${event.type}`)

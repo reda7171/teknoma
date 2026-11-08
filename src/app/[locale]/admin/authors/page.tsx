@@ -1,8 +1,11 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getAllAuthors } from '@/lib/actions/admin-authors'
 import AuthorsList from './AuthorsList'
 import { User, Sparkles, BookOpen } from 'lucide-react'
 
 export default async function AdminAuthorsPage() {
+    await requirePageRole(["ADMIN","MANAGER","BLOG_MODERATOR"])
+
     const { data: authors } = await getAllAuthors()
 
     // Calculer quelques stats

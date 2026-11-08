@@ -1,5 +1,6 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { redirect } from 'next/navigation'
 import N8nConfigForm from './N8nConfigForm'
 import { Repeat } from 'lucide-react'
@@ -11,6 +12,8 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function N8nConfigPage() {
+    await requirePageRole(["ADMIN"])
+
     try {
         await verifyAdmin()
     } catch {
@@ -59,10 +62,10 @@ export default async function N8nConfigPage() {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Webhooks & Tokens de réseaux sociaux</p>
                         </div>
                     </div>
-                    <N8nConfigForm 
-                        initialWebhookUrl={webhookUrl} 
+                    <N8nConfigForm
+                        initialWebhookUrl={webhookUrl}
                         initialInstagramWebhookUrl={instagramWebhookUrl}
-                        initialFacebookAccessToken={facebookAccessToken} 
+                        initialFacebookAccessToken={facebookAccessToken}
                         initialInstagramAccountId={instagramAccountId}
                         initialInstagramToken={instagramToken}
                         initialThreadsAccountId={threadsAccountId}

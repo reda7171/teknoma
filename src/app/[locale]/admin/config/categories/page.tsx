@@ -1,9 +1,12 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getTranslations } from 'next-intl/server'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import CategoryTreeForm from './CategoryTreeForm'
 import { prisma } from '@/lib/prisma'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+    await requirePageRole(["ADMIN"])
+
     const t = await getTranslations('Admin')
     return {
         title: `Configuration Catégories | Admin | Riwaya`
@@ -11,6 +14,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function AdminCategoriesPage() {
+    await requirePageRole(["ADMIN"])
+
     const initialTree = await getCategoryTree()
 
     const categoryCountsRaw = await prisma.book.groupBy({
@@ -26,7 +31,7 @@ export default async function AdminCategoriesPage() {
     })
 
     const counts: Record<string, number> = {}
-    
+
     // Process main category counts
     categoryCountsRaw.forEach(item => {
         if (item.category) {

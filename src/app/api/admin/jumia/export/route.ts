@@ -1,9 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from "next/server"
 import { JumiaAPI } from "@/lib/jumia-api"
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 // Export commandes Jumia du mois en CSV
 export async function GET(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })

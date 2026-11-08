@@ -9,7 +9,7 @@ import AddToCartButton from '@/components/AddToCartButton'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import StickyBottomActions from '@/components/StickyBottomActions'
 import ScrollDownIndicator from '@/components/ScrollDownIndicator'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { getTranslations } from 'next-intl/server'
 
 export async function generateMetadata({
@@ -21,7 +21,7 @@ export async function generateMetadata({
     const product = await prisma.extraProduct.findUnique({
         where: { id },
     })
-    
+
     const t = await getTranslations('KidsProductDetail')
 
     if (!product) {
@@ -174,7 +174,7 @@ export default async function ProductDetailPage({
                             <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-3">
                                 {product.name}
                             </h1>
-                            
+
                             {/* Note / Avis Simulés Premium */}
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="flex items-center text-amber-400">

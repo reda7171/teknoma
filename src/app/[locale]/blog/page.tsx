@@ -6,20 +6,20 @@ import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import { ArrowRight, Calendar, User, Quote, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react'
 import AdUnit from '@/components/AdUnit'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 
 export const revalidate = 3600 // Cache d'une heure (ISR)
 
-export async function generateMetadata({ 
-    params 
-}: { 
-    params: Promise<{ locale: string }> 
+export async function generateMetadata({
+    params
+}: {
+    params: Promise<{ locale: string }>
 }): Promise<Metadata> {
     const { locale } = await params
     const t = await getTranslations({ locale, namespace: 'Blog' })
-    
+
     return {
         title: `${t('Title')} | Riwaya`,
         description: t('Subtitle'),
@@ -42,12 +42,12 @@ export async function generateMetadata({
         }
     }
 }
-export default async function BlogPage({ 
+export default async function BlogPage({
     params,
-    searchParams 
-}: { 
+    searchParams
+}: {
     params: Promise<{ locale: string }>,
-    searchParams: Promise<{ page?: string; category?: string }> 
+    searchParams: Promise<{ page?: string; category?: string }>
 }) {
     const { locale } = await params
     const sParams = await searchParams
@@ -62,8 +62,8 @@ export default async function BlogPage({
         getSetting('adsense_slot_sidebar')
     ])
 
-    const displayCategories = locale === 'ar' 
-        ? categories.filter(cat => /[\u0600-\u06FF]/.test(cat)) 
+    const displayCategories = locale === 'ar'
+        ? categories.filter(cat => /[\u0600-\u06FF]/.test(cat))
         : categories;
 
     return (
@@ -97,10 +97,10 @@ export default async function BlogPage({
             </div>
 
             {adsenseSidebarSlot && (
-                <AdUnit 
-                    publisherId={adsenseId || ""} 
-                    slot={adsenseSidebarSlot} 
-                    isEnabled={adsenseEnabled === 'true'} 
+                <AdUnit
+                    publisherId={adsenseId || ""}
+                    slot={adsenseSidebarSlot}
+                    isEnabled={adsenseEnabled === 'true'}
                     className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10"
                 />
             )}
@@ -153,7 +153,7 @@ export default async function BlogPage({
                                                 <Calendar className="w-3 h-3" />
                                                 <span>
                                                     {new Date(post.publishedAt).toLocaleDateString(
-                                                        locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-US' : 'fr-FR', 
+                                                        locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-US' : 'fr-FR',
                                                         {
                                                             day: 'numeric',
                                                             month: 'short',

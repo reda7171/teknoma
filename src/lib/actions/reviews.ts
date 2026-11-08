@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { verifyAdmin } from './auth'
-import { createAuditLog } from './audit'
+import { createAuditLog } from "@/lib/server/audit"
 import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sendTelegramMessage } from '@/lib/telegram'
 

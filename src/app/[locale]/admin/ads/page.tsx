@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { Suspense } from 'react'
 import { getAllAds } from '@/lib/actions/advertisements'
 import AdsList from '@/components/admin/AdsList'
@@ -5,6 +6,8 @@ import { Link } from '@/i18n/routing'
 import { Plus } from 'lucide-react'
 
 export default async function AdsPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const ads = await getAllAds()
 
     return (

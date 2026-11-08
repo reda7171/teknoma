@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getReports } from '@/lib/actions/reports'
 import Link from 'next/link'
 import ReportStatusUpdater from '@/components/admin/ReportStatusUpdater'
@@ -8,6 +9,8 @@ export default async function AdminReportsPage({
 }: {
     searchParams: Promise<{ status?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const params = await searchParams
     const status = params.status || 'PENDING'
     const reports = await getReports(status)
@@ -31,7 +34,7 @@ export default async function AdminReportsPage({
                         Modération & Sécurité de la plateforme
                     </p>
                 </div>
-                
+
                 <div className="flex gap-2 p-1.5 bg-gray-100 rounded-[2rem] w-fit shadow-inner">
                     {statusOptions.map((option) => (
                         <Link

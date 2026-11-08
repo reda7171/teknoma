@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 
 export interface CannibalizationIssue {
@@ -17,12 +19,14 @@ function normalize(str: string) {
 }
 
 export async function analyzeSeoCannibalization(): Promise<CannibalizationIssue[]> {
+    await requireRole(["ADMIN","MANAGER"])
+
     const issuesMap = new Map<string, CannibalizationIssue['entities']>()
 
     function addEntity(keyword: string, entity: CannibalizationIssue['entities'][0]) {
         if (!keyword) return
         const keys = keyword.split(',').map(k => normalize(k)).filter(k => k.length > 2)
-        
+
         for (const k of keys) {
             if (!issuesMap.has(k)) {
                 issuesMap.set(k, [])
@@ -80,7 +84,7 @@ export async function analyzeSeoCannibalization(): Promise<CannibalizationIssue[
 
     // Filter to only keep keywords that have > 1 entity mapping to it
     const conflicts: CannibalizationIssue[] = []
-    
+
     issuesMap.forEach((entities, keyword) => {
         if (entities.length > 1) {
             // Ignore generic keywords that might just be common words

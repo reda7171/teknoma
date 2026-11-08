@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { redirect } from 'next/navigation'
 import { getAdminStats } from '@/lib/actions/admin-community'
 import { Users, BookOpen, Repeat, Star, MessageSquare, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react'
@@ -5,6 +6,8 @@ import Link from 'next/link'
 import StatsChart from '@/components/admin/StatsChart'
 
 export default async function AdminCommunityDashboard() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const stats = await getAdminStats()
 
     if (!stats) {

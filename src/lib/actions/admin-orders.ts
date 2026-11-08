@@ -3,14 +3,14 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { createAuditLog } from './audit'
+import { createAuditLog } from "@/lib/server/audit"
 import { withyouService } from '@/lib/delivery/withyou'
 import { normalizeCityForCarrier } from '@/lib/constants/cities'
 import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 import { OrderStatus } from '@prisma/client'
-import { allocateOrderItemStock, restoreOrderItemStock } from '@/lib/actions/warehouse'
+import { allocateOrderItemStock, restoreOrderItemStock } from "@/lib/server/warehouse"
 
 /**
  * Mettre à jour le statut d'une commande
@@ -18,7 +18,7 @@ import { allocateOrderItemStock, restoreOrderItemStock } from '@/lib/actions/war
  */
 export async function updateOrderStatus(orderId: string, status: OrderStatus, options?: { skipSyncToProvider?: boolean, historyComment?: string }) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         // Récupérer la commande avec items pour gérer le stock
         const order = await prisma.order.findUnique({
@@ -159,7 +159,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
             if (order.email) {
                 const customerEmail = order.email
                 const triggerKey = status === 'SHIPPED' ? 'order_shipped' : 'order_delivered'
-                import('@/lib/actions/email-templates').then(({ sendTriggerEmail }) => {
+                import("@/lib/server/email-templates").then(({ sendTriggerEmail }) => {
                     sendTriggerEmail(triggerKey, customerEmail, {
                         client_nom: order.fullName,
                         customer_name: order.fullName,
@@ -192,7 +192,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
  */
 export async function updateOrderDetails(orderId: string, data: any) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const cleanData = { ...data }
         if (cleanData.shippingFees === null) cleanData.shippingFees = 0
@@ -226,7 +226,7 @@ export async function updateOrderDetails(orderId: string, data: any) {
 /** Signaler ou resoudre un article manquant sans modifier le contenu de la commande. */
 export async function updateOrderItemMissing(orderId: string, itemId: string, isMissing: boolean) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
         const item = await prisma.orderItem.findFirst({ where: { id: itemId, orderId }, select: { id: true } })
         if (!item) return { success: false, error: 'Article introuvable dans cette commande' }
 
@@ -254,7 +254,7 @@ export async function updateOrderItemMissing(orderId: string, itemId: string, is
  */
 export async function updateOrderTrackingId(orderId: string, trackingID: string, shippingCompanyId?: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const dataToUpdate: any = { trackingID }
         if (shippingCompanyId) {
@@ -277,7 +277,7 @@ export async function updateOrderTrackingId(orderId: string, trackingID: string,
  */
 export async function togglePaymentStatus(orderId: string, isPaid: boolean, expenseId?: string | null) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const data: any = { isPaid }
         if (expenseId !== undefined) {
@@ -313,7 +313,7 @@ export async function togglePaymentStatus(orderId: string, isPaid: boolean, expe
  */
 export async function getAllOrders() {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
         const orders = await prisma.order.findMany({
             include: {
                 items: {
@@ -361,7 +361,7 @@ export async function getAllOrders() {
  */
 export async function getOrderById(orderId: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
         const order = await prisma.order.findUnique({
             where: { id: orderId },
             include: {
@@ -435,7 +435,7 @@ export async function getOrderById(orderId: string) {
  */
 export async function syncOrderToWithYou(orderId: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const order = await prisma.order.findUnique({
             where: { id: orderId },
@@ -489,7 +489,7 @@ export async function syncOrderToWithYou(orderId: string) {
         return {
             success: true,
             trackingID: trackingID,
-            message: syncWarning 
+            message: syncWarning
                 ? `Commande assignée à WithYou (Attention: ${syncWarning})`
                 : 'Commande envoyée à WithYou avec succès'
         }
@@ -507,7 +507,7 @@ export async function syncOrderToWithYou(orderId: string) {
  */
 export async function syncOrderToShippingCompany(orderId: string, companyId: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const order = await prisma.order.findUnique({
             where: { id: orderId },
@@ -614,7 +614,7 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
         return {
             success: true,
             trackingID: trackingID,
-            message: syncWarning 
+            message: syncWarning
                 ? `Commande assignée à ${company.name} (Attention: ${syncWarning})`
                 : `Commande envoyée à ${company.name} avec succès`
         }
@@ -639,7 +639,7 @@ export async function getOrderShippingLabel(orderId: string) {
  */
 export async function bulkDeleteOrders(orderIds: string[]) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         if (!orderIds || orderIds.length === 0) {
             return {
@@ -753,7 +753,7 @@ export async function bulkDeleteOrders(orderIds: string[]) {
  */
 export async function syncDeliveryStatus(orderId: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const order = await prisma.order.findUnique({
             where: { id: orderId }
@@ -844,7 +844,7 @@ export async function syncDeliveryStatus(orderId: string) {
 
 export async function bulkSyncDeliveries() {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const activeOrders = await prisma.order.findMany({
             where: {
@@ -1099,7 +1099,7 @@ export async function updateOrderItems(orderId: string, items: {
     isMissing?: boolean;
 }[]) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const order = await prisma.order.findUnique({
             where: { id: orderId },
@@ -1312,7 +1312,7 @@ export async function updateOrderItems(orderId: string, items: {
  */
 export async function searchProductsForOrder(query: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
         if (!query || query.length < 2) return []
 
         const books = await prisma.book.findMany({

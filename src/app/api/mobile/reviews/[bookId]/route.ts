@@ -1,8 +1,9 @@
+import { getMobileCustomer } from '@/lib/mobile-auth'
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
+import { getJwtSecret } from '@/lib/jwt-secret';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
@@ -56,6 +57,9 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ bookId: string }> }
 ) {
+    const mobileCustomer = await getMobileCustomer(req)
+    if (!mobileCustomer) return NextResponse.json({ error: 'Non autoris�' }, { status: 401 })
+
   const { bookId } = await params;
 
   try {
@@ -67,7 +71,7 @@ export async function POST(
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
       try {
-        const decoded: any = jwt.verify(token, JWT_SECRET);
+        const decoded: any = jwt.verify(token, getJwtSecret());
         customerId = decoded.id;
       } catch (e) {
         // Token invalide, on l'ignore

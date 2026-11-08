@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedAdmin, hasAdminRole, ORDER_OPERATION_ROLES } from '@/lib/admin-auth'
@@ -18,6 +19,9 @@ function errorResponse(error: string, status: 401 | 403 | 500) {
  * lors des déconnexions et finissait par épuiser la mémoire WASM.
  */
 export async function GET(request: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN"])
+    if (accessDenied) return accessDenied
+
     try {
         // Authorize before parsing the requested window or reading any customer data.
         // The role is loaded from the database: the admin-role cookie is only a UI hint

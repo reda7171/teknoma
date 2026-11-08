@@ -1,7 +1,10 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getAllMenus } from '@/lib/actions/menus'
 import MenuManager from '@/components/admin/MenuManager'
 
 export default async function MenusPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const menus = await getAllMenus()
 
     return (

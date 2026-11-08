@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getTopReaders } from '@/lib/actions/community'
 import { verifyAdmin } from '@/lib/actions/auth'
 import Image from 'next/image'
@@ -9,6 +10,8 @@ export const metadata = {
 }
 
 export default async function TopReadersAdminPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     await verifyAdmin()
     const topReaders = await getTopReaders(100)
 

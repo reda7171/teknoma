@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 import { prisma } from '@/lib/prisma'
 import { generateBookUrl } from '@/lib/i18n-utils'
-import { isFeatureEnabled } from '@/lib/actions/site-settings'
+import { isFeatureEnabled } from '@/lib/server/site-settings'
 
 export const revalidate = 3600
 

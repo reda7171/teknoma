@@ -1,6 +1,7 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getOrderById } from '@/lib/actions/admin-orders'
 import { prisma } from '@/lib/prisma'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { normalizeImage } from '@/lib/utils'
@@ -22,6 +23,8 @@ export default async function OrderDetailsPage({
 }: {
     params: Promise<{ id: string; locale: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const { id, locale } = await params
 
     const isAuth = await isAuthenticated()
@@ -75,7 +78,7 @@ export default async function OrderDetailsPage({
         where: { isActive: true },
         select: { id: true, name: true }
     })
-    
+
     const defaultCompanyId = await getSetting('DEFAULT_SHIPPING_COMPANY_ID')
 
     const warehouses = await prisma.warehouse.findMany({
@@ -115,7 +118,7 @@ export default async function OrderDetailsPage({
                         comment: order.comment,
                         shippingCompany: order.shippingCompany,
                         shippingFees: order.shippingFees
-                    }} 
+                    }}
                     companies={activeCompanies}
                     />
                     <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
@@ -125,7 +128,7 @@ export default async function OrderDetailsPage({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main: Items */}
                 <div className="lg:col-span-2 space-y-6">
-                    <OrderItemsEditor 
+                    <OrderItemsEditor
                         orderId={order.id}
                         initialItems={order.items}
                         locale={locale}
@@ -152,10 +155,10 @@ export default async function OrderDetailsPage({
                                 Facturation & Reste
                             </h2>
                             <span className={`px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                                isFullyPaid 
-                                    ? 'bg-emerald-100 text-emerald-800' 
-                                    : paidAmount > 0 
-                                        ? 'bg-amber-100 text-amber-800' 
+                                isFullyPaid
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : paidAmount > 0
+                                        ? 'bg-amber-100 text-amber-800'
                                         : 'bg-red-100 text-red-800'
                             }`}>
                                 {isFullyPaid ? 'Soldé' : (paidAmount > 0 ? 'Acompte' : 'Non Réglé')}
@@ -184,8 +187,8 @@ export default async function OrderDetailsPage({
 
                             <div className="pt-3">
                                 <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                                    remainingAmount > 0 
-                                        ? 'bg-red-50 border-red-200 text-red-950' 
+                                    remainingAmount > 0
+                                        ? 'bg-red-50 border-red-200 text-red-950'
                                         : 'bg-emerald-50 border-emerald-200 text-emerald-950'
                                 }`}>
                                     <div>
@@ -202,9 +205,9 @@ export default async function OrderDetailsPage({
                         </div>
 
                         <div className="mt-4 pt-3 border-t border-gray-100">
-                            <OrderInvoiceModal 
-                                order={order} 
-                                locale={locale} 
+                            <OrderInvoiceModal
+                                order={order}
+                                locale={locale}
                                 triggerText="Éditer la facture & le reste"
                                 triggerClassName="w-full justify-center flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition shadow-sm text-sm"
                             />
@@ -276,9 +279,9 @@ export default async function OrderDetailsPage({
                             <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     {shippingCompany.logo ? (
-                                        <img 
-                                            src={shippingCompany.logo} 
-                                            alt={shippingCompany.name} 
+                                        <img
+                                            src={shippingCompany.logo}
+                                            alt={shippingCompany.name}
                                             className="w-10 h-10 object-contain rounded bg-white border border-gray-200 p-1"
                                         />
                                     ) : (
@@ -292,7 +295,7 @@ export default async function OrderDetailsPage({
                                     </div>
                                 </div>
                                 {shippingCompany.supportPhone && (
-                                    <a 
+                                    <a
                                         href={`tel:${shippingCompany.supportPhone}`}
                                         className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-sm font-bold transition-colors"
                                         title={shippingCompany.supportPhone}

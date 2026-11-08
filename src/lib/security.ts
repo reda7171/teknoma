@@ -1,3 +1,7 @@
+import 'server-only'
+import sanitizeHtmlLibrary from 'sanitize-html'
+import { randomBytes } from 'node:crypto'
+
 /**
  * Sanitize user input to prevent XSS attacks
  */
@@ -17,23 +21,16 @@ export function sanitizeInput(input: string): string {
  * Sanitize HTML content (for rich text editors)
  */
 export function sanitizeHtml(html: string): string {
-    if (!html) return ''
-
-    // Liste blanche des balises autorisées
-    const allowedTags = ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'a', 'img']
-    const allowedAttributes = ['href', 'src', 'alt', 'title', 'class']
-
-    // Supprimer les scripts
-    let cleaned = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-
-    // Supprimer les événements inline (onclick, onerror, etc.)
-    cleaned = cleaned.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
-    cleaned = cleaned.replace(/on\w+\s*=\s*[^\s>]*/gi, '')
-
-    // Supprimer javascript: dans les URLs
-    cleaned = cleaned.replace(/javascript:/gi, '')
-
-    return cleaned
+    if (typeof html !== 'string') return ''
+    return sanitizeHtmlLibrary(html, {
+        allowedTags: ['p','br','strong','b','em','i','u','s','h1','h2','h3','h4','h5','h6','ul','ol','li','a','img','blockquote','pre','code','table','thead','tbody','tr','th','td','span','div','hr','iframe'],
+        allowedAttributes: { '*': ['class'], a: ['href','title','target','rel'], img: ['src','alt','title','width','height','loading'], iframe: ['src','width','height','allowfullscreen','title'] },
+        allowedSchemes: ['http','https','mailto','tel'],
+        allowedSchemesByTag: { img: ['http','https'], iframe: ['https'] },
+        allowProtocolRelative: false,
+        allowedIframeHostnames: ['www.youtube.com','www.youtube-nocookie.com','player.vimeo.com'],
+        transformTags: { a: sanitizeHtmlLibrary.simpleTransform('a', { rel: 'noopener noreferrer' }) },
+    })
 }
 
 /**
@@ -87,24 +84,9 @@ export function escapeSqlLike(input: string): string {
 /**
  * Generate secure random token
  */
-export function generateSecureToken(length: number = 32): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    let result = ''
-    const randomValues = new Uint8Array(length)
-
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-        crypto.getRandomValues(randomValues)
-        for (let i = 0; i < length; i++) {
-            result += chars[randomValues[i] % chars.length]
-        }
-    } else {
-        // Fallback (moins sécurisé)
-        for (let i = 0; i < length; i++) {
-            result += chars[Math.floor(Math.random() * chars.length)]
-        }
-    }
-
-    return result
+export function generateSecureToken(length = 32): string {
+    if (!Number.isInteger(length) || length < 16 || length > 1024) throw new Error('Invalid token length')
+    return randomBytes(Math.ceil(length * 3 / 4)).toString('base64url').slice(0, length)
 }
 
 /**

@@ -1,96 +1,36 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import { z } from 'zod'
+import { randomBytes } from 'node:crypto'
+import { getJwtSecret } from '@/lib/jwt-secret'
+import { mobilePasswordVersion } from '@/lib/mobile-auth'
+import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
+import { readJsonBody } from '@/lib/request-body'
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
-
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const { email, password, fullName, phone } = body;
-
-    if (!password || !fullName || (!email && !phone)) {
-      return NextResponse.json({ error: 'Missing required fields (email or phone, and password)' }, { status: 400 });
-    }
-
-    // Check if customer exists by phone or email
-    const existingCustomer = await prisma.customer.findFirst({
-      where: {
-        OR: [
-          { email: email || 'NONE' },
-          { phone: phone || 'NONE' },
-        ],
-      },
-    });
-
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    let customer;
-
-    if (existingCustomer) {
-      if (existingCustomer.password) {
-        return NextResponse.json({ error: 'Ce numéro de téléphone ou cet email est déjà utilisé par un compte actif. Veuillez vous connecter.' }, { status: 409 });
-      } else {
-        // Le compte a été créé lors d'une commande COD (pas de mot de passe) -> On le met à jour
-        customer = await prisma.customer.update({
-          where: { id: existingCustomer.id },
-          data: {
-            password: hashedPassword,
-            fullName,
-            email: email || existingCustomer.email,
-          },
-        });
-      }
-    } else {
-      // Create new customer
-      customer = await prisma.customer.create({
-        data: {
-          email: email || null,
-          password: hashedPassword,
-          fullName,
-          phone: phone || '', // Phone is required in schema
-        },
-      });
-    }
-
-    // Generate a welcome coupon
+const schema = z.object({
+    email: z.string().email().max(255).optional(), phone: z.string().trim().min(8).max(20),
+    fullName: z.string().trim().min(2).max(100), password: z.string().min(12).max(72),
+})
+export async function POST(request: Request) {
+    if (!(await rateLimit(`mobile_register_${await getIpIdentifier()}`, { limit: 5, windowMs: 15 * 60 * 1000 })).success) return NextResponse.json({ error: 'Veuillez reessayer plus tard' }, { status: 429 })
+    let input: z.infer<typeof schema>
     try {
-      const couponCode = `BIENVENUE-${Math.random().toString(36).substring(2,6).toUpperCase()}${customer.id.substring(0,4).toUpperCase()}`
-      await prisma.coupon.create({
-          data: {
-              code: couponCode,
-              discount: 10,
-              type: 'FIXED_AMOUNT',
-              isActive: true,
-          }
-      })
-    } catch (err) {
-      console.error('Failed to create welcome gift', err)
-    }
-
-    // Generate JWT
-    const token = jwt.sign(
-      { id: customer.id, email: customer.email, role: 'CUSTOMER' },
-      JWT_SECRET,
-      { expiresIn: '30d' }
-    );
-
-    return NextResponse.json({
-      message: 'Account created successfully',
-      token,
-      customer: {
-        id: customer.id,
-        email: customer.email,
-        fullName: customer.fullName,
-        phone: customer.phone,
-      }
-    }, { status: 201 });
-
-  } catch (error: any) {
-    console.error('Mobile Register Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  }
+        input = schema.parse(await readJsonBody(request))
+        if (Buffer.byteLength(input.password) > 72) throw new Error('Password too long')
+    } catch { return NextResponse.json({ error: 'Donnees invalides. Mot de passe de 12 caracteres minimum.' }, { status: 400 }) }
+    try {
+        const secret = getJwtSecret()
+        const existing = await prisma.customer.findFirst({ where: { OR: [{ phone: input.phone }, ...(input.email ? [{ email: input.email }] : [])] } })
+        // A COD record is not proof of identity. Never claim it with a new password.
+        if (existing) return NextResponse.json({ error: 'Ce compte necessite une connexion ou une recuperation verifiee.' }, { status: 409 })
+        const password = await bcrypt.hash(input.password, 12)
+        const customer = await prisma.customer.create({ data: { fullName: input.fullName, phone: input.phone, email: input.email || null, password } })
+        await prisma.coupon.create({ data: { code: `BIENVENUE-${randomBytes(8).toString('hex').toUpperCase()}`, discount: 10, type: 'FIXED_AMOUNT', isActive: true } }).catch(() => null)
+        const token = jwt.sign({ id: customer.id, role: 'CUSTOMER', ver: mobilePasswordVersion(password) }, secret, {
+            algorithm: 'HS256', issuer: 'riwaya', audience: 'mobile-customer', expiresIn: '30d',
+        })
+        return NextResponse.json({ token, customer: { id: customer.id, email: customer.email, fullName: customer.fullName, phone: customer.phone } }, { status: 201, headers: { 'Cache-Control': 'no-store' } })
+    } catch { return NextResponse.json({ error: 'Inscription indisponible' }, { status: 503 }) }
 }

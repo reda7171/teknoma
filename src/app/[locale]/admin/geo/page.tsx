@@ -1,7 +1,8 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 import { MessageCircle } from 'lucide-react'
-import { getAllSettings } from '@/lib/actions/site-settings'
+import { getAllSettings } from '@/lib/server/site-settings'
 import GeoConfigForm from './GeoConfigForm'
 
 export const metadata = {
@@ -9,6 +10,8 @@ export const metadata = {
 }
 
 export default async function GeoConfigPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
     } catch {
@@ -43,7 +46,7 @@ export default async function GeoConfigPage() {
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Optimisation pour les IA génératives (ChatGPT, Gemini, etc.)</p>
                             </div>
                         </div>
-                        
+
                         <GeoConfigForm initialData={settings} />
                     </div>
                 </div>

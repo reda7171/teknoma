@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { getAdminUser, isAuthenticated } from '@/lib/actions/auth'
 import { getWhatsAppAgents, resolveActiveWhatsAppAgent, WhatsAppAgentConfig } from '@/lib/whatsapp-presence'
@@ -10,6 +12,8 @@ export interface AgentPresenceItem extends WhatsAppAgentConfig {
 }
 
 export async function getWhatsAppAvailabilityPrompt() {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         const agents = await getWhatsAppAgents()
         const keys = agents.map(a => `whatsapp_presence_${a.id}`)
@@ -67,6 +71,7 @@ export async function getWhatsAppAvailabilityPrompt() {
 }
 
 export async function setWhatsAppAvailability(agentId: string, online: boolean) {
+    await requireRole(["ADMIN", "MANAGER"])
     try {
         const isAuth = await isAuthenticated()
         if (!isAuth) {
@@ -129,6 +134,7 @@ export async function setWhatsAppAvailability(agentId: string, online: boolean) 
 }
 
 export async function heartbeatWhatsAppAvailability(agentId: string) {
+    await requireRole(["ADMIN", "MANAGER"])
     try {
         const key = `whatsapp_presence_${agentId}`
         const setting = await prisma.siteSettings.findUnique({ where: { key } })

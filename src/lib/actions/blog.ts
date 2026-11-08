@@ -1,5 +1,8 @@
 'use server'
 
+import { sanitizeHtml } from '@/lib/security'
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { getCached } from '@/lib/cache'
 import { revalidatePath } from 'next/cache'
@@ -261,6 +264,8 @@ export async function getAllPosts(
     bookId?: string,
     hasImage?: string
 ) {
+    await requireRole(["ADMIN","MANAGER","BLOG_MODERATOR"])
+
     const skip = (page - 1) * limit
     const where: any = {}
 
@@ -351,7 +356,7 @@ export async function getAllPosts(
 
 export async function createPost(data: any) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
         const adminId = await getAdminUser()
 
         if (!adminId) {
@@ -375,7 +380,7 @@ export async function createPost(data: any) {
                 title: data.title,
                 slug: data.slug,
                 excerpt: sanitizedExcerpt,
-                content: sanitizedContent,
+                content: sanitizeHtml(sanitizedContent || ''),
                 coverImage: data.coverImage,
                 published: data.published,
                 publishedAt: data.published ? new Date() : null,
@@ -402,7 +407,7 @@ export async function createPost(data: any) {
 
 export async function updatePost(id: string, data: any) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
 
         const sanitizedContent = typeof data.content === 'string' ? data.content.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n') : data.content
         const sanitizedExcerpt = typeof data.excerpt === 'string' ? data.excerpt.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n') : data.excerpt
@@ -413,7 +418,7 @@ export async function updatePost(id: string, data: any) {
                 title: data.title,
                 slug: data.slug,
                 excerpt: sanitizedExcerpt,
-                content: sanitizedContent,
+                content: sanitizeHtml(sanitizedContent || ''),
                 coverImage: data.coverImage,
                 published: data.published,
                 publishedAt: data.published && !data.publishedAt ? new Date() : data.publishedAt,
@@ -442,7 +447,7 @@ export async function updatePost(id: string, data: any) {
 
 export async function deletePost(id: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
 
         await prisma.post.delete({
             where: { id }
@@ -458,6 +463,8 @@ export async function deletePost(id: string) {
 }
 
 export async function getPostById(id: string) {
+    await requireRole(["ADMIN","MANAGER","BLOG_MODERATOR"])
+
     return prisma.post.findUnique({
         where: { id },
         include: {
@@ -580,7 +587,7 @@ export async function logPostReadTime(id: string, seconds: number) {
  */
 export async function deletePostsBulk(ids: string[]) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
 
         await prisma.post.deleteMany({
             where: {
@@ -601,7 +608,7 @@ export async function deletePostsBulk(ids: string[]) {
  */
 export async function sharePostToN8n(postId: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
 
         const post = await prisma.post.findUnique({
             where: { id: postId },
@@ -617,7 +624,7 @@ export async function sharePostToN8n(postId: string) {
 
         if (!post) return { success: false, error: 'Article introuvable' }
 
-        const { getSetting } = await import('@/lib/actions/site-settings')
+        const { getSetting } = await import('@/lib/server/site-settings')
         const n8nWebhook = await getSetting('n8n_facebook_webhook')
         const siteUrl = await getSetting('site_url') || 'https://riwaya.store'
 
@@ -655,5 +662,3 @@ export async function sharePostToN8n(postId: string) {
         return { success: false, error: 'Une erreur est survenue' }
     }
 }
-
-

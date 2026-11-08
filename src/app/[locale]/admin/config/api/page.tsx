@@ -1,5 +1,6 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { Metadata } from 'next'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { MessageCircle, Facebook, Cpu } from 'lucide-react'
 import TrackingConfigForm from './TrackingConfigForm'
 
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
 }
 
 export default async function TrackingConfigPage() {
+    await requirePageRole(["ADMIN"])
+
     const fbPixelId = await getSetting('facebook_pixel_id') || ''
     const geminiApiKey = await getSetting('gemini_api_key') || ''
     const tiktokAccessToken = await getSetting('tiktok_access_token') || ''
@@ -46,9 +49,9 @@ export default async function TrackingConfigPage() {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Tokens d'accès globaux & pixels de conversion</p>
                         </div>
                     </div>
-                    
+
                     <div className="space-y-8">
-                        <TrackingConfigForm 
+                        <TrackingConfigForm
                             initialFbPixelId={fbPixelId}
                             initialGeminiApiKey={geminiApiKey}
                             initialTiktokAccessToken={tiktokAccessToken}

@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { Suspense } from "react"
 import { getTranslations } from "next-intl/server"
 import JumiaProductsClient from "./JumiaProductsClient"
@@ -10,9 +11,11 @@ export default async function JumiaProductsPage({
 }: {
     params: Promise<{ locale: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { locale } = await params
     const t = await getTranslations('Admin')
-    
+
     // On charge tous les produits Jumia
     const initialProducts = await getAllJumiaProducts()
 
@@ -22,9 +25,9 @@ export default async function JumiaProductsPage({
                 <h2 className="text-3xl font-bold tracking-tight">Catalogue Jumia</h2>
             </div>
             <Suspense fallback={<div>Chargement du catalogue...</div>}>
-                <JumiaProductsClient 
-                    initialData={initialProducts?.products || []} 
-                    nextToken={null} 
+                <JumiaProductsClient
+                    initialData={initialProducts?.products || []}
+                    nextToken={null}
                 />
             </Suspense>
         </div>

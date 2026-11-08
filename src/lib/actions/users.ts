@@ -8,7 +8,7 @@ import { hash } from 'bcryptjs'
 
 export async function getUsers() {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN"])
         const users = await prisma.user.findMany({
             orderBy: { createdAt: 'desc' },
             select: {
@@ -35,7 +35,7 @@ export async function getUsers() {
 
 export async function updateUserRole(userId: string, newRole: UserRole) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN"])
         await prisma.user.update({
             where: { id: userId },
             data: { role: newRole }
@@ -49,7 +49,7 @@ export async function updateUserRole(userId: string, newRole: UserRole) {
 
 export async function toggleUserBan(userId: string, isBanned: boolean) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN"])
         await prisma.user.update({
             where: { id: userId },
             data: { isBanned }
@@ -63,7 +63,7 @@ export async function toggleUserBan(userId: string, isBanned: boolean) {
 
 export async function deleteUser(userId: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN"])
         await prisma.user.delete({
             where: { id: userId }
         })
@@ -76,9 +76,9 @@ export async function deleteUser(userId: string) {
 
 export async function createUserAdmin(data: any) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN"])
         if (!data.email || !data.password) return { success: false, error: 'Email et mot de passe requis' }
-        
+
         const hashedPassword = await hash(data.password, 10)
         await prisma.user.create({
             data: {
@@ -108,9 +108,9 @@ export async function createUserAdmin(data: any) {
 
 export async function updateUserAdmin(userId: string, data: any) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN"])
         if (!data.email) return { success: false, error: 'Email requis' }
-        
+
         const updateData: any = {
             email: data.email,
             fullName: data.fullName,
@@ -145,7 +145,7 @@ export async function updateUserAdmin(userId: string, data: any) {
 
 export async function getLoginHistory(userId: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN"])
         const history = await prisma.loginHistory.findMany({
             where: { userId },
             orderBy: { createdAt: 'desc' },
@@ -159,7 +159,7 @@ export async function getLoginHistory(userId: string) {
 
 export async function getGlobalLoginHistory() {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN"])
         const history = await prisma.loginHistory.findMany({
             include: {
                 user: {
@@ -178,5 +178,3 @@ export async function getGlobalLoginHistory() {
         return { success: false, error: 'Impossible de récupérer l\'historique global' }
     }
 }
-
-

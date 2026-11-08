@@ -1,6 +1,6 @@
 'use server'
 
-import { getSetting } from './site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { verifyAdmin } from './auth'
 
 const FB_API_VERSION = 'v19.0'
@@ -75,7 +75,7 @@ export async function launchFacebookAd(params: LaunchAdParams) {
         if (finalImageUrl.startsWith('/')) {
             finalImageUrl = `https://riwaya.store${finalImageUrl}`
         }
-        
+
         // Télécharger l'image pour l'envoyer en tant que fichier (bytes)
         const imgDownloadRes = await fetch(finalImageUrl)
         if (!imgDownloadRes.ok) {
@@ -109,7 +109,7 @@ export async function launchFacebookAd(params: LaunchAdParams) {
         // Si des villes sont spécifiées, on ajoute au ciblage
         if (params.targeting.cities && params.targeting.cities.length > 0) {
             // Note: C'est complexe car il faut les IDs des villes Facebook.
-            // Pour l'instant, si on veut cibler par ville sans les IDs exacts, 
+            // Pour l'instant, si on veut cibler par ville sans les IDs exacts,
             // il vaut mieux utiliser l'API Search de FB pour trouver les IDs des villes.
             // On va simplifier en gardant le pays entier par défaut si la résolution échoue.
             // (Voir fonction resolveCityIds plus bas - mockée pour l'instant)
@@ -117,18 +117,18 @@ export async function launchFacebookAd(params: LaunchAdParams) {
 
         const adSetFormData = new URLSearchParams()
         adSetFormData.append('name', `AdSet - ${params.name}`)
-        
+
         // Map objective to optimization goal
         let optimizationGoal = 'LINK_CLICKS'
         if (campaignObjective === 'OUTCOME_SALES') optimizationGoal = 'OFFSITE_CONVERSIONS'
         else if (campaignObjective === 'OUTCOME_ENGAGEMENT') optimizationGoal = 'POST_ENGAGEMENT'
-        
+
         adSetFormData.append('optimization_goal', optimizationGoal)
-        
+
         adSetFormData.append('billing_event', 'IMPRESSIONS')
         adSetFormData.append('bid_strategy', 'LOWEST_COST_WITHOUT_CAP')
         // Convert daily budget from درهم to cents (FB expects lowest denomination)
-        adSetFormData.append('daily_budget', (params.dailyBudgetMad * 100).toString()) 
+        adSetFormData.append('daily_budget', (params.dailyBudgetMad * 100).toString())
         adSetFormData.append('campaign_id', campaignId)
         adSetFormData.append('targeting', JSON.stringify(targetingObj))
         adSetFormData.append('status', 'PAUSED')
@@ -158,7 +158,7 @@ export async function launchFacebookAd(params: LaunchAdParams) {
                 }
             }
         }
-        
+
         if (igUserId) {
             creativeObj.object_story_spec.instagram_actor_id = igUserId
         }
@@ -197,10 +197,10 @@ export async function launchFacebookAd(params: LaunchAdParams) {
             throw new Error(`Erreur Création Ad: ${adData.error.error_user_msg || adData.error.message}`)
         }
 
-        return { 
-            success: true, 
-            campaignId, 
-            adSetId, 
+        return {
+            success: true,
+            campaignId,
+            adSetId,
             adId: adData.id,
             message: "Publicité créée avec succès et mise en pause sur votre compte Facebook."
         }

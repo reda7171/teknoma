@@ -1,14 +1,14 @@
-const FALLBACK_BUILD_SECRET = 'riwaya-build-prerender-fallback-jwt-secret-key-32-chars-min'
+import 'server-only'
+import { randomBytes } from 'node:crypto'
 
-const configuredSecret = process.env.JWT_SECRET?.trim()
+const developmentSecret = randomBytes(48).toString('hex')
 
-export const JWT_SECRET = (configuredSecret && configuredSecret.length >= 32)
-    ? configuredSecret
-    : FALLBACK_BUILD_SECRET
-
-if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSecret.length < 32)) {
-    if (process.env.NEXT_PHASE !== 'phase-production-build') {
-        console.warn('[SECURITY] JWT_SECRET non configuré ou inférieur à 32 caractères.')
+// Validate at use time: builds need no production key; runtime fails closed.
+export function getJwtSecret(): string {
+    const secret = process.env.JWT_SECRET?.trim()
+    if (secret && secret.length >= 32) return secret
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('JWT_SECRET must contain at least 32 characters')
     }
+    return developmentSecret
 }
-

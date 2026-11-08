@@ -1,4 +1,5 @@
-import { getSetting } from '@/lib/actions/site-settings'
+import { requirePageRole } from '@/lib/page-authorization'
+import { getSetting } from '@/lib/server/site-settings'
 import PaymentMethodsForm from './PaymentMethodsForm'
 
 export const metadata = {
@@ -6,8 +7,10 @@ export const metadata = {
 }
 
 export default async function PaymentMethodsPage() {
+    await requirePageRole(["ADMIN"])
+
   const codEnabled = await getSetting('payment_cod_enabled') === 'true'
-  
+
   const paypalEnabled = await getSetting('payment_paypal_enabled') === 'true'
   const paypalClientId = await getSetting('payment_paypal_client_id') || ''
   const paypalClientSecret = await getSetting('payment_paypal_client_secret') || ''

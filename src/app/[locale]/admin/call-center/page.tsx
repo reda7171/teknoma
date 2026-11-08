@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { isAuthenticated } from '@/lib/actions/auth'
@@ -6,6 +7,8 @@ import CallCenterClient from './CallCenterClient'
 export const dynamic = 'force-dynamic'
 
 export default async function CallCenterPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const auth = await isAuthenticated()
     if (!auth) {
         redirect('/fr/login')

@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { redirect } from 'next/navigation'
 import { getAllExchanges, deleteExchange } from '@/lib/actions/admin-community'
 import { ArrowLeft, Trash2, Eye, BookOpen, Star } from 'lucide-react'
@@ -9,6 +10,8 @@ export default async function AdminExchangesPage({
 }: {
     searchParams: Promise<{ status?: string; page?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const params = await searchParams
     const status = params.status || 'ALL'
     const page = parseInt(params.page || '1')

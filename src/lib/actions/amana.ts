@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { canReadOrder } from '@/lib/order-access'
 import { getAmanaTracking, AmanaTrackingResult } from '@/lib/shipping/amana-tracking'
 
 export async function fetchLiveAmanaTracking(orderId: string): Promise<AmanaTrackingResult | null> {
@@ -27,7 +28,7 @@ export async function fetchLiveAmanaTracking(orderId: string): Promise<AmanaTrac
             }
         })
 
-        if (!order) return null
+        if (!order || !(await canReadOrder(order))) return null
 
         return await getAmanaTracking(order)
     } catch (error) {
@@ -35,4 +36,3 @@ export async function fetchLiveAmanaTracking(orderId: string): Promise<AmanaTrac
         return null
     }
 }
-

@@ -1,6 +1,7 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { sendTelegramMessage, sendTelegramPhoto } from '@/lib/telegram'
 
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -8,6 +9,9 @@ import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { publishPin } from '@/lib/pinterest'
 
 export async function POST(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     try {
         // OWASP A01: Broken Access Control - Authentification Admin Obligatoire
         try {
@@ -29,7 +33,7 @@ export async function POST(req: NextRequest) {
         // URL du webhook n8n (Priorité à la DB, puis .env)
         const dbWebhookUrl = await getSetting('n8n_webhook_url')
         let N8N_WEBHOOK_URL = dbWebhookUrl || process.env.N8N_WEBHOOK_URL
-        
+
         if (process.env.NODE_ENV === 'development' && N8N_WEBHOOK_URL) {
             N8N_WEBHOOK_URL = N8N_WEBHOOK_URL.replace('http://n8n:', 'http://167.86.108.246:');
         }
@@ -90,10 +94,10 @@ export async function POST(req: NextRequest) {
                 baseUrl = `${protocol}://${host}`;
             } else {
                 const port = host.split(':')[1] || '3000';
-                baseUrl = `${protocol}://167.86.108.246${port ? `:${port}` : ''}`; 
+                baseUrl = `${protocol}://167.86.108.246${port ? `:${port}` : ''}`;
             }
         }
-        
+
         baseUrl = baseUrl.replace(/\/$/, '');
 
         // Si base64 fourni, sauvegarder le fichier côté serveur pour obtenir une URL publique
@@ -120,7 +124,7 @@ export async function POST(req: NextRequest) {
         }
 
         let imageUrl = resolvedCustomImageUrl || item?.image || '';
-        
+
         if (imageUrl && (imageUrl.includes('localhost') || imageUrl.includes('127.0.0.1'))) {
             try {
                 const urlObj = new URL(imageUrl);
@@ -141,15 +145,15 @@ export async function POST(req: NextRequest) {
                 const urlObj = new URL(imageUrl);
                 const path = await import('path');
                 const { copyFile, mkdir } = await import('fs/promises');
-                
+
                 const localPath = path.default.join(process.cwd(), 'public', decodeURIComponent(urlObj.pathname).replace('/api/uploads/', '/uploads/'));
                 const ext = path.default.extname(localPath) || '.jpg';
                 const safeFileName = `safe_${Date.now()}_${Math.random().toString(36).substring(7)}${ext}`;
                 const safeUploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives');
-                
+
                 await mkdir(safeUploadDir, { recursive: true });
                 await copyFile(localPath, path.default.join(safeUploadDir, safeFileName));
-                
+
                 imageUrl = `${urlObj.origin}/api/uploads/creatives/${safeFileName}`;
                 void('[N8N PUBLISH] Created safe ASCII image copy:', imageUrl);
             } catch (e) {
@@ -187,7 +191,7 @@ export async function POST(req: NextRequest) {
 
         // Texte à publier avec lien intégré
         let finalCaption = body.customCaption || (itemType === 'BOOK' ? (item?.description || title) : (item?.description ? `${title}\n\n${item.description}` : title));
-        
+
         if (finalCaption === 'Riwaya' || !finalCaption) {
             finalCaption = `📚 Découvrez notre sélection de livres sur Riwaya !\n\n🔗 ${domain === 'jumia.ma' ? jumiaLink : storeDomain}`;
         } else if (!finalCaption.includes('http')) {
@@ -240,7 +244,7 @@ export async function POST(req: NextRequest) {
             pinterest_board_id: pinterestBoardId,
             postId: body.postId || ''
         }
-        
+
         let platformsArray = ['facebook']
         if (platform === 'both' || platform === 'all') {
             platformsArray = ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest']
@@ -350,7 +354,7 @@ export async function POST(req: NextRequest) {
 
         // Envoyer au webhook n8n
         void('[N8N PUBLISH] Sending payload to:', N8N_WEBHOOK_URL);
-        
+
         // Timeout de 60 secondes (n8n publie sur les réseaux sociaux, ça prend du temps)
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000);
@@ -368,9 +372,9 @@ export async function POST(req: NextRequest) {
             if (fetchError.name === 'AbortError') {
                 return NextResponse.json({ error: 'Le serveur n8n ne répond pas (Timeout 10s)' }, { status: 504 })
             }
-            return NextResponse.json({ 
+            return NextResponse.json({
                 error: `Impossible de contacter n8n (${N8N_WEBHOOK_URL}). Vérifiez que le serveur n8n est allumé et accessible.`,
-                details: fetchError.message 
+                details: fetchError.message
             }, { status: 502 })
         } finally {
             clearTimeout(timeoutId);
@@ -385,21 +389,21 @@ export async function POST(req: NextRequest) {
         const n8nData = await n8nRes.json().catch(() => ({}))
 
         // Envoyer la notification Telegram
-        const platformLabel = platform === 'all' 
-            ? 'toutes les plateformes' 
-            : platform === 'tiktok' 
-                ? 'TikTok' 
+        const platformLabel = platform === 'all'
+            ? 'toutes les plateformes'
+            : platform === 'tiktok'
+                ? 'TikTok'
                 : platform === 'pinterest'
                     ? 'Pinterest'
-                    : platform === 'both' || platform === 'all' 
-                        ? 'Toutes les plateformes' 
+                    : platform === 'both' || platform === 'all'
+                        ? 'Toutes les plateformes'
                         : platform.charAt(0).toUpperCase() + platform.slice(1);
 
         const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const messageText = scheduleAt 
+        const messageText = scheduleAt
             ? `📅 <b>Publication Programmée</b>\n\nUn post pour <b>${safeTitle}</b> a été programmé sur <b>${platformLabel}</b> via n8n.\n🕒 <b>Date:</b> ${new Date(scheduleAt).toLocaleString('fr-FR')}`
             : `🚀 <b>Nouvelle Publication</b>\n\nUn post pour <b>${safeTitle}</b> a été envoyé à n8n pour publication immédiate sur <b>${platformLabel}</b>.`;
-            
+
         if (imageUrl && !isVideo) {
             sendTelegramPhoto(imageUrl, messageText).catch(console.error);
         } else {

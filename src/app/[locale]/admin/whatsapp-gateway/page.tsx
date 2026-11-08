@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { redirect } from 'next/navigation'
 import { isAuthenticated } from '@/lib/actions/auth'
 import {
@@ -6,7 +7,7 @@ import {
     getWhatsAppTemplates,
     getWhatsAppMessageLogs,
     getWahaSessions
-} from '@/lib/actions/whatsapp-gateway'
+} from "@/lib/server/whatsapp-gateway"
 import { WhatsAppGatewayClient } from '@/components/admin/WhatsAppGatewayClient'
 
 export const metadata = { title: 'Passerelle WhatsApp QR & Sessions | Admin Riwaya' }
@@ -16,6 +17,8 @@ export default async function WhatsAppGatewayPage({
 }: {
     params: Promise<{ locale: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { locale } = await params
     const isAuth = await isAuthenticated()
     if (!isAuth) {

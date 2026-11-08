@@ -37,7 +37,7 @@ async function handleSecureAudioUpload(file: File, subDir: string, prefix: strin
     const baseName = sanitizeFilename(file.name).split('.')[0]
     const hash = createHash('sha256').update(buffer).update(Date.now().toString()).digest('hex').substring(0, 12)
     const extension = extname(file.name) || '.mp3'
-    
+
     const filename = `${prefix}_${hash}_${baseName}${extension}`
 
     const uploadDir = join(process.cwd(), 'public', 'uploads', subDir)
@@ -46,7 +46,7 @@ async function handleSecureAudioUpload(file: File, subDir: string, prefix: strin
     }
 
     const filepath = normalize(join(uploadDir, filename))
-    
+
     if (!filepath.startsWith(uploadDir)) {
         throw new Error("Chemin de fichier invalide")
     }
@@ -58,7 +58,7 @@ async function handleSecureAudioUpload(file: File, subDir: string, prefix: strin
 
 export async function uploadAudioTestimonial(formData: FormData) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
         const file = formData.get('audio') as File
         const audioUrl = await handleSecureAudioUpload(file, 'audios', 'testimonial')
         return { success: true, audioUrl }
@@ -70,7 +70,7 @@ export async function uploadAudioTestimonial(formData: FormData) {
 
 export async function deleteAudioFile(audioUrl: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
 
         if (!audioUrl || !audioUrl.startsWith('/uploads/audios/')) {
             return { success: false, error: "URL audio invalide" }

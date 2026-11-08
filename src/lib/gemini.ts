@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { getSetting } from "@/lib/actions/site-settings";
+import { getSetting } from '@/lib/server/site-settings'
 import { prisma } from "@/lib/prisma";
 
 const GEMINI_CANDIDATE_MODELS = [
@@ -64,7 +64,7 @@ export async function getGeminiModel(preferredModel?: string) {
   const apiKey = (await getSetting("gemini_api_key")) || process.env.GEMINI_API_KEY || "";
   if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
   const genAI = new GoogleGenerativeAI(apiKey);
-  return genAI.getGenerativeModel({ 
+  return genAI.getGenerativeModel({
     model: preferredModel || process.env.GEMINI_MODEL || "gemini-3.7-flash",
     systemInstruction: SYSTEM_INSTRUCTION_DEFAULT
   });
@@ -77,8 +77,8 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
     // Gestion rapide des salutations pour économiser des ressources
     const greetings = ['bonjour', 'salut', 'salam', 'hello', 'hey', 'صباح', 'مرحبا'];
     if (greetings.some(g => msg === g || msg.startsWith(g + ' '))) {
-      const welcome = locale === 'ar' 
-        ? "مرحباً! ✨ أنا المساعد الذكي لـ **رواية**. كيف يمكنني مساعدتك اليوم؟" 
+      const welcome = locale === 'ar'
+        ? "مرحباً! ✨ أنا المساعد الذكي لـ **رواية**. كيف يمكنني مساعدتك اليوم؟"
         : "Bonjour ! ✨ Je suis l'assistant intelligent de **Riwaya**. Comment puis-je vous aider aujourd'hui ?";
       return { text: welcome, type: undefined, data: undefined };
     }
@@ -89,30 +89,16 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
 
     // 1. Détection d'intention pour le contexte DB
     if (msg.includes("commande") || msg.includes("suivi") || msg.includes("طلب") || msg.includes("تتبع")) {
-      const orderMatch = msg.match(/(?:(?:commande|suivi|طلب|تتبع)[:\s#]*|#)([a-f0-9-]{6,})/i);
-      if (orderMatch) {
-        const orderId = orderMatch[1];
-        const order = await prisma.order.findFirst({
-          where: { id: { startsWith: orderId } },
-          select: { id: true, fullName: true, total: true, status: true, createdAt: true, city: true }
-        });
-        if (order) {
-          context = `CONTEXTE COMMANDE : L'utilisateur consulte la commande #${order.id}. Client: ${order.fullName}, Statut: ${order.status}, Ville: ${order.city}, Total: ${order.total} درهم. Date: ${order.createdAt.toLocaleDateString()}.`;
-          dataType = 'order';
-          data = order;
-        } else {
-          context = `CONTEXTE : L'utilisateur cherche la commande "${orderId}" mais elle n'existe pas.`;
-        }
-      }
+      return { text: locale === 'ar' ? 'https://riwaya.store/ar/track' : locale === 'en' ? 'Track your order securely: https://riwaya.store/en/track' : 'Suivez votre commande sur la page securisee : https://riwaya.store/fr/track', type: undefined, data: undefined };
     } else if (msg.length > 3) {
       // Recherche de livres
       const books = await prisma.book.findMany({
-        where: { 
+        where: {
           OR: [
             { title: { contains: message } },
             { author: { contains: message } }
           ],
-          active: true 
+          active: true
         },
         take: 5,
         select: { id: true, title: true, author: true, price: true, image: true }
@@ -125,8 +111,8 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
       }
     }
 
-    const prompt = context 
-      ? `CONTEXTE : ${context}\n\nCONSIGNE : Réponds au message suivant de manière concise en utilisant le contexte si pertinent.\nMESSAGE : ${message}` 
+    const prompt = context
+      ? `CONTEXTE : ${context}\n\nCONSIGNE : Réponds au message suivant de manière concise en utilisant le contexte si pertinent.\nMESSAGE : ${message}`
       : message;
 
     const { text } = await executeWithModelFallback(async (model) => {
@@ -166,7 +152,7 @@ Réponds UNIQUEMENT au format JSON strict avec la structure suivante, sans texte
   "seoDescription": "Une meta-description SEO accrocheuse d'environ 150 caractères.",
   "seoKeywords": "mot-clé 1, mot-clé 2, mot-clé 3, mot-clé 4"
 }`;
-    
+
     return await executeWithModelFallback(async (model) => {
       const result = await model.generateContent(prompt);
       const text = result.response.text().trim().replace(/```json|```/gi, '');
@@ -200,7 +186,7 @@ Réponds UNIQUEMENT au format JSON strict (sans \`\`\`json) sous forme d'un tabl
     "reason": "Une courte phrase accrocheuse expliquant pourquoi ce livre est recommandé."
   }
 ]`;
-    
+
     return await executeWithModelFallback(async (model) => {
       const result = await model.generateContent(prompt);
       const text = result.response.text().trim().replace(/```json|```/gi, '');

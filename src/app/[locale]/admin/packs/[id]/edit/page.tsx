@@ -1,11 +1,14 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getPackById } from '@/lib/actions/packs'
 import { getBooks } from '@/lib/db/books'
 import { notFound } from 'next/navigation'
 import PackEditForm from './PackEditForm'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { prisma } from '@/lib/prisma'
 
 export default async function EditPackPage({ params }: { params: Promise<{ id: string }> }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { id } = await params
 
     const [packResult, books, whatsappPhone, allPacks] = await Promise.all([

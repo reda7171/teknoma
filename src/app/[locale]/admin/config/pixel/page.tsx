@@ -1,5 +1,6 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { redirect } from 'next/navigation'
 import PixelConfigForm from './PixelConfigForm'
 import { Share2 } from 'lucide-react'
@@ -9,6 +10,8 @@ export const metadata = {
 }
 
 export default async function PixelConfigPage() {
+    await requirePageRole(["ADMIN"])
+
     try {
         await verifyAdmin()
     } catch {

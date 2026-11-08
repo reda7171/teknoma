@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
@@ -18,6 +19,9 @@ function slugifyStrict(text: string) {
 }
 
 export async function POST() {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
@@ -109,8 +113,8 @@ export async function POST() {
             }
             const slug = `${slugBase}-${lang}-${Math.random().toString(36).substring(7)}`
 
-            const coverImage = book.image && !book.image.includes('removebg') 
-                ? book.image 
+            const coverImage = book.image && !book.image.includes('removebg')
+                ? book.image
                 : `https://images.unsplash.com/photo-1544644107-568f4c27995d?auto=format&fit=crop&q=80&w=1200`
 
             const post = await prisma.post.create({
@@ -134,8 +138,8 @@ export async function POST() {
             articlesCreated.push(post.id)
         }
 
-        return NextResponse.json({ 
-            success: true, 
+        return NextResponse.json({
+            success: true,
             message: `${articlesCreated.length} articles avec auteurs multiples générés.`,
             count: articlesCreated.length
         })

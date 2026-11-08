@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 import { madToUsdCents, paypalClient, paypalOrigin } from '@/lib/paypal'
@@ -8,6 +9,9 @@ interface Webhook { id: string; url: string; event_types: { name: string }[] }
 const events = ['PAYMENT.CAPTURE.COMPLETED', 'PAYMENT.CAPTURE.REFUNDED']
 
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN"])
+    if (accessDenied) return accessDenied
+
     const admin = await getAuthenticatedAdmin()
     if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
     if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Accès interdit' }, { status: 403 })

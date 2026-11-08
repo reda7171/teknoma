@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { listBackups, createBackup } from '@/lib/admin/backup'
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
@@ -10,6 +11,9 @@ async function authorize() {
 }
 
 export async function GET() {
+    const accessDenied = await authorizeAdminApi(["ADMIN"])
+    if (accessDenied) return accessDenied
+
     try {
         const denied = await authorize()
         if (denied) return denied
@@ -23,6 +27,9 @@ export async function GET() {
 }
 
 export async function POST() {
+    const accessDenied = await authorizeAdminApi(["ADMIN"])
+    if (accessDenied) return accessDenied
+
     try {
         const denied = await authorize()
         if (denied) return denied

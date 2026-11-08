@@ -1,13 +1,16 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import AccessoriesTable from '../AccessoriesTable'
 import Link from 'next/link'
 import { Plus, Package } from 'lucide-react'
 
-export default async function KidsAdminPage({ 
-    params 
-}: { 
+export default async function KidsAdminPage({
+    params
+}: {
     params: Promise<{ locale: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { locale } = await params
     const category = 'KIDS'
 

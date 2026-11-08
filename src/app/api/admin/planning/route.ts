@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
 
 export async function GET(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const posts = await prisma.scheduledPost.findMany({
@@ -14,9 +18,12 @@ export async function GET(req: NextRequest) {
     }
 }
 
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 
 export async function POST(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const body = await req.json()
@@ -90,7 +97,7 @@ export async function POST(req: NextRequest) {
         const appBaseUrl = rawBase.includes('127.0.0.1') || rawBase.includes('localhost')
             ? 'https://riwaya.store'
             : (rawBase || 'https://riwaya.store')
-            
+
         let absoluteImage = mediaUrl || ''
         if (absoluteImage && !absoluteImage.startsWith('http')) {
             absoluteImage = `${appBaseUrl}${absoluteImage.startsWith('/') ? '' : '/'}${absoluteImage}`
@@ -128,7 +135,7 @@ export async function POST(req: NextRequest) {
 
         // 4. Envoyer à n8n avec timeout
         void(`[Planning API] Envoi à n8n (${n8nWebhookUrl}) - batch de ${payload.batch.length} items`)
-        
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
 
@@ -158,6 +165,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         // Delete all scheduled posts

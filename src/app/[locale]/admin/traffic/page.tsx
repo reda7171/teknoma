@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { isAuthenticated } from '@/lib/actions/auth'
 import { getTrafficStats } from '@/lib/actions/analytics-traffic'
 import { redirect } from 'next/navigation'
@@ -5,10 +6,12 @@ import { Eye, Users, MousePointer2 } from 'lucide-react'
 import ActivityFeed from '@/components/admin/ActivityFeed'
 import { Link } from '@/i18n/routing'
 
-export default async function TrafficAnalyticsPage(props: { 
+export default async function TrafficAnalyticsPage(props: {
     params: Promise<{ locale: string }>,
-    searchParams: Promise<{ period?: string }> 
+    searchParams: Promise<{ period?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const params = await props.params
     const searchParams = await props.searchParams
     const { locale } = params
@@ -41,15 +44,15 @@ export default async function TrafficAnalyticsPage(props: {
                         Surveillance en temps réel du comportement utilisateur
                     </p>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2 p-1.5 bg-gray-100 rounded-[2rem] shadow-inner">
                     {periods.map((p) => (
                         <Link
                             key={p.value}
                             href={`/admin/traffic?period=${p.value}`}
                             className={`px-5 py-2.5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${
-                                period === p.value 
-                                    ? 'bg-white text-black shadow-md' 
+                                period === p.value
+                                    ? 'bg-white text-black shadow-md'
                                     : 'text-gray-500 hover:text-black'
                             }`}
                         >

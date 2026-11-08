@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getAllReviews, getReviewsStats } from '@/lib/actions/reviews'
 import { getAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import { getImageTestimonials } from '@/lib/actions/image-testimonials'
@@ -14,6 +15,8 @@ export default async function AdminReviewsPage({
     params: Promise<{ locale: string }>,
     searchParams: Promise<{ filter?: string, tab?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { locale } = await params
     const searchParamsValues = await searchParams
     const filter = (searchParamsValues.filter || 'all') as 'all' | 'approved' | 'pending'
@@ -41,7 +44,7 @@ export default async function AdminReviewsPage({
                         Modération & Gestion de la réputation narrative
                     </p>
                 </div>
-                
+
                 {/* Tabs de Navigation Principale */}
                 <div className="flex bg-gray-100 p-1.5 rounded-[2rem] shadow-inner w-fit">
                     <Link

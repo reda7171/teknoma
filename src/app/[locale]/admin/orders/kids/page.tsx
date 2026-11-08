@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import { Baby, Eye, Filter, Phone, MapPin } from 'lucide-react'
 import Link from 'next/link'
@@ -36,6 +37,8 @@ export default async function KidsOrdersPage(props: {
     params: Promise<{ locale: string }>
     searchParams: Promise<{ status?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const { locale } = await props.params
     const { status } = await props.searchParams
 

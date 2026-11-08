@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { AdPlacement } from '@prisma/client'
@@ -33,12 +35,16 @@ export async function getActiveAds(placement?: AdPlacement) {
 }
 
 export async function getAdById(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     return prisma.advertisement.findUnique({
         where: { id }
     })
 }
 
 export async function getAllAds() {
+    await requireRole(["ADMIN","MANAGER"])
+
     return prisma.advertisement.findMany({
         orderBy: [
             { isActive: 'desc' },
@@ -58,6 +64,8 @@ export async function createAd(data: {
     startDate?: Date
     endDate?: Date
 }) {
+    await requireRole(["ADMIN","MANAGER"])
+
     const ad = await prisma.advertisement.create({
         data: {
             title: data.title,
@@ -85,6 +93,8 @@ export async function updateAd(id: string, data: {
     startDate?: Date
     endDate?: Date
 }) {
+    await requireRole(["ADMIN","MANAGER"])
+
     const ad = await prisma.advertisement.update({
         where: { id },
         data
@@ -95,6 +105,8 @@ export async function updateAd(id: string, data: {
 }
 
 export async function deleteAd(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     await prisma.advertisement.delete({
         where: { id }
     })

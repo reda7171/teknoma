@@ -1,5 +1,5 @@
 import { getCommunityUser } from '@/lib/actions/community-auth'
-import { getSettingsByCategory } from '@/lib/actions/site-settings'
+import { getSettingsByCategory } from '@/lib/server/site-settings'
 import UserDropdown from './UserDropdown'
 
 export default async function UserDropdownWrapper() {

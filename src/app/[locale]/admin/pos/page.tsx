@@ -1,15 +1,18 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 import POSClient from '@/components/admin/pos/POSClient';
-import { getSetting } from '@/lib/actions/site-settings';
+import { getSetting } from '@/lib/server/site-settings'
 
 export default async function POSPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
   const t = await getTranslations('Admin');
 
   let books: any[] = [];
   let packs: any[] = [];
   let accessories: any[] = [];
-  
+
   const showCategories = await getSetting('pos_show_categories') !== 'false';
   const showSearch = await getSetting('pos_show_search') !== 'false';
   const defaultDiscount = Number(await getSetting('pos_default_discount')) || 0;
@@ -20,7 +23,7 @@ export default async function POSPage() {
   const allowOutOfStock = await getSetting('pos_allow_out_of_stock') === 'true';
   const requireCustomer = await getSetting('pos_require_customer') !== 'false'; // Default to true if not set
   const enableSessions = await getSetting('pos_enable_sessions') === 'true';
-  
+
   const activeCompanies = await prisma.shippingCompany.findMany({ where: { isActive: true } });
   const shippingCompanies = activeCompanies.map(c => ({ id: c.id, name: c.name }));
 
@@ -68,10 +71,10 @@ export default async function POSPage() {
 
   return (
     <div className="h-full w-full overflow-hidden">
-      <POSClient 
-        books={books} 
-        packs={packs} 
-        accessories={accessories} 
+      <POSClient
+        books={books}
+        packs={packs}
+        accessories={accessories}
         showCategories={showCategories}
         showSearch={showSearch}
         defaultDiscount={defaultDiscount}

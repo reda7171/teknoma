@@ -1,25 +1,16 @@
+import { getMobileCustomer } from '@/lib/mobile-auth'
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
+import { getJwtSecret } from '@/lib/jwt-secret';
 
-function getCustomerId(req: Request) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    return decoded.id;
-  } catch (e) {
-    return null;
-  }
-}
+async function getCustomerId(req: Request) { return (await getMobileCustomer(req))?.id || null }
 
 // GET: Récupérer ou créer un chat pour un échange, et lister les messages
 export async function GET(req: Request, { params }: { params: Promise<{ exchangeId: string }> }) {
   try {
-    const customerId = getCustomerId(req);
+    const customerId = await getCustomerId(req);
     if (!customerId) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
@@ -53,15 +44,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ exchange
     }
 
     // Déterminer le message initial
-    const initialContent = exchange.message && exchange.message.trim() !== '' 
-      ? exchange.message 
+    const initialContent = exchange.message && exchange.message.trim() !== ''
+      ? exchange.message
       : "Bonjour, je suis intéressé par votre livre !";
 
     // Si le chat n'existe pas, le créer
     let chat = exchange.chat;
     if (!chat) {
       chat = await prisma.chat.create({
-        data: { 
+        data: {
           exchangeId,
           messages: {
             create: {

@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         await prisma.scheduledPost.delete({
@@ -15,11 +19,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const body = await req.json()
         const { time, date, content, platforms, mediaUrl, status } = body
-        
+
         const data: any = {}
         if (time) data.time = time
         if (date) data.date = new Date(date)

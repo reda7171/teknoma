@@ -30,7 +30,7 @@ class WithYouService {
         let token = envToken
 
         try {
-            const { getSetting } = await import('@/lib/actions/site-settings')
+            const { getSetting } = await import('@/lib/server/site-settings')
             const [withYouKey, withYouToken, legacyKey, legacyToken] = await Promise.all([
                 getSetting('withyou_api_key'),
                 getSetting('withyou_api_token'),
@@ -69,7 +69,7 @@ class WithYouService {
         try {
             const fetchOptions: RequestInit = {
                 method,
-                headers: { 
+                headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
@@ -92,7 +92,7 @@ class WithYouService {
 
             const response = await fetch(url, fetchOptions)
             const bodyText = await response.text()
-            
+
             let parsed
             try {
                 parsed = JSON.parse(bodyText)
@@ -129,7 +129,7 @@ class WithYouService {
             if (res && typeof res === 'object' && (res.status === 'error' || res.erreur)) {
                 throw new Error(res.message || 'Erreur WithYou')
             }
-            
+
             let cityList: string[] = []
 
             if (Array.isArray(res)) {
@@ -201,11 +201,11 @@ class WithYouService {
         const validIDs = trackingIDs
             .map(id => String(id || '').trim())
             .filter(id => id.length > 0 && !isUuid(id));
-        
+
         if (validIDs.length === 0) {
             return { status: 'success', data: [] };
         }
-        
+
         try {
             // L'API WithYou attend un tableau de chaînes: { key, token, data: [codetracking1, codetracking2] }
             const res = await this.request('/getstatus', { data: validIDs }, 'POST')

@@ -1,15 +1,18 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import AccessoriesTable from './AccessoriesTable'
 import Link from 'next/link'
 import { Plus, Package } from 'lucide-react'
 
-export default async function AccessoriesPage({ 
-    params, 
-    searchParams 
-}: { 
+export default async function AccessoriesPage({
+    params,
+    searchParams
+}: {
     params: Promise<{ locale: string }>,
     searchParams: Promise<{ category?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { locale } = await params
     const { category } = await searchParams
 
@@ -18,8 +21,8 @@ export default async function AccessoriesPage({
         orderBy: { createdAt: 'desc' }
     })
 
-    const title = category 
-        ? category.toUpperCase() === 'BOOKMARK' ? 'Marque-pages' 
+    const title = category
+        ? category.toUpperCase() === 'BOOKMARK' ? 'Marque-pages'
         : category.toUpperCase() === 'LIBRARY' ? 'Bibliothèques'
         : category.toUpperCase() === 'USB' ? 'Clés USB'
         : category.toUpperCase() === 'KIDS' ? 'Produits enfants'

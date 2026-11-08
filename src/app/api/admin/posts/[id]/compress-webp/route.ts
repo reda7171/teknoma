@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -9,6 +10,9 @@ export async function POST(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER","BLOG_MODERATOR"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const { id } = await params

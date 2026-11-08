@@ -1,9 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { translateBookFields, translateWithDeepl } from '@/lib/deepl'
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 // POST /api/admin/translate - Traduire du texte via DeepL
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER","BLOG_MODERATOR"])
+    if (accessDenied) return accessDenied
+
     // Vérification admin
     const admin = await getAuthenticatedAdmin()
     if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })

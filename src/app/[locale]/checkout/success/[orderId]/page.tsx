@@ -50,11 +50,11 @@ export default async function OrderSuccessPage({
 
     return (
         <div className="min-h-screen bg-pixio-cream">
-            <GoogleReviewsOptIn 
-                orderId={order.id} 
-                email={order.email} 
-                estimatedDeliveryDate={estimatedDeliveryDateStr} 
-                products={products} 
+            <GoogleReviewsOptIn
+                orderId={order.id}
+                email={order.email}
+                estimatedDeliveryDate={estimatedDeliveryDateStr}
+                products={products}
             />
             <TrackPurchaseOrder order={order} />
             <Header />
@@ -100,8 +100,8 @@ export default async function OrderSuccessPage({
                                             <div className="flex items-center gap-4">
                                                 {item.book?.image || item.pack?.image || item.extraProduct?.image || item.digitalProduct?.image ? (
                                                     <div className="w-12 h-16 relative rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                                                        <img 
-                                                            src={item.book?.image || item.pack?.image || item.extraProduct?.image || item.digitalProduct?.image} 
+                                                        <img
+                                                            src={item.book?.image || item.pack?.image || item.extraProduct?.image || item.digitalProduct?.image}
                                                             alt={item.book?.title || item.pack?.name || item.extraProduct?.name || item.digitalProduct?.title}
                                                             className="object-cover w-full h-full"
                                                         />
@@ -120,7 +120,7 @@ export default async function OrderSuccessPage({
                                         </div>
                                     ))}
                                 </div>
-                                
+
                                 <div className="flex justify-between items-center mb-2">
                                     <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400">Sous-total</p>
                                     <p className="text-base font-bold text-black">{order.subtotal} درهم</p>
@@ -135,7 +135,7 @@ export default async function OrderSuccessPage({
                                         <p className="text-base font-bold text-green-500">-{order.discount} درهم</p>
                                     </div>
                                 )}
-                                
+
                                 <div className="flex justify-between items-end pt-4 border-t border-gray-100 border-dashed">
                                     <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-gray-400 mb-1">{t('TotalPaid')}</p>
                                     <p className="text-4xl sm:text-5xl font-black text-black tracking-tighter">{order.total} <span className="text-xs uppercase font-black text-gray-400 ml-1">درهم</span></p>
@@ -169,15 +169,7 @@ export default async function OrderSuccessPage({
                         )}
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                            <a
-                                href={`/api/orders/${order.id}/invoice?print=1`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold text-xs sm:text-sm rounded-full transition-all border border-gray-200"
-                            >
-                                <FileText className="w-4 h-4 text-blue-600" />
-                                <span>Télécharger la Facture (PDF)</span>
-                            </a>
+
                             <Link
                                 href={`/track/${order.id}`}
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-full transition-all shadow-lg shadow-blue-500/20"

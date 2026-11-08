@@ -9,7 +9,7 @@ import AddToCartButton from '@/components/AddToCartButton'
 import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import StickyBottomActions from '@/components/StickyBottomActions'
 import ScrollDownIndicator from '@/components/ScrollDownIndicator'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { getTranslations } from 'next-intl/server'
 
 export async function generateMetadata({

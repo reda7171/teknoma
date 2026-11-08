@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET() {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
@@ -23,6 +27,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {

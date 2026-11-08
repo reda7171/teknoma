@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { writeFile, mkdir } from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
@@ -11,6 +12,9 @@ const ALLOWED_EXTENSIONS = ['.mp4', '.webm', '.mov', '.avi', '.mpeg']
 const MAX_FILE_SIZE = 200 * 1024 * 1024
 
 export async function POST(request: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         try { await verifyAdmin() } catch { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
 

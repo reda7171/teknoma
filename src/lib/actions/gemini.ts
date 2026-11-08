@@ -4,12 +4,12 @@ import { generateText as baseGenerateText } from "@/lib/gemini";
 import { verifyAdmin } from "./auth";
 
 export async function generatePostContent(
-    input: string, 
-    language: 'fr' | 'ar', 
+    input: string,
+    language: 'fr' | 'ar',
     type: 'TITLE' | 'EXCERPT' | 'CONTENT' | 'SLUG' = 'CONTENT'
 ) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
 
         if (!input) return { success: false, error: 'Une entrée est requise.' }
 
@@ -44,12 +44,12 @@ export async function generatePostContent(
                 FAQ (3 questions pertinentes)
             `;
 
-            prompt = language === 'fr' 
-                ? `Rédige un article de blog complet et professionnel pour la librairie "Riwaya" sur le livre ou le thème suivant : "${input}". 
+            prompt = language === 'fr'
+                ? `Rédige un article de blog complet et professionnel pour la librairie "Riwaya" sur le livre ou le thème suivant : "${input}".
                    Tu DOIS impérativement suivre cette structure Markdown :
                    ${structure}
                    Rédige un contenu de haute qualité, optimisé pour le SEO et engageant.`
-                : `Rédige un article de blog complet et professionnel pour la librairie "Riwaya" sur le livre ou le thème suivant : "${input}". 
+                : `Rédige un article de blog complet et professionnel pour la librairie "Riwaya" sur le livre ou le thème suivant : "${input}".
                    Tu DOIS impérativement suivre cette structure Markdown (en arabe) :
                    ${structure}
                    Rédige un contenu de haute qualité (en arabe), optimisé pour le SEO et engageant.`;

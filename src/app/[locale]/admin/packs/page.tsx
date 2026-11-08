@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { adminGetPacks } from '@/lib/db/packs'
 import { getBooks } from '@/lib/db/books'
 import Link from 'next/link'
@@ -5,6 +6,8 @@ import { Plus } from 'lucide-react'
 import PacksTable from './PacksTable'
 
 export default async function PacksPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const [packs, books] = await Promise.all([
         adminGetPacks(),
         getBooks({ active: true }),

@@ -1,7 +1,7 @@
 import { getBooks, getBookCategories, getBooksCount, getAllAuthors } from '@/lib/db/books'
 import { getPopularPacks } from '@/lib/db/packs'
 import { getCategoryConfigByName } from '@/lib/actions/categories'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import { parsePriceFilter } from '@/lib/utils/search'
 import { prisma } from '@/lib/prisma'
@@ -230,10 +230,10 @@ export default async function BooksPage({
                         <CatalogViewSwitcher activeParams={sParams as any} />
                     </div>
                 </div>
-                
+
                 <div className="flex flex-col lg:flex-row gap-4 xl:gap-6">
                     {/* Sidebar / Mobile Sticky Filters */}
-                    <BooksFilters 
+                    <BooksFilters
                         params={sParams}
                         categoryTree={categoryTree}
                         categoryCounts={categoryCounts}

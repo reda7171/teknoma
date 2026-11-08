@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
-import { getAllSettings } from '@/lib/actions/site-settings'
+import { getAllSettings } from '@/lib/server/site-settings'
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 export async function GET() {
+    const accessDenied = await authorizeAdminApi(["ADMIN"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })

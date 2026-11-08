@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import { Search, Filter, Eye, Usb, Baby, BookOpen } from 'lucide-react'
 import Link from 'next/link'
@@ -78,6 +79,8 @@ export default async function AdminOrdersPage(props: {
     params: Promise<{ locale: string }>
     searchParams: Promise<{ status?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const params = await props.params
     const { locale } = params
     const searchParams = await props.searchParams
@@ -126,7 +129,7 @@ export default async function AdminOrdersPage(props: {
     const paymentSettings = await prisma.siteSettings.findMany({
         where: { key: { in: ['payment_cod_enabled', 'payment_bank_transfer_enabled', 'payment_paypal_enabled', 'payment_stripe_enabled', 'payment_cmi_enabled'] } }
     })
-    
+
     const activePaymentMethods = {
         COD: paymentSettings.find(s => s.key === 'payment_cod_enabled')?.value === 'true',
         BANK_TRANSFER: paymentSettings.find(s => s.key === 'payment_bank_transfer_enabled')?.value === 'true',
@@ -146,7 +149,7 @@ export default async function AdminOrdersPage(props: {
         where: { status: 'PENDING', updatedAt: { lte: tenMinutesAgo } },
         orderBy: { updatedAt: 'desc' }
     })
-    
+
     const abandonedCarts = abandonedCartsRaw.map(cart => ({
         id: cart.id,
         fullName: cart.fullName || 'Client Inconnu',
@@ -156,7 +159,7 @@ export default async function AdminOrdersPage(props: {
     }))
 
     return (
-        <OrdersPageClient 
+        <OrdersPageClient
             orders={orders as any}
             abandonedCarts={abandonedCarts}
             locale={locale}

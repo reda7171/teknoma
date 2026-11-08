@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { ExpenseCategory, TransactionType } from '@prisma/client'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { sendTelegramMessage } from '@/lib/telegram'
 
 export async function createExpense(data: {
@@ -51,7 +51,7 @@ export async function createExpense(data: {
                 where: { id: { in: data.orderIds } },
                 data: { expenseId: expense.id, isPaid: true }
             })
-            
+
             // Mettre à jour les frais de livraison si fournis
             if (data.orderFraisMap) {
                 const updatePromises = Object.entries(data.orderFraisMap).map(([orderId, frais]) => {
@@ -123,7 +123,7 @@ export async function getPurchaseLots() {
     try {
         await verifyAdmin()
         return await prisma.expense.findMany({
-            where: { 
+            where: {
                 category: 'BOOKS_PURCHASE'
             },
             orderBy: { date: 'desc' }
@@ -135,9 +135,9 @@ export async function getPurchaseLots() {
 
 export async function getExpenses(filters?: { month?: number, year?: number }) {
     await verifyAdmin()
-    
+
     let where: any = { financeArchiveId: null }
-    
+
     if (filters?.month && filters?.year) {
         // Mois en JS: 0 = Janvier, 11 = Décembre
         // On veut le début du mois (ex: 1er Janvier) et la fin (ex: 31 Janvier)
@@ -163,7 +163,7 @@ export async function getUninvoicedDeliveredOrders(currentExpenseId?: string) {
         const orders = await prisma.order.findMany({
             where: {
                 status: 'DELIVERED',
-                ...(currentExpenseId 
+                ...(currentExpenseId
                     ? { OR: [{ expenseId: null }, { expenseId: currentExpenseId }] }
                     : { expenseId: null }
                 )
@@ -342,7 +342,7 @@ export async function getChartData(filters?: { month?: number, year?: number }) 
                 : ((item as any).book?.costPrice || (item as any).pack?.costPrice || 0)
             totalCost += itemCost * item.quantity
         }
-        
+
         const dateKey = isMonthView ? order.createdAt.getDate().toString() : order.createdAt.getMonth().toString()
         const entry = dataMap.get(dateKey)
         if (entry) {
@@ -371,7 +371,7 @@ export async function getChartData(filters?: { month?: number, year?: number }) 
 
 export async function archiveCurrentPeriod(data: { name: string, netProfit: number, revenue: number, expenses: number, shareReda: number, shareAmine: number, ordersCount: number }) {
     await verifyAdmin()
-    
+
     // Create archive record
     const archive = await prisma.financeArchive.create({
         data: {

@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -6,6 +7,9 @@ import { v4 as uuidv4 } from 'uuid'
 
 // GET : lister les campagnes
 export async function GET() {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const campaigns = await prisma.pushCampaign.findMany({
@@ -21,6 +25,9 @@ export async function GET() {
 
 // POST : créer et envoyer une campagne
 export async function POST(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const { title, body, url, icon } = await req.json()

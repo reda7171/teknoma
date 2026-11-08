@@ -1,9 +1,11 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { verifyAdmin } from './auth'
-import { createAuditLog } from './audit'
+import { createAuditLog } from "@/lib/server/audit"
 
 export async function getCategoryConfigs() {
     try {
@@ -32,6 +34,8 @@ export async function updateCategoryBadge(name: string, badge: string | null, ex
 }
 
 export async function getAllCategories() {
+    await requireRole(["ADMIN","MANAGER"])
+
     // Publicly accessible for filters
     const categories = await prisma.book.groupBy({
         by: ['category'],
