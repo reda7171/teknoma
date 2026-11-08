@@ -1,6 +1,6 @@
 'use client'
 
-import Script from 'next/script'
+import Script from '@/components/CspScript'
 import { useEffect, useState } from 'react'
 import { updateOrderEmail } from '@/lib/actions/orders'
 import { X, Mail, CheckCircle, Loader2 } from 'lucide-react'

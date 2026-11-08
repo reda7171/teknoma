@@ -27,11 +27,17 @@ Date : 8 novembre 2026. Analyse du dépôt et tests isolés ; aucune attaque ni 
 
 ## Vérifications
 
-`npm run test:security` : 16 scénarios réussis, dont l’exécution de 89 handlers administratifs réels sans identité authentifiée, le refus de facture avec une autorisation client valide, le rejet des cookies falsifiés, la révocation des sessions, les liens de mot de passe à usage unique, les prix falsifiés et la répétition d’un crédit d’échange. Base, cookies et services externes remplacés par des fixtures ; ces tests ne constituent pas un test de pénétration de la production.
+`npm run test:security` : 18 scénarios réussis, dont l’exécution de 89 handlers administratifs réels sans identité authentifiée, le refus de facture avec une autorisation client valide, le rejet des cookies falsifiés, la révocation des sessions, les liens de mot de passe à usage unique, les prix falsifiés et la répétition d’un crédit d’échange. Base, cookies et services externes remplacés par des fixtures ; ces tests ne constituent pas un test de pénétration de la production.
+
+Rapport HTTP Observatory : la réponse en ligne a confirmé la présence de `unsafe-inline` dans `script-src`, l’absence d’`object-src` et `Referrer-Policy: origin-when-cross-origin`. Le correctif utilise un nonce aléatoire de 128 bits par réponse, transmis au rendu Next et aux scripts applicatifs, `strict-dynamic`, `script-src-attr 'none'`, `object-src 'none'`, et `strict-origin-when-cross-origin`. Les documents à nonce ne sont pas mis en cache partagé. Le JavaScript de production n’autorise plus `unsafe-inline`, `unsafe-eval`, `data:` ou `blob:` dans `script-src` ; les styles intégrés restent autorisés pour les composants existants. Tests Chromium sur un serveur local de production : démarrage Next et blocage d’un script injecté dans la réponse HTML sur `/fr/admin/login`, `/fr/books`, `/ar` et `/en`. Les services tiers réels ne sont pas sollicités par ces tests. Le score Observatory après déploiement reste à mesurer.
 
 Compilation Next.js réussie ; validation syntaxique de 549 fichiers JSX/TSX et parité de 2 110 clés de traduction réussies. Le projet désactive la vérification des types dans son build : `tsc --noEmit` signale encore des erreurs préexistantes, notamment des signatures de routes et des types métier. Le build seul ne garantit donc pas l’absence d’erreurs de typage.
 
 `npm audit --omit=dev` : 0 vulnérabilité connue signalée lors de cette vérification. Les dépendances de développement sont distinctes et ne sont pas couvertes par cette affirmation.
+
+Vérification supplémentaire des autres projets du dépôt : la boutique `apps/storefront-ma` utilisait Next 16.2.4 et passe à 16.4.2 ; son build, y compris son contrôle TypeScript, réussit. Le verrou mobile a été actualisé avec `npm audit fix --package-lock-only --legacy-peer-deps --ignore-scripts`, sans option `--force`. L’audit mobile des dépendances d’exécution passe de 87 alertes (dont 47 critiques et 20 hautes, dépendances indirectes comprises) à 12 alertes : 11 modérées et 1 faible, aucune haute ni critique. Les causes restantes sont `glob`, `minimatch` et `deepmerge` dans l’arbre Expo ; les remédiations proposées par npm impliquent des changements majeurs et demandent des essais mobiles dédiés. Le mobile n’a pas été compilé sur Android/iOS pendant cet audit.
+
+GitHub signalait 112 alertes sur la branche principale au moment de l’ouverture de la PR, réparties entre le verrou principal, le verrou mobile et le manifeste de la boutique secondaire. Ce compteur ne décrit pas les dépendances corrigées de la branche de travail et devra être recalculé après intégration. Les alertes restantes ne sont pas présentées comme corrigées.
 
 ## Mise en service et limites
 

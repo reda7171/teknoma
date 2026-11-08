@@ -43,7 +43,7 @@ async function main() {
             price: 65,
             originalPrice: 85,
             stock: 25,
-            image: "https://riwaya.store/uploads/books/placeholder.jpg",
+            image: "/book-placeholder.png",
             category: "القرآن وعلومه",
             active: true,
         },
@@ -56,7 +56,7 @@ async function main() {
             title: 'محاط بالحمقى',
             author: 'Thomas Erikson',
             price: 59,
-            image: '/uploads/books/محاط-بالحمقى.jpg',
+            image: '/book-placeholder.png',
             category: 'Développement Personnel',
         },
         {
@@ -64,7 +64,7 @@ async function main() {
             title: 'قوانين التحرر من الصراع النفسي',
             author: 'يوسف الحسني',
             price: 55,
-            image: '/uploads/books/قوانين-التحرر-من-الصراع-النفسي.jpg',
+            image: '/book-placeholder.png',
             category: 'Développement Personnel',
         },
         {
@@ -72,7 +72,7 @@ async function main() {
             title: ' ‫عقدك النفسية سجنك الأبدي',
             author: 'يوسف الحسني',
             price: 55,
-            image: '/uploads/books/عقدك-النفسية-سجنك-الأبدي.jpg',
+            image: '/book-placeholder.png',
             category: 'Développement Personnel',
         },
         {
@@ -80,7 +80,7 @@ async function main() {
             title: 'فهم الأمراض النفسية منطقيًا',
             author: 'دين بيرنيت',
             price: 59,
-            image: '/uploads/books/فهم-الأمراض-النفسية-منطقيا.jpg',
+            image: '/book-placeholder.png',
             category: 'Vie pratique',
         },
         {
@@ -88,7 +88,7 @@ async function main() {
             title: 'قوة عقلك الباطن',
             author: 'Joseph Murphy',
             price: 49,
-            image: '/uploads/books/قوة-عقلك-الباطن.jpg',
+            image: '/book-placeholder.png',
             category: 'Développement Personnel',
         },
         {
@@ -96,7 +96,7 @@ async function main() {
             title: 'السماح بالرحيل',
             author: 'ديفيد هاوكينز',
             price: 59,
-            image: '/uploads/books/السماح-بالرحيل.jpg',
+            image: '/book-placeholder.png',
             category: 'Développement Personnel',
         },
         {
@@ -104,7 +104,7 @@ async function main() {
             title: 'L’intelligence émotionnelle 1&2',
             author: 'Daniel Goleman',
             price: 89,
-            image: '/uploads/books/lintelligence-motionnelle-12.jpg',
+            image: '/book-placeholder.png',
             category: 'Psychologie & Sociologie',
         },
         {
@@ -112,7 +112,7 @@ async function main() {
             title: 'كلنا مرضى نفسيين',
             author: 'إسماعيل عرفة',
             price: 53,
-            image: '/uploads/books/كلنا-مرضى-نفسيين.jpg',
+            image: '/book-placeholder.png',
             category: 'Vie pratique',
         },
     ]
@@ -123,6 +123,7 @@ async function main() {
             update: {
                 title: b.title,
                 author: b.author,
+                image: b.image,
                 active: true,
             },
             create: {
@@ -147,6 +148,7 @@ async function main() {
             name: "باقة 9 كتب – علم النفس وتطوير الذات- فهم النفس والمشاعر والعلاقات",
             nameFr: "Pack 9 Livres – Psychologie & Développement Personnel - Confiance, Émotions et Compréhension de Soi",
             nameEn: "Pack 9 Books - Psychology & Personal Development",
+            image: "/book-placeholder.png",
             active: true,
         },
         create: {
@@ -159,7 +161,7 @@ async function main() {
             descriptionEn: "Discover a curated collection of 9 books dedicated to psychology and personal development.",
             price: 499,
             originalPrice: 850,
-            image: "/uploads/books/66791fa321a94fcb-pack_cover______9_____________________________________________________________1789642160724.png",
+            image: "/book-placeholder.png",
             active: true,
             isFreeDelivery: false,
             shippingFees: 30,

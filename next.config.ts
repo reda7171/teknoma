@@ -1,3 +1,4 @@
+import { contentSecurityPolicy } from './src/lib/content-security-policy'
 import withPWAInit from '@ducanh2912/next-pwa'
 import createNextIntlPlugin from 'next-intl/plugin'
 import type { NextConfig } from 'next'
@@ -151,7 +152,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'Cross-Origin-Opener-Policy',
@@ -167,18 +168,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://www.googletagmanager.com https://connect.facebook.net https://pagead2.googlesyndication.com https://challenges.cloudflare.com https://unpkg.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://maps.googleapis.com https://www.clarity.ms https://*.clarity.ms",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
-              "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
-              "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https:",
-              "frame-src 'self' https://www.openstreetmap.org https://www.google.com https://maps.googleapis.com https://maps.google.com https://pagead2.googlesyndication.com https://challenges.cloudflare.com https://accounts.google.com https://smartlock.google.com https://www.facebook.com",
-              "connect-src 'self' https: blob: https://accounts.google.com",
-              "media-src 'self' blob: https:",
-              "worker-src 'self' blob:",
-            ].join('; '),
+            value: contentSecurityPolicy(undefined, process.env.NODE_ENV === 'development'),
           },
         ],
       },

@@ -1,6 +1,6 @@
 'use client'
 
-import Script from 'next/script'
+import Script from '@/components/CspScript'
 
 export default function GoogleAnalytics({ gaId }: { gaId: string }) {
     if (!gaId) return null
