@@ -172,6 +172,11 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
                     }).catch(console.error)
                 }).catch(console.error)
             }
+            if (status === 'DELIVERED') {
+                import('@/lib/server/google-ads-conversion').then(({ uploadCodConversionToGoogleAds }) => {
+                    uploadCodConversionToGoogleAds(orderId).catch(console.error)
+                }).catch(console.error)
+            }
         }
 
         return {
@@ -833,6 +838,11 @@ export async function syncDeliveryStatus(orderId: string) {
             revalidatePath(`/ar/admin/orders/${orderId}`)
             revalidatePath(`/admin/orders/${orderId}`)
             return { success: true, status: newStatus, internalStatus: mappedInternalStatus, message: 'Statut mis à jour avec succès' }
+            if (status === 'DELIVERED') {
+                import('@/lib/server/google-ads-conversion').then(({ uploadCodConversionToGoogleAds }) => {
+                    uploadCodConversionToGoogleAds(orderId).catch(console.error)
+                }).catch(console.error)
+            }
         }
 
         return { success: true, status: order.deliveryStatus, message: 'Le statut est déjà à jour' }
@@ -1069,6 +1079,11 @@ export async function bulkSyncDeliveries() {
                 error: syncErrors.join('\n'),
                 updatedCount: 0,
                 updatedOrders: []
+            }
+            if (status === 'DELIVERED') {
+                import('@/lib/server/google-ads-conversion').then(({ uploadCodConversionToGoogleAds }) => {
+                    uploadCodConversionToGoogleAds(orderId).catch(console.error)
+                }).catch(console.error)
             }
         }
 
