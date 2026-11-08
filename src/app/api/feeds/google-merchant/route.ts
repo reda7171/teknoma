@@ -146,3 +146,4 @@ export async function GET() {
         return new NextResponse('Erreur génération flux', { status: 500 })
     }
 }
+

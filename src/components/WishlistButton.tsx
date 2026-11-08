@@ -17,6 +17,8 @@ interface WishlistButtonProps {
     variant?: 'icon' | 'full'
 }
 
+let isWishlistRehydrated = false
+
 export default function WishlistButton({ item, className, showText = false, variant = 'icon' }: WishlistButtonProps) {
     const [mounted, setMounted] = useState(false)
     const [syncing, setSyncing] = useState(false)
@@ -27,7 +29,10 @@ export default function WishlistButton({ item, className, showText = false, vari
     const router = useRouter()
 
     useEffect(() => {
-        useWishlistStore.persist.rehydrate()
+        if (!isWishlistRehydrated) {
+            useWishlistStore.persist.rehydrate()
+            isWishlistRehydrated = true
+        }
         setMounted(true)
     }, [])
 

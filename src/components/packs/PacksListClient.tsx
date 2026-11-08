@@ -109,7 +109,7 @@ export default function PacksListClient({ packs, availableBooks, openCustomBuild
                         <PackCard
                             key={pack.id}
                             {...pack}
-                            priority={idx < 3}
+                            priority={idx === 0}
                             books={pack.books.map((pb: any) => ({
                                 book: {
                                     ...pb.book,
