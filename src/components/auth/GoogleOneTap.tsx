@@ -27,6 +27,7 @@ export default function GoogleOneTap() {
     useEffect(() => {
         if (initializedRef.current) return
         if (typeof window === 'undefined') return
+        if (typeof document !== 'undefined' && document.cookie.includes('riwaya_authenticated=1')) return
 
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "967210658791-vn1et4a1cr5b78as8vh5f3h1jfs153kh.apps.googleusercontent.com"
         if (!clientId) return
@@ -55,15 +56,20 @@ export default function GoogleOneTap() {
                     client_id: clientId,
                     callback: handleCredentialResponse,
                     auto_select: false,
-
                     cancel_on_tap_outside: true,
+                    use_fedcm_for_prompt: false,
+                    itp_support: true,
                 })
                 window.google.accounts.id.prompt((notification: any) => {
-                    if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
-                        // Moment ignoré ou non affiché (environnement restreint ou rejet)
+                    if (
+                        notification?.isNotDisplayed?.() ||
+                        notification?.isSkippedMoment?.() ||
+                        notification?.isDismissedMoment?.()
+                    ) {
+                        // Ignorer silencieusement les rejets de prompt / annulations utilisateur / non affichage
                     }
                 })
-            } catch (err) {
+            } catch {
                 // Silently ignore GSI initialization errors in headless/unsupported environments
             }
         }
