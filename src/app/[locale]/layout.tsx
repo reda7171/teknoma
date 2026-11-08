@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { outfit } from '../fonts';
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
@@ -19,13 +20,6 @@ import FacebookSDK from '@/components/FacebookSDK'
 import { resolveActiveWhatsAppAgent } from '@/lib/whatsapp-presence'
 
 
-const outfit = localFont({
-  src: "../../fonts/Outfit-VariableFont_wght.ttf",
-  variable: "--font-outfit",
-  display: 'swap',
-  preload: false,
-});
-
 const tajawal = localFont({
   src: [
     { path: "../../fonts/Tajawal-ExtraLight.ttf", weight: "200" },
@@ -35,7 +29,7 @@ const tajawal = localFont({
     { path: "../../fonts/Tajawal-Bold.ttf", weight: "700" },
   ],
   variable: "--font-tajawal",
-  display: 'swap',
+  display: 'optional',
   preload: false, // Chargé uniquement pour RTL — pas besoin de précharger
 });
 
@@ -44,7 +38,8 @@ import { Cairo } from 'next/font/google';
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
   variable: "--font-cairo",
-  display: 'swap',
+  display: 'optional',
+  preload: false,
   adjustFontFallback: false,
 });
 

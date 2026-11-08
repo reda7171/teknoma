@@ -905,7 +905,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <RefreshCw className="w-16 h-16 text-green-300 mx-auto mb-4" />
                   <p className="text-gray-500 font-black text-lg md:text-2xl uppercase tracking-wider mb-8">{c('exchange_no_data', t('ExchangeBooks.NoData'))}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-center justify-center max-w-4xl mx-auto px-4 w-full">
-                    <Link href="/community/register" className="w-full h-14 inline-flex items-center justify-center gap-2.5 px-4 bg-green-600 text-white font-black text-xs sm:text-xs md:text-sm uppercase tracking-wider rounded-full hover:bg-green-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 border-2 border-transparent text-center">
+                    <Link href="/community/register" className="w-full h-14 inline-flex items-center justify-center gap-2.5 px-4 bg-green-700 text-white font-black text-xs sm:text-xs md:text-sm uppercase tracking-wider rounded-full hover:bg-green-800 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 border-2 border-transparent text-center">
                       <span className="truncate">{c('exchange_join', t('ExchangeBooks.JoinCommunity'))}</span>
                       <ArrowRight className="w-4 h-4 rtl:rotate-180 flex-shrink-0" />
                     </Link>
@@ -956,7 +956,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     ))}
                   </div>
                   <ScrollReveal delay={500} className="flex justify-center mt-12">
-                    <Link href="/community/market" className="group inline-flex items-center gap-4 px-12 py-6 bg-green-600 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-2xl hover:scale-105 hover:-translate-y-1">
+                    <Link href="/community/market" className="group inline-flex items-center gap-4 px-12 py-6 bg-green-700 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-800 transition-all shadow-2xl hover:scale-105 hover:-translate-y-1">
                       <span>{c('exchange_view_more', t('ExchangeBooks.ViewMore'))}</span>
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
@@ -1000,14 +1000,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <div className="flex-1 space-y-8">
                   <ScrollReveal animation="animate-reveal-up" delay={100}><div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-400/10 border border-amber-400/20 rounded-full"><Zap className="w-3 h-3 text-amber-400" /><span className="text-xs md:text-sm rtl:text-sm rtl:tracking-normal font-black uppercase text-amber-400 tracking-[0.3em]">{c('digital_badge', tDigital('HomeSection.Badge'))}</span></div></ScrollReveal>
                   <ScrollReveal animation="animate-reveal-up" delay={200}><h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9]">{c('digital_title', tDigital('HomeSection.Title'))}<span className="text-amber-400">.</span></h2></ScrollReveal>
-                  <ScrollReveal animation="animate-reveal-up" delay={300}><p className="text-lg text-gray-500 font-medium max-w-lg leading-relaxed">{c('digital_description', tDigital('HomeSection.Description'))}</p></ScrollReveal>
+                  <ScrollReveal animation="animate-reveal-up" delay={300}><p className="text-lg text-gray-400 font-medium max-w-lg leading-relaxed">{c('digital_description', tDigital('HomeSection.Description'))}</p></ScrollReveal>
                   <ScrollReveal animation="animate-reveal-up" delay={400} className="space-y-4">
                     {[
                       { icon: Download, label: c('digital_feature_1', tDigital('HomeSection.Feature1')) },
                       { icon: FileText, label: c('digital_feature_2', tDigital('HomeSection.Feature2')) },
                       { icon: Shield, label: c('digital_feature_3', tDigital('HomeSection.Feature3')) },
                     ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3"><div className="w-8 h-8 bg-amber-400/10 border border-amber-400/20 rounded-xl flex items-center justify-center flex-shrink-0"><item.icon className="w-4 h-4 text-amber-400" /></div><span className="text-sm font-bold text-gray-500">{item.label}</span></div>
+                      <div key={i} className="flex items-center gap-3"><div className="w-8 h-8 bg-amber-400/10 border border-amber-400/20 rounded-xl flex items-center justify-center flex-shrink-0"><item.icon className="w-4 h-4 text-amber-400" /></div><span className="text-sm font-bold text-gray-400">{item.label}</span></div>
                     ))}
                   </ScrollReveal>
                   <ScrollReveal animation="animate-reveal-up" delay={500}><Link href="/livres-numeriques" className="group inline-flex items-center gap-4 px-10 py-5 bg-amber-400 text-black font-black text-xs uppercase tracking-widest rounded-full hover:bg-amber-300 transition-all shadow-2xl hover:shadow-amber-400/30 hover:-translate-y-1 hover:scale-105"><span>{c('digital_cta', tDigital('HomeSection.CTA'))}</span><ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link></ScrollReveal>
@@ -1119,7 +1119,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
                     <Link
                       href="/community/register"
-                      className="inline-flex items-center gap-3 px-8 py-4 bg-green-600 text-white font-black text-sm uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-lg hover:-translate-y-1"
+                      className="inline-flex items-center gap-3 px-8 py-4 bg-green-700 text-white font-black text-sm uppercase tracking-widest rounded-full hover:bg-green-800 transition-all shadow-lg hover:-translate-y-1"
                     >
                       <span>{c('exchange_join', t('ExchangeBooks.JoinCommunity'))}</span>
                       <ArrowRight className="w-4 h-4" />
@@ -1223,7 +1223,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <ScrollReveal delay={500} className="flex justify-center mt-12">
                     <Link
                       href="/community/market"
-                      className="group inline-flex items-center gap-4 px-12 py-6 bg-green-600 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-700 transition-all shadow-2xl hover:scale-105 hover:-translate-y-1"
+                      className="group inline-flex items-center gap-4 px-12 py-6 bg-green-700 text-white font-black text-xs uppercase tracking-widest rounded-full hover:bg-green-800 transition-all shadow-2xl hover:scale-105 hover:-translate-y-1"
                     >
                       <span>{c('exchange_view_more', t('ExchangeBooks.ViewMore'))}</span>
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

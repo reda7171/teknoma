@@ -4,12 +4,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import HeaderWithUser from '@/components/HeaderWithUser'
 import FooterWithFeatures from '@/components/FooterWithFeatures'
-import localFont from 'next/font/local'
-
-const outfit = localFont({
-  src: "../fonts/Outfit-VariableFont_wght.ttf",
-  variable: "--font-outfit",
-});
+import { outfit } from './fonts'
 
 export default async function NotFound() {
   let messages = {}
