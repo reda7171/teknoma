@@ -28,6 +28,7 @@ import { ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import Image from 'next/image'
 import LaunchFacebookAdModal from '@/components/admin/LaunchFacebookAdModal'
+import GoogleAdsGeneratorModal from '@/components/admin/GoogleAdsGeneratorModal'
 
 interface Asset {
     name: string
@@ -46,6 +47,7 @@ export default function MarketingPage() {
     const [isScrolled, setIsScrolled] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+    const [isGoogleAdsModalOpen, setIsGoogleAdsModalOpen] = useState(false)
     const [uploading, setUploading] = useState(false)
     const [uploadType, setUploadType] = useState<'CREATIVE' | 'PACK' | 'DESCRIPTION'>('CREATIVE')
     const [uploadName, setUploadName] = useState('')
@@ -359,20 +361,28 @@ export default function MarketingPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                            <Sparkles className="w-6 h-6 text-white" />
+                        <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg">
+                            <Sparkles className="w-6 h-6 text-amber-400" />
                         </div>
-                        Marketing & Créatives
+                        Marketing &amp; Créatives
                     </h1>
                     <p className="text-slate-500 mt-2 font-medium">Retrouvez toutes les images générées pour vos campagnes publicitaires.</p>
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap w-full md:w-auto">
+                    <button
+                        onClick={() => setIsGoogleAdsModalOpen(true)}
+                        className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 md:px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl font-bold transition-all shadow-lg active:scale-95"
+                    >
+                        <Sparkles className="w-4 h-4 text-amber-400" />
+                        <span>Campagne Google Ads (IA)</span>
+                    </button>
+
                     {/* Mode sélection */}
                     <button
                         onClick={() => { setSelectionMode(s => !s); setSelectedAssets([]) }}
                         className={`flex-1 md:flex-none justify-center flex items-center gap-2 px-4 md:px-5 py-3 rounded-xl font-bold text-sm border transition-all active:scale-95 ${
-                            selectionMode ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                            selectionMode ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                     >
                         <Filter className="w-4 h-4" />
@@ -381,7 +391,7 @@ export default function MarketingPage() {
 
                     <button 
                         onClick={() => setIsUploadModalOpen(true)}
-                        className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 md:px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
+                        className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 md:px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95"
                     >
                         <Plus className="w-4 h-4" />
                         <span className="hidden sm:inline">Nouvelle Créative</span>
@@ -1085,6 +1095,12 @@ export default function MarketingPage() {
                     setSelectedAdAsset(null)
                 }}
                 asset={selectedAdAsset}
+            />
+
+            {/* Modal Automatisation Google Ads avec Gemini */}
+            <GoogleAdsGeneratorModal
+                isOpen={isGoogleAdsModalOpen}
+                onClose={() => setIsGoogleAdsModalOpen(false)}
             />
 
         </div>
