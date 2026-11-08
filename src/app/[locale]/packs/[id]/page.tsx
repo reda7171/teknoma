@@ -91,6 +91,13 @@ export async function generateMetadata({
             description: ogDescription,
             images: [
                 {
+                    url: dynamicOgImageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: `${displayName} - Riwaya`,
+                    type: 'image/png',
+                },
+                {
                     url: imageUrl || `${baseUrl}/og-image.jpg`,
                     width: 800,
                     height: 800,
@@ -105,7 +112,7 @@ export async function generateMetadata({
             card: 'summary_large_image',
             title: ogTitle,
             description: ogDescription,
-            images: [imageUrl || `${baseUrl}/og-image.jpg`],
+            images: [dynamicOgImageUrl],
         },
         other: {
             'product:price:amount': `${displayPrice}`,
