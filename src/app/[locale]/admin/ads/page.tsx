@@ -2,6 +2,7 @@ import { requirePageRole } from '@/lib/page-authorization'
 import { Suspense } from 'react'
 import { getAllAds } from '@/lib/actions/advertisements'
 import AdsList from '@/components/admin/AdsList'
+import GoogleAdsLauncherButton from '@/components/admin/GoogleAdsLauncherButton'
 import { Link } from '@/i18n/routing'
 import { Plus } from 'lucide-react'
 
@@ -23,13 +24,16 @@ export default async function AdsPage() {
                     </p>
                 </div>
 
-                <Link
-                    href="/admin/ads/new"
-                    className="flex items-center gap-3 px-8 py-4 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 transition-all shadow-xl active:scale-95 w-fit"
-                >
-                    <Plus className="w-4 h-4" />
-                    Nouvelle publicité
-                </Link>
+                <div className="flex items-center gap-3 flex-wrap">
+                    <GoogleAdsLauncherButton />
+                    <Link
+                        href="/admin/ads/new"
+                        className="flex items-center gap-3 px-8 py-4 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-900 transition-all shadow-xl active:scale-95 w-fit"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Nouvelle publicité
+                    </Link>
+                </div>
             </div>
 
             <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
