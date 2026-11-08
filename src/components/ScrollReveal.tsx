@@ -53,13 +53,6 @@ export default function ScrollReveal({
         const el = elementRef.current
         if (!el) return
 
-        // Si l'élément est déjà visible dans le viewport, activer directement
-        const rect = el.getBoundingClientRect()
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-            setIsVisible(true)
-            return
-        }
-
         const observer = getSharedObserver()
         if (!observer) {
             setIsVisible(true)

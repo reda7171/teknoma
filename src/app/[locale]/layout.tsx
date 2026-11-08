@@ -27,7 +27,7 @@ const outfit = localFont({
   src: "../../fonts/Outfit-VariableFont_wght.ttf",
   variable: "--font-outfit",
   display: 'swap',
-  preload: true,
+  preload: false,
 });
 
 const tajawal = localFont({

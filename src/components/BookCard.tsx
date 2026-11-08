@@ -70,7 +70,7 @@ export default function BookCard({
     return (
         <div className={`group relative bg-white rounded-3xl overflow-hidden transition-all duration-500 border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-2xl h-full flex flex-col ${isFeatured ? 'scale-105 z-10 border-black shadow-xl' : ''}`}>
             {/* Image Container */}
-            <Link href={bookUrl} className="block relative">
+            <Link href={bookUrl} prefetch={false} className="block relative">
                 <div className={`relative bg-white overflow-hidden ${isCompact ? 'aspect-[3/4]' : isFeatured ? 'aspect-[3/4]' : 'aspect-[3/4]'}`}>
                     <ImageWithFallback
                         src={image}
@@ -140,7 +140,7 @@ export default function BookCard({
 
             {/* Content */}
             <div className={`text-center flex flex-col items-center flex-grow bg-white ${isCompact ? 'p-4' : 'px-4 py-6'}`}>
-                <Link href={bookUrl} className="block w-full after:absolute after:inset-0 after:z-0">
+                <Link href={bookUrl} prefetch={false} className="block w-full after:absolute after:inset-0 after:z-0">
                     <h3 className={`font-black text-gray-900 tracking-tight line-clamp-2 transition-colors group-hover:text-black ${isCompact ? 'text-sm mb-1 uppercase' : isFeatured ? 'text-xl mb-2' : 'text-base mb-1.5'
                         }`}>
                         {displayTitle}

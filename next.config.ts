@@ -13,7 +13,7 @@ const withPWA = withPWAInit({
   cacheOnFrontEndNav: false,
   aggressiveFrontEndNavCaching: false,
   reloadOnOnline: true,
-  disable: process.env.NODE_ENV === 'development', // Désactivé en dev pour éviter les conflits
+  disable: process.env.NODE_ENV === 'development' || process.env.CI === 'true', // Désactivé en dev et en CI pour préserver les audits Lighthouse
   workboxOptions: {
     disableDevLogs: true,
     runtimeCaching: [
