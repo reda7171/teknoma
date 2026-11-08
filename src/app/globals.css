@@ -420,10 +420,6 @@ body {
   animation: zoomIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-.mt-20 {
-    margin-top: calc(var(--spacing) * -8);
-}
-
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .pb-safe {
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));

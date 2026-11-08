@@ -192,7 +192,7 @@ export default async function AuthorPage({
                 <section className="relative pt-12 pb-20 overflow-hidden">
                     {/* Decorative Background */}
                     <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-slate-200/50 to-transparent -z-10" />
-                    <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -z-10" />
+                    <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -z-10" />
                     <div className="absolute top-40 -left-40 w-96 h-96 bg-amber-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -z-10" />
 
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -237,7 +237,7 @@ export default async function AuthorPage({
                                     {isAuth && (
                                         <Link
                                             href={`/admin/authors/edit/${encodeURIComponent(authorName)}`}
-                                            className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-colors border border-indigo-100"
+                                            className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-100 text-slate-800 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-colors border border-slate-200"
                                         >
                                             <Edit className="w-3 h-3" />
                                             Éditer
@@ -384,7 +384,7 @@ export default async function AuthorPage({
                                     <Link
                                         key={simAuthor.id}
                                         href={`/authors/${encodeURIComponent(simAuthor.name)}`}
-                                        className="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center"
+                                        className="group bg-white p-6 pb-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center h-full min-h-[220px]"
                                     >
                                         <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden mb-6 bg-slate-50 border-4 border-slate-50 group-hover:border-amber-100 transition-colors">
                                             {(simAuthor.image || simAuthor.sampleBookImage) ? (
@@ -393,7 +393,7 @@ export default async function AuthorPage({
                                                 <User className="w-12 h-12 text-slate-300 mx-auto mt-8 md:mt-10" />
                                             )}
                                         </div>
-                                        <h3 className="text-lg font-black text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-1">
+                                        <h3 className="text-lg font-black text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-1 mt-auto">
                                             {simAuthor.name}
                                         </h3>
                                     </Link>
@@ -403,7 +403,7 @@ export default async function AuthorPage({
                     )}
 
                     {/* Merchant & Seller Internal Linking Callout */}
-                    <div className="mt-20 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden shadow-xl border border-slate-700">
+                    <div className="mt-24 sm:mt-28 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden shadow-xl border border-slate-700 clear-both">
                         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                             <div className="max-w-2xl text-center md:text-left rtl:md:text-right">
                                 <span className="inline-block px-3.5 py-1 rounded-full bg-amber-400/20 text-amber-300 font-bold text-xs uppercase tracking-wider mb-3">
