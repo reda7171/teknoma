@@ -36,6 +36,7 @@ services:
     image: redis:alpine
     container_name: riwaya_redis
     restart: always
+    command: redis-server --maxmemory 200mb --maxmemory-policy allkeys-lru
     deploy:
       resources:
         limits:
