@@ -10,12 +10,12 @@ import dynamic from 'next/dynamic'
 import Toaster from '@/components/Toaster';
 import Script from 'next/script';
 
-const WhatsAppButton = dynamic(() => import('@/components/WhatsAppButton'))
-const WhatsAppChannelButton = dynamic(() => import('@/components/WhatsAppChannelButton'))
-const ChatBot = dynamic(() => import('@/components/ChatBot'))
+const WhatsAppButton = dynamic(() => import('@/components/WhatsAppButton'), { ssr: false })
+const WhatsAppChannelButton = dynamic(() => import('@/components/WhatsAppChannelButton'), { ssr: false })
+const ChatBot = dynamic(() => import('@/components/ChatBot'), { ssr: false })
 const CookieConsent = dynamic(() => import('@/components/CookieConsent'))
-const CartPromoLeadPopup = dynamic(() => import('@/components/cart/CartPromoLeadPopup'))
-const WelcomeOfferPopup = dynamic(() => import('@/components/community/WelcomeOfferPopup'))
+const CartPromoLeadPopup = dynamic(() => import('@/components/cart/CartPromoLeadPopup'), { ssr: false })
+const WelcomeOfferPopup = dynamic(() => import('@/components/community/WelcomeOfferPopup'), { ssr: false })
 import UtmTracker from '@/components/UtmTracker'
 import DeferredMarketingScripts from '@/components/DeferredMarketingScripts'
 import AuthModalLoader from '@/components/auth/AuthModalLoader'

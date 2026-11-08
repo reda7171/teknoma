@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600;
 
 export default async function PacksPage({
     params,
