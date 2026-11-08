@@ -4,6 +4,8 @@ import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 
 const CORS_HEADERS = {
+    'X-Content-Type-Options': 'nosniff',
+    'Content-Security-Policy': "default-src 'none'; sandbox",
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
     'Access-Control-Allow-Headers': '*',
@@ -29,6 +31,7 @@ export async function HEAD(req: NextRequest, { params }: { params: Promise<{ pat
     const resolvedParams = await Promise.resolve(params)
     const rawPath = resolvedParams.path || []
     const pathArray = rawPath.map(p => decodeURIComponent(p))
+    if (pathArray[0] === 'school-lists') return new NextResponse('Not found', { status: 404 })
 
     if (pathArray.some(segment => segment.includes('..'))) {
         return new NextResponse('Forbidden', { status: 403 })
@@ -58,6 +61,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
     const resolvedParams = await Promise.resolve(params)
     const rawPath = resolvedParams.path || []
     const pathArray = rawPath.map(p => decodeURIComponent(p))
+    if (pathArray[0] === 'school-lists') return new NextResponse('Not found', { status: 404 })
 
     // Sécurité: Empêcher de remonter dans les dossiers
     if (pathArray.some(segment => segment.includes('..'))) {

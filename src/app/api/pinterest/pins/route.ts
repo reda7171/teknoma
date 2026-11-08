@@ -1,9 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/actions/auth';
-import { getSetting } from '@/lib/actions/site-settings';
+import { getSetting } from '@/lib/server/site-settings'
 import axios from 'axios';
 
 export async function GET(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin();
     } catch {

@@ -1,9 +1,12 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import SeoCategoryForm from '../SeoCategoryForm'
 import { getSeoCategoryBookOptions } from '@/lib/db/books'
 
 export default async function NewSeoCategoryPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const books = await getSeoCategoryBookOptions()
-    
+
     return (
         <div>
             <div className="mb-8">
@@ -12,7 +15,7 @@ export default async function NewSeoCategoryPage() {
                     Créez une nouvelle page d'atterrissage ou une bannière pour l'accueil
                 </p>
             </div>
-            
+
             <div className="bg-white rounded-lg border border-gray-200">
                 <SeoCategoryForm books={books} />
             </div>

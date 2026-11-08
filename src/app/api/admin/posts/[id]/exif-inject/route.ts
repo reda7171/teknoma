@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -7,6 +8,9 @@ import fs from 'fs'
 import os from 'os'
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER","BLOG_MODERATOR"])
+    if (accessDenied) return accessDenied
+
     let tempFilePath: string | null = null
     try {
         await verifyAdmin()

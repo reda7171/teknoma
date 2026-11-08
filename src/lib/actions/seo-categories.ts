@@ -1,16 +1,20 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { seoPages } from '@/lib/seo-pages'
 
 export async function migrateSeoPagesToDb() {
+    await requireRole(["ADMIN","MANAGER"])
+
   try {
     for (const locale of Object.keys(seoPages)) {
       const pages = seoPages[locale]
       let order = 0
       for (const slug of Object.keys(pages)) {
         const page = pages[slug]
-        
+
         // Use predefined gradients from SeoCategoriesSection if they don't have one
         const gradients = [
           'from-[#4A25E1] to-[#7A5AF8]', // Deep Purple
@@ -22,11 +26,11 @@ export async function migrateSeoPagesToDb() {
           'from-[#334155] to-[#0F172A]', // Slate Dark
           'from-[#0284C7] to-[#0369A1]'  // Sky Blue
         ]
-        
+
         // Only show on home if it's one of the new 8 categories
         const newCategoriesSlugs = [
-          'romans-arabes', 'romans-romantiques', 'romans-thriller-suspense', 
-          'livres-developpement-personnel', 'livres-business-investissement', 
+          'romans-arabes', 'romans-romantiques', 'romans-thriller-suspense',
+          'livres-developpement-personnel', 'livres-business-investissement',
           'romans-marocains', 'idees-cadeaux-livres', 'livres-pas-chers',
           'riwayat-arabia', 'riwayat-romansiya', 'riwayat-tachwiq',
           'kotob-tatwir-adat', 'kotob-mal-istithmar', 'riwayat-maghribia',
@@ -35,7 +39,7 @@ export async function migrateSeoPagesToDb() {
           'self-help-books', 'business-investing-books', 'moroccan-novels',
           'book-gift-ideas', 'cheap-books'
         ]
-        
+
         const showOnHome = newCategoriesSlugs.includes(slug)
         const color = showOnHome ? gradients[order % gradients.length] : null
 
@@ -82,6 +86,8 @@ export async function migrateSeoPagesToDb() {
 }
 
 export async function getSeoCategories() {
+    await requireRole(["ADMIN","MANAGER"])
+
   return await prisma.seoCategory.findMany({
     include: {
       _count: {
@@ -93,6 +99,8 @@ export async function getSeoCategories() {
 }
 
 export async function getSeoCategory(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
   return await prisma.seoCategory.findUnique({
     where: { id },
     include: {
@@ -237,6 +245,8 @@ export async function getHeaderSeoCategories(locale: string) {
 }
 
 export async function createSeoCategory(data: any) {
+    await requireRole(["ADMIN","MANAGER"])
+
   try {
     const category = await prisma.seoCategory.create({
       data: {
@@ -263,6 +273,8 @@ export async function createSeoCategory(data: any) {
 }
 
 export async function saveSeoCategory(id: string, data: any) {
+    await requireRole(["ADMIN","MANAGER"])
+
   try {
     const category = await prisma.seoCategory.update({
       where: { id },
@@ -290,6 +302,8 @@ export async function saveSeoCategory(id: string, data: any) {
 }
 
 export async function deleteSeoCategory(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
   try {
     await prisma.seoCategory.delete({
       where: { id }
@@ -301,6 +315,8 @@ export async function deleteSeoCategory(id: string) {
 }
 
 export async function updateSeoCategoryBooks(categoryId: string, bookIds: string[]) {
+    await requireRole(["ADMIN","MANAGER"])
+
   try {
     // Supprimer toutes les relations existantes
     await prisma.seoCategoryBook.deleteMany({
@@ -317,7 +333,7 @@ export async function updateSeoCategoryBooks(categoryId: string, bookIds: string
         }
       })
     }
-    
+
     return { success: true }
   } catch (error) {
     return { success: false, error }

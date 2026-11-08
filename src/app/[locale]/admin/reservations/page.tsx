@@ -1,7 +1,10 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getReservations } from '@/lib/actions/admin-reservations'
 import ReservationsClient from './ReservationsClient'
 
 export default async function AdminReservationsPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { data: reservations } = await getReservations()
 
     return (

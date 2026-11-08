@@ -1,10 +1,14 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/actions/auth';
 import { publishPin } from '@/lib/pinterest';
-import { getSetting } from '@/lib/actions/site-settings';
+import { getSetting } from '@/lib/server/site-settings'
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin();
     } catch {

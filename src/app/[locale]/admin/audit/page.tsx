@@ -1,9 +1,12 @@
-import { getAuditLogs } from '@/lib/actions/audit'
+import { requirePageRole } from '@/lib/page-authorization'
+import { getAuditLogs } from "@/lib/server/audit"
 import { Clock, User, Tag, FileText } from 'lucide-react'
 import ExportButton from '@/components/admin/ExportButton'
 import { exportAuditLogs } from '@/lib/actions/export'
 
 export default async function AuditPage() {
+    await requirePageRole(["ADMIN"])
+
     const logs = await getAuditLogs(100)
 
     const entityIcons: any = {
@@ -26,7 +29,7 @@ export default async function AuditPage() {
                         Historique complet des actions administratives
                     </p>
                 </div>
-                
+
                 <ExportButton
                     action={exportAuditLogs}
                     filename="audit_logs"

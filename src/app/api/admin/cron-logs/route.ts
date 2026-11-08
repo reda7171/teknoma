@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 export async function GET() {
+    const accessDenied = await authorizeAdminApi(["ADMIN"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return new NextResponse('Authentication required', { status: 401 })
@@ -21,6 +25,9 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return new NextResponse('Authentication required', { status: 401 })

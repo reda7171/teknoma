@@ -1,8 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
-import { getSetting, updateSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
+import { updateSetting } from '@/lib/actions/site-settings'
 import { verifyAdmin } from '@/lib/actions/auth'
 
 export async function POST(request: Request) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
 

@@ -1,9 +1,12 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getSeoCategories } from '@/lib/actions/seo-categories'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import SeoCategoriesTable from './SeoCategoriesTable'
 
 export default async function SeoCategoriesPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const categories = await getSeoCategories()
 
     return (

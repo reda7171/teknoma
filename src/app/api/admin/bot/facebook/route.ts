@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { exec } from 'child_process'
 import path from 'path'
@@ -6,14 +7,17 @@ import { prisma } from '@/lib/prisma'
 import { generateFacebookWatermarkedImage, FacebookWatermarkConfig } from '@/lib/facebook-watermark'
 
 export async function POST(request: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
         if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Accès interdit' }, { status: 403 })
 
         const body = await request.json()
-        const rawIds: string[] = Array.isArray(body.bookIds) 
-            ? body.bookIds 
+        const rawIds: string[] = Array.isArray(body.bookIds)
+            ? body.bookIds
             : (body.bookId ? [body.bookId] : [])
         const bookIds = rawIds.filter(Boolean)
 
@@ -38,7 +42,7 @@ export async function POST(request: Request) {
         }
 
         const scriptPath = path.join(process.cwd(), 'scripts', 'puppeteer_bot.ts')
-        
+
         // On lance le processus en arrière-plan sans attendre sa fin
         const childEnv = {
             ...process.env,
@@ -53,8 +57,8 @@ export async function POST(request: Request) {
             }
         })
 
-        return NextResponse.json({ 
-            success: true, 
+        return NextResponse.json({
+            success: true,
             count: bookIds.length,
             message: `Bot Facebook lancé pour ${bookIds.length} livre(s).`
         })

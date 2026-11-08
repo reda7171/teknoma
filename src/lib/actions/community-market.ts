@@ -174,7 +174,7 @@ export async function getSmartMatches() {
                 }))
             },
             include: {
-                owner: true
+                owner: { select: { id: true, fullName: true, image: true, city: true, rating: true } }
             },
             take: 20
         })

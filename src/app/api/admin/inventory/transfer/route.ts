@@ -1,9 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { prisma } from '@/lib/prisma'
 
 // POST /api/admin/inventory/transfer
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
@@ -23,7 +27,7 @@ export async function POST(req: Request) {
     try {
         await prisma.$transaction(async (tx) => {
             const sourceWhere: any = bookId ? { bookId_warehouseId: { bookId, warehouseId: fromWarehouseId } } : { extraProductId_warehouseId: { extraProductId: extraProductId!, warehouseId: fromWarehouseId } }
-            
+
             const source = await tx.inventory.findUnique({
                 where: sourceWhere,
             })

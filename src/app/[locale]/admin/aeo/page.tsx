@@ -1,7 +1,8 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 import { MessageCircle } from 'lucide-react'
-import { getAllSettings } from '@/lib/actions/site-settings'
+import { getAllSettings } from '@/lib/server/site-settings'
 import AeoConfigForm from './AeoConfigForm'
 
 export const metadata = {
@@ -9,6 +10,8 @@ export const metadata = {
 }
 
 export default async function AeoConfigPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
     } catch {
@@ -43,7 +46,7 @@ export default async function AeoConfigPage() {
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Optimisation pour les moteurs de réponses (ChatGPT, Perplexity, etc.)</p>
                             </div>
                         </div>
-                        
+
                         <AeoConfigForm initialData={settings} />
                     </div>
                 </div>

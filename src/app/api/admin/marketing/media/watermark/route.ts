@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { prisma } from '@/lib/prisma'
@@ -6,6 +7,9 @@ import fs from 'fs/promises'
 import sharp from 'sharp'
 
 export async function POST(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
 
@@ -44,7 +48,7 @@ export async function POST(req: NextRequest) {
 
         const watermarkedFileName = `watermarked_${Date.now()}_${path.basename(baseImagePath)}`
         const uploadsMarketingDir = path.join(publicDir, 'uploads', 'marketing')
-        
+
         // S'assurer que le dossier existe
         await fs.mkdir(uploadsMarketingDir, { recursive: true })
 

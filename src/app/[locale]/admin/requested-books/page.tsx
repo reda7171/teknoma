@@ -1,8 +1,11 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getRequestedBooks } from '@/lib/actions/requested-books'
 import RequestedBooksClient from './RequestedBooksClient'
 import { Search } from 'lucide-react'
 
 export default async function AdminRequestedBooksPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { data: books } = await getRequestedBooks()
 
     return (

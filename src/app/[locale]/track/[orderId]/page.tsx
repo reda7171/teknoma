@@ -1,4 +1,6 @@
+import { publicOrderSelect } from '@/lib/public-order'
 import { prisma } from '@/lib/prisma'
+import { canReadOrder } from '@/lib/order-access'
 import { notFound } from 'next/navigation'
 import OrderTrackingClient from './OrderTrackingClient'
 import { Metadata } from 'next'
@@ -25,21 +27,10 @@ export default async function OrderTrackingPage(props: {
     // Fetch order details
     const order = await prisma.order.findUnique({
         where: { id: orderId },
-        include: {
-            items: {
-                include: {
-                    book: { select: { title: true, image: true, author: true } },
-                    pack: { select: { name: true, image: true } },
-                    extraProduct: { select: { name: true, image: true } }
-                }
-            },
-            statusHistory: {
-                orderBy: { createdAt: 'desc' }
-            }
-        }
+        select: publicOrderSelect
     })
 
-    if (!order) {
+    if (!order || !(await canReadOrder(order))) {
         return notFound()
     }
 
@@ -58,11 +49,11 @@ export default async function OrderTrackingPage(props: {
     const amanaTracking = isAmanaShipping ? await getAmanaTracking(order) : null
 
     return (
-        <OrderTrackingClient 
-            order={order as any} 
+        <OrderTrackingClient
+            order={order as any}
             shippingCompany={shippingCompany}
             amanaTracking={amanaTracking}
-            locale={locale} 
+            locale={locale}
         />
     )
 }

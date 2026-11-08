@@ -1,11 +1,14 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getCoupons } from '@/lib/actions/coupons'
 import { CouponsClient } from '@/components/admin/CouponsClient'
 
 export const metadata = { title: 'Codes Promo | Admin Riwaya' }
 
 export default async function CouponsPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
   const result = await getCoupons()
-  
+
   if (!result.success) {
     return (
       <div className="flex items-center justify-center h-[50vh] text-red-500 font-bold">

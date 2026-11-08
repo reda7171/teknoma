@@ -10,7 +10,7 @@ function getErrorMessage(error: unknown) {
 
 export async function getReservations() {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const reservations = await prisma.bookReservation.findMany({
             include: {
@@ -32,7 +32,7 @@ export async function getReservations() {
 
 export async function updateReservationStatus(id: string, status: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         await prisma.bookReservation.update({
             where: { id },
@@ -47,7 +47,7 @@ export async function updateReservationStatus(id: string, status: string) {
 
 export async function deleteReservation(id: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         await prisma.bookReservation.delete({
             where: { id }
@@ -61,7 +61,7 @@ export async function deleteReservation(id: string) {
 
 export async function updateReservationWhatsapp(id: string, whatsapp: string) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const normalizedWhatsapp = whatsapp.trim().replace(/[\s().-]/g, '')
         const digitCount = normalizedWhatsapp.replace(/\D/g, '').length
@@ -89,7 +89,7 @@ type BulkReservationAction = 'PENDING' | 'NOTIFIED' | 'DELETE'
 
 export async function bulkUpdateReservations(ids: string[], action: BulkReservationAction) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","CONFIRMATOR"])
 
         const uniqueIds = [...new Set(ids.filter(id => typeof id === 'string' && id.trim().length > 0))]
         if (uniqueIds.length === 0) {

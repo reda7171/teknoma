@@ -5,7 +5,7 @@ import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import ContactFaq, { FaqItem } from '@/components/contact/ContactFaq'
 import Breadcrumbs from '@/components/Breadcrumbs'
-import { isFeatureEnabled } from '@/lib/actions/site-settings'
+import { isFeatureEnabled } from '@/lib/server/site-settings'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
@@ -19,9 +19,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isAr = locale === 'ar'
     const isEn = locale === 'en'
 
-    const title = isAr 
+    const title = isAr
         ? 'كن بائعاً أو موزعاً للكتب | متجر رواية المغرب'
-        : isEn 
+        : isEn
             ? 'Become a Book Seller & Partner | Riwaya Morocco'
             : 'Devenir Vendeur & Revendeur de Livres | Riwaya Maroc'
 
@@ -299,7 +299,7 @@ export default async function BecomeSellerPage({ params }: { params: Promise<{ l
                             <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight mb-8">
                                 {t('4Etapes')}
                             </h2>
-                            
+
                             <div className="space-y-8">
                                 {/* Step 1 */}
                                 <div className="flex gap-4">

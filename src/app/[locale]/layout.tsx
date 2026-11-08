@@ -7,7 +7,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { isFeatureEnabled, getSetting } from '@/lib/actions/site-settings';
+import { isFeatureEnabled, getSetting } from '@/lib/server/site-settings'
 import dynamic from 'next/dynamic'
 import Toaster from '@/components/Toaster';
 import Script from 'next/script';

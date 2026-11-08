@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getAllPosts, getPostCategories } from '@/lib/actions/blog'
 import Link from 'next/link'
 import { Plus, Edit, FileText, Globe, TrendingUp, Clock } from 'lucide-react'
@@ -13,6 +14,8 @@ export default async function AdminPostsPage({
     params: Promise<{ locale: string }>,
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER","BLOG_MODERATOR"])
+
     const { locale } = await params
     const searchParamsValues = await searchParams
     const page = typeof searchParamsValues.page === 'string' ? parseInt(searchParamsValues.page) : 1
@@ -55,7 +58,7 @@ export default async function AdminPostsPage({
         orderBy: { fullName: 'asc' }
     })
     const authors = authorsRaw.filter(a => a.fullName).map(a => ({ id: a.id, fullName: `${a.fullName} (${a.role})` }))
-    
+
     const books = await prisma.book.findMany({
         select: { id: true, title: true },
         orderBy: { title: 'asc' }
@@ -75,13 +78,13 @@ export default async function AdminPostsPage({
         _sum: { viewCount: true },
         _min: { createdAt: true }
     })
-    
+
     const langStats = langStatsRaw.map(stat => {
         const totalViews = stat._sum.viewCount || 0
         const oldestDate = stat._min.createdAt || new Date()
         const daysSince = Math.max(1, Math.ceil((new Date().getTime() - oldestDate.getTime()) / (1000 * 60 * 60 * 24)))
         const viewsPerDay = Math.round(totalViews / daysSince)
-        
+
         return {
             language: stat.language,
             totalViews,
@@ -96,13 +99,13 @@ export default async function AdminPostsPage({
         where: { url: { contains: '/blog' } },
         _count: { id: true }
     })
-    
+
     const countryMap = new Map<string, number>();
     topCountriesRaw.forEach(c => {
         const name = c.country && c.country !== 'Inconnu' ? c.country : 'Inconnu';
         countryMap.set(name, (countryMap.get(name) || 0) + c._count.id);
     });
-    
+
     const topCountries = Array.from(countryMap.entries())
         .map(([country, count]) => ({ country, _count: { id: count } }))
         .sort((a, b) => b._count.id - a._count.id)
@@ -133,7 +136,7 @@ export default async function AdminPostsPage({
                         Gestion du contenu éditorial & Blog
                     </p>
                 </div>
-                
+
                 <Link
                     href={`/${locale}/admin/posts/new`}
                     className="bg-black text-white px-10 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10 hover:bg-gray-800 transition-all active:scale-95 w-fit"
@@ -151,10 +154,10 @@ export default async function AdminPostsPage({
                     { id: 'ar', label: 'العربية' },
                     { id: 'en', label: 'English' }
                 ].map(tab => {
-                    const count = tab.id === 'all' 
+                    const count = tab.id === 'all'
                         ? Object.values(langCounts).reduce((a, b) => a + b, 0)
                         : (langCounts[tab.id] || 0);
-                    
+
                     return (
                         <Link
                             key={tab.id}
@@ -170,7 +173,7 @@ export default async function AdminPostsPage({
                 })}
             </div>
 
-            <AdminPostsFilters 
+            <AdminPostsFilters
                 activeFilters={activeFilters}
                 categories={categories}
                 authors={authors}

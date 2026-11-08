@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import { Usb, Eye, Filter, Phone, MapPin, Languages } from 'lucide-react'
 import Link from 'next/link'
@@ -43,6 +44,8 @@ export default async function UsbOrdersPage(props: {
     params: Promise<{ locale: string }>
     searchParams: Promise<{ status?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const { locale } = await props.params
     const { status } = await props.searchParams
 

@@ -7,7 +7,7 @@ import ExchangesList from '@/components/community/ExchangesList'
 import { Link } from '@/i18n/routing'
 import { ArrowLeft, ArrowRight, BookOpen, Clock, CheckCircle, RefreshCw, Layers } from 'lucide-react'
 import { getTranslations, getLocale } from 'next-intl/server'
-import { isFeatureEnabled } from '@/lib/actions/site-settings'
+import { isFeatureEnabled } from '@/lib/server/site-settings'
 
 export default async function ExchangesPage() {
     const enabled = await isFeatureEnabled('feature_exchange')

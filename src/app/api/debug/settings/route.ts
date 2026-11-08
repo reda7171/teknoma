@@ -1,9 +1,14 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 import { verifyAdmin } from '@/lib/actions/auth'
 
 export async function GET(req: Request) {
+    if (process.env.NODE_ENV === 'production') return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
@@ -29,8 +34,8 @@ export async function GET(req: Request) {
 
     try {
         const settings = await prisma.siteSettings.findMany()
-        return NextResponse.json({ 
-            success: true, 
+        return NextResponse.json({
+            success: true,
             count: settings.length,
             settings: settings.map(s => ({
                 key: s.key,

@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse, NextRequest } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { prisma } from '@/lib/prisma'
@@ -5,6 +6,9 @@ import fs from 'fs/promises'
 import path from 'path'
 
 export async function GET() {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
 
@@ -152,6 +156,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const { name, url, type, bookId, packId } = await request.json()

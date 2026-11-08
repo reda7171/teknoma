@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { prisma } from '@/lib/prisma'
@@ -18,6 +19,9 @@ export async function POST(
     request: Request,
     { params }: { params: { id: string } }
 ) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER","BLOG_MODERATOR"])
+    if (accessDenied) return accessDenied
+
     try {
         try { await verifyAdmin() } catch { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
 
@@ -36,7 +40,7 @@ export async function POST(
         }
 
         const absolutePath = join(process.cwd(), 'public', imageUrl)
-        
+
         try {
             await stat(absolutePath)
         } catch {
@@ -45,23 +49,23 @@ export async function POST(
 
         const title = post.title || 'article'
         const baseSlug = slugify(title)
-        
+
         const pathParts = imageUrl.split('/')
         const fileName = pathParts[pathParts.length - 1]
         const extensionMatch = fileName.match(/\.([a-z0-9]+)$/i)
         const extension = extensionMatch ? extensionMatch[1] : 'jpg'
-        
+
         let newFileName = `${baseSlug}.${extension}`
         const dirPath = join(process.cwd(), 'public', 'uploads')
-        
+
         // Ensure no collisions
         let counter = 1
         let newAbsolutePath = join(dirPath, newFileName)
-        
+
         if (newAbsolutePath === absolutePath) {
              return NextResponse.json({ success: true, message: 'Fichier déjà bien nommé', newUrl: imageUrl })
         }
-        
+
         while (fs.existsSync(newAbsolutePath)) {
             newFileName = `${baseSlug}-${counter}.${extension}`
             newAbsolutePath = join(dirPath, newFileName)
@@ -69,9 +73,9 @@ export async function POST(
         }
 
         await rename(absolutePath, newAbsolutePath)
-        
+
         const newUrl = `/uploads/${newFileName}`
-        
+
         await prisma.post.update({
             where: { id: params.id },
             data: { image: newUrl }

@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import fs from 'fs/promises'
 import path from 'path'
 import { revalidatePath } from 'next/cache'
@@ -7,6 +9,8 @@ import { revalidatePath } from 'next/cache'
 const messagesDir = path.join(process.cwd(), 'src', 'messages')
 
 export async function getTranslationsData() {
+    await requireRole(["ADMIN"])
+
     try {
         const fr = JSON.parse(await fs.readFile(path.join(messagesDir, 'fr.json'), 'utf-8'))
         const en = JSON.parse(await fs.readFile(path.join(messagesDir, 'en.json'), 'utf-8'))
@@ -19,6 +23,8 @@ export async function getTranslationsData() {
 }
 
 export async function saveTranslationFile(lang: string, data: any) {
+    await requireRole(["ADMIN"])
+
     if (!['fr', 'en', 'ar'].includes(lang)) return { success: false, error: 'Invalid language' };
     try {
         const filePath = path.join(messagesDir, `${lang}.json`);

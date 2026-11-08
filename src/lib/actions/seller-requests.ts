@@ -1,5 +1,8 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
+import { randomBytes } from 'node:crypto'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -7,7 +10,7 @@ import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 import { sanitizeInput } from '@/lib/security'
 import { transporter } from '@/lib/email'
 import { sendTelegramMessage } from '@/lib/telegram'
-import { getAllSettings } from '@/lib/actions/site-settings'
+import { getAllSettings } from '@/lib/server/site-settings'
 
 const SellerRequestSchema = z.object({
     storeName: z.string().min(2, 'Le nom de la boutique est requis').max(150),
@@ -116,7 +119,7 @@ export async function createSellerRequest(input: SellerRequestInput) {
         } catch (tgErr) {
             console.error('[SellerRequest] Erreur notification Telegram:', tgErr)
         }
-        
+
         revalidatePath('/admin/vendeurs')
 
         // Notification instantanée IndexNow (Bing, Yandex, Seznam, Naver)
@@ -183,6 +186,8 @@ export async function getSellerRequestStatus(query: string) {
 }
 
 export async function getSellerRequests() {
+    await requireRole(["ADMIN"])
+
     try {
         const requests = await prisma.sellerRequest.findMany({
             orderBy: { createdAt: 'desc' }
@@ -195,6 +200,8 @@ export async function getSellerRequests() {
 }
 
 export async function updateSellerRequestStatus(id: string, status: string) {
+    await requireRole(["ADMIN"])
+
     try {
         const updated = await prisma.sellerRequest.update({
             where: { id },
@@ -205,7 +212,7 @@ export async function updateSellerRequestStatus(id: string, status: string) {
         if (status === 'APPROVED') {
             const bcrypt = require('bcryptjs')
             // Mot de passe par défaut : seller + 4 derniers caractères de l'ID ou phone
-            const defaultPassword = 'Seller' + updated.phone.slice(-4)
+            const defaultPassword = randomBytes(32).toString('base64url')
             const hashedPassword = await bcrypt.hash(defaultPassword, 10)
 
             await prisma.user.upsert({
@@ -226,7 +233,7 @@ export async function updateSellerRequestStatus(id: string, status: string) {
                     credits: 0 // Les vendeurs commencent avec 0 crédits d'échange
                 }
             })
-            
+
             // Note: En production, on enverrait un mail ici avec defaultPassword
 
         }
@@ -246,6 +253,8 @@ export async function updateSellerRequestStatus(id: string, status: string) {
 }
 
 export async function deleteSellerRequest(id: string) {
+    await requireRole(["ADMIN"])
+
     try {
         await prisma.sellerRequest.delete({
             where: { id }
@@ -272,6 +281,8 @@ export async function updateSellerRequest(id: string, data: {
     city: string
     stockSize: string
 }) {
+    await requireRole(["ADMIN"])
+
     try {
         const request = await prisma.sellerRequest.update({
             where: { id },

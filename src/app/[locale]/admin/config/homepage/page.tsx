@@ -1,4 +1,5 @@
-import { getSettingsByCategory } from '@/lib/actions/site-settings'
+import { requirePageRole } from '@/lib/page-authorization'
+import { getSettingsByCategory } from '@/lib/server/site-settings'
 import HomepageSectionsForm from '@/components/admin/HomepageSectionsForm'
 import HomepageContentForm from '@/components/admin/HomepageContentForm'
 import { LayoutDashboard, Type } from 'lucide-react'
@@ -10,6 +11,8 @@ export default async function HomepageConfigPage({
 }: {
     searchParams: Promise<{ tab?: string }>
 }) {
+    await requirePageRole(["ADMIN"])
+
     const sp = await searchParams
     const activeTab = sp?.tab === 'sections' ? 'sections' : 'content'
 

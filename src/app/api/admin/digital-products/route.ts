@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -5,6 +6,9 @@ import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 
 // POST: Créer un produit numérique
 export async function POST(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
   try {
     const ip = await getIpIdentifier()
     const limiter = await rateLimit(`admin_digital_products_post_${ip}`, { limit: 20, windowMs: 60000 })
@@ -50,6 +54,9 @@ export async function POST(req: NextRequest) {
 
 // GET: Liste admin (avec produits inactifs)
 export async function GET(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
   try {
     const ip = await getIpIdentifier()
     const limiter = await rateLimit(`admin_digital_products_get_${ip}`, { limit: 50, windowMs: 60000 })

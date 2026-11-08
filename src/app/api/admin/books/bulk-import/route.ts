@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { importBooksFromExcel, updateStockFromTsv, type ProgressCallback } from '@/lib/actions/bulk-import'
@@ -7,6 +8,9 @@ export const maxDuration = 300 // 5 minutes pour les gros volumes
 
 // POST /api/admin/books/bulk-import (Streaming NDJSON avec progression temps réel)
 export async function POST(request: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
 

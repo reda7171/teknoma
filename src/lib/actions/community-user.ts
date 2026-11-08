@@ -4,6 +4,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { randomUUID } from 'crypto'
 import { z } from 'zod'
+import { createSession } from '@/lib/server/community-session'
 import { prisma } from '@/lib/prisma'
 import { getCommunityUser } from './community-auth'
 import { revalidatePath } from 'next/cache'
@@ -120,6 +121,7 @@ export async function updateProfile(formData: FormData) {
             data: updateData,
         })
 
+        if (validated.data.password) await createSession(user.id)
         revalidatePath('/community')
         return { success: true }
     } catch (error) {

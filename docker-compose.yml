@@ -20,7 +20,7 @@ services:
           memory: 512M
     cpu_shares: 1024
     ports:
-      - "3906:3306"
+      - "127.0.0.1:3906:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -43,7 +43,7 @@ services:
           memory: 256M
     cpu_shares: 512
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -83,6 +83,7 @@ services:
     volumes:
       - ./public/uploads:/app/public/uploads
       - ./backups:/app/backups
+      - ./data/private-school-lists:/app/data/private-school-lists
     healthcheck:
       test: [ "CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/fr || exit 1" ]
       interval: 30s
@@ -133,7 +134,7 @@ services:
       PMA_USER: ${DB_USER:-riwaya_user}
       PMA_PASSWORD: ${DB_PASSWORD:-riwaya_pass}
     ports:
-      - "9901:80"
+      - "127.0.0.1:9901:80"
     depends_on:
       - db
     networks:
@@ -152,7 +153,7 @@ services:
           memory: 512M
     cpu_shares: 256
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     environment:
       - WHATSAPP_DEFAULT_ENGINE=NOWEB
       - WHATSAPP_START_SESSION=default
@@ -160,8 +161,8 @@ services:
       - WAHA_PRINT_QR=true
       - WAHA_DASHBOARD_ENABLED=true
       - WAHA_DASHBOARD_USERNAME=${WAHA_USER:-admin}
-      - WAHA_DASHBOARD_PASSWORD=${WAHA_PASS:-admin123}
-      - WAHA_API_KEY=${WAHA_API_KEY:-riwaya_waha_api_key_2026}
+      - WAHA_DASHBOARD_PASSWORD=${WAHA_DASHBOARD_PASSWORD:?Configure WAHA_DASHBOARD_PASSWORD}
+      - WAHA_API_KEY=${WAHA_API_KEY:?Configure WAHA_API_KEY}
     volumes:
       - waha_data:/app/.sessions
     networks:

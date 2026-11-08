@@ -27,8 +27,8 @@ function ResetPasswordForm() {
             return
         }
 
-        if (password.length < 6) {
-            setError('Le mot de passe doit contenir au moins 6 caractères.')
+        if (password.length < 12) {
+            setError('Le mot de passe doit contenir au moins 12 caractères.')
             return
         }
 
@@ -38,7 +38,7 @@ function ResetPasswordForm() {
         }
 
         setLoading(true)
-        const res = await resetPassword(email, password)
+        const res = await resetPassword(email, password, searchParams.get('token') || undefined)
         setLoading(false)
 
         if (res.success) {

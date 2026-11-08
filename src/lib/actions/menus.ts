@@ -1,5 +1,7 @@
 'use server'
 
+import { requireRole } from '@/lib/require-role'
+
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { revalidatePath } from 'next/cache'
@@ -51,6 +53,8 @@ export async function getActiveMenuBySlug(slug: string) {
 
 // Récupérer tous les menus
 export async function getAllMenus() {
+    await requireRole(["ADMIN","MANAGER"])
+
     return prisma.menu.findMany({
         include: {
             items: {
@@ -62,6 +66,8 @@ export async function getAllMenus() {
 
 // Récupérer un menu avec ses items (structure hiérarchique)
 export async function getMenuWithItems(menuId: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     const menu = await prisma.menu.findUnique({
         where: { id: menuId },
         include: {
@@ -89,6 +95,8 @@ export async function getMenuWithItems(menuId: string) {
 
 // Créer un nouveau menu
 export async function createMenu(data: { slug: string; name: string }) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
 
@@ -114,6 +122,8 @@ export async function createMenuItem(data: {
     parentId?: string | null
     order?: number
 }) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
 
@@ -142,6 +152,8 @@ export async function updateMenuItem(id: string, data: {
     order?: number
     parentId?: string | null
 }) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
 
@@ -159,6 +171,8 @@ export async function updateMenuItem(id: string, data: {
 
 // Supprimer un item de menu
 export async function deleteMenuItem(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
 
@@ -175,6 +189,8 @@ export async function deleteMenuItem(id: string) {
 
 // Mettre à jour l'ordre des items
 export async function updateMenuOrder(items: { id: string; order: number }[]) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
 
@@ -196,6 +212,8 @@ export async function updateMenuOrder(items: { id: string; order: number }[]) {
 
 // Supprimer un menu
 export async function deleteMenu(id: string) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
 
@@ -212,6 +230,8 @@ export async function deleteMenu(id: string) {
 
 // Mettre à jour un menu (toggle isActive ou rename)
 export async function updateMenu(id: string, data: { isActive?: boolean, name?: string }) {
+    await requireRole(["ADMIN","MANAGER"])
+
     try {
         await verifyAdmin()
 

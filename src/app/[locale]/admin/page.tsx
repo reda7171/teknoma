@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import { BookOpen, Package, ShoppingCart, TrendingUp, BarChart2, ShoppingBag, Cpu, CheckCircle, Users, Clock, AlertTriangle, XOctagon, ExternalLink, ShoppingBag as JumiaIcon, Zap, Link2, DollarSign, Sparkles, Coins } from 'lucide-react'
 import Link from 'next/link'
@@ -6,7 +7,7 @@ import { getBadgeStats } from '@/lib/actions/analytics'
 import DashboardAnalytics from '@/components/admin/DashboardAnalytics'
 import { isAuthenticated, getAdminRole, getAdminUser } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import ScanRetourButton from '@/components/admin/ScanRetourButton'
 import BubbleToggle from '@/components/admin/BubbleToggle'
 import StatsGridController from '@/components/admin/StatsGridController'
@@ -52,8 +53,8 @@ async function getStats(role: string | null, userId: string | null) {
         prisma.book.aggregate({ where: { active: true, ...sellerBookWhere }, _sum: { stock: true } }),
         prisma.book.count({ where: { active: true, image: '', ...sellerBookWhere } }),
         prisma.order.count({ where: { isPaid: true, ...sellerOrderWhere } }),
-        role === 'SELLER' 
-            ? prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED', ...sellerOrderWhere }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }) 
+        role === 'SELLER'
+            ? prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED', ...sellerOrderWhere }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } })
             : prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }),
         prisma.order.groupBy({
             by: ['salesChannel'],
@@ -372,6 +373,8 @@ async function getTopPerformers(role: string | null, userId: string | null) {
 
 
 export default async function AdminDashboard(props: { params: Promise<{ locale: string }> }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const params = await props.params
     const { locale } = params
 

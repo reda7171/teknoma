@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -6,6 +7,9 @@ import path from 'path'
 import fs from 'fs'
 
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const { edits } = await req.json()
@@ -18,10 +22,10 @@ export async function POST(req: Request) {
 
             if (asset?.url && asset.url.startsWith('/uploads/')) {
                 const filePath = path.join(process.cwd(), 'public', asset.url)
-                
+
                 if (fs.existsSync(filePath)) {
                     const kwArray = data.keywords ? data.keywords.split(',').map((k: string) => k.trim()).filter(Boolean) : []
-                    
+
                     await exiftool.write(filePath, {
                         XPTitle: data.title || asset.name,
                         Title: data.title || asset.name,

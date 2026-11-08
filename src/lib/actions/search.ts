@@ -6,7 +6,7 @@ import Fuse from 'fuse.js'
 import { expandQueryWithSynonyms } from '@/lib/utils/synonyms'
 import { parsePriceFilter } from '@/lib/utils/search'
 import { matchWithLevenshtein, findBestSuggestion } from '@/lib/utils/levenshtein'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 
 // Cache mémoire des résultats de recherche prédictive (TTL: 60s)
 const predictiveCache = new Map<string, { data: { results: any[]; suggestion: string | null }; timestamp: number }>()
@@ -247,10 +247,10 @@ export async function getPopularSearches(limit = 5) {
     }
 }
 
-import { 
+import {
     getCachedCover,
     setCachedCover,
-    recordCacheHit 
+    recordCacheHit
 } from '@/lib/actions/gemini-cache'
 
 /**
@@ -377,4 +377,3 @@ Ne mets aucun texte avant ou après.`
         return { success: false, error: error?.message || 'Erreur lors de la reconnaissance de couverture' }
     }
 }
-

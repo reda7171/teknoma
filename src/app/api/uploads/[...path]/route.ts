@@ -5,6 +5,8 @@ import { existsSync } from 'fs'
 
 // Headers CORS pour permettre à Instagram/Facebook de télécharger les images
 const CORS_HEADERS = {
+    'X-Content-Type-Options': 'nosniff',
+    'Content-Security-Policy': "default-src 'none'; sandbox",
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
     'Access-Control-Allow-Headers': '*',
@@ -17,8 +19,9 @@ export async function OPTIONS() {
 }
 
 // Handle HEAD requests: return headers without body, useful for social platforms validation
-export async function HEAD(req: NextRequest, { params }: { params: { path: string[] } }) {
-    const pathArray = params.path || []
+export async function HEAD(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+    const pathArray = (await params).path || []
+    if (pathArray[0] === 'school-lists') return new NextResponse('Not found', { status: 404 })
     if (pathArray.some(segment => segment.includes('..'))) {
         return new NextResponse('Forbidden', { status: 403 })
     }
@@ -42,16 +45,17 @@ export async function HEAD(req: NextRequest, { params }: { params: { path: strin
     })
 }
 
-export async function GET(req: NextRequest, { params }: { params: { path: string[] } }) {
-    const pathArray = params.path || []
-    
+export async function GET(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+    const pathArray = (await params).path || []
+    if (pathArray[0] === 'school-lists') return new NextResponse('Not found', { status: 404 })
+
     // Sécurité: Empêcher de remonter dans les dossiers (Path Traversal)
     if (pathArray.some(segment => segment.includes('..'))) {
         return new NextResponse('Forbidden', { status: 403 })
     }
 
     const filePath = join(process.cwd(), 'public', 'uploads', ...pathArray)
-    
+
     if (!existsSync(filePath)) {
         const placeholderPath = join(process.cwd(), 'public', 'book-placeholder.png')
         if (existsSync(placeholderPath)) {
@@ -62,10 +66,10 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
         }
         return new NextResponse('Not found', { status: 404 })
     }
-    
+
     try {
         const fileBuffer = await readFile(filePath)
-        
+
         // Déterminer le content-type
         let contentType = 'application/octet-stream'
         const ext = filePath.split('.').pop()?.toLowerCase()
@@ -73,7 +77,7 @@ export async function GET(req: NextRequest, { params }: { params: { path: string
         else if (ext === 'png') contentType = 'image/png'
         else if (ext === 'gif') contentType = 'image/gif'
         else if (ext === 'webp') contentType = 'image/webp'
-        
+
         return new NextResponse(fileBuffer, {
             headers: {
                 'Content-Type': contentType,

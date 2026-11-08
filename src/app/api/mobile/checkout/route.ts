@@ -1,72 +1,22 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { OrderStatus, SalesChannel } from '@prisma/client';
+import { NextResponse } from 'next/server'
+import { getMobileCustomer } from '@/lib/mobile-auth'
+import { readJsonBody } from '@/lib/request-body'
+import { createOrder } from '@/lib/actions/orders'
+import { prisma } from '@/lib/prisma'
+import { publicOrderSelect } from '@/lib/public-order'
 
 export async function POST(request: Request) {
+  const customer = await getMobileCustomer(request)
+  if (!customer) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
   try {
-    const body = await request.json();
-    const { fullName, phone, address, city, comment, total, discount, couponCode, items, paymentMethod } = body;
-
-    if (!fullName || !phone || !address || !city || !items || !items.length) {
-      return NextResponse.json({ success: false, error: 'Données manquantes' }, { status: 400 });
-    }
-
-    const order = await prisma.order.create({
-      data: {
-        salesChannel: SalesChannel.MOBILE_APP,
-        fullName,
-        phone,
-        address,
-        city,
-        comment,
-        total,
-        subtotal: total + (discount || 0),
-        discount: discount || 0,
-        couponCode: couponCode || null,
-        status: OrderStatus.PENDING,
-        paymentMethod: paymentMethod || 'COD',
-        items: {
-          create: items.map((item: any) => ({
-            type: item.type === 'PACK' ? 'PACK' : 'BOOK',
-            quantity: item.quantity,
-            price: item.price || 0,
-            ...(item.type === 'PACK' ? { packId: item.productId } : { bookId: item.productId })
-          }))
-        }
-      },
-      include: {
-        items: {
-          include: {
-            book: { select: { title: true } },
-            pack: { select: { name: true } },
-          }
-        }
-      }
-    });
-
-    return NextResponse.json({
-      success: true,
-      orderId: order.id,
-      orderDetails: {
-        id: order.id,
-        fullName: order.fullName,
-        city: order.city,
-        total: order.total,
-        discount: order.discount,
-        couponCode: order.couponCode,
-        createdAt: order.createdAt,
-        items: order.items.map(i => ({
-          name: i.type === 'PACK' ? i.pack?.name : i.book?.title,
-          quantity: i.quantity,
-          type: i.type,
-        }))
-      }
-    });
-  } catch (error) {
-    console.error('Mobile API Error - Checkout:', error);
-    return NextResponse.json(
-      { success: false, error: 'Erreur lors de la création de la commande' },
-      { status: 500 }
-    );
+    const body = await readJsonBody(request)
+    const result = await createOrder(body as Parameters<typeof createOrder>[0], 'MOBILE_APP')
+    if (!result.success || !result.orderId) return NextResponse.json(result, { status: 400 })
+    const order = await prisma.order.update({
+      where: { id: result.orderId }, data: { customerId: customer.id }, select: publicOrderSelect,
+    })
+    return NextResponse.json({ success: true, orderId: order.id, orderDetails: order }, { headers: { 'Cache-Control': 'no-store' } })
+  } catch {
+    return NextResponse.json({ success: false, error: 'Commande impossible' }, { status: 400 })
   }
 }

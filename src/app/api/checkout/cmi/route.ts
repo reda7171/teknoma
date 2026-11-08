@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSetting } from '@/lib/actions/site-settings'
+import { canReadOrder } from '@/lib/order-access'
+import { getTrustedAppOrigin } from '@/lib/oauth-security'
+import { getSetting } from '@/lib/server/site-settings'
 import { generateCMIHash } from '@/lib/cmi'
 
 export async function POST(req: Request) {
@@ -8,13 +10,13 @@ export async function POST(req: Request) {
         const clientId = await getSetting('payment_cmi_client_id')
         const storeKey = await getSetting('payment_cmi_store_key')
         const mode = await getSetting('payment_cmi_mode') || 'test'
-        
+
         if (!clientId || !storeKey) {
             return NextResponse.json({ error: 'CMI is not configured' }, { status: 500 })
         }
 
-        const gatewayUrl = mode === 'live' 
-            ? 'https://payment.cmi.co.ma/ficap/sps/pay' 
+        const gatewayUrl = mode === 'live'
+            ? 'https://payment.cmi.co.ma/ficap/sps/pay'
             : 'https://testpayment.cmi.co.ma/ficap/sps/pay'
 
         const body = await req.json()
@@ -28,11 +30,12 @@ export async function POST(req: Request) {
             where: { id: orderId }
         })
 
-        if (!order) {
+        if (!order || !(await canReadOrder(order, req))) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
 
-        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+        if (order.paymentMethod !== 'CMI' || order.isPaid || ['CANCELLED', 'RETURNED'].includes(order.status)) return NextResponse.json({ error: 'Paiement indisponible' }, { status: 409 })
+        const origin = getTrustedAppOrigin(req)
 
         // CMI Required Parameters
         const params: Record<string, string> = {
@@ -67,7 +70,8 @@ export async function POST(req: Request) {
         // Generate HTML form
         let formHtml = `<form id="cmi_form" method="post" action="${gatewayUrl}">`
         for (const [key, value] of Object.entries(params)) {
-            formHtml += `<input type="hidden" name="${key}" value="${value}" />`
+            const escapedValue = value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            formHtml += `<input type="hidden" name="${key}" value="${escapedValue}" />`
         }
         formHtml += `</form>`
 

@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
@@ -17,6 +21,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
@@ -24,7 +31,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     }
 
     const { id } = await params
-    
+
     // Suppression complète (Hard delete) avec suppression en cascade manuelle
     await prisma.$transaction([
         prisma.inventory.deleteMany({ where: { warehouseId: id } }),
@@ -32,6 +39,6 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         prisma.stockMovement.deleteMany({ where: { fromWarehouseId: id } }),
         prisma.warehouse.delete({ where: { id } })
     ])
-    
+
     return NextResponse.json({ success: true })
 }

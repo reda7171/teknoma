@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getAllExchanges, getExchangeStats, getAllExchangeBooks } from '@/lib/actions/admin-exchanges'
 import Link from 'next/link'
 import { PackageOpen, Clock, CheckCircle, AlertCircle, BookOpen, ArrowRight } from 'lucide-react'
@@ -5,6 +6,8 @@ import ExchangesTable from './ExchangesTable'
 import ExchangeBooksTable from './ExchangeBooksTable'
 
 export default async function AdminExchangesPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const [exchanges, stats, exchangeBooks] = await Promise.all([
         getAllExchanges(),
         getExchangeStats(),

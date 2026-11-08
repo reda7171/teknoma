@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { oauthLoginOrRegister } from '@/lib/actions/community-auth'
+import { oauthLoginOrRegister } from '@/lib/server/community-oauth'
 import { getTrustedAppOrigin, isValidOAuthState, oauthStateCookieName } from '@/lib/oauth-security'
 
 export async function GET(request: NextRequest) {

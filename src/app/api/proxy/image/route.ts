@@ -1,34 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server'
+import sharp from 'sharp'
+import { authorizeAdminApi } from '@/lib/api-authorization'
+import { fetchPublicImage } from '@/lib/public-image-fetch'
+import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 
-export async function GET(req: NextRequest) {
-    const { searchParams } = new URL(req.url);
-    const imageUrl = searchParams.get('url');
-
-    if (!imageUrl) {
-        return new NextResponse('URL is required', { status: 400 });
-    }
-
+export async function GET(request: NextRequest) {
+    const denied = await authorizeAdminApi(['ADMIN', 'MANAGER', 'BLOG_MODERATOR', 'SELLER'])
+    if (denied) return denied
+    const limiter = await rateLimit(`image_proxy_${await getIpIdentifier()}`, { limit: 20, windowMs: 60_000 })
+    if (!limiter.success) return new NextResponse('Too many requests', { status: 429 })
+    const url = request.nextUrl.searchParams.get('url')
+    if (!url) return new NextResponse('URL required', { status: 400 })
     try {
-        const response = await fetch(imageUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-            }
-        });
-        if (!response.ok) throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
-
-        const blob = await response.blob();
-        const headers = new Headers();
-        headers.set('Content-Type', blob.type);
-        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-        headers.set('Access-Control-Allow-Origin', '*');
-
-        return new NextResponse(blob, {
-            status: 200,
-            headers,
-        });
-    } catch (error) {
-        console.error('Proxy error:', error);
-        return new NextResponse('Error fetching image', { status: 500 });
-    }
+        const input = await fetchPublicImage(url)
+        const image = await sharp(input, { limitInputPixels: 25_000_000 })
+            .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer()
+        return new NextResponse(new Uint8Array(image), {
+            headers: { 'Content-Type': 'image/webp', 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' },
+        })
+    } catch { return new NextResponse('Image refused', { status: 400 }) }
 }

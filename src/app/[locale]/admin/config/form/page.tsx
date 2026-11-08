@@ -1,5 +1,6 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { getSetting, getSettingsByCategory } from '@/lib/actions/site-settings'
+import { getSetting, getSettingsByCategory } from '@/lib/server/site-settings'
 import { redirect } from 'next/navigation'
 import FormConfig from './FormConfig'
 import { Settings } from 'lucide-react'
@@ -9,6 +10,8 @@ export const metadata = {
 }
 
 export default async function FormConfigPage() {
+    await requirePageRole(["ADMIN"])
+
     try {
         await verifyAdmin()
     } catch {

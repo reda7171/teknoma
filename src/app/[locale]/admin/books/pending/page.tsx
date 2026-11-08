@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { ArrowLeft, Check, X } from 'lucide-react'
@@ -5,8 +6,10 @@ import { normalizeImage } from '@/lib/utils'
 import PendingBooksTable from './PendingBooksTable'
 
 export default async function PendingBooksPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const books = await prisma.book.findMany({
-        where: { 
+        where: {
             active: false,
             customerSellerId: { not: null }
         },

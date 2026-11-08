@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { Suspense } from "react"
 import { getTranslations } from "next-intl/server"
 import JumiaConsignmentClient from "./JumiaConsignmentClient"
@@ -8,9 +9,11 @@ export default async function JumiaConsignmentPage({
 }: {
     params: Promise<{ locale: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { locale } = await params
     const t = await getTranslations('Admin')
-    
+
     // Pour la création de FBJ on aura besoin des shops
     const shopsRes = await getJumiaShops()
 
@@ -20,7 +23,7 @@ export default async function JumiaConsignmentPage({
                 <h2 className="text-3xl font-bold tracking-tight">Consignation FBJ</h2>
             </div>
             <Suspense fallback={<div>Chargement FBJ...</div>}>
-                <JumiaConsignmentClient 
+                <JumiaConsignmentClient
                     shops={shopsRes?.shops || []}
                 />
             </Suspense>

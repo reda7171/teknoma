@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from './auth'
 import { revalidatePath } from 'next/cache'
-import { sendWhatsAppMessageDirect } from './whatsapp-gateway'
+import { sendWhatsAppMessageDirect } from "@/lib/server/whatsapp-gateway"
 
 export interface SubmitPromoLeadInput {
     phone?: string

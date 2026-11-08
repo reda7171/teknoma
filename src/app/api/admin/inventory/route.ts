@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
@@ -28,7 +32,7 @@ export async function GET(req: Request) {
         orderBy: [{ warehouse: { name: 'asc' } }, { quantity: 'desc' }],
     })
 
-    // If a specific warehouse is selected, we want to ensure ALL products are displayed, 
+    // If a specific warehouse is selected, we want to ensure ALL products are displayed,
     // even those with 0 stock that don't have an inventory record yet.
     if (warehouseId && !bookId && !extraProductId) {
         const warehouse = await prisma.warehouse.findUnique({ where: { id: warehouseId } })
@@ -82,6 +86,9 @@ export async function GET(req: Request) {
 
 // POST /api/admin/inventory — Ajouter ou ajuster du stock
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
@@ -97,7 +104,7 @@ export async function POST(req: Request) {
     await prisma.$transaction(async (tx) => {
         const whereClause: any = bookId ? { bookId_warehouseId: { bookId, warehouseId } } : { extraProductId_warehouseId: { extraProductId: extraProductId!, warehouseId } }
         const createData: any = bookId ? { bookId, warehouseId, quantity: Number(quantity) } : { extraProductId: extraProductId!, warehouseId, quantity: Number(quantity) }
-        
+
         await tx.inventory.upsert({
             where: whereClause,
             update: { quantity: { increment: Number(quantity) } },

@@ -48,23 +48,26 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json()
-        const { offerId, status } = body
+        const { offerId, status, sessionId } = body
 
-        if (!offerId || !status) {
+        if (!offerId || typeof sessionId !== 'string' || !/^[a-f0-9-]{36}$/i.test(sessionId) || !['ACCEPTED', 'REJECTED'].includes(status)) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
         }
 
-        const offer = await prisma.instantOffer.update({
-            where: { id: offerId },
+        const changed = await prisma.instantOffer.updateMany({
+            where: { id: offerId, sessionId, status: 'PENDING', expiresAt: { gt: new Date() } },
             data: { status } // 'ACCEPTED' ou 'REJECTED'
         })
+
+        if (changed.count !== 1) return NextResponse.json({ error: 'Offre indisponible' }, { status: 404 })
+        const offer = await prisma.instantOffer.findUniqueOrThrow({ where: { id: offerId } })
 
         // Notifier sur Telegram de l'action du client
         try {
             const emoji = status === 'ACCEPTED' ? '✅' : '❌'
             const action = status === 'ACCEPTED' ? 'ACCEPTEE' : 'REFUSEE'
             const actionText = status === 'ACCEPTED' ? 'accepté' : 'refusé'
-            
+
             await sendTelegramMessage(
                 `${emoji} <b>Offre ${action}</b>\n\nLe client a <b>${actionText}</b> l'offre de réduction de <b>${offer.discount} Dhs</b>.\n🔑 <b>Session:</b> <code>${offer.sessionId}</code>`
             )

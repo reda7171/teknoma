@@ -1,17 +1,21 @@
-"use server"
+'use server'
+
+import { requireRole } from '@/lib/require-role'
 
 import { JumiaAPI } from '@/lib/jumia-api'
 import { prisma } from '@/lib/prisma'
 import { sendTelegramMessage } from '@/lib/telegram'
 
 export async function getPendingJumiaOrdersCount() {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return 0
         // Fetch only pending orders (Jumia API status parameter is typically 'PENDING')
         const response = await jumia.getOrders(100, undefined, 'PENDING')
         const orders = response?.orders || response?.data?.orders || []
-        
+
         // Count strictly pending
         return orders.filter((o: any) => {
             const status = (o.status || o.Status || '').toLowerCase()
@@ -24,10 +28,12 @@ export async function getPendingJumiaOrdersCount() {
 }
 
 export async function syncAllJumiaStock() {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
-        
+
         // 1. Fetch ALL Jumia products
         let allJumiaProducts: any[] = []
         let token = undefined
@@ -35,34 +41,34 @@ export async function syncAllJumiaStock() {
             const res = await jumia.getProducts({ size: 100, token })
             const products = res?.products || res?.data?.products || []
             allJumiaProducts = allJumiaProducts.concat(products)
-            
+
             token = res?.nextToken || res?.data?.nextToken
             if (!token) break
         }
-        
+
         if (allJumiaProducts.length === 0) {
             return { error: "Aucun produit trouvé sur Jumia" }
         }
-        
+
         // 2. Fetch all Riwaya Books and Packs
         const books = await prisma.book.findMany({ select: { id: true, title: true, stock: true } })
-        
+
         // On récupère aussi les packs si jamais il y a des packs sur Jumia, bien qu'ils n'aient pas de stock propre direct (ils pourraient avoir isFreeDelivery ou autre)
         // Mais pour l'instant concentrons-nous sur les livres, ou si vous gérez le stock des packs :
         const packs = await prisma.pack.findMany({ select: { id: true, name: true } })
-        
+
         // 3. Match and prepare payload
         const updates: any[] = []
-        
+
         for (const p of allJumiaProducts) {
             const sku = p.sellerSku || (p.variations && p.variations[0]?.sellerSku)
             if (!sku || !p.name) continue
-            
+
             const jumiaName = p.name.toLowerCase().trim()
-            
+
             // Cherche un livre qui a le même nom
             let matchedBook = books.find(b => b.title.toLowerCase().trim() === jumiaName)
-            
+
             if (matchedBook) {
                 updates.push({
                     sellerSku: sku, // L'API Jumia a toujours besoin du sku pour la mise à jour
@@ -71,18 +77,18 @@ export async function syncAllJumiaStock() {
                 })
             }
         }
-        
+
         if (updates.length === 0) {
             return { error: "Aucun produit Jumia n'a pu être associé à un livre Riwaya (vérifiez que le nom du produit Jumia correspond exactement au titre du livre sur Riwaya)." }
         }
-        
+
         // 4. Send updates to Jumia (chunk by 50)
         const chunkSize = 50
         for (let i = 0; i < updates.length; i += chunkSize) {
             const chunk = updates.slice(i, i + chunkSize)
             await jumia.updateProductsStock(chunk)
         }
-        
+
         return { success: true, count: updates.length }
     } catch (e: any) {
         console.error("Error syncing Jumia stock:", e)
@@ -132,9 +138,11 @@ async function enrichJumiaOrdersWithItems(jumia: any, rawOrders: any[]) {
 }
 
 export async function getJumiaOrders(size = 100, token?: string, status?: string, createdAfter?: string, createdBefore?: string, sortBy = 'createdAt', sortDirection = 'DESC') {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
-    
+
     try {
         const response = await jumia.getOrders(size, token, status, createdAfter, createdBefore, sortBy, sortDirection)
         const rawOrders = response?.orders || response?.data?.orders || []
@@ -160,9 +168,11 @@ export async function getJumiaOrders(size = 100, token?: string, status?: string
 }
 
 export async function getJumiaStats() {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) return null
-    
+
     try {
         const now = new Date()
         const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -170,15 +180,15 @@ export async function getJumiaStats() {
         const statsPeriodStart = new Date(now.getFullYear(), now.getMonth() - 2, 1)
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
         const createdAfter = statsPeriodStart.toISOString().split('T')[0]
-        
+
         const tomorrow = new Date()
         tomorrow.setDate(tomorrow.getDate() + 1)
         const createdBefore = tomorrow.toISOString().split('T')[0]
-        
+
         // Fetch up to 300 recent orders for stats
         const response = await jumia.getOrders(300, undefined, undefined, createdAfter, createdBefore)
         const orders = response?.orders || response?.data?.orders || []
-        
+
         let total = 0
         let pending = 0
         let shipped = 0
@@ -193,12 +203,12 @@ export async function getJumiaStats() {
         let todayOrders = 0
         let currentMonthCanceled = 0
         let currentMonthReturned = 0
-        
+
         const evolutionMap: Record<string, { date: string, count: number, revenue: number }> = {}
-        
+
         orders.forEach((o: any) => {
             const st = (o.status || o.Status || o.Statuses?.[0] || '').toUpperCase()
-            
+
             const createdAtValue = o.createdAt || o.CreatedAt || o.created_at
             const createdAt = createdAtValue ? new Date(createdAtValue) : null
             const isCurrentMonth = Boolean(createdAt && !Number.isNaN(createdAt.getTime()) && createdAt >= currentMonthStart)
@@ -214,7 +224,7 @@ export async function getJumiaStats() {
                 if (isCurrentMonth) currentMonthCanceled++
                 return
             }
-            
+
             total++
             if (st === 'PENDING') pending++
             else if (st === 'READY_TO_SHIP' || st === 'READY-TO-SHIP' || st === 'SHIPPED') shipped++
@@ -223,12 +233,12 @@ export async function getJumiaStats() {
             if (isPreviousMonth) previousMonthOrders++
             if (isToday) todayOrders++
             if (isCurrentMonth && st === 'RETURNED') currentMonthReturned++
-            
+
             const price = parseFloat(o.totalAmountLocal?.value || o.Price || o.GrandTotal || '0')
-            
+
             // On ne compte pas le revenu pour les commandes RETURNED, mais on les garde dans le total
             const isValidRevenue = !isNaN(price) && st !== 'RETURNED'
-            
+
             if (isValidRevenue) {
                 revenue += price
                 if (isCurrentMonth) currentMonthRevenue += price
@@ -247,9 +257,9 @@ export async function getJumiaStats() {
                 }
             }
         })
-        
+
         const evolutionData = Object.values(evolutionMap).sort((a, b) => a.date.localeCompare(b.date))
-        
+
         const recentOrders = orders.slice(0, 3)
         const currentMonthAverageOrder = currentMonthOrders > 0 ? currentMonthRevenue / currentMonthOrders : 0
         const currentMonthCancellationRate = currentMonthOrders + currentMonthCanceled > 0
@@ -289,9 +299,11 @@ export async function getJumiaStats() {
 }
 
 export async function getJumiaOrderItems(orderId: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
-    
+
     try {
         const response = await jumia.getOrderItems(orderId)
         const data = Array.isArray(response) ? response[0] : response
@@ -303,25 +315,27 @@ export async function getJumiaOrderItems(orderId: string) {
 }
 
 export async function cancelJumiaOrderFull(orderId: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
-    
+
     try {
         const responseItems = await jumia.getOrderItems(orderId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
         const items = data?.items || data?.data?.items || data || []
-        
+
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande. Impossible d'annuler.")
         }
-        
+
         // Extraction des IDs (suivant les différentes structures de l'API)
         const orderItemIds = items.map((item: any) => item.id || item.orderItemId || item.OrderItemId || item.uuid).filter(Boolean)
-        
+
         if (!orderItemIds.length) {
             throw new Error("Impossible de trouver l'UUID des articles à annuler.")
         }
-        
+
         // Appel final pour annuler
         const cancelResponse = await jumia.cancelOrders(orderItemIds)
         await prisma.jumiaActionLog.create({ data: { orderId, action: 'CANCEL', status: 'SUCCESS' } }).catch(() => {})
@@ -373,7 +387,7 @@ async function reintegrateJumiaOrderStock(items: any[], orderId: string, reason:
         }
 
         // Syncer le nouveau stock vers Jumia
-        const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
+        const { syncJumiaStockForBooksBackground } = await import("@/lib/server/jumia")
         await syncJumiaStockForBooksBackground(books.map(b => b.id))
 
         // Notifier Telegram
@@ -387,6 +401,8 @@ async function reintegrateJumiaOrderStock(items: any[], orderId: string, reason:
 
 // Action publique : réintégrer le stock d'une commande Jumia FAILED/CANCELED/RETURNED
 export async function restoreJumiaOrderStock(orderId: string, reason: 'FAILED' | 'CANCELED' | 'RETURNED' = 'CANCELED') {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) return { success: false, error: "Jumia n'est pas configuré" }
 
@@ -442,22 +458,24 @@ async function resolveJumiaOrderInternalId(jumia: any, orderId: string): Promise
 }
 
 export async function packJumiaOrderFull(orderId: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
-    
+
     try {
         // 1. Fetch Order Items
         const internalId = await resolveJumiaOrderInternalId(jumia, orderId)
         const responseItems = await jumia.getOrderItems(internalId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
         const items = data?.items || data?.data?.items || data || []
-        
+
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande.")
         }
-        
+
         const orderItemIds = items.map((item: any) => item.id || item.orderItemId || item.OrderItemId || item.uuid).filter(Boolean)
-        
+
         if (!orderItemIds.length) {
             throw new Error("Impossible de trouver l'UUID des articles.")
         }
@@ -508,7 +526,7 @@ export async function packJumiaOrderFull(orderId: string) {
         if (!shipmentProviderId) {
             throw new Error("Impossible de trouver l'ID du fournisseur d'expédition.")
         }
-        
+
         // Rabat Océan does not require a caller-provided tracking code, so use
         // the V1 packing endpoint. Jumia's V2 endpoint rejects a missing
         // trackingCode even when the provider reports trackingCodeRequired=false.
@@ -518,7 +536,7 @@ export async function packJumiaOrderFull(orderId: string) {
                 shipmentProviderId
             }))
         }
-        
+
         const packResponse = await jumia.packOrdersV1(payload)
         const packErrors = packResponse?.error?.packages || packResponse?.error?.orderItems || []
         if (Array.isArray(packErrors) && packErrors.length > 0) {
@@ -553,36 +571,38 @@ export async function packJumiaOrderFull(orderId: string) {
 }
 
 export async function printJumiaOrderLabelsFull(orderId: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
-    
+
     try {
         const internalId = await resolveJumiaOrderInternalId(jumia, orderId)
         const responseItems = await jumia.getOrderItems(internalId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
         const items = data?.items || data?.data?.items || data?.orderItems || data?.data?.orderItems || (Array.isArray(data) ? data : [])
-        
+
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande.")
         }
-        
+
         const orderItemIds = items.map((item: any) => item.id || item.orderItemId || item.OrderItemId || item.uuid).filter(Boolean)
-        
+
         if (!orderItemIds.length) {
             throw new Error("Impossible de trouver l'UUID des articles.")
         }
-        
+
         const payload = {
             orderItemIds: orderItemIds,
 
 
 
         }
-        
+
         void('[PRINT LABELS] Order ID:', orderId)
         void('[PRINT LABELS] Items found:', items.length, JSON.stringify(items.slice(0, 2)))
         void('[PRINT LABELS] Payload:', JSON.stringify(payload))
-        
+
         let response: any
         try {
             response = await jumia.printLabels(payload)
@@ -605,25 +625,27 @@ export async function printJumiaOrderLabelsFull(orderId: string) {
 }
 
 export async function printJumiaOrderInvoiceFull(orderId: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
-    
+
     try {
         const internalId = await resolveJumiaOrderInternalId(jumia, orderId)
         const responseItems = await jumia.getOrderItems(internalId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
         const items = data?.items || data?.data?.items || data || []
-        
+
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande.")
         }
-        
+
         const orderItemIds = items.map((item: any) => item.id || item.orderItemId || item.OrderItemId || item.uuid).filter(Boolean)
-        
+
         if (!orderItemIds.length) {
             throw new Error("Impossible de trouver l'UUID des articles.")
         }
-        
+
         // On the Jumia API side, some use orderId directly or orderItemIds in payload
         const printResponse = await jumia.printInvoice({ orderId, orderItemIds })
         await prisma.jumiaActionLog.create({ data: { orderId, action: 'PRINT_INVOICE', status: 'SUCCESS' } }).catch(() => {})
@@ -636,29 +658,31 @@ export async function printJumiaOrderInvoiceFull(orderId: string) {
 }
 
 export async function readyToShipJumiaOrderFull(orderId: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     const jumia = await JumiaAPI.getInstance()
     if (!jumia) throw new Error("Jumia n'est pas configuré")
-    
+
     try {
         const internalId = await resolveJumiaOrderInternalId(jumia, orderId)
         const responseItems = await jumia.getOrderItems(internalId)
         const data = Array.isArray(responseItems) ? responseItems[0] : responseItems
         const items = data?.items || data?.data?.items || data || []
-        
+
         if (!items || !items.length) {
             throw new Error("Aucun article trouvé pour cette commande.")
         }
-        
+
         const orderItemIds = items.map((item: any) => item.id || item.orderItemId || item.OrderItemId || item.uuid).filter(Boolean)
-        
+
         if (!orderItemIds.length) {
             throw new Error("Impossible de trouver l'UUID des articles.")
         }
-        
+
         const payload = {
             orderItemIds: orderItemIds
         }
-        
+
         const response = await jumia.readyToShipOrders(payload)
         await prisma.jumiaActionLog.create({ data: { orderId, action: 'READY_TO_SHIP', status: 'SUCCESS' } }).catch(() => {})
         return response
@@ -670,6 +694,8 @@ export async function readyToShipJumiaOrderFull(orderId: string) {
 }
 
 export async function getJumiaPayoutStatements(params?: any) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return null
@@ -682,6 +708,8 @@ export async function getJumiaPayoutStatements(params?: any) {
 }
 
 export async function createJumiaConsignmentOrder(payload: any) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -694,6 +722,8 @@ export async function createJumiaConsignmentOrder(payload: any) {
 }
 
 export async function updateJumiaConsignmentOrder(purchaseOrderNumber: string, payload: any) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -706,6 +736,8 @@ export async function updateJumiaConsignmentOrder(purchaseOrderNumber: string, p
 }
 
 export async function getJumiaConsignmentStock(businessClientCode: string, sku: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -720,6 +752,8 @@ export async function getJumiaConsignmentStock(businessClientCode: string, sku: 
 
 
 export async function getJumiaShops() {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -732,6 +766,8 @@ export async function getJumiaShops() {
 }
 
 export async function getJumiaShopsOfMasterShop() {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -746,6 +782,8 @@ export async function getJumiaShopsOfMasterShop() {
 // --- Feeds (Products) Actions ---
 
 export async function getJumiaFeed(id: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -757,6 +795,8 @@ export async function getJumiaFeed(id: string) {
 }
 
 export async function updateJumiaProductsStock(products: any[]) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -768,6 +808,8 @@ export async function updateJumiaProductsStock(products: any[]) {
 }
 
 export async function updateJumiaProductsPrice(products: any[]) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -779,6 +821,8 @@ export async function updateJumiaProductsPrice(products: any[]) {
 }
 
 export async function updateJumiaProductsStatus(products: any[]) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -790,6 +834,8 @@ export async function updateJumiaProductsStatus(products: any[]) {
 }
 
 export async function createJumiaProducts(shopId: string, products: any[]) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -801,6 +847,8 @@ export async function createJumiaProducts(shopId: string, products: any[]) {
 }
 
 export async function updateJumiaProducts(products: any[], shopId?: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -814,6 +862,8 @@ export async function updateJumiaProducts(products: any[], shopId?: string) {
 // --- Catalog Actions ---
 
 export async function getJumiaBrands(page = 1) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -825,6 +875,8 @@ export async function getJumiaBrands(page = 1) {
 }
 
 export async function getJumiaCategories(page = 1, attributeSetName?: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -836,6 +888,8 @@ export async function getJumiaCategories(page = 1, attributeSetName?: string) {
 }
 
 export async function getJumiaProducts(params: any = {}) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -849,6 +903,8 @@ export async function getJumiaProducts(params: any = {}) {
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function getAllJumiaProducts() {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     let allProducts: any[] = []
     let nextToken: string | undefined = undefined
 
@@ -862,7 +918,7 @@ export async function getAllJumiaProducts() {
             }
             nextToken = res.nextToken
         } while (nextToken)
-        
+
         // Fetch all stock and merge
         const jumia = await JumiaAPI.getInstance()
         if (jumia && allProducts.length > 0) {
@@ -880,7 +936,7 @@ export async function getAllJumiaProducts() {
                     break;
                 }
             } while (stockNextToken)
-            
+
             // Check linkage with local products
             const sellerSkus: string[] = []
             allProducts.forEach((p: any) => {
@@ -891,15 +947,15 @@ export async function getAllJumiaProducts() {
                     })
                 }
             })
-            
+
             let linkedSkus = new Set<string>()
-            
+
             if (sellerSkus.length > 0) {
                 const linkedBooks = await prisma.book.findMany({
                     where: { sellerSku: { in: sellerSkus } },
                     select: { sellerSku: true }
                 })
-                
+
                 linkedBooks.forEach(b => { if (b.sellerSku) linkedSkus.add(b.sellerSku) })
             }
 
@@ -917,7 +973,7 @@ export async function getAllJumiaProducts() {
                         p.stockId = stockItem.id
                     }
                 }
-                
+
                 // Linkage check
                 let isLinked = false
                 if (p.sellerSku && linkedSkus.has(p.sellerSku)) isLinked = true
@@ -927,11 +983,11 @@ export async function getAllJumiaProducts() {
                     })
                 }
                 p.isLinked = isLinked
-                
+
                 return p
             })
         }
-        
+
         return { products: allProducts }
     } catch (e: any) {
         return { error: e.message, products: allProducts }
@@ -939,6 +995,8 @@ export async function getAllJumiaProducts() {
 }
 
 export async function getJumiaAttributeSets(id: string) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -950,6 +1008,8 @@ export async function getJumiaAttributeSets(id: string) {
 }
 
 export async function getJumiaCatalogStock(params: any = {}) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }
@@ -961,6 +1021,8 @@ export async function getJumiaCatalogStock(params: any = {}) {
 }
 
 export async function getJumiaPayoutStatementsAction(params: any = {}) {
+    await requireRole(["ADMIN","MANAGER","CONFIRMATOR"])
+
     try {
         const jumia = await JumiaAPI.getInstance()
         if (!jumia) return { error: "Jumia n'est pas configuré" }

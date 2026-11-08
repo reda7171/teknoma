@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { getCommunityUser } from './community-auth'
 import { revalidatePath } from 'next/cache'
-import { createNotification } from './community-notifications'
+import { createNotification } from '@/lib/server/community-notifications'
 import { z } from 'zod'
 
 const ratingSchema = z.object({

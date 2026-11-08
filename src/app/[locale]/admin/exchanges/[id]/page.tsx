@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { Link } from '@/i18n/routing'
 import { getExchangeById } from '@/lib/actions/admin-exchanges'
 import { notFound } from 'next/navigation'
@@ -10,6 +11,8 @@ export default async function ExchangeDetailsPage({
 }: {
     params: Promise<{ id: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const { id } = await params
     const exchange = await getExchangeById(id)
 

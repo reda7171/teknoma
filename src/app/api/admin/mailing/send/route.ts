@@ -1,9 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server';
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { transporter } from '@/lib/email';
 
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin();
         if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 });
@@ -133,8 +137,8 @@ export async function POST(req: Request) {
             message += ` Note: limité à ${MAX_PER_BATCH} destinataires en temps réel.`;
         }
 
-        return NextResponse.json({ 
-            success: true, 
+        return NextResponse.json({
+            success: true,
             message,
             stats: { total: recipients.length, success: successCount, failed: failCount }
         });

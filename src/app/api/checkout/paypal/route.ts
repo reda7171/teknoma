@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { canReadOrder } from '@/lib/order-access'
 import { madToUsdCents, paypalClient, paypalOrigin } from '@/lib/paypal'
 import { validatePaypalOrder, type PaypalOrder } from '@/lib/paypal-validation'
 
@@ -10,7 +11,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
         }
         const order = await prisma.order.findUnique({ where: { id: body.orderId } })
-        if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+        if (!order || !(await canReadOrder(order, req))) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         if (order.paymentMethod !== 'PAYPAL' || order.isPaid || !['PENDING', 'CONFIRMED'].includes(order.status)) {
             return NextResponse.json({ error: 'Commande non éligible au paiement PayPal' }, { status: 409 })
         }

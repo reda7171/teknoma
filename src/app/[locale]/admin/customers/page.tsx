@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import { Users } from 'lucide-react'
 import CustomersPageClient from './CustomersPageClient'
@@ -318,6 +319,8 @@ async function getCustomers(): Promise<CustomerItem[]> {
 }
 
 export default async function AdminCustomersPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const customers = await getCustomers()
 
     return (
@@ -332,7 +335,7 @@ export default async function AdminCustomersPage() {
                         Base de données centralisée (**)
                     </p>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                     <div className="bg-black text-white px-8 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10">
                         <Users className="w-4 h-4 text-gray-400" />

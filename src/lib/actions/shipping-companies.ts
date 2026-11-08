@@ -3,7 +3,8 @@
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { revalidatePath } from 'next/cache'
-import { getSetting, updateSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
+import { updateSetting } from '@/lib/actions/site-settings'
 
 export async function getShippingCompanies() {
     try {

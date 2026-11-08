@@ -1,17 +1,20 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getUsers } from '@/lib/actions/users'
 import UsersClient from './UsersClient'
 import { Users } from 'lucide-react'
 
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 
 export const metadata = {
     title: 'Gestion des Utilisateurs | Admin',
 }
 
 export default async function UsersPage() {
+    await requirePageRole(["ADMIN"])
+
     const res = await getUsers()
     const users = res.success && res.data ? res.data : []
-    
+
     const permissionsSetting = await getSetting('role_permissions', '{}')
     const initialPermissions = JSON.parse(permissionsSetting || '{}')
 

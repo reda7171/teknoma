@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getAllComments } from '@/lib/actions/comments'
 import { MessageSquare } from 'lucide-react'
 import CommentsTable from './CommentsTable'
@@ -11,6 +12,8 @@ export default async function AdminCommentsPage({
 }: {
     searchParams: Promise<{ page?: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER","BLOG_MODERATOR"])
+
     const sp = await searchParams
     const page = parseInt(sp.page || '1')
     const { comments, pagination } = await getAllComments(page)

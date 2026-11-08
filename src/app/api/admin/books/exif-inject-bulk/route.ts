@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -6,10 +7,13 @@ import path from 'path'
 import fs from 'fs'
 
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
         const { edits } = await req.json()
-        
+
         if (!edits || typeof edits !== 'object') {
             return NextResponse.json({ success: false, error: 'Données invalides' }, { status: 400 })
         }
@@ -23,7 +27,7 @@ export async function POST(req: Request) {
 
         for (const book of books) {
             if (!book.image || !book.image.startsWith('/uploads/')) continue
-            
+
             const filePath = path.join(process.cwd(), 'public', book.image)
             if (!fs.existsSync(filePath)) continue
 
@@ -58,7 +62,7 @@ export async function POST(req: Request) {
                 if (fs.existsSync(backupPath)) {
                     fs.unlinkSync(backupPath)
                 }
-                
+
                 successCount++
             } catch (err) {
                 console.error(`Erreur EXIF pour ${book.title}:`, err)

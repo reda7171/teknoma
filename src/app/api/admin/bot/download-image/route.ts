@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server';
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth';
 
@@ -16,6 +17,9 @@ function isAllowedImageUrl(value: string) {
 }
 
 export async function GET(request: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     const admin = await getAuthenticatedAdmin();
     if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 });
     if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 });

@@ -1,8 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server';
-import { getSetting, updateSetting } from '@/lib/actions/site-settings';
+import { getSetting } from '@/lib/server/site-settings'
+import { updateSetting } from '@/lib/actions/site-settings'
 import axios from 'axios';
 
 export async function GET(req: NextRequest) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     const code = req.nextUrl.searchParams.get('code');
     const error = req.nextUrl.searchParams.get('error');
 
@@ -25,7 +30,7 @@ export async function GET(req: NextRequest) {
         }
 
         const redirectUri = `${baseUrl}/api/tiktok/callback`;
-        
+
         const params = new URLSearchParams();
         params.append('client_key', clientKey);
         params.append('client_secret', clientSecret);
@@ -46,10 +51,10 @@ export async function GET(req: NextRequest) {
         });
 
         const data = response.data;
-        
+
         if (data.data && data.data.access_token) {
             await updateSetting('tiktok_access_token', data.data.access_token, 'config', 'TikTok Access Token (OAuth)');
-            
+
             if (data.data.refresh_token) {
                 await updateSetting('tiktok_refresh_token', data.data.refresh_token, 'config', 'TikTok Refresh Token (OAuth)');
             }

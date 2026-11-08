@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { getCommunityUser, checkExchangeEligibility } from '@/lib/actions/community-auth'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { createNotification } from './community-notifications'
+import { createNotification } from '@/lib/server/community-notifications'
 
 const ExchangeRequestSchema = z.object({
     bookRequestedId: z.string().uuid(),
@@ -40,7 +40,7 @@ export async function createExchangeRequest(formData: FormData): Promise<Exchang
         // 1. Vérifier le livre demandé
         const requestedBook = await (prisma as any).exchangeBook.findUnique({
             where: { id: data.bookRequestedId },
-            include: { owner: true }
+            include: { owner: { select: { id: true, fullName: true, image: true, city: true, rating: true } } }
         })
 
         if (!requestedBook || requestedBook.status !== 'AVAILABLE') {
@@ -87,7 +87,7 @@ export async function createExchangeRequest(formData: FormData): Promise<Exchang
             }
         })
 
-        // 4. Mettre à jour le statut des livres ? 
+        // 4. Mettre à jour le statut des livres ?
         // Non, on garde AVAILABLE tant que l'échange n'est pas ACCEPTED.
         // Mais on pourrait mettre "PENDING" pour éviter double demande instantanée.
         // Pour l'instant on autorise plusieurs demandes sur un même livre (premier arrivé premier servi à l'acceptation).
@@ -209,10 +209,8 @@ export async function acceptExchange(exchangeId: string) {
 
 
             // Mettre à jour l'échange
-            await tx.exchange.update({
-                where: { id: exchangeId },
-                data: { status: 'ACCEPTED' }
-            })
+            const changed = await tx.exchange.updateMany({ where: { id: exchangeId, status: 'PENDING' }, data: { status: 'ACCEPTED' } })
+            if (changed.count !== 1) throw new Error('Transition impossible')
 
             // Marquer les livres comme réservés/échangés
             await tx.exchangeBook.update({
@@ -261,23 +259,8 @@ export async function rejectExchange(exchangeId: string) {
             return { success: false, error: "Non autorisé" }
         }
 
-        await (prisma as any).exchange.update({
-            where: { id: exchangeId },
-            data: { status: 'REJECTED' } // Changed from CANCELLED to REJECTED
-        })
-
-        // Marquer les livres comme à nouveau disponibles
-        await (prisma as any).exchangeBook.update({
-            where: { id: exchange.bookRequestedId },
-            data: { status: 'AVAILABLE' }
-        })
-
-        if (exchange.bookOfferedId) {
-            await (prisma as any).exchangeBook.update({
-                where: { id: exchange.bookOfferedId },
-                data: { status: 'AVAILABLE' }
-            })
-        }
+        const changed = await (prisma as any).exchange.updateMany({ where: { id: exchangeId, status: 'PENDING' }, data: { status: 'REJECTED' } })
+        if (changed.count !== 1) return { success: false, error: 'Transition impossible' }
         revalidatePath('/community/exchanges')
         return { success: true }
     } catch {
@@ -316,10 +299,8 @@ export async function completeExchange(exchangeId: string) {
         // Transaction de transfert de propriété
         await (prisma as any).$transaction(async (tx: any) => {
             // 1. Mettre à jour le statut de l'échange
-            await tx.exchange.update({
-                where: { id: exchangeId },
-                data: { status: 'COMPLETED' }
-            })
+            const changed = await tx.exchange.updateMany({ where: { id: exchangeId, status: 'ACCEPTED' }, data: { status: 'COMPLETED' } })
+            if (changed.count !== 1) throw new Error('Transition impossible')
 
             // 2. Transférer le livre demandé (du Responder -> Requester)
             await tx.exchangeBook.update({

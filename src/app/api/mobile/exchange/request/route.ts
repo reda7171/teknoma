@@ -1,25 +1,16 @@
+import { getMobileCustomer } from '@/lib/mobile-auth'
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
+import { getJwtSecret } from '@/lib/jwt-secret';
 
-function getCustomerId(req: Request) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    return decoded.id;
-  } catch (e) {
-    return null;
-  }
-}
+async function getCustomerId(req: Request) { return (await getMobileCustomer(req))?.id || null }
 
 // POST: Envoyer une demande d'échange
 export async function POST(req: Request) {
   try {
-    const requesterId = getCustomerId(req);
+    const requesterId = await getCustomerId(req);
     if (!requesterId) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
@@ -43,22 +34,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Vous ne pouvez pas demander votre propre livre' }, { status: 400 });
     }
 
-    let creditsAmount = 0;
-    if (targetBook.exchangeType === 'CREDIT') {
-      const requester = await prisma.customer.findUnique({ where: { id: requesterId } });
-      if (!requester || requester.credits < 10) {
-        return NextResponse.json({ error: 'Crédits insuffisants (10 crédits requis)' }, { status: 400 });
-      }
-      creditsAmount = 10;
-      
-      // Déduire les crédits du demandeur
-      await prisma.customer.update({
-        where: { id: requesterId },
-        data: { credits: { decrement: 10 } }
-      });
+    if (bookOfferedId) {
+      const offered = await prisma.exchangeBook.findUnique({ where: { id: bookOfferedId } });
+      if (!offered || offered.ownerId !== requesterId || offered.status === 'EXCHANGED') return NextResponse.json({ error: 'Livre indisponible' }, { status: 400 });
     }
-
-    const exchange = await prisma.exchange.create({
+    if (targetBook.status === 'EXCHANGED') return NextResponse.json({ error: 'Livre indisponible' }, { status: 400 });
+    const creditsAmount = targetBook.exchangeType === 'CREDIT' ? 10 : 0;
+    const exchange = await prisma.$transaction(async tx => {
+      if (creditsAmount) {
+        const debit = await tx.customer.updateMany({ where: { id: requesterId, credits: { gte: creditsAmount } }, data: { credits: { decrement: creditsAmount } } });
+        if (debit.count !== 1) throw new Error('Cr?dits insuffisants');
+      }
+      return tx.exchange.create({
       data: {
         requesterId,
         responderId: targetBook.ownerId,
@@ -69,6 +56,8 @@ export async function POST(req: Request) {
         creditsAmount: creditsAmount > 0 ? creditsAmount : null,
         status: 'PENDING',
       },
+    });
+
     });
 
     return NextResponse.json({ message: 'Demande envoyée avec succès', exchange });

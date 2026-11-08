@@ -1,4 +1,5 @@
-import { getSupplierOrderRecommendations, getStockStats } from '@/lib/actions/supplier-order'
+import { requirePageRole } from '@/lib/page-authorization'
+import { getSupplierOrderRecommendations, getStockStats } from "@/lib/server/supplier-order"
 import { AlertTriangle, Package, TrendingUp, DollarSign, ShoppingCart, ArrowUp } from 'lucide-react'
 import SupplierOrderExport from '@/components/admin/SupplierOrderExport'
 import CopyTitlesButton from '@/components/admin/CopyTitlesButton'
@@ -16,6 +17,8 @@ export default async function SupplierOrderPage({
   searchParams: Promise<{ periode?: string; filtre?: string }>
   params: Promise<{ locale: string }>
 }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
   const [sp, p] = await Promise.all([searchParams, params])
   const lang = p.locale
   const periode = parseInt(sp.periode || '30')

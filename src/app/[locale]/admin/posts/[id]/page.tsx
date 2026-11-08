@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import PostForm from '@/components/admin/PostForm'
 import { getPostById } from '@/lib/actions/blog'
 import { notFound } from 'next/navigation'
@@ -5,8 +6,10 @@ import { computePostSeoScore } from '@/lib/utils'
 import { Image as ImageIcon, FileText, Link as LinkIcon } from 'lucide-react'
 
 export default async function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
+    await requirePageRole(["ADMIN","MANAGER","BLOG_MODERATOR"])
+
     const { id } = await params
-    
+
     if (id === 'new') {
         return (
             <div className="space-y-8 max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">

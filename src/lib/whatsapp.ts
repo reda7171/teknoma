@@ -82,7 +82,7 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
         let wahaSent = false
         let wahaError: string | null = null
         try {
-            const { sendWhatsAppMessageDirect } = await import('@/lib/actions/whatsapp-gateway')
+            const { sendWhatsAppMessageDirect } = await import("@/lib/server/whatsapp-gateway")
             const directRes = await sendWhatsAppMessageDirect(cleanPhone, message, {
                 type: 'NOTIFICATION',
                 metadata: {
@@ -185,7 +185,7 @@ export async function notifyAdminOnSellerLogin(seller: {
 
         let wahaSent = false
         try {
-            const { sendWhatsAppMessageDirect } = await import('@/lib/actions/whatsapp-gateway')
+            const { sendWhatsAppMessageDirect } = await import("@/lib/server/whatsapp-gateway")
             const directRes = await sendWhatsAppMessageDirect(adminPhone, message, {
                 type: 'NOTIFICATION',
                 metadata: {
@@ -223,4 +223,3 @@ export async function notifyAdminOnSellerLogin(seller: {
         return { success: false, error: err?.message || 'Erreur inconnue' }
     }
 }
-

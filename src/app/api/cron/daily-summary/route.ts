@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendTelegramMessage } from '@/lib/telegram'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { isAuthorizedCronRequest } from '@/lib/cron-auth'
 import { JumiaAPI } from '@/lib/jumia-api'
 import { summarizeJumiaOrders, type JumiaReportOrder } from '@/lib/jumia-reporting'
@@ -68,10 +68,10 @@ export async function GET(req: NextRequest) {
             totalDeliveryFees += fee ?? 30
         }
         const caNet = totalRevenue - totalDeliveryFees
-        
+
         // Trouver le livre le plus vendu
         const bookStats: Record<string, { title: string, qty: number }> = {}
-        
+
         for (const order of orders) {
             for (const item of order.items) {
                 if (item.bookId) {

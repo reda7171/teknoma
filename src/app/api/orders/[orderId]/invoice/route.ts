@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateInvoiceHtml } from '@/lib/utils/invoiceGenerator';
+import { authorizeAdminApi } from '@/lib/api-authorization';
 
 export async function GET(
     request: NextRequest,
     context: { params: Promise<{ orderId: string }> }
 ) {
+    const denied = await authorizeAdminApi(['ADMIN', 'MANAGER']);
+    if (denied) return denied;
     try {
         const { orderId } = await context.params;
         const searchParams = request.nextUrl.searchParams;

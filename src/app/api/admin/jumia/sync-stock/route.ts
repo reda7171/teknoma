@@ -1,8 +1,12 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
-import { syncBooksStockToJumia } from '@/lib/actions/jumia'
+import { syncBooksStockToJumia } from "@/lib/server/jumia"
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 export async function POST() {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })

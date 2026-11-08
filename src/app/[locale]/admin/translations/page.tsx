@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getTranslationsData } from '@/lib/actions/translations'
 import TranslationManager from '@/components/admin/TranslationManager'
 import { Languages } from 'lucide-react'
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminTranslationsPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     await verifyAdmin();
     const data = await getTranslationsData();
 
@@ -24,7 +27,7 @@ export default async function AdminTranslationsPage() {
                         Internationalisation & Localisation (FR/AR/EN)
                     </p>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                     <div className="bg-black text-white px-8 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10">
                         <Languages className="w-4 h-4 text-blue-400" />

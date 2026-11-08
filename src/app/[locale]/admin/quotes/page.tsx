@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getQuotes } from '@/lib/actions/quotes'
 import { getAllAuthors } from '@/lib/actions/admin-authors'
 import QuotesClient from './QuotesClient'
@@ -8,6 +9,8 @@ export const metadata = {
 }
 
 export default async function QuotesPage(props: { searchParams: Promise<{ q?: string, tag?: string }> }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const searchParams = await props.searchParams
     const q = searchParams.q || ''
     const tag = searchParams.tag || ''
@@ -15,7 +18,7 @@ export default async function QuotesPage(props: { searchParams: Promise<{ q?: st
     const quotes = await getQuotes(q, tag)
     const authorsResult = await getAllAuthors()
     const authors = authorsResult.success ? authorsResult.data.map(a => a.name) : []
-    
+
     return (
         <div className="space-y-8 max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">

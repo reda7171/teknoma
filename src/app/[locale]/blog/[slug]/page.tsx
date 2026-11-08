@@ -1,3 +1,4 @@
+import { getAdminRole } from '@/lib/actions/auth'
 import { getPostBySlug, incrementPostViews, getRelatedPosts, getPrevNextPosts } from '@/lib/actions/blog'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
@@ -23,7 +24,7 @@ import BlogDynamicContent from '@/components/blog/BlogDynamicContent'
 const MobileSectionNavigation = dynamic(() => import('@/components/blog/MobileSectionNavigation'))
 import FontSizeRegulator from '@/components/blog/FontSizeRegulator'
 import { getTranslations } from 'next-intl/server'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import AdUnit from '@/components/AdUnit'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
 import { getOgImageUrl, getBaseUrl, normalizeImage } from '@/lib/utils'
@@ -110,7 +111,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     await incrementPostViews(post.id, country)
 
     const cookieStore = await cookies()
-    const adminRole = cookieStore.get('admin-role')?.value
+    const adminRole = await getAdminRole()
     const isAdmin = adminRole === 'ADMIN'
 
     const displayAuthor = getDisplayAuthor(post.authorName || post.author?.fullName, locale);
@@ -121,7 +122,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     rawContent = rawContent.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n');
     // Si l'utilisateur a écrit des tirets directement sans saut de ligne correct
     rawContent = rawContent.replace(/<br>\s*-/g, '\n-');
-    
+
     const processedContent = await remark()
         .use(remarkGfm)
         .use(remarkHtml, { sanitize: false })
@@ -142,7 +143,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         const cleanText = text.replace(/<[^>]+>/g, '');
         let baseId = cleanText.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/(^-|-$)+/g, '');
         if (!baseId) baseId = `section`;
-        
+
         let finalId = baseId;
         let counter = 1;
         while (usedIds.has(finalId)) {
@@ -150,7 +151,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             counter++;
         }
         usedIds.add(finalId);
-        
+
         return `<${tag} id="${finalId}">${text}</${tag}>`;
     });
 
@@ -463,9 +464,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 <Home className="w-3 h-3" />
                                 {t('Blog')}
                             </Link>
-                            
+
                             <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0 rtl:rotate-180" />
-                            
+
                             {post.category && (
                                 <>
                                     <Link href={`/blog?category=${encodeURIComponent(post.category)}`} className="hover:text-slate-900 transition-colors whitespace-nowrap shrink-0">
@@ -520,7 +521,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     )}
 
                     {/* Méta avec nouveau composant ArticleMeta */}
-                    <ArticleMeta 
+                    <ArticleMeta
                         author={post.author}
                         authorName={post.authorName}
                         displayAuthor={displayAuthor}
@@ -545,7 +546,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         {/* Decorative background blocks for editorial look */}
                         <div className="absolute inset-0 bg-black rounded-3xl md:rounded-[2rem] rotate-1 group-hover:rotate-2 transition-transform duration-700 opacity-5 shadow-2xl hidden md:block" />
                         <div className="absolute inset-0 bg-gray-200 rounded-3xl md:rounded-[2rem] -rotate-1 group-hover:-rotate-2 transition-transform duration-700 opacity-20 hidden md:block" />
-                        
+
                         {/* Main Container - Rounded on mobile, larger on desktop */}
                         <div className="relative h-[250px] sm:h-[300px] md:h-auto md:aspect-[21/9] w-full overflow-hidden rounded-2xl md:rounded-[2rem] md:border-8 border-white bg-slate-50 shadow-sm md:shadow-2xl md:shadow-black/10 group-hover:-translate-y-1 transition-transform duration-700">
                             {/* Blurred Ambient Background */}
@@ -559,7 +560,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-100/50 to-transparent" />
                             </div>
-                            
+
                             {/* Foreground Image */}
                             <Image
                                 src={normalizeImage(post.coverImage)}
@@ -569,7 +570,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 priority
                                 unoptimized
                             />
-                            
+
                             {/* Inner highlight (Desktop only) */}
                             <div className="hidden md:block absolute inset-0 ring-1 ring-inset ring-black/5 rounded-[1.5rem] pointer-events-none z-20" />
                         </div>
@@ -599,8 +600,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 prose-ul:space-y-3 prose-ol:space-y-3 prose-ul:mb-8 prose-ol:mb-8 prose-ul:pl-4 prose-ol:pl-4
                                 prose-li:text-slate-800 prose-li:mb-4
                                 prose-blockquote:bg-slate-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:font-medium prose-blockquote:text-slate-700 prose-blockquote:shadow-sm
-                                    ${post.language === 'ar' 
-                                        ? 'font-tajawal text-right text-[20px] md:text-[24px] leading-[1.9] md:leading-[2.3] prose-h2:font-black prose-h3:font-black prose-p:font-bold prose-li:font-bold prose-h2:!text-[36px] md:prose-h2:!text-[48px] prose-h3:!text-[30px] md:prose-h3:!text-[38px] prose-p:!text-[22px] md:prose-p:!text-[28px] prose-p:leading-[2.1] md:prose-p:leading-[2.4] prose-li:text-[22px] md:prose-li:text-[26px] prose-li:leading-[2.1] md:prose-li:leading-[2.4] prose-blockquote:border-r-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-l-2xl' 
+                                    ${post.language === 'ar'
+                                        ? 'font-tajawal text-right text-[20px] md:text-[24px] leading-[1.9] md:leading-[2.3] prose-h2:font-black prose-h3:font-black prose-p:font-bold prose-li:font-bold prose-h2:!text-[36px] md:prose-h2:!text-[48px] prose-h3:!text-[30px] md:prose-h3:!text-[38px] prose-p:!text-[22px] md:prose-p:!text-[28px] prose-p:leading-[2.1] md:prose-p:leading-[2.4] prose-li:text-[22px] md:prose-li:text-[26px] prose-li:leading-[2.1] md:prose-li:leading-[2.4] prose-blockquote:border-r-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-l-2xl'
                                         : 'prose-xl text-left prose-headings:tracking-tight prose-h2:!text-3xl md:prose-h2:!text-4xl lg:prose-h2:!text-5xl prose-h3:!text-2xl md:prose-h3:!text-3xl prose-p:leading-[2] md:prose-p:leading-[2.2] prose-p:!text-[22px] md:prose-p:!text-[26px] prose-p:font-medium prose-li:leading-[2] md:prose-li:leading-[2.2] prose-li:font-medium prose-li:!text-[20px] md:prose-li:!text-[24px] prose-blockquote:border-l-4 prose-blockquote:border-slate-800 prose-blockquote:rounded-r-2xl'}`}
                         >
                             {/* === GEO: AI TL;DR Summary === */}
@@ -610,7 +611,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         <Bot className="w-24 h-24 text-emerald-900" />
                                     </div>
                                     <h2 className="text-xs md:text-sm font-black uppercase tracking-widest text-emerald-800 mb-3 flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4 text-emerald-600" /> 
+                                        <Sparkles className="w-4 h-4 text-emerald-600" />
                                         {locale === 'ar' ? 'نظرة سريعة (TL;DR)' : locale === 'en' ? 'Quick Summary (TL;DR)' : 'Résumé Rapide (TL;DR)'}
                                     </h2>
                                     <div className="text-emerald-950/80 font-medium leading-relaxed relative z-10 text-[15px] md:text-[17px]">
@@ -627,10 +628,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             {/* Encart Publicitaire Haut d'article */}
                             {adsenseEnabled && slotTop && (
                                 <div className="not-prose my-6">
-                                    <AdUnit 
-                                        publisherId={adsensePublisherId || ""} 
-                                        slot={slotTop} 
-                                        isEnabled={adsenseEnabled} 
+                                    <AdUnit
+                                        publisherId={adsensePublisherId || ""}
+                                        slot={slotTop}
+                                        isEnabled={adsenseEnabled}
                                         lazy={false}
                                     />
                                 </div>
@@ -646,13 +647,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                         return (
                                             <>
                                                 <BlogDynamicContent html={part1} />
-                                                
+
                                                 {/* === CTA Interne (Mobile & Desktop) === */}
                                                 <div className="not-prose my-12 p-8 md:p-10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] relative overflow-hidden group transform hover:-translate-y-1 transition-all duration-500 border border-slate-700/50">
                                                     {/* Background decorative elements */}
                                                     <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] group-hover:bg-emerald-500/20 transition-colors duration-700" />
                                                     <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] group-hover:bg-blue-500/20 transition-colors duration-700" />
-                                                    
+
                                                     <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                                                         <div className="text-center md:text-start flex-1 space-y-3">
                                                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-white/80 text-[10px] uppercase tracking-widest font-black backdrop-blur-sm border border-white/10 mb-2">
@@ -666,8 +667,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                                 {locale === 'ar' ? 'كتب مختارة بعناية لتناسب جميع الأذواق وبأفضل الأسعار.' : locale === 'en' ? 'Carefully selected books for all tastes at the best prices.' : 'Des livres soigneusement sélectionnés pour tous les goûts aux meilleurs prix.'}
                                                             </p>
                                                         </div>
-                                                        <a 
-                                                            href="#recommended-books" 
+                                                        <a
+                                                            href="#recommended-books"
                                                             className="relative overflow-hidden inline-flex items-center gap-3 px-8 py-4 bg-white text-slate-900 text-sm md:text-base font-black uppercase tracking-wider rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] flex-shrink-0 group/btn"
                                                         >
                                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite]" />
@@ -711,7 +712,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         {(post.authorName || post.author) && (
                             <Link id="author-bio-mobile" href={post.author?.id ? `/blog/author/${post.author.id}` : `/blog`} className="lg:hidden mt-10 md:mt-16 p-5 md:p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl group-hover:bg-rose-500/15 transition-colors duration-500" />
-                                
+
                                 <div className="relative z-10 flex items-start gap-4">
                                     {/* Photo */}
                                     <div className="w-16 h-16 md:w-20 md:h-20 rounded-[1.2rem] bg-white border border-slate-100 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm">
@@ -849,10 +850,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         {/* Encart Publicitaire Différé (Bas d'article via IntersectionObserver) */}
                         {adsenseEnabled && slotBottom && (
                             <div className="not-prose my-10">
-                                <AdUnit 
-                                    publisherId={adsensePublisherId || ""} 
-                                    slot={slotBottom} 
-                                    isEnabled={adsenseEnabled} 
+                                <AdUnit
+                                    publisherId={adsensePublisherId || ""}
+                                    slot={slotBottom}
+                                    isEnabled={adsenseEnabled}
                                     lazy={true}
                                 />
                             </div>
@@ -870,7 +871,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                     {/* === Sidebar sticky === */}
                     <aside className="hidden lg:block lg:col-span-4 sticky top-24 space-y-6 lg:space-y-8 h-max pb-8">
-                            
+
                             {/* TOC Desktop */}
                             <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
                                 <TableOfContents language={post.language} />
@@ -881,7 +882,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 <Link id="author-bio-desktop" href={post.author?.id ? `/blog/author/${post.author.id}` : `/blog`} className="p-6 bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl text-slate-900 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group block hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl group-hover:bg-rose-500/15 transition-colors duration-500" />
                                     <p className="relative z-10 text-[10px] rtl:text-xs font-black uppercase tracking-[0.3em] rtl:tracking-normal text-slate-400 mb-5">{t('AboutAuthor')}</p>
-                                    
+
                                     <div className="relative z-10 flex items-start gap-4">
                                         {/* Photo */}
                                         <div className="w-16 h-16 rounded-[1.2rem] bg-white border border-slate-100 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm">
@@ -1174,7 +1175,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </section>
 
             <Footer />
-            
+
             {/* === Navigation Article Précédent / Suivant === */}
             {(prevPost || nextPost) && (
                 <nav className="bg-white border-t border-slate-100" aria-label={locale === 'ar' ? 'تصفح المقالات' : locale === 'en' ? 'Article navigation' : 'Navigation articles'}>
@@ -1229,7 +1230,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
                 </nav>
             )}
-            
+
             {/* === Mobile Sticky Share Bar === */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/50 p-3 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] pb-safe">
                 <div className="flex items-center justify-center w-full">

@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { createAuditLog } from './audit'
+import { createAuditLog } from "@/lib/server/audit"
 
 const AuthorProfileSchema = z.object({
     name: z.string().min(1, 'Le nom est requis'),
@@ -23,7 +23,7 @@ export type AuthorProfileInput = z.infer<typeof AuthorProfileSchema>
  */
 export async function getAllAuthors() {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
 
         // 1. Récupérer tous les auteurs uniques des livres
         const uniqueAuthors = await prisma.book.groupBy({
@@ -65,7 +65,7 @@ export async function getAllAuthors() {
  */
 export async function upsertAuthorProfile(input: AuthorProfileInput) {
     try {
-        await verifyAdmin()
+        await verifyAdmin(["ADMIN","MANAGER","BLOG_MODERATOR"])
         const validatedData = AuthorProfileSchema.parse(input)
 
         const profile = await prisma.authorProfile.upsert({

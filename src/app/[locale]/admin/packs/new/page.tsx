@@ -1,9 +1,12 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { getBooks } from '@/lib/db/books'
 import PackForm from './PackForm'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { prisma } from '@/lib/prisma'
 
 export default async function NewPackPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const [books, accessories, whatsappPhone] = await Promise.all([
         getBooks({ includeInactive: true, limit: 1000 }),
         prisma.extraProduct.findMany({

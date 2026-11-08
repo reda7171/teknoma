@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import ExcelJS from 'exceljs'
@@ -5,6 +6,9 @@ import { verifyAdmin } from '@/lib/actions/auth'
 
 // GET /api/admin/books/export-excel — export tous les livres au format Excel
 export async function GET(request: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
 

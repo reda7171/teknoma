@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import CannibalizationReport from '@/components/admin/seo/CannibalizationReport'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
 }
 
 export default async function SeoCannibalizationPage() {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const t = await getTranslations('Admin')
 
     return (

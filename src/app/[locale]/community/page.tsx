@@ -9,7 +9,7 @@ import { getWishlist } from '@/lib/actions/community-wishlist'
 import WishlistSection from '@/components/community/WishlistSection'
 import TopReadersList from '@/components/community/TopReadersList'
 import { getTopReaders, getUserExchangeCount } from '@/lib/actions/community'
-import { isFeatureEnabled } from '@/lib/actions/site-settings'
+import { isFeatureEnabled } from '@/lib/server/site-settings'
 import { getPrimaryImage } from '@/lib/utils/image'
 import { getUserRecommendations } from '@/lib/actions/community-recommendations'
 import { getReadingList } from '@/lib/actions/reading-list'
@@ -159,7 +159,7 @@ export default async function CommunityDashboard({ params, searchParams }: { par
                                 {readingList.length}
                             </span>
                         </Link>
-                        
+
                         {/* 4. Solde / Crédits */}
                         <div className="bg-amber-100 border-2 border-transparent px-5 py-4 rounded-3xl flex flex-col items-center min-w-[100px] hover:border-amber-400 transition-all shadow-sm text-center">
                             <span className="text-[10px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest text-amber-700 mb-1">{t('Credits')}</span>

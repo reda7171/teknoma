@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { isAuthenticated } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 import FollowUpClient from './FollowUpClient'
@@ -7,6 +8,8 @@ export const metadata = {
 }
 
 export default async function FollowUpPage(props: { params: Promise<{ locale: string }> }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const params = await props.params
     const { locale } = params
 

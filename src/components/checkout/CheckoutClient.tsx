@@ -31,12 +31,12 @@ interface CheckoutForm {
     paymentMethod: 'COD' | 'STRIPE' | 'PAYPAL' | 'CMI' | 'BANK_TRANSFER'
 }
 
-export default function CheckoutClient({ 
+export default function CheckoutClient({
     user,
     minOrderAmount = 0,
     paymentSettings,
     is3For4Active
-}: { 
+}: {
     user?: { fullName?: string | null; email: string; phone?: string | null; image?: string | null; credits?: number } | null;
     minOrderAmount?: number;
     paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string; logo?: string; qrCode?: string }[] }
@@ -296,7 +296,7 @@ export default function CheckoutClient({
 
     useEffect(() => {
         if (watchedCity && watchedCity.length > 0) {
-            const filtered = allCities.filter(c => 
+            const filtered = allCities.filter(c =>
                 c.toLowerCase().includes(watchedCity.toLowerCase())
             )
             setFilteredCities(filtered.slice(0, 8)) // Limiter à 8 suggestions
@@ -353,12 +353,12 @@ export default function CheckoutClient({
         fbPixelEvents.addPaymentInfo()
 
         if (minOrderAmount > 0 && finalTotal < minOrderAmount) {
-            const minAmountMsg = locale === 'ar' 
-                ? `الحد الأدنى للطلب هو ${minOrderAmount} درهم.` 
-                : locale === 'en' 
-                ? `The minimum order amount is ${minOrderAmount} درهم.` 
+            const minAmountMsg = locale === 'ar'
+                ? `الحد الأدنى للطلب هو ${minOrderAmount} درهم.`
+                : locale === 'en'
+                ? `The minimum order amount is ${minOrderAmount} درهم.`
                 : `Le montant minimum du panier pour commander est de ${minOrderAmount} درهم.`
-                
+
             setError(minAmountMsg)
             showNotification(minAmountMsg, 'error')
             setIsSubmitting(false)
@@ -411,6 +411,7 @@ export default function CheckoutClient({
                     items: orderItems,
                     couponCode: coupon?.code,
                     discount: totalDiscountAmount,
+                    cartSessionId: sessionId || undefined,
                     useCredits: useCredits,
                     utmSource: localStorage.getItem('utm_source') || undefined,
                     utmMedium: localStorage.getItem('utm_medium') || undefined,
@@ -708,7 +709,7 @@ export default function CheckoutClient({
                                         }}
                                         className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
                                     />
-                                    
+
                                     {!isWorldwide && showCities && (
                                         <div className="absolute z-[999] left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-gray-100 overflow-hidden max-h-[250px] overflow-y-auto custom-scrollbar">
                                             {filteredCities.map((city, idx) => (
@@ -728,7 +729,7 @@ export default function CheckoutClient({
                                             ))}
                                         </div>
                                     )}
-                                    
+
                                     {errors.city && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.city.message}</p>}
                                 </div>
                                 <div className="space-y-3">
@@ -769,9 +770,9 @@ export default function CheckoutClient({
                             <div className="space-y-4">
                             {paymentSettings?.stripeEnabled && (
                                 <label className={`flex items-center p-4 border rounded-2xl cursor-pointer transition-all ${watch('paymentMethod') === 'STRIPE' ? 'border-pixio-primary bg-amber-50' : 'border-pixio-border hover:border-pixio-primary'}`}>
-                                    <input 
-                                        type="radio" 
-                                        value="STRIPE" 
+                                    <input
+                                        type="radio"
+                                        value="STRIPE"
                                         {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
                                     />
@@ -788,9 +789,9 @@ export default function CheckoutClient({
 
                             {paymentSettings?.paypalEnabled && (
                                 <label className={`flex items-center p-4 border rounded-2xl cursor-pointer transition-all ${watch('paymentMethod') === 'PAYPAL' ? 'border-pixio-primary bg-amber-50' : 'border-pixio-border hover:border-pixio-primary'}`}>
-                                    <input 
-                                        type="radio" 
-                                        value="PAYPAL" 
+                                    <input
+                                        type="radio"
+                                        value="PAYPAL"
                                         {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
                                     />
@@ -810,9 +811,9 @@ export default function CheckoutClient({
 
                             {paymentSettings?.cmiEnabled && (
                                 <label className={`flex items-center p-4 border rounded-2xl cursor-pointer transition-all ${watch('paymentMethod') === 'CMI' ? 'border-pixio-primary bg-amber-50' : 'border-pixio-border hover:border-pixio-primary'}`}>
-                                    <input 
-                                        type="radio" 
-                                        value="CMI" 
+                                    <input
+                                        type="radio"
+                                        value="CMI"
                                         {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="w-4 h-4 text-pixio-primary bg-white border-gray-300 focus:ring-pixio-primary"
                                     />
@@ -828,9 +829,9 @@ export default function CheckoutClient({
 
                             {paymentSettings?.codEnabled && (
                                 <label className={`relative flex items-center p-4 sm:p-6 md:p-8 border-2 rounded-2xl sm:rounded-[2rem] cursor-pointer transition-all shadow-2xl shadow-black/5 ${watch('paymentMethod') === 'COD' ? 'border-black bg-pixio-cream/50' : 'border-transparent bg-pixio-cream/30 hover:border-black/50'}`}>
-                                    <input 
-                                        type="radio" 
-                                        value="COD" 
+                                    <input
+                                        type="radio"
+                                        value="COD"
                                         {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                         className="sr-only"
                                     />
@@ -856,9 +857,9 @@ export default function CheckoutClient({
                             {paymentSettings?.bankTransferEnabled && (
                                 <div>
                                     <label className={`relative flex items-center p-4 sm:p-6 md:p-8 border-2 rounded-2xl sm:rounded-[2rem] cursor-pointer transition-all shadow-2xl shadow-black/5 ${watch('paymentMethod') === 'BANK_TRANSFER' ? 'border-teal-600 bg-teal-50/30' : 'border-transparent bg-pixio-cream/30 hover:border-teal-400'}`}>
-                                        <input 
-                                            type="radio" 
-                                            value="BANK_TRANSFER" 
+                                        <input
+                                            type="radio"
+                                            value="BANK_TRANSFER"
                                             {...register('paymentMethod', { onChange: () => setTimeout(saveAbandonedCart, 100) })}
                                             className="sr-only"
                                         />
@@ -890,8 +891,8 @@ export default function CheckoutClient({
                                                             setTimeout(saveAbandonedCart, 100);
                                                         }}
                                                         className={`p-4 rounded-xl border-2 transition-all flex items-center justify-between group ${
-                                                            selectedBankIndex === index 
-                                                                ? 'border-teal-600 bg-teal-50/50' 
+                                                            selectedBankIndex === index
+                                                                ? 'border-teal-600 bg-teal-50/50'
                                                                 : 'border-slate-200 hover:border-teal-200 hover:bg-slate-50'
                                                         }`}
                                                     >
@@ -1056,7 +1057,7 @@ export default function CheckoutClient({
                                     <span className="text-black">{shippingFee} {locale === 'ar' ? 'درهم' : 'MAD'}</span>
                                 )}
                             </div>
-                            
+
                             {user?.credits && user.credits > 0 ? (
                                     <div className="flex items-center justify-between p-4 bg-amber-50 rounded-2xl border border-amber-100 mt-4">
                                         <div className="flex items-center gap-3">
@@ -1189,18 +1190,18 @@ export default function CheckoutClient({
             {selectedBankIndex !== null && paymentSettings?.bankTransferAccounts && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedBankIndex(null)}>
                     <div className="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl relative animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
-                        <button 
+                        <button
                             onClick={() => setSelectedBankIndex(null)}
                             className="absolute top-4 right-4 rtl:left-4 rtl:right-auto p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10"
                         >
                             <X className="w-5 h-5 text-slate-500" />
                         </button>
-                        
+
                         <div className="p-6 md:p-8">
                             <h3 className="text-xl font-black text-slate-900 mb-6 text-center">
                                 {t('BankInfoModalTitle')}
                             </h3>
-                            
+
                             <div className="space-y-6">
                                 <div className="flex flex-col items-center justify-center gap-3">
                                     {paymentSettings.bankTransferAccounts[selectedBankIndex].logo ? (
@@ -1214,7 +1215,7 @@ export default function CheckoutClient({
                                         </>
                                     )}
                                 </div>
-                                
+
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
                                     <div>
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{t('AccountHolder')}</p>
@@ -1225,7 +1226,7 @@ export default function CheckoutClient({
                                         <p className="font-mono font-black text-slate-900 tracking-wider text-sm md:text-base break-all select-all">{paymentSettings.bankTransferAccounts[selectedBankIndex].rib}</p>
                                     </div>
                                 </div>
-                                
+
                                 {paymentSettings.bankTransferAccounts[selectedBankIndex].qrCode && (
                                     <div className="border-t border-slate-100 pt-6">
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">{t('ScanToPay')}</p>
@@ -1237,7 +1238,7 @@ export default function CheckoutClient({
                                     </div>
                                 )}
                             </div>
-                            
+
                             <div className="mt-8">
                                 <button
                                     onClick={() => setSelectedBankIndex(null)}

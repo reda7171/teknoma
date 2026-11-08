@@ -136,7 +136,7 @@ export async function getBooks(filters?: BookFilters) {
             }
 
             let results = Array.from(merged.values())
-            
+
             // Mettre les livres en rupture à la fin
             const inStock = results.filter(b => b.stock > 0)
             const outOfStock = results.filter(b => b.stock === 0)
@@ -339,8 +339,8 @@ export async function getBookById(id: string) {
         const book = await prisma.book.findUnique({
             where: { id },
             include: {
-                customerSeller: true,
-                seller: true,
+                customerSeller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
+                seller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
                 inventories: { include: { warehouse: true } },
             },
         })
@@ -351,8 +351,8 @@ export async function getBookById(id: string) {
             return await prisma.book.findFirst({
                 where: { active: true },
                 include: {
-                    customerSeller: true,
-                    seller: true,
+                    customerSeller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
+                    seller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
                     inventories: { include: { warehouse: true } },
                 },
             })
@@ -364,8 +364,8 @@ export async function getBookById(id: string) {
             return await prisma.book.findFirst({
                 where: { active: true },
                 include: {
-                    customerSeller: true,
-                    seller: true,
+                    customerSeller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
+                    seller: { select: { id: true, fullName: true, image: true, city: true, rating: true } },
                     inventories: { include: { warehouse: true } },
                 },
             }).catch(() => null)
@@ -604,8 +604,8 @@ export async function getBestSellerBooks(limit = 6) {
 
             // 3. Fallback : On complète avec les livres marqués manuellement comme "Meilleure Vente"
             const manuallySelected = await prisma.book.findMany({
-                where: { 
-                    active: true, 
+                where: {
+                    active: true,
                     isBestSeller: true,
                     stock: { gt: 0 },
                     ...(resultBooks.length > 0 ? { id: { notIn: resultBooks.map(b => b.id) } } : {})
@@ -621,8 +621,8 @@ export async function getBestSellerBooks(limit = 6) {
 
             // 4. On complète avec les livres ayant le plus de stock
             const others = await prisma.book.findMany({
-                where: { 
-                    active: true, 
+                where: {
+                    active: true,
                     stock: { gt: 0 },
                     ...(resultBooks.length > 0 ? { id: { notIn: resultBooks.map(b => b.id) } } : {})
                 },
@@ -663,7 +663,7 @@ export async function getBestAuthors(limit = 6) {
             // 1. Tenter de récupérer les auteurs par ventes (OrderItem)
             const soldBooks = await prisma.orderItem.groupBy({
                 by: ['bookId'],
-                where: { 
+                where: {
                     type: 'BOOK',
                     bookId: { not: null }
                 },
@@ -709,10 +709,10 @@ export async function getBestAuthors(limit = 6) {
 
             if (topAuthorsRaw.length < limit) {
                 const existingAuthorNames = topAuthorsRaw.map((a: any) => a.author)
-                
+
                 const catalogAuthors = await prisma.book.groupBy({
                     by: ['author'],
-                    where: { 
+                    where: {
                         active: true,
                         ...(existingAuthorNames.length > 0 ? { author: { notIn: existingAuthorNames } } : {})
                     },
@@ -772,11 +772,11 @@ export async function getCategoryCounts(): Promise<CategoryCounts> {
         const cat = row.category;
         const sub = row.subCategory;
         const count = row._count.id;
-        
+
         if (!counts[cat]) {
             counts[cat] = { total: 0, subs: {} };
         }
-        
+
         counts[cat].total += count;
         if (sub) {
             counts[cat].subs[sub] = count;
@@ -891,4 +891,3 @@ export async function getAdjacentCategoryBooks(currentBookId: string, category?:
         300 // Cache 5 min
     )
 }
-

@@ -68,7 +68,7 @@ export default function InstantOfferPopup() {
             await fetch('/api/cart/offer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ offerId: offer.id, status: 'ACCEPTED' })
+                body: JSON.stringify({ offerId: offer.id, sessionId, status: 'ACCEPTED' })
             })
             applyDiscount(offer.discount)
             setShowConfetti(true)
@@ -87,7 +87,7 @@ export default function InstantOfferPopup() {
             await fetch('/api/cart/offer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ offerId: offer.id, status: 'REJECTED' })
+                body: JSON.stringify({ offerId: offer.id, sessionId, status: 'REJECTED' })
             })
             setOffer(null)
         } catch (error) {
@@ -102,26 +102,26 @@ export default function InstantOfferPopup() {
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             {showConfetti && <Confetti recycle={false} numberOfPieces={300} />}
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in zoom-in duration-300">
-                <button aria-label="Fermer" 
+                <button aria-label="Fermer"
                     onClick={handleReject}
                     className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors"
                 >
                     <X className="w-6 h-6" />
                 </button>
-                
+
                 <div className="flex flex-col items-center text-center mt-4">
                     <div className="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-4">
                         <Gift className="w-8 h-8" />
                     </div>
-                    
+
                     <h2 className="text-2xl font-black mb-2 uppercase">Offre Spéciale !</h2>
                     <p className="text-gray-600 mb-6 font-medium leading-relaxed">
                         Coucou 👋 ! Je vois que vous êtes en train de passer commande. Je suis avec vous en ligne et je vous offre une réduction immédiate de <strong className="text-amber-500 font-black text-xl">{offer.discount} درهم</strong> sur votre panier !
                     </p>
-                    
-                    <a 
+
+                    <a
                         href="https://wa.me/212702220575?text=Bonjour,%20j%27ai%20besoin%20d%27aide%20pour%20ma%20commande"
-                        target="_blank" 
+                        target="_blank"
                         rel="noreferrer"
                         className="flex items-center justify-center gap-2 w-full py-3 px-4 mb-4 rounded-xl font-bold bg-[#E8F8EE] text-[#1EBE5D] hover:bg-[#D1F2DD] transition-colors"
                     >
@@ -130,15 +130,15 @@ export default function InstantOfferPopup() {
                         </svg>
                         Je suis en ligne sur WhatsApp !
                     </a>
-                    
+
                     <div className="flex gap-3 w-full">
-                        <button 
+                        <button
                             onClick={handleReject}
                             className="flex-1 py-3 px-4 rounded-xl font-bold border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
                         >
                             Non merci
                         </button>
-                        <button 
+                        <button
                             onClick={handleAccept}
                             className="flex-1 py-3 px-4 rounded-xl font-bold bg-black text-white hover:bg-gray-800 hover:shadow-lg transition-all active:scale-95 uppercase tracking-wider text-sm"
                         >

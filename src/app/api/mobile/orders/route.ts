@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getMobileCustomer } from '@/lib/mobile-auth';
 
 // Libellés de statut en français
 const STATUS_LABELS: Record<string, string> = {
@@ -13,19 +14,15 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export async function GET(request: Request) {
+  const customer = await getMobileCustomer(request);
+  if (!customer) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const phone = searchParams.get('phone')?.trim();
   const orderId = searchParams.get('orderId')?.trim();
 
-  if (!phone && !orderId) {
-    return NextResponse.json({ success: false, error: 'phone ou orderId requis' }, { status: 400 });
-  }
-
   try {
     const orders = await prisma.order.findMany({
-      where: orderId
-        ? { id: orderId }
-        : { phone: { contains: phone! } },
+      where: { customerId: customer.id, ...(orderId ? { id: orderId } : {}) },
       select: {
         id: true,
         status: true,
@@ -44,7 +41,6 @@ export async function GET(request: Request) {
         statusHistory: {
           select: {
             status: true,
-            comment: true,
             createdAt: true,
           },
           orderBy: { createdAt: 'asc' },

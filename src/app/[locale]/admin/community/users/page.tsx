@@ -1,3 +1,4 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { redirect } from 'next/navigation'
 import { getAllUsers } from '@/lib/actions/admin-community'
 import { ArrowLeft, Star, BookOpen, Repeat, Coins } from 'lucide-react'
@@ -9,6 +10,8 @@ export default async function AdminUsersPage({
 }: {
     searchParams: Promise<{ page?: string }>
 }) {
+    await requirePageRole(["ADMIN"])
+
     const params = await searchParams
     const page = parseInt(params.page || '1')
 

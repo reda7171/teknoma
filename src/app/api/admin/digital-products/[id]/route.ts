@@ -1,3 +1,4 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
@@ -5,6 +6,9 @@ import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 
 // PUT: Mettre à jour un produit
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
   try {
     const ip = await getIpIdentifier()
     const limiter = await rateLimit(`admin_digital_product_put_${ip}`, { limit: 20, windowMs: 60000 })
@@ -44,6 +48,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 // PATCH: Toggle actif/vedette
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
   try {
     const ip = await getIpIdentifier()
     const limiter = await rateLimit(`admin_digital_product_patch_${ip}`, { limit: 20, windowMs: 60000 })
@@ -69,6 +76,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 // DELETE: Supprimer un produit
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER"])
+    if (accessDenied) return accessDenied
+
   try {
     const ip = await getIpIdentifier()
     const limiter = await rateLimit(`admin_digital_product_delete_${ip}`, { limit: 10, windowMs: 60000 })

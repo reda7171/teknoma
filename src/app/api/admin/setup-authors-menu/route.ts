@@ -1,9 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { getAuthenticatedAdmin, hasAdminRole } from '@/lib/admin-auth'
 
 export async function POST() {
+    const accessDenied = await authorizeAdminApi(["ADMIN"])
+    if (accessDenied) return accessDenied
+
     try {
         const admin = await getAuthenticatedAdmin()
         if (!admin) return NextResponse.json({ error: 'Authentification requise' }, { status: 401 })
@@ -11,7 +15,7 @@ export async function POST() {
 
         // Find the main menu (usually slug 'header')
         const menu = await prisma.menu.findFirst({
-            where: { 
+            where: {
                 OR: [
                     { slug: 'header' },
                     { slug: 'main' },

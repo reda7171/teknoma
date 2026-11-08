@@ -1,10 +1,14 @@
+import { getMobileCustomer } from '@/lib/mobile-auth'
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from '@/lib/jwt-secret';
+import { getJwtSecret } from '@/lib/jwt-secret';
 
 export async function GET(request: Request) {
+    const mobileCustomer = await getMobileCustomer(request)
+    if (!mobileCustomer) return NextResponse.json({ error: 'Non autoris�' }, { status: 401 })
+
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -12,7 +16,7 @@ export async function GET(request: Request) {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token, getJwtSecret()) as { id: string };
 
     const readingList = await prisma.readingList.findMany({
       where: { customerId: decoded.id },
@@ -30,6 +34,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    const mobileCustomer = await getMobileCustomer(request)
+    if (!mobileCustomer) return NextResponse.json({ error: 'Non autoris�' }, { status: 401 })
+
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -37,7 +44,7 @@ export async function POST(request: Request) {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token, getJwtSecret()) as { id: string };
 
     const body = await request.json();
     const { title, author, totalPages, cover, bookId } = body;

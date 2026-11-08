@@ -1,5 +1,6 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { getShippingCompanies } from '@/lib/actions/shipping-companies'
 import { redirect } from 'next/navigation'
 import DeliveryConfigForm from './DeliveryConfigForm'
@@ -12,6 +13,8 @@ export const metadata = {
 }
 
 export default async function DeliveryConfigPage() {
+    await requirePageRole(["ADMIN"])
+
     try {
         await verifyAdmin()
     } catch {
@@ -54,7 +57,7 @@ export default async function DeliveryConfigPage() {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Personnalisation de la bande d'annonce de livraison</p>
                         </div>
                     </div>
-                    <DeliveryConfigForm 
+                    <DeliveryConfigForm
                         initialAnnouncementEnabled={announcementEnabled === 'true'}
                         initialAnnouncementMessage={announcementMessage}
                         initialAnnouncementBgColor={announcementBgColor}

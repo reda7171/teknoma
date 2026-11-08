@@ -11,7 +11,7 @@ import { getTranslations } from 'next-intl/server'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { Metadata } from 'next'
 import SetPixelView from '@/components/SetPixelView'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
 import PackCustomizerClient from '@/components/packs/PackCustomizerClient'
 import { getCommunityUser } from '@/lib/actions/community-auth'
@@ -489,9 +489,9 @@ export default async function PackDetailPage({
                                     {displayName}<span className="text-gray-200">.</span>
                                 </h1>
 
-                                <PackCustomizerClient 
-                                    pack={pack as any} 
-                                    whatsappPhone={whatsappPhone || undefined} 
+                                <PackCustomizerClient
+                                    pack={pack as any}
+                                    whatsappPhone={whatsappPhone || undefined}
                                     priceData={{
                                         totalOriginalPrice,
                                         hasDiscount,

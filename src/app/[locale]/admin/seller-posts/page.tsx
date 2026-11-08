@@ -1,9 +1,12 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
 import SellerPostsApprovalClient from './SellerPostsApprovalClient'
 
 export default async function SellerPostsApprovalPage({ params }: { params: Promise<{ locale: string }> }) {
+    await requirePageRole(["ADMIN","MANAGER"])
+
     const locale = (await params).locale
     const userId = await getAdminUser()
     const role = await getAdminRole()

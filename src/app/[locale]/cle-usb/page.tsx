@@ -6,7 +6,7 @@ import UsbInteractive, { HeroPreviewButton, VideoPlayButton } from '@/components
 import HeaderWithUser from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import { getActiveMenuBySlug } from '@/lib/actions/menus'
-import { isFeatureEnabled } from '@/lib/actions/site-settings'
+import { isFeatureEnabled } from '@/lib/server/site-settings'
 import { notFound } from 'next/navigation'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -174,7 +174,7 @@ export default async function UsbEducPage({ params }: { params: Promise<{ locale
                                 <span className="absolute -bottom-1 left-0 right-0 h-1 rounded-full" style={{ backgroundColor: '#FF6B6B', opacity: 0.4 }} />
                             </span>
                         </h1>
-                        <p 
+                        <p
                             className="text-xl text-gray-600 mb-8 max-w-lg leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: t.raw('HeroDesc') }}
                         />

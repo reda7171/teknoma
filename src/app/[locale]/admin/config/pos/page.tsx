@@ -1,5 +1,6 @@
+import { requirePageRole } from '@/lib/page-authorization'
 import { verifyAdmin } from '@/lib/actions/auth'
-import { getSetting } from '@/lib/actions/site-settings'
+import { getSetting } from '@/lib/server/site-settings'
 import { redirect } from 'next/navigation'
 import POSConfigForm from './POSConfigForm'
 import { Monitor } from 'lucide-react'
@@ -11,6 +12,8 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function POSConfigPage() {
+    await requirePageRole(["ADMIN"])
+
     try {
         await verifyAdmin()
     } catch {
@@ -60,7 +63,7 @@ export default async function POSConfigPage() {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Informations de la boutique pour les reçus</p>
                         </div>
                     </div>
-                    <POSConfigForm 
+                    <POSConfigForm
                         initialStoreName={posStoreName}
                         initialStoreAddress={posStoreAddress}
                         initialStorePhone={posStorePhone}

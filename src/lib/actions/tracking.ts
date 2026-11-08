@@ -1,7 +1,11 @@
 'use server'
 
+import { publicOrderSelect } from '@/lib/public-order'
+
 import { prisma } from '@/lib/prisma'
 import { headers } from 'next/headers'
+import { grantOrderAccess } from '@/lib/order-access'
+import { rateLimit, getIpIdentifier } from '@/lib/rate-limit'
 
 // Résout le pays depuis une IP via ip-api.com (gratuit, 45 req/min)
 async function resolveCountry(ip: string | null): Promise<string> {
@@ -66,10 +70,12 @@ export type TrackingResult = {
 }
 
 export async function trackOrder(formData: FormData): Promise<TrackingResult> {
+    const limiter = await rateLimit(`order_tracking_${await getIpIdentifier()}`, { limit: 5, windowMs: 15 * 60 * 1000 })
+    if (!limiter.success) return { success: false, error: 'Veuillez réessayer plus tard' }
     const orderId = formData.get('orderId') as string
     const contact = formData.get('contact') as string
 
-    if (!orderId || !contact) {
+    if (typeof orderId !== 'string' || typeof contact !== 'string' || orderId.length < 8 || orderId.length > 100 || contact.length > 255) {
         return { success: false, error: 'Veuillez remplir tous les champs' }
     }
 
@@ -81,16 +87,7 @@ export async function trackOrder(formData: FormData): Promise<TrackingResult> {
                     { trackingID: orderId }
                 ]
             },
-            include: {
-                items: {
-                    include: {
-                        book: true,
-                        pack: true,
-                        gift: true,
-                        digitalProduct: true
-                    }
-                }
-            }
+            select: publicOrderSelect
         })
 
         if (!order) {
@@ -102,7 +99,7 @@ export async function trackOrder(formData: FormData): Promise<TrackingResult> {
         if (!isValidContact) {
             return { success: false, error: 'Les informations de contact ne correspondent pas' }
         }
-
+        await grantOrderAccess(order.id)
         return { success: true, order }
     } catch (error) {
         console.error('Track Order Error:', error)

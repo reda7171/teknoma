@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { isAuthorizedCronRequest } from "@/lib/cron-auth"
-import { sendWhatsAppMessageDirect } from "@/lib/actions/whatsapp-gateway"
+import { sendWhatsAppMessageDirect } from "@/lib/server/whatsapp-gateway"
 import { DEFAULT_WHATSAPP_TEMPLATES } from "@/lib/constants/whatsapp-templates"
 import { sendTelegramMessage } from "@/lib/telegram"
 

@@ -1,9 +1,13 @@
+import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/actions/auth'
 import { prisma } from '@/lib/prisma'
 
 // Retourne les mouvements EXIT d'un entrepôt (sorties liées aux commandes)
 export async function GET(req: Request) {
+    const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER","CONFIRMATOR"])
+    if (accessDenied) return accessDenied
+
     try {
         await verifyAdmin()
     } catch {
