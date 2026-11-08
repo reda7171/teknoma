@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { outfit } from '../fonts';
 import "../globals.css";
+import "../cairo-font.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -31,16 +32,6 @@ const tajawal = localFont({
   variable: "--font-tajawal",
   display: 'optional',
   preload: false, // Chargé uniquement pour RTL — pas besoin de précharger
-});
-
-import { Cairo } from 'next/font/google';
-
-const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
-  variable: "--font-cairo",
-  display: 'optional',
-  preload: false,
-  adjustFontFallback: false,
 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -498,6 +489,12 @@ export default async function LocaleLayout({
   return (
     <html lang={lang} dir={dir} suppressHydrationWarning={true} translate="no" data-scroll-behavior="smooth">
       <head>
+        {locale === 'ar' && (
+          <>
+            <link rel="preload" href="/fonts/cairo-arabic-9ff27b8a.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+            <link rel="preload" href="/fonts/cairo-latin-d41831e2.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+          </>
+        )}
 
         {/* Google Tag Manager - Chargé après délai pour préserver la performance Lighthouse */}
         {googleSearchConsoleId && (
@@ -520,7 +517,7 @@ export default async function LocaleLayout({
         )}
       </head>
       <body
-        className={`${outfit.variable} ${tajawal.variable} ${cairo.variable} ${locale === 'ar' ? 'font-cairo-var' : 'font-sans'} antialiased bg-white`}
+        className={`${outfit.variable} ${tajawal.variable} ${locale === 'ar' ? 'font-cairo-var' : 'font-sans'} antialiased bg-white`}
         suppressHydrationWarning={true}
       >
         <noscript>
