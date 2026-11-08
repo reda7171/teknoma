@@ -33,6 +33,10 @@ Compilation Next.js réussie ; validation syntaxique de 549 fichiers JSX/TSX et 
 
 `npm audit --omit=dev` : 0 vulnérabilité connue signalée lors de cette vérification. Les dépendances de développement sont distinctes et ne sont pas couvertes par cette affirmation.
 
+Vérification supplémentaire des autres projets du dépôt : la boutique `apps/storefront-ma` utilisait Next 16.2.4 et passe à 16.4.2 ; son build, y compris son contrôle TypeScript, réussit. Le verrou mobile a été actualisé avec `npm audit fix --package-lock-only --legacy-peer-deps --ignore-scripts`, sans option `--force`. L’audit mobile des dépendances d’exécution passe de 87 alertes (dont 47 critiques et 20 hautes, dépendances indirectes comprises) à 12 alertes : 11 modérées et 1 faible, aucune haute ni critique. Les causes restantes sont `glob`, `minimatch` et `deepmerge` dans l’arbre Expo ; les remédiations proposées par npm impliquent des changements majeurs et demandent des essais mobiles dédiés. Le mobile n’a pas été compilé sur Android/iOS pendant cet audit.
+
+GitHub signalait 112 alertes sur la branche principale au moment de l’ouverture de la PR, réparties entre le verrou principal, le verrou mobile et le manifeste de la boutique secondaire. Ce compteur ne décrit pas les dépendances corrigées de la branche de travail et devra être recalculé après intégration. Les alertes restantes ne sont pas présentées comme corrigées.
+
 ## Mise en service et limites
 
 Ces changements doivent être déployés pour protéger le site en ligne. Avant déploiement : utiliser Node >=22.12, une valeur `JWT_SECRET` aléatoire propre au service et un `WHATSAPP_WEBHOOK_SECRET` identique sur le producteur du webhook et sur le site. Ne pas utiliser les exemples comme secrets. Configurer les identifiants WAHA explicitement. Préserver les volumes des anciens documents et du nouveau répertoire privé.
