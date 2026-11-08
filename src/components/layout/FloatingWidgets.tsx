@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useEffect, useState } from 'react'
 
 const WhatsAppButton = dynamic(() => import('@/components/WhatsAppButton'), { ssr: false })
 const WhatsAppChannelButton = dynamic(() => import('@/components/WhatsAppChannelButton'), { ssr: false })
@@ -26,6 +27,33 @@ export default function FloatingWidgets({
     whatsappChannelUrl,
     isChatBotEnabled,
 }: FloatingWidgetsProps) {
+    const [ready, setReady] = useState(false)
+
+    useEffect(() => {
+        let idleId: number | undefined
+        let timerId: number | undefined
+        const schedule = () => {
+            // Separate chunks still compete with the page when rendered during
+            // hydration. Wait for initial resources, then use an idle slot.
+            if ('requestIdleCallback' in window) {
+                idleId = window.requestIdleCallback(() => setReady(true), { timeout: 2000 })
+            } else {
+                timerId = window.setTimeout(() => setReady(true), 0)
+            }
+        }
+
+        if (document.readyState === 'complete') schedule()
+        else window.addEventListener('load', schedule, { once: true })
+
+        return () => {
+            window.removeEventListener('load', schedule)
+            if (idleId !== undefined) window.cancelIdleCallback(idleId)
+            if (timerId !== undefined) window.clearTimeout(timerId)
+        }
+    }, [])
+
+    if (!ready) return null
+
     return (
         <>
             {isWhatsAppEnabled && (
