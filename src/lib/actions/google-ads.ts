@@ -401,3 +401,13 @@ export async function launchGoogleAdsApiCampaign(campaign: GoogleAdsCampaignPlan
         }
     }
 }
+
+/**
+ * Déclenchement manuel du rapport hebdomadaire Google Ads COD vers Telegram depuis le dashboard admin
+ */
+export async function triggerWeeklyGoogleAdsTelegramReportAction() {
+    await verifyAdmin()
+    const { sendWeeklyGoogleAdsCodReport } = await import('@/lib/server/google-ads-reporting')
+    return sendWeeklyGoogleAdsCodReport(7)
+}
+

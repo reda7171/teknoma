@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Sparkles, X, Check, Copy, Download, Send, ArrowRight, Loader2, Target, DollarSign, Layers, Globe, ShoppingBag, Search } from 'lucide-react'
-import { generateGoogleAdsCampaignWithGemini, launchGoogleAdsApiCampaign, GoogleAdsCampaignPlan } from '@/lib/actions/google-ads'
+import { generateGoogleAdsCampaignWithGemini, launchGoogleAdsApiCampaign, triggerWeeklyGoogleAdsTelegramReportAction, GoogleAdsCampaignPlan } from '@/lib/actions/google-ads'
 import { toast } from 'sonner'
 
 interface GoogleAdsGeneratorModalProps {
@@ -21,8 +21,25 @@ export default function GoogleAdsGeneratorModal({ isOpen, onClose }: GoogleAdsGe
     const [copiedCsv, setCopiedCsv] = useState(false)
     const [copiedFeed, setCopiedFeed] = useState(false)
     const [launchingApi, setLaunchingApi] = useState(false)
+    const [sendingReport, setSendingReport] = useState(false)
 
     if (!isOpen) return null
+
+    const handleSendWeeklyReport = async () => {
+        setSendingReport(true)
+        try {
+            const res = await triggerWeeklyGoogleAdsTelegramReportAction()
+            if (res.success && res.summary) {
+                toast.success(`Rapport envoyé sur Telegram : ${res.summary.totalDeliveredOrders} commandes (${res.summary.totalRevenueMad.toFixed(0)} MAD)`)
+            } else {
+                toast.error(res.error || 'Erreur lors de l envoi Telegram')
+            }
+        } catch {
+            toast.error('Erreur technique Telegram')
+        } finally {
+            setSendingReport(false)
+        }
+    }
 
     const handleGenerate = async () => {
         setStep('ANALYZING')
@@ -206,10 +223,20 @@ export default function GoogleAdsGeneratorModal({ isOpen, onClose }: GoogleAdsGe
                                 </div>
                             </div>
 
-                            <div className="pt-4 flex justify-end">
+                            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <button
+                                    type="button"
+                                    disabled={sendingReport}
+                                    onClick={handleSendWeeklyReport}
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-2xl text-xs transition-colors"
+                                >
+                                    {sendingReport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 text-blue-600" />}
+                                    <span>Envoyer Rapport Telegram Hebdomadaire</span>
+                                </button>
+
                                 <button
                                     onClick={handleGenerate}
-                                    className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-2xl shadow-xl transition-all duration-200 hover:-translate-y-0.5"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-2xl shadow-xl transition-all duration-200 hover:-translate-y-0.5"
                                 >
                                     <Sparkles className="w-5 h-5 text-amber-400" />
                                     <span>Analyser le Store & Créer la Campagne</span>
