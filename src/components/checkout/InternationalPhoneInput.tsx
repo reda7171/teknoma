@@ -135,7 +135,7 @@ export default function InternationalPhoneInput({
                     disabled={disabled}
                     dir="ltr"
                     placeholder={placeholder || selectedCountry.placeholder}
-                    className={`w-full pl-24 sm:pl-28 pr-6 py-5 bg-pixio-cream/50 border-2 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black placeholder:text-gray-400 text-sm sm:text-base ${
+                    className={`w-full pl-24 sm:pl-28 pr-6 py-5 bg-pixio-cream/50 border-2 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black placeholder:text-gray-400 text-base ${
                         error ? 'border-red-400 focus:border-red-500' : 'border-gray-200'
                     }`}
                 />
@@ -153,7 +153,7 @@ export default function InternationalPhoneInput({
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             placeholder="Rechercher un pays (ex: France, +33)..."
-                            className="w-full bg-transparent border-none outline-none text-xs font-bold text-gray-800 placeholder:text-gray-400 px-2 py-1"
+                            className="w-full bg-transparent border-none outline-none text-base sm:text-xs font-bold text-gray-800 placeholder:text-gray-400 px-2 py-1"
                         />
                     </div>
 

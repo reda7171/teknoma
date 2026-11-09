@@ -706,7 +706,7 @@ export default function CheckoutClient({
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('FullName')}</label>
                                 <input
                                     {...registerWithTracker('fullName', { required: t('Errors.FullNameRequired') })}
-                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
+                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black text-base"
                                 />
                                 {errors.fullName && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.fullName.message}</p>}
                             </div>
@@ -749,7 +749,7 @@ export default function CheckoutClient({
                                         onFocus={() => {
                                             if (!isWorldwide && watchedCity && filteredCities.length > 0) setShowCities(true)
                                         }}
-                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
+                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black text-base"
                                     />
 
                                     {!isWorldwide && showCities && (
@@ -778,7 +778,7 @@ export default function CheckoutClient({
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('FullAddress')}</label>
                                     <input
                                         {...register('address', { required: t('Errors.AddressRequired') })}
-                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black"
+                                        className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black text-base"
                                     />
                                     {errors.address && <p className="text-red-500 text-[10px] font-black uppercase mt-1 ml-1">{errors.address.message}</p>}
                                 </div>
@@ -788,7 +788,7 @@ export default function CheckoutClient({
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('NoteOptional')}</label>
                                 <textarea
                                     {...register('comment')}
-                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black min-h-[120px]"
+                                    className="w-full px-6 py-5 bg-pixio-cream/50 border-2 border-gray-200 rounded-[1.5rem] focus:bg-white focus:border-black outline-none transition-all font-black text-black min-h-[120px] text-base"
                                 />
                             </div>
 
