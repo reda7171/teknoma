@@ -6,6 +6,7 @@ import { useCartStore } from '@/store/cart'
 import { useUIStore } from '@/store/ui'
 import { useTranslations } from 'next-intl'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
+import { ga4TrackAddToCart } from '@/lib/tracking'
 import { notifyAddToCart } from '@/lib/actions/cart-notify'
 
 interface AddToCartButtonProps {
@@ -84,6 +85,18 @@ export default function AddToCartButton({
                         title: product.title,
                         price: product.price,
                         quantity: 1
+                    })
+
+                    // GA4 Ecommerce: Add to Cart
+                    ga4TrackAddToCart({
+                        items: [{
+                            id: product.id,
+                            title: product.title,
+                            price: product.price,
+                            quantity: 1,
+                            category: product.type
+                        }],
+                        value: product.price
                     })
 
                     // Telegram Notification

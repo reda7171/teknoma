@@ -17,7 +17,7 @@ import { fbPixelEvents } from '@/lib/facebook-pixel'
 import { getActiveGifts } from '@/lib/actions/gifts'
 import { getWithYouCities } from '@/lib/actions/delivery'
 import { calculate3For4Discount } from '@/lib/utils'
-import { trackPurchase } from '@/lib/tracking'
+import { trackPurchase, ga4TrackBeginCheckout, ga4TrackAddShippingInfo, ga4TrackAddPaymentInfo } from '@/lib/tracking'
 import { getSavedDeliveryProfile, saveDeliveryProfile, clearSavedDeliveryProfile, SavedDeliveryProfile } from '@/lib/delivery-storage'
 import { withExponentialRetry } from '@/lib/retry'
 
@@ -318,6 +318,19 @@ export default function CheckoutClient({
                 })),
                 total: finalTotal
             })
+
+            // GA4 Ecommerce: Begin Checkout
+            ga4TrackBeginCheckout({
+                items: items.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    price: Number(item.price),
+                    quantity: item.quantity,
+                    category: item.type
+                })),
+                value: finalTotal,
+                coupon: coupon?.code
+            })
         }
     }, [mounted])
 
@@ -351,6 +364,34 @@ export default function CheckoutClient({
         isSubmittingRef.current = true
         setError(null)
         fbPixelEvents.addPaymentInfo()
+
+        // GA4 Ecommerce: Add Shipping Info
+        ga4TrackAddShippingInfo({
+            items: items.map(item => ({
+                id: item.id,
+                title: item.title,
+                price: Number(item.price),
+                quantity: item.quantity,
+                category: item.type
+            })),
+            value: finalTotal,
+            shippingTier: isWorldwide ? destinationCountry.name : (data.city || 'Maroc'),
+            coupon: coupon?.code
+        })
+
+        // GA4 Ecommerce: Add Payment Info
+        ga4TrackAddPaymentInfo({
+            items: items.map(item => ({
+                id: item.id,
+                title: item.title,
+                price: Number(item.price),
+                quantity: item.quantity,
+                category: item.type
+            })),
+            value: finalTotal,
+            paymentType: data.paymentMethod || 'Cash On Delivery (COD)',
+            coupon: coupon?.code
+        })
 
         if (minOrderAmount > 0 && finalTotal < minOrderAmount) {
             const minAmountMsg = locale === 'ar'
@@ -434,6 +475,7 @@ export default function CheckoutClient({
                     total: finalTotal,
                     shippingFee: shippingFee,
                     paymentMethod: data.paymentMethod,
+                    coupon: coupon?.code,
                     items: items.map(item => ({
                         id: item.id,
                         title: item.title,

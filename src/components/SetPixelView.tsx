@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
+import { ga4TrackViewItem } from '@/lib/tracking'
 import { useCartStore } from '@/store/cart'
 import { incrementBookViews } from '@/lib/actions/books'
 
@@ -10,9 +11,10 @@ interface SetPixelViewProps {
     title: string
     price: number
     category?: string
+    author?: string
 }
 
-export default function SetPixelView({ id, title, price, category }: SetPixelViewProps) {
+export default function SetPixelView({ id, title, price, category, author }: SetPixelViewProps) {
     const sessionId = useCartStore(state => state.sessionId)
     const setSessionId = useCartStore(state => state.setSessionId)
     const hasTracked = useRef(false)
@@ -28,6 +30,14 @@ export default function SetPixelView({ id, title, price, category }: SetPixelVie
             category
         })
 
+        ga4TrackViewItem({
+            id,
+            title,
+            price,
+            category,
+            author
+        })
+
         const currentSessionId = sessionId || `c_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`
         if (!sessionId) {
             setSessionId(currentSessionId)
@@ -36,7 +46,7 @@ export default function SetPixelView({ id, title, price, category }: SetPixelVie
         if (category !== 'Pack') {
             incrementBookViews(id, currentSessionId).catch(() => {})
         }
-    }, [id, title, price, category, sessionId, setSessionId])
+    }, [id, title, price, category, author, sessionId, setSessionId])
 
     return null
 }
