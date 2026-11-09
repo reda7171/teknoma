@@ -19,6 +19,7 @@ interface BookJsonLdProps {
     }>;
     category?: string | null;
     numberOfPages?: number | null;
+    condition?: string | null;
     createdAt?: Date | string;
   };
   locale: string;
@@ -162,7 +163,9 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             }))
           } : {}),
           "priceValidUntil": priceValidUntil,
-          "itemCondition": "https://schema.org/NewCondition",
+          "itemCondition": (book.condition === 'USED' || book.condition === 'GOOD')
+            ? "https://schema.org/UsedCondition"
+            : "https://schema.org/NewCondition",
           "url": bookUrl,
           "seller": {
             "@type": "Organization",

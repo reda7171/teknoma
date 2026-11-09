@@ -135,6 +135,16 @@ export async function getSitemapsSyncStatus(): Promise<SitemapsOverviewData> {
             priorityCategory: 'Standard & Catalogue'
         },
         {
+            id: 'google-shopping-xml',
+            name: 'Flux Google Shopping & Merchant Center',
+            url: `${baseUrl}/google-shopping.xml`,
+            type: 'FEED',
+            urlCount: booksCount + packsCount,
+            status: 'SYNCHRONIZED',
+            lastModified: now.toISOString(),
+            priorityCategory: 'Google Merchant Center (Haute Priorité)'
+        },
+        {
             id: 'feed-rss',
             name: 'Flux RSS Produits & Actualités',
             url: `${baseUrl}/feed.xml`,
@@ -170,7 +180,7 @@ export async function getSitemapsSyncStatus(): Promise<SitemapsOverviewData> {
         otherBotSellersVisit,
         robotsTxtStatus: {
             declared: true,
-            sitemapsCount: 5
+            sitemapsCount: 6
         },
         indexNow: indexNowOverview
     }

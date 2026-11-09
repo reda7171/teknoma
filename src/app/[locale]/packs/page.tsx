@@ -67,9 +67,58 @@ export async function PacksContent({
 
     const t = await getTranslations({ locale, namespace: 'PacksPage' })
     const tNav = await getTranslations({ locale, namespace: 'Navigation' })
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+
+    const packsSchema = {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    {
+                        '@type': 'ListItem',
+                        position: 1,
+                        name: tNav('Home'),
+                        item: `${baseUrl}/${locale}`
+                    },
+                    {
+                        '@type': 'ListItem',
+                        position: 2,
+                        name: t('Title'),
+                        item: `${baseUrl}/${locale}/packs`
+                    }
+                ]
+            },
+            {
+                '@type': 'CollectionPage',
+                name: `${t('Title')} | Riwaya`,
+                description: t('Subtitle'),
+                url: `${baseUrl}/${locale}/packs`,
+                mainEntity: {
+                    '@type': 'ItemList',
+                    numberOfItems: packs.length,
+                    itemListElement: packs.map((pack: any, index: number) => {
+                        const img = pack.image || (pack.books?.[0]?.book?.image) || '/images/placeholder-pack.jpg'
+                        const safeImg = img.startsWith('http') ? img : `${baseUrl}${img}`
+                        return {
+                            '@type': 'ListItem',
+                            position: index + 1,
+                            name: pack.name,
+                            url: `${baseUrl}/${locale}/packs/${pack.id}`,
+                            image: safeImg
+                        }
+                    })
+                }
+            }
+        ]
+    }
 
     return (
         <div className="min-h-screen bg-pixio-cream">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(packsSchema).replace(/</g, '\\u003c') }}
+            />
             <Header />
 
             {/* Page Header */}
