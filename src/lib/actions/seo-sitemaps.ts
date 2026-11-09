@@ -58,6 +58,7 @@ export async function getSitemapsSyncStatus(): Promise<SitemapsOverviewData> {
         otherBotVisitSetting,
         booksCount,
         packsCount,
+        reviewsCount,
         postsCount,
         categoriesCount,
         latestSellerReq,
@@ -73,6 +74,7 @@ export async function getSitemapsSyncStatus(): Promise<SitemapsOverviewData> {
         }).catch(() => null),
         prisma.book.count({ where: { active: true } }).catch(() => 0),
         prisma.pack.count({ where: { active: true } }).catch(() => 0),
+        prisma.review.count({ where: { isApproved: true } }).catch(() => 0),
         prisma.post.count({ where: { published: true } }).catch(() => 0),
         prisma.seoCategory.count({ where: { isActive: true } }).catch(() => 0),
         prisma.sellerRequest.findFirst({
@@ -145,6 +147,16 @@ export async function getSitemapsSyncStatus(): Promise<SitemapsOverviewData> {
             priorityCategory: 'Google Merchant Center (Haute Priorité)'
         },
         {
+            id: 'google-product-reviews-xml',
+            name: 'Flux Google Product Reviews (Avis Certifiés)',
+            url: `${baseUrl}/google-product-reviews.xml`,
+            type: 'FEED',
+            urlCount: reviewsCount,
+            status: 'SYNCHRONIZED',
+            lastModified: now.toISOString(),
+            priorityCategory: 'Avis & Étoiles Google Search'
+        },
+        {
             id: 'feed-rss',
             name: 'Flux RSS Produits & Actualités',
             url: `${baseUrl}/feed.xml`,
@@ -180,7 +192,7 @@ export async function getSitemapsSyncStatus(): Promise<SitemapsOverviewData> {
         otherBotSellersVisit,
         robotsTxtStatus: {
             declared: true,
-            sitemapsCount: 6
+            sitemapsCount: 7
         },
         indexNow: indexNowOverview
     }
