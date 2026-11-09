@@ -177,39 +177,75 @@ export default async function BooksPage({
     const baseUrl = getBaseUrl()
     const pageUrl = isUsedOnly ? `${baseUrl}/${locale}/books?usedOnly=true` : `${baseUrl}/${locale}/books`
 
-    let usedBooksSchema = null
-    if (isUsedOnly) {
-        usedBooksSchema = {
-            '@context': 'https://schema.org',
-            '@type': 'CollectionPage',
-            name: locale === 'ar' ? 'كتب وروايات مستعملة بالمغرب' : 'Livres d\'Occasion au Maroc',
-            description: locale === 'ar' ? 'تشكيلة مختارة من الكتب والروايات المستعملة بحالة ممتازة في المغرب' : 'Sélection de livres et romans d\'occasion en excellent état à petits prix au Maroc',
-            url: pageUrl,
-            mainEntity: {
-                '@type': 'ItemList',
-                numberOfItems: books.length,
-                itemListElement: books.slice(0, 20).map((b: any, index: number) => {
-                    const img = b.image ? (b.image.startsWith('http') ? b.image : `${baseUrl}${b.image}`) : undefined
-                    return {
-                        '@type': 'ListItem',
-                        position: index + 1,
-                        name: b.title,
-                        url: `${baseUrl}/${locale}/books/${b.id}`,
-                        ...(img ? { image: img } : {})
-                    }
-                })
-            }
+    const categoryName = sParams.category
+        ? (tCats.has(sParams.category as any) ? tCats(sParams.category as any) : String(sParams.category))
+        : null
+
+    const catalogPageTitle = isUsedOnly
+        ? (locale === 'ar' ? 'كتب وروايات مستعملة بالمغرب' : 'Livres d\'Occasion au Maroc')
+        : categoryName
+        ? (locale === 'ar' ? `كتب ${categoryName}` : `Livres ${categoryName}`)
+        : (locale === 'ar' ? 'كتالوج الكتب' : 'Catalogue des Livres')
+
+    const breadcrumbItems = [
+        {
+            '@type': 'ListItem',
+            position: 1,
+            name: locale === 'ar' ? 'الرئيسية' : 'Accueil',
+            item: `${baseUrl}/${locale}`
+        },
+        {
+            '@type': 'ListItem',
+            position: 2,
+            name: locale === 'ar' ? 'الكتب' : 'Livres',
+            item: `${baseUrl}/${locale}/books`
         }
+    ]
+
+    if (categoryName) {
+        breadcrumbItems.push({
+            '@type': 'ListItem',
+            position: 3,
+            name: categoryName,
+            item: `${baseUrl}/${locale}/books?category=${encodeURIComponent(String(sParams.category))}`
+        })
+    }
+
+    const catalogSchema = {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': 'BreadcrumbList',
+                itemListElement: breadcrumbItems
+            },
+            {
+                '@type': 'CollectionPage',
+                name: catalogPageTitle,
+                url: pageUrl,
+                mainEntity: {
+                    '@type': 'ItemList',
+                    numberOfItems: books.length,
+                    itemListElement: books.slice(0, 24).map((b: any, index: number) => {
+                        const img = b.image ? (b.image.startsWith('http') ? b.image : `${baseUrl}${b.image}`) : undefined
+                        return {
+                            '@type': 'ListItem',
+                            position: index + 1,
+                            name: b.title,
+                            url: `${baseUrl}/${locale}/books/${b.id}`,
+                            ...(img ? { image: img } : {})
+                        }
+                    })
+                }
+            }
+        ]
     }
 
     return (
         <div className="min-h-screen bg-[#FDFBF7]">
-            {usedBooksSchema && (
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(usedBooksSchema) }}
-                />
-            )}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(catalogSchema).replace(/</g, '\\u003c') }}
+            />
             <Header />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-4 pt-2 sm:pt-4 lg:py-8">

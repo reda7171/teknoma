@@ -366,6 +366,25 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
                 </div>
             )}
 
+            {/* Navigation crawlable pour les robots d'indexation (Googlebot) conforme aux règles Google Search Central Pagination */}
+            <noscript>
+                <nav aria-label="Pagination catalogue" className="mt-8 text-center p-6 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                    <p className="text-xs font-bold text-gray-600 mb-3">Accéder aux pages suivantes du catalogue</p>
+                    <div className="flex justify-center items-center gap-3">
+                        {page > 2 && (
+                            <a href={`?page=${page - 1}`} className="px-5 py-2.5 bg-gray-100 text-black hover:bg-gray-200 rounded-xl text-xs font-black uppercase tracking-wider">
+                                Page précédente
+                            </a>
+                        )}
+                        {hasMore && (
+                            <a href={`?page=${page}`} className="px-5 py-2.5 bg-black text-white hover:bg-gray-800 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm">
+                                Page suivante
+                            </a>
+                        )}
+                    </div>
+                </nav>
+            </noscript>
+
             {!hasMore && books.length > 0 && (
                 <div className="text-center p-10 text-gray-700 text-xs rtl:text-lg font-black uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal">
                     {tCommon('EndOfCollection')}
