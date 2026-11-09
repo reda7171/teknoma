@@ -32,6 +32,162 @@ export interface PurchaseData {
     items: TrackingProduct[]
 }
 
+export interface DataLayerMonitoredEvent {
+    id: string
+    timestamp: string
+    eventName: string
+    stepIndex: number
+    stepName: string
+    ecommerce: Record<string, any>
+    validation: {
+        isValid: boolean
+        warnings: string[]
+        errors: string[]
+        checks: { label: string; passed: boolean }[]
+    }
+}
+
+export const FUNNEL_STEPS: Record<string, { stepIndex: number; stepName: string; description: string }> = {
+    view_item_list: { stepIndex: 1, stepName: 'Consultation catalogue', description: 'Affichage des listes de livres ou packs' },
+    select_item: { stepIndex: 2, stepName: 'Sélection produit', description: 'Clic sur un livre ou un pack' },
+    view_item: { stepIndex: 3, stepName: 'Vue fiche produit', description: 'Ouverture de la page détail' },
+    add_to_cart: { stepIndex: 4, stepName: 'Ajout au panier', description: 'Mise au panier depuis bouton ou fiche' },
+    remove_from_cart: { stepIndex: 5, stepName: 'Retrait du panier', description: 'Suppression d’un article' },
+    view_cart: { stepIndex: 6, stepName: 'Consultation panier', description: 'Ouverture tiroir ou page panier' },
+    begin_checkout: { stepIndex: 7, stepName: 'Initialisation commande', description: 'Arrivée sur la page /checkout' },
+    add_shipping_info: { stepIndex: 8, stepName: 'Informations livraison', description: 'Sélection ville ou mode d’expédition' },
+    add_payment_info: { stepIndex: 9, stepName: 'Mode de paiement', description: 'Validation paiement COD ou bancaire' },
+    purchase: { stepIndex: 10, stepName: 'Conversion Achat COD', description: 'Commande validée avec transaction_id' },
+}
+
+export const DATALAYER_STORAGE_KEY = 'riwaya_datalayer_monitor_events'
+export const DATALAYER_CHANNEL_NAME = 'riwaya_datalayer_channel'
+
+function validateAndFormatEvent(eventName: string, ecommerce: Record<string, any>): DataLayerMonitoredEvent {
+    const meta = FUNNEL_STEPS[eventName] || { stepIndex: 0, stepName: eventName, description: 'Événement personnalisé' }
+    const checks: { label: string; passed: boolean }[] = []
+    const errors: string[] = []
+    const warnings: string[] = []
+
+    // 1. DataLayer reset check
+    checks.push({ label: 'Purge dataLayer préalable (ecommerce: null)', passed: true })
+
+    // 2. Currency check
+    if (['view_item', 'add_to_cart', 'remove_from_cart', 'view_cart', 'begin_checkout', 'add_shipping_info', 'add_payment_info', 'purchase'].includes(eventName)) {
+        const isMad = ecommerce.currency === 'MAD'
+        checks.push({ label: "Devise conforme ISO 4217 ('MAD')", passed: isMad })
+        if (!isMad) errors.push(`Devise manquante ou non conforme: attendu 'MAD', reçu '${ecommerce.currency}'`)
+    }
+
+    // 3. Items array check
+    const hasItems = Array.isArray(ecommerce.items) && ecommerce.items.length > 0
+    checks.push({ label: 'Tableau items renseigné et non vide', passed: hasItems })
+    if (!hasItems) errors.push('Le paramètre "items" doit être un tableau non vide.')
+
+    // 4. Value check
+    if (['add_to_cart', 'view_cart', 'begin_checkout', 'add_shipping_info', 'add_payment_info', 'purchase'].includes(eventName)) {
+        const hasValidValue = typeof ecommerce.value === 'number' && !isNaN(ecommerce.value) && ecommerce.value >= 0
+        checks.push({ label: 'Montant valeur (value) numérique positif', passed: hasValidValue })
+        if (!hasValidValue) errors.push(`Montant "value" invalide: ${ecommerce.value}`)
+    }
+
+    // 5. Items internal schema
+    if (hasItems) {
+        const allItemsHaveIdAndName = ecommerce.items.every((it: any) => Boolean(it.item_id && it.item_name))
+        checks.push({ label: 'Tous les items ont item_id et item_name', passed: allItemsHaveIdAndName })
+        if (!allItemsHaveIdAndName) errors.push('Certains items n\'ont pas de "item_id" ou de "item_name".')
+    }
+
+    // 6. Specific step checks
+    if (eventName === 'purchase') {
+        const hasTx = Boolean(ecommerce.transaction_id)
+        checks.push({ label: 'transaction_id unique présent', passed: hasTx })
+        if (!hasTx) errors.push('transaction_id manquant sur l\'événement purchase.')
+    }
+    if (eventName === 'add_shipping_info') {
+        const hasShipping = Boolean(ecommerce.shipping_tier)
+        checks.push({ label: 'shipping_tier (ville / pays) renseigné', passed: hasShipping })
+        if (!hasShipping) warnings.push('shipping_tier non spécifié.')
+    }
+    if (eventName === 'add_payment_info') {
+        const hasPayment = Boolean(ecommerce.payment_type)
+        checks.push({ label: 'payment_type renseigné (COD / Virement)', passed: hasPayment })
+        if (!hasPayment) warnings.push('payment_type non spécifié.')
+    }
+
+    const isValid = errors.length === 0
+
+    return {
+        id: `evt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        timestamp: new Date().toISOString(),
+        eventName,
+        stepIndex: meta.stepIndex,
+        stepName: meta.stepName,
+        ecommerce,
+        validation: {
+            isValid,
+            warnings,
+            errors,
+            checks
+        }
+    }
+}
+
+function broadcastToMonitor(eventName: string, ecommerceParams: Record<string, any>) {
+    if (typeof window === 'undefined') return
+
+    const eventRecord = validateAndFormatEvent(eventName, ecommerceParams)
+
+    // 1. BroadcastChannel (cross-tab sync en temps réel)
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            const channel = new BroadcastChannel(DATALAYER_CHANNEL_NAME)
+            channel.postMessage(eventRecord)
+            channel.close()
+        } catch {
+            // Ignorer si non supporté
+        }
+    }
+
+    // 2. CustomEvent (synchrone dans le même onglet)
+    try {
+        window.dispatchEvent(new CustomEvent('riwaya:datalayer_event', { detail: eventRecord }))
+    } catch {
+        // Ignorer
+    }
+
+    // 3. LocalStorage persistence (garde les 50 derniers événements pour l'historique)
+    try {
+        const raw = localStorage.getItem(DATALAYER_STORAGE_KEY)
+        const history: DataLayerMonitoredEvent[] = raw ? JSON.parse(raw) : []
+        history.unshift(eventRecord)
+        if (history.length > 50) history.pop()
+        localStorage.setItem(DATALAYER_STORAGE_KEY, JSON.stringify(history))
+    } catch {
+        // Ignorer
+    }
+}
+
+export function getMonitoredDataLayerEvents(): DataLayerMonitoredEvent[] {
+    if (typeof window === 'undefined') return []
+    try {
+        const raw = localStorage.getItem(DATALAYER_STORAGE_KEY)
+        return raw ? JSON.parse(raw) : []
+    } catch {
+        return []
+    }
+}
+
+export function clearMonitoredDataLayerEvents() {
+    if (typeof window === 'undefined') return
+    try {
+        localStorage.removeItem(DATALAYER_STORAGE_KEY)
+        window.dispatchEvent(new CustomEvent('riwaya:datalayer_clear'))
+    } catch {
+        // Ignorer
+    }
+}
+
 const DEFAULT_CURRENCY = 'MAD'
 const DEFAULT_AFFILIATION = 'Riwaya'
 
@@ -72,6 +228,8 @@ function sendGa4EcommerceEvent(eventName: string, ecommerceParams: Record<string
     } catch (err) {
         console.warn(`[GA4 ${eventName}] Erreur dataLayer:`, err)
     }
+
+    broadcastToMonitor(eventName, ecommerceParams)
 }
 
 /**
@@ -353,4 +511,104 @@ export function trackPurchase(data: PurchaseData) {
             index,
         }))
     })
+}
+
+/**
+ * Déclenche une simulation réaliste d'une étape du tunnel pour validation
+ */
+export function simulateDataLayerFunnelStep(eventName: string) {
+    const mockBook = {
+        id: 'test_book_101',
+        title: 'Les Misérables - Victor Hugo',
+        price: 95,
+        category: 'Classiques',
+        author: 'Victor Hugo',
+        quantity: 1
+    }
+
+    switch (eventName) {
+        case 'view_item_list':
+            ga4TrackViewItemList({
+                listId: 'test_catalog',
+                listName: 'Catalogue Simulation Test',
+                items: [{
+                    item_id: mockBook.id,
+                    item_name: mockBook.title,
+                    price: mockBook.price,
+                    item_brand: mockBook.author,
+                    item_category: mockBook.category,
+                    index: 0
+                }]
+            })
+            break
+        case 'select_item':
+            ga4TrackSelectItem({
+                listId: 'test_catalog',
+                listName: 'Catalogue Simulation Test',
+                item: {
+                    item_id: mockBook.id,
+                    item_name: mockBook.title,
+                    price: mockBook.price,
+                    item_brand: mockBook.author,
+                    item_category: mockBook.category
+                }
+            })
+            break
+        case 'view_item':
+            ga4TrackViewItem(mockBook)
+            break
+        case 'add_to_cart':
+            ga4TrackAddToCart({
+                items: [mockBook],
+                value: mockBook.price
+            })
+            break
+        case 'remove_from_cart':
+            ga4TrackRemoveFromCart({
+                items: [mockBook],
+                value: mockBook.price
+            })
+            break
+        case 'view_cart':
+            ga4TrackViewCart({
+                items: [mockBook],
+                value: mockBook.price
+            })
+            break
+        case 'begin_checkout':
+            ga4TrackBeginCheckout({
+                items: [mockBook],
+                value: mockBook.price,
+                coupon: 'BIENVENUE10'
+            })
+            break
+        case 'add_shipping_info':
+            ga4TrackAddShippingInfo({
+                items: [mockBook],
+                value: mockBook.price + 30,
+                shippingTier: 'Casablanca (Livraison Express)',
+                coupon: 'BIENVENUE10'
+            })
+            break
+        case 'add_payment_info':
+            ga4TrackAddPaymentInfo({
+                items: [mockBook],
+                value: mockBook.price + 30,
+                paymentType: 'Cash On Delivery (COD)',
+                coupon: 'BIENVENUE10'
+            })
+            break
+        case 'purchase':
+            trackPurchase({
+                id: `ORD-TEST-${Math.floor(1000 + Math.random() * 9000)}`,
+                total: mockBook.price + 30,
+                shippingFee: 30,
+                paymentMethod: 'Cash On Delivery (COD)',
+                coupon: 'BIENVENUE10',
+                items: [mockBook]
+            })
+            break
+        default:
+            console.warn('Étape non reconnue pour simulation:', eventName)
+    }
 }

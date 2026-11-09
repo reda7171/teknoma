@@ -26,6 +26,7 @@ import {
     getBadgeStats,
 } from '@/lib/actions/analytics'
 import Image from 'next/image'
+import DataLayerMonitorWidget from '@/components/admin/DataLayerMonitorWidget'
 
 const AccessibleTooltip = Tooltip as any;
 
@@ -250,6 +251,9 @@ export default function AnalyticsClient() {
                     </div>
                 </div>
             </div>
+
+            {/* Monitoring DataLayer GA4 en temps réel */}
+            <DataLayerMonitorWidget />
 
             {/* Badges Cliqués */}
             {badgeStats.length > 0 && (
