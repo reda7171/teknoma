@@ -56,7 +56,8 @@ import {
     Mail,
     PhoneCall,
     Briefcase,
-    Target
+    Target,
+    Activity
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
@@ -218,6 +219,7 @@ export default function AdminLayout({
             icon: BarChart3,
             children: [
                 { name: 'Statistiques', href: `/${lang}/admin/analytics`, icon: BarChart3 },
+                { name: 'Monitoring DataLayer', href: `/${lang}/admin/analytics/datalayer`, icon: Activity, badge: 'Live' },
                 { name: 'Revenus & Finances', href: `/${lang}/admin/finance`, icon: Banknote },
                 { name: 'Cashflow', href: `/${lang}/admin/cashflow`, icon: Wallet },
                 { name: 'Trafic & Acquisition', href: `/${lang}/admin/traffic`, icon: TrendingUp },
