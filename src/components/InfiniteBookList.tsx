@@ -11,6 +11,7 @@ import { Package, ArrowRight, Sparkles, Gamepad2, Baby, BookOpen } from 'lucide-
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { useTranslations, useLocale } from 'next-intl'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
+import { ga4TrackViewItemList } from '@/lib/tracking'
 
 interface InfiniteBookListProps {
     initialBooks: Book[]
@@ -48,6 +49,21 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
         setBooks(initialBooks)
         setPage(2)
         setHasMore(initialBooks.length >= (initialFilters.limit || 12))
+
+        if (initialBooks && initialBooks.length > 0) {
+            ga4TrackViewItemList({
+                listId: (initialFilters.category as string) || 'books_catalog',
+                listName: (initialFilters.category as string) || 'Catalogue Livres',
+                items: initialBooks.map((b, idx) => ({
+                    item_id: b.id,
+                    item_name: b.title,
+                    price: b.price,
+                    item_brand: b.author,
+                    item_category: b.category || 'Livres',
+                    index: idx
+                }))
+            })
+        }
     }, [initialBooks, initialFilters])
 
     useEffect(() => {

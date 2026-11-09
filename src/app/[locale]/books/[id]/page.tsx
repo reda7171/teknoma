@@ -482,6 +482,7 @@ export default async function BookDetailPage({
                     title={book.title}
                     price={book.price}
                     category={book.category || undefined}
+                    author={book.author || undefined}
                 />
 
 

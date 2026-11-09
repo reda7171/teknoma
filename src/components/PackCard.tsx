@@ -11,6 +11,7 @@ import { normalizeImage } from '@/lib/utils'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { notifyAddToCart } from '@/lib/actions/cart-notify'
 import { fbPixelEvents } from '@/lib/facebook-pixel'
+import { ga4TrackAddToCart, ga4TrackSelectItem } from '@/lib/tracking'
 import { getLocalizedPackTitle } from '@/lib/i18n-utils'
 
 interface PackCardProps {
@@ -65,6 +66,19 @@ export default function PackCard({
 
     const displayName = getLocalizedPackTitle({ name, nameFr, nameEn, language, books }, locale);
 
+    const handleSelectPack = () => {
+        ga4TrackSelectItem({
+            listId: 'packs_catalog',
+            listName: 'Catalogue Packs',
+            item: {
+                item_id: id,
+                item_name: displayName,
+                price: displayPrice,
+                item_category: 'Pack'
+            }
+        })
+    }
+
     return (
         <div className="group relative bg-[#FDFBF7] rounded-[2rem] overflow-hidden border border-gray-100 hover:border-black shadow-sm hover:shadow-2xl transition-all duration-500">
             {/* Savings Badge - Style Pixio */}
@@ -100,7 +114,7 @@ export default function PackCard({
             </div>
 
             {/* Image Section */}
-            <Link href={`/packs/${id}`} prefetch={false} className="block">
+            <Link href={`/packs/${id}`} prefetch={false} onClick={handleSelectPack} className="block">
                 <div className="relative h-64 bg-gray-50 overflow-hidden">
                     {image ? (
                         <ImageWithFallback
@@ -131,7 +145,7 @@ export default function PackCard({
 
             {/* Content */}
             <div className="p-8">
-                <Link href={`/packs/${id}`} prefetch={false}>
+                <Link href={`/packs/${id}`} prefetch={false} onClick={handleSelectPack}>
                     <div className="flex flex-col items-center text-center mb-6">
                         <span className="text-xs rtl:text-sm font-black uppercase tracking-[0.2em] rtl:tracking-normal text-gray-600 mb-2">{t('Exclusive')}</span>
                         <h3 className="text-3xl md:text-2xl font-black text-black tracking-tighter mb-2 group-hover:translate-y-1 transition-transform">
@@ -199,6 +213,18 @@ export default function PackCard({
                                     title: displayName,
                                     price: displayPrice,
                                     quantity: 1
+                                })
+
+                                // GA4 Ecommerce: Add to Cart
+                                ga4TrackAddToCart({
+                                    items: [{
+                                        id,
+                                        title: displayName,
+                                        price: displayPrice,
+                                        quantity: 1,
+                                        category: 'Pack'
+                                    }],
+                                    value: displayPrice
                                 })
 
                                 // Telegram Notification

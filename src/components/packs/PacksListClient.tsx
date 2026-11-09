@@ -5,6 +5,7 @@ import PackCard from '@/components/PackCard'
 import { Package, Sparkles, ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import CustomPackBuilder from './CustomPackBuilder'
+import { ga4TrackViewItemList } from '@/lib/tracking'
 
 interface PacksListClientProps {
     packs: any[]
@@ -38,6 +39,22 @@ export default function PacksListClient({ packs, availableBooks, openCustomBuild
     const displayedPacks = useMemo(() => {
         return filteredPacks.slice(0, visibleCount)
     }, [filteredPacks, visibleCount])
+
+    useEffect(() => {
+        if (displayedPacks && displayedPacks.length > 0) {
+            ga4TrackViewItemList({
+                listId: 'packs_catalog',
+                listName: 'Catalogue Packs',
+                items: displayedPacks.map((p, idx) => ({
+                    item_id: p.id,
+                    item_name: p.name,
+                    price: p.price,
+                    item_category: 'Pack',
+                    index: idx
+                }))
+            })
+        }
+    }, [displayedPacks])
 
     if (packs.length === 0) {
         return (

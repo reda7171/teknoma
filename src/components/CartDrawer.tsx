@@ -13,6 +13,7 @@ import CartBookmarksUpsell from '@/components/cart/CartBookmarksUpsell'
 import InstantOfferPopup from '@/components/cart/InstantOfferPopup'
 import { usePathname } from 'next/navigation'
 import { calculate3For4Discount } from '@/lib/utils'
+import { ga4TrackViewCart, ga4TrackRemoveFromCart } from '@/lib/tracking'
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -55,6 +56,16 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
 
     const handleRemove = async (item: any) => {
         removeItem(item.id)
+        ga4TrackRemoveFromCart({
+            items: [{
+                id: item.id,
+                title: item.title,
+                price: item.price,
+                quantity: item.quantity,
+                category: item.type
+            }],
+            value: item.price * (item.quantity || 1)
+        })
         try {
             const newTotal = useCartStore.getState().getTotalPrice()
             await withExponentialRetry(
@@ -84,6 +95,21 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
     
     const promo3for4Discount = is3For4Active ? calculate3For4Discount(items) : 0
     const finalTotal = Math.max(0, totalPrice - promo3for4Discount)
+
+    useEffect(() => {
+        if (isOpen && items.length > 0) {
+            ga4TrackViewCart({
+                items: items.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    price: item.price,
+                    quantity: item.quantity,
+                    category: item.type
+                })),
+                value: finalTotal
+            })
+        }
+    }, [isOpen])
 
 
     const handleCheckoutClick = (e?: React.MouseEvent) => {
