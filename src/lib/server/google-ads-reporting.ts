@@ -123,3 +123,4 @@ export async function sendWeeklyGoogleAdsCodReport(days = 7): Promise<{
         }
     }
 }
+

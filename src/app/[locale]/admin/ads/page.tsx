@@ -1,15 +1,20 @@
 import { requirePageRole } from '@/lib/page-authorization'
 import { Suspense } from 'react'
 import { getAllAds } from '@/lib/actions/advertisements'
+import { getRoasEvolutionMetrics } from '@/lib/actions/ads-roas'
 import AdsList from '@/components/admin/AdsList'
 import GoogleAdsLauncherButton from '@/components/admin/GoogleAdsLauncherButton'
+import GoogleAdsRoasChart from '@/components/admin/GoogleAdsRoasChart'
 import { Link } from '@/i18n/routing'
 import { Plus } from 'lucide-react'
 
 export default async function AdsPage() {
     await requirePageRole(["ADMIN","MANAGER"])
 
-    const ads = await getAllAds()
+    const [ads, roasData] = await Promise.all([
+        getAllAds(),
+        getRoasEvolutionMetrics(8)
+    ])
 
     return (
         <div className="space-y-12">
@@ -35,6 +40,9 @@ export default async function AdsPage() {
                     </Link>
                 </div>
             </div>
+
+            {/* Net ROAS & COD Revenue Trend Chart */}
+            <GoogleAdsRoasChart data={roasData} />
 
             <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 overflow-hidden">
                 <Suspense fallback={
