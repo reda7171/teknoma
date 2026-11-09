@@ -92,7 +92,7 @@ export default function CouponInput({ cartTotal, onApplied, onRemoved }: CouponI
                         value={code}
                         onChange={(e) => setCode(e.target.value.toUpperCase())}
                         placeholder={t('PromoCodePlaceholder')}
-                        className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-3 bg-gray-100 border-2 border-gray-200 rounded-xl font-black focus:border-blue-500 focus:bg-white outline-none transition-all uppercase placeholder:font-bold placeholder:text-gray-400 text-sm"
+                        className="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-3 bg-gray-100 border-2 border-gray-200 rounded-xl font-black focus:border-blue-500 focus:bg-white outline-none transition-all uppercase placeholder:font-bold placeholder:text-gray-400 text-base sm:text-sm"
                         disabled={isLoading}
                     />
                 </div>
