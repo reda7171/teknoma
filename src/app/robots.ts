@@ -75,6 +75,7 @@ export default function robots(): MetadataRoute.Robots {
             `${baseUrl}/sitemap.xml`,
             `${baseUrl}/sitemap-sellers.xml`,
             `${baseUrl}/google-shopping.xml`,
+            `${baseUrl}/google-product-reviews.xml`,
             `${baseUrl}/feed.xml`,
             `${baseUrl}/nouveautes.xml`,
             `${baseUrl}/nouveautes.atom`,
