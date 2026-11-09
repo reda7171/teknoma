@@ -55,8 +55,12 @@ import {
     Bell,
     Mail,
     PhoneCall,
-    Briefcase
+    Briefcase,
+    Target
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+const GoogleAdsGeneratorModal = dynamic(() => import('@/components/admin/GoogleAdsGeneratorModal'), { ssr: false })
 
 import OrderNotifications from '@/components/admin/OrderNotifications'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
@@ -75,6 +79,7 @@ export default function AdminLayout({
     const [sidebarCollapsed, setSidebarCollapsed] = useState(true) // Collapsed by default
     const [userRole, setUserRole] = useState<string | null>(null)
     const [pendingJumiaCount, setPendingJumiaCount] = useState(0)
+    const [isGoogleAdsModalOpen, setIsGoogleAdsModalOpen] = useState(false)
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
         'Configuration': false 
     })
@@ -196,6 +201,7 @@ export default function AdminLayout({
             href: `/${lang}/admin/marketing`,
             icon: Sparkles,
             children: [
+                { name: 'Google Ads (IA & PMax)', href: `/${lang}/admin/ads`, icon: Target, isModalTrigger: true, badge: 'IA' },
                 { name: 'Campagnes & Offres', href: `/${lang}/admin/marketing`, icon: Sparkles },
                 { name: 'Notifications Push', href: `/${lang}/admin/push-campaigns`, icon: Bell },
                 { name: 'Mailing / Newsletters', href: `/${lang}/admin/mailing`, icon: Mail },
@@ -464,9 +470,29 @@ export default function AdminLayout({
 
                             {!isCollapsed && hasChildren && expandedMenus[item.name] && (
                                 <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-100 pl-4 py-1">
-                                    {item.children.map((child) => {
+                                    {item.children.map((child: any) => {
                                         const isChildActive = pathname === child.href
                                         const ChildIcon = child.icon
+
+                                        if (child.isModalTrigger) {
+                                            return (
+                                                <button
+                                                    key={child.name}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setIsGoogleAdsModalOpen(true)
+                                                        setSidebarOpen(false)
+                                                    }}
+                                                    className="w-full flex items-center px-4 py-3 md:py-2 text-sm md:text-xs font-semibold rounded-lg text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all text-left group/adsbtn"
+                                                >
+                                                    <ChildIcon className="w-4 h-4 mr-3 text-amber-500 group-hover/adsbtn:scale-110 transition-transform" />
+                                                    <span className="flex-1">{child.name}</span>
+                                                    <span className="ml-auto px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-400 text-slate-900 shadow-sm">
+                                                        IA
+                                                    </span>
+                                                </button>
+                                            )
+                                        }
 
                                         return (
                                             <Link
@@ -598,6 +624,12 @@ export default function AdminLayout({
                     {children}
                 </main>
             </div>
+
+            {/* Google Ads Modal déclenchable directement depuis le menu latéral */}
+            <GoogleAdsGeneratorModal
+                isOpen={isGoogleAdsModalOpen}
+                onClose={() => setIsGoogleAdsModalOpen(false)}
+            />
         </div>
     )
 }
