@@ -2,6 +2,23 @@ import { getTranslations } from 'next-intl/server'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
 import TrackingClient from './TrackingClient'
+import { Metadata } from 'next'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+    return {
+        title: isAr ? 'تتبع طلبيتك' : isEn ? 'Track Your Order' : 'Suivi de commande',
+        description: isAr
+            ? 'تتبع حالة طلبيتك من الكتب في المغرب خطوة بخطوة برقم الطلب ورقم الهاتف.'
+            : isEn
+            ? 'Track your Riwaya book order status across Morocco step by step using your order ID and phone number.'
+            : 'Suivez l\'état d\'expédition de votre commande de livres Riwaya au Maroc étape par étape.',
+        alternates: getCanonicalAlternates(`/${locale}/tracking`, locale),
+    }
+}
 
 export default async function TrackingPage() {
     const t = await getTranslations('Tracking')

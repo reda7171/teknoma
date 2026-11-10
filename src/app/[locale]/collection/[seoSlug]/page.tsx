@@ -10,6 +10,7 @@ import { getBaseUrl, normalizeImage } from '@/lib/utils'
 
 import { getSeoCategoryPage } from '@/lib/actions/seo-categories'
 import { getTranslations } from 'next-intl/server'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
 
 // Map de keywords SEO par slug pour enrichir le ciblage
 const slugKeywordsMap: Record<string, string[]> = {
@@ -84,7 +85,7 @@ export async function generateMetadata({ params }: { params: Promise<{ seoSlug: 
         ...(slugsByLocale.fr ? { 'fr': `${baseUrl}/fr/collection/${slugsByLocale.fr}`, 'fr-MA': `${baseUrl}/fr/collection/${slugsByLocale.fr}` } : {}),
         ...(slugsByLocale.ar ? { 'ar': `${baseUrl}/ar/collection/${slugsByLocale.ar}`, 'ar-MA': `${baseUrl}/ar/collection/${slugsByLocale.ar}` } : {}),
         ...(slugsByLocale.en ? { 'en': `${baseUrl}/en/collection/${slugsByLocale.en}`, 'en-MA': `${baseUrl}/en/collection/${slugsByLocale.en}` } : {}),
-        'x-default': `${baseUrl}/fr/collection/${slugsByLocale.fr || data.slug}`,
+        'x-default': `${baseUrl}/ar/collection/${slugsByLocale.ar || slugsByLocale.fr || data.slug}`,
       }
     }
   }
@@ -103,16 +104,31 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
   const data = resolved.category
   if (data.slug !== seoSlug) permanentRedirect(`/${locale}/collection/${data.slug}`)
 
-  // Obtenir les livres assignés manuellement d'abord
-  let popularBooks = data.books?.map((b: any) => b.book).filter((book: any) => book.active) || []
-  
-  // Si pas assez de livres, on complète avec la recherche automatique
+  // Imposer le filtrage linguistique strict sur les collections dédiées à une langue
+  const slugAndQuery = `${data.slug} ${data.searchQuery || ''} ${data.title}`.toLowerCase()
+  const forcedCollectionLang: 'fr' | 'en' | 'ar' | undefined =
+    /livres-francais|french-books|kotob-faransiya|\bfrançais\b/.test(slugAndQuery)
+      ? 'fr'
+      : /english-books|livres-anglais|kotob-ingliziya/.test(slugAndQuery)
+      ? 'en'
+      : /romans-arabes|riwayat-arabia|arabic-novels|كتب عربية/.test(slugAndQuery)
+      ? 'ar'
+      : undefined
+
+  // Obtenir les livres assignés manuellement d'abord (filtrés par langue si collection linguistique)
+  let popularBooks = (data.books?.map((b: any) => b.book).filter((book: any) => {
+    if (!book?.active) return false
+    if (!forcedCollectionLang) return true
+    return (book.language || '').toLowerCase().startsWith(forcedCollectionLang)
+  }) || [])
+
+  // Si pas assez de livres, on complète strictement dans la même langue si applicable
   if (popularBooks.length < 8) {
     let additionalBooks = []
-    if (data.searchQuery) {
-      additionalBooks = await getBooks({ search: data.searchQuery, limit: 8, active: true })
+    if (data.searchQuery && data.searchQuery.toLowerCase() !== 'français' && data.searchQuery.toLowerCase() !== 'english') {
+      additionalBooks = await getBooks({ search: data.searchQuery, language: forcedCollectionLang, limit: 8, active: true })
     } else {
-      additionalBooks = await getPopularBooks(8)
+      additionalBooks = await getPopularBooks(8, forcedCollectionLang)
     }
     // Ajouter ceux qui ne sont pas déjà dans la liste
     additionalBooks.forEach((b: any) => {
@@ -150,11 +166,11 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "هل التوصيل مجاني عند شراء الكتب؟",
-          a: "نوفر التوصيل المجاني على الباقات الترويجية المختارة أو عند وصول مجموع سلتكم إلى السقف المؤهل. رسوم الشحن تظهر بوضوح وبكل شفافية قبل تأكيد الطلب."
+          a: `تبلغ تكلفة التوصيل ${STORE_POLICY.shippingFeeMorocco} درهماً، ويكون التوصيل مجانياً للطلبات ابتداءً من ${STORE_POLICY.freeShippingThreshold} درهم أو على الباقات الترويجية المؤهلة.`
         },
         {
           q: "ما هي شروط الاستبدال والاسترجاع (ضمان رواية)؟",
-          a: "نوفر ضمان 'راضٍ أو مسترجع خلال 7 أيام'. في حال وجود أي عيب مصنعي أو تلف أثناء الشحن، يتكفل فريقنا باستبدال نسختكم فوراً أو إرجاع ثمنها دون تعقيد."
+          a: `لديكم مهلة ${STORE_POLICY.returnWindowDays} أيام تقويمية بعد الاستلام لطلب الإرجاع أو الاستبدال مجاناً في حال وجود عيب أو تلف أو خطأ في الطلب.`
         },
         {
           q: "هل تتوفر باقات وتخفيضات خاصة بالمجموعة؟",
@@ -185,11 +201,11 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "Is delivery free on book orders?",
-          a: "Free shipping is offered on selected promotional packs or eligible cart totals. Exact delivery charges are calculated and displayed transparently before confirmation."
+          a: `Standard shipping across Morocco is ${STORE_POLICY.shippingFeeMorocco} MAD, and delivery is free on orders over ${STORE_POLICY.freeShippingThreshold} MAD or selected promotional packs.`
         },
         {
           q: "What is your return and exchange policy?",
-          a: "Every order is protected by our Riwaya 7-day money-back guarantee. If you encounter any print defects or shipping issues, we immediately replace or refund your purchase."
+          a: `You have ${STORE_POLICY.returnWindowDays} calendar days after delivery to request a free return or replacement if a book has a print defect, transit damage, or order error.`
         },
         {
           q: "Do you offer bundle deals and discounts for this collection?",
@@ -220,11 +236,11 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "La livraison est-elle gratuite ?",
-          a: "La livraison est offerte sur nos packs promotionnels et dès que votre panier atteint le montant requis. Pour les autres commandes, les frais sont calculés et affichés en toute transparence avant validation."
+          a: `La livraison au Maroc est à ${STORE_POLICY.shippingFeeMorocco} DH et devient gratuite dès ${STORE_POLICY.freeShippingThreshold} DH d'achat (ou sur nos packs éligibles).`
         },
         {
           q: "Quelle est votre politique de retour ou d'échange ?",
-          a: "Vous bénéficiez de la garantie Riwaya 'Satisfait ou remboursé sous 7 jours'. En cas de défaut de fabrication ou de dommage durant le transport, nous échangeons l'ouvrage ou vous remboursons sans tracas."
+          a: `Vous disposez de ${STORE_POLICY.returnWindowDays} jours calendaires après réception pour demander un échange ou remboursement gratuit en cas de défaut, dommage ou erreur de commande.`
         },
         {
           q: "Proposez-vous des packs et des réductions sur plusieurs livres ?",

@@ -9,6 +9,7 @@ import ImageInjectorMetaForm from './ImageInjectorMetaForm'
 import BlogImageInjectorMetaForm from './BlogImageInjectorMetaForm'
 import MarketingImageInjectorMetaForm from './MarketingImageInjectorMetaForm'
 import SitemapSyncStatusWidget from '@/components/admin/SitemapSyncStatusWidget'
+import CatalogBlogQualityAudit, { AuditBookIssue, AuditPostIssue } from '@/components/admin/CatalogBlogQualityAudit'
 import { getSitemapsSyncStatus } from '@/lib/actions/seo-sitemaps'
 import { Search, Image as ImageIcon, Zap, Code } from 'lucide-react'
 
@@ -19,7 +20,7 @@ export const metadata = {
 export default async function SeoConfigPage({
     searchParams,
 }: {
-    searchParams: Promise<{ tab?: string }>
+    searchParams: Promise<{ tab?: string; sub?: string }>
 }) {
     await requirePageRole(["ADMIN","MANAGER"])
 
@@ -32,11 +33,81 @@ export default async function SeoConfigPage({
     const sp = await searchParams
     const activeTab = sp?.tab === 'head' ? 'head' : sp?.tab === 'images' ? 'images' : 'general'
 
-    const [seoSettings, injectedTags, sitemapsOverview] = await Promise.all([
+    const [seoSettings, injectedTags, sitemapsOverview, auditBooksRaw, auditPostsRaw] = await Promise.all([
         getSettingsByCategory('seo'),
         getSetting('seo_injected_head_tags'),
         getSitemapsSyncStatus(),
+        prisma.book.findMany({
+            where: { active: true },
+            orderBy: { views: 'desc' },
+            take: 100,
+            select: { id: true, title: true, author: true, language: true, isbn: true, description: true, descriptionFr: true, descriptionEn: true }
+        }),
+        prisma.post.findMany({
+            where: { published: true },
+            orderBy: { viewCount: 'desc' },
+            take: 100,
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                language: true,
+                content: true,
+                category: true,
+                _count: { select: { books: true } }
+            }
+        }),
     ])
+
+    // Calcul des anomalies prioritaires livres & blog
+    const seenBookTitles = new Map<string, number>()
+    for (const b of auditBooksRaw) {
+        const norm = (b.title || '').trim().toLowerCase()
+        if (norm) seenBookTitles.set(norm, (seenBookTitles.get(norm) || 0) + 1)
+    }
+    const bookIssues: AuditBookIssue[] = []
+    for (const b of auditBooksRaw) {
+        const reasons: string[] = []
+        const descLen = Math.max(
+            (b.description || '').trim().length,
+            (b.descriptionFr || '').trim().length,
+            (b.descriptionEn || '').trim().length
+        )
+        if (descLen < 150) reasons.push('Description < 150 car.')
+        if (!b.isbn || b.isbn.trim().length < 10) reasons.push('ISBN manquant')
+        if ((seenBookTitles.get((b.title || '').trim().toLowerCase()) || 0) > 1) reasons.push('Titre en doublon')
+        if (reasons.length > 0) {
+            bookIssues.push({
+                id: b.id,
+                title: b.title,
+                author: b.author,
+                language: b.language || 'fr',
+                reasons,
+            })
+        }
+    }
+
+    const postIssues: AuditPostIssue[] = []
+    for (const p of auditPostsRaw) {
+        const reasons: string[] = []
+        if ((p._count?.books || 0) === 0) reasons.push('Aucun livre lié')
+        const plain = (p.content || '').replace(/<[^>]*>/g, ' ').trim()
+        const words = plain ? plain.split(/\s+/).length : 0
+        if (words < 350) reasons.push(`Contenu court (${words} mots)`)
+        const lowerTitleAndBody = `${p.title} ${plain}`.toLowerCase()
+        if (/mark manson|atomic habits|العادات الذرية|فن اللامبالاة/.test(lowerTitleAndBody) && /suspense|personnages iconiques|iconic characters|maître du suspense/.test(lowerTitleAndBody)) {
+            reasons.push('Analyse hors-sujet détectée')
+        }
+        if (reasons.length > 0) {
+            postIssues.push({
+                id: p.id,
+                title: p.title,
+                slug: p.slug,
+                language: p.language || 'fr',
+                reasons,
+            })
+        }
+    }
 
     // Livres pour l'onglet Image Injector Tools
     let books: any[] = []
@@ -103,6 +174,14 @@ export default async function SeoConfigPage({
 
             {/* Widget Moniteur Sitemaps & Détection Googlebot */}
             <SitemapSyncStatusWidget initialData={sitemapsOverview} />
+
+            {/* Widget Audit Qualité Catalogue & Blog */}
+            <CatalogBlogQualityAudit
+                bookIssues={bookIssues.slice(0, 25)}
+                postIssues={postIssues.slice(0, 25)}
+                totalBooksChecked={auditBooksRaw.length}
+                totalPostsChecked={auditPostsRaw.length}
+            />
 
             <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-black/5 p-8 md:p-12 overflow-hidden">
                 <div className="w-full mx-auto">

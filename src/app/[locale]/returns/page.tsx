@@ -2,6 +2,23 @@ import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { RotateCcw, ShieldCheck, Clock, MessageCircle } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { Metadata } from 'next'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+    return {
+        title: isAr ? 'سياسة الإرجاع والاستبدال' : isEn ? 'Returns & Refunds Policy' : 'Retours et remboursements',
+        description: isAr
+            ? 'شروط إرجاع واستبدال الكتب خلال 3 أيام تقويمية من التسليم في مكتبة رواية.'
+            : isEn
+            ? 'Return, exchange, and refund terms within 3 calendar days of book delivery at Riwaya Morocco.'
+            : 'Conditions de retour, d\'échange et de remboursement de vos livres sous 3 jours calendaires sur Riwaya.',
+        alternates: getCanonicalAlternates(`/${locale}/returns`, locale),
+    }
+}
 
 export default async function ReturnsPage() {
     const t = await getTranslations('Returns');

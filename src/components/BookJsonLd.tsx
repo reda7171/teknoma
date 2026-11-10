@@ -1,5 +1,6 @@
 import React from 'react';
 import { getSchemaAvailability } from '@/lib/product-availability';
+import { STORE_POLICY } from '@/lib/constants/store-policy';
 
 interface BookJsonLdProps {
   book: {
@@ -182,7 +183,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             "applicableCountry": "MA",
             "returnPolicyCountry": "MA",
             "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-            "merchantReturnDays": 3,
+            "merchantReturnDays": STORE_POLICY.returnWindowDays,
             "returnMethod": "https://schema.org/ReturnByMail",
             "returnFees": "https://schema.org/FreeReturn",
             "refundType": "https://schema.org/FullRefund",
@@ -192,7 +193,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
             "@type": "OfferShippingDetails",
             "shippingRate": {
               "@type": "MonetaryAmount",
-              "value": 35,
+              "value": book.price >= STORE_POLICY.freeShippingThreshold ? 0 : STORE_POLICY.shippingFeeMorocco,
               "currency": "MAD"
             },
             "shippingDestination": {

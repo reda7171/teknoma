@@ -64,22 +64,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.warn('⚠️ Sitemaps: Could not fetch books during build')
     }
 
-    // 3. Articles de blog dynamiques
+    // 3. Articles de blog dynamiques (indexés uniquement dans leur langue d'origine)
     let postUrls: any[] = []
     try {
         const posts = await prisma.post.findMany({
             where: { published: true },
-            select: { slug: true, updatedAt: true },
+            select: { slug: true, language: true, updatedAt: true },
             orderBy: { updatedAt: 'desc' }
         })
-        postUrls = locales.flatMap((locale) =>
-            posts.map((post) => ({
-                url: `${baseUrl}/${locale}/blog/${post.slug}`,
+        postUrls = posts.map((post) => {
+            const postLocale = locales.includes(post.language || '') ? post.language : 'fr'
+            return {
+                url: `${baseUrl}/${postLocale}/blog/${post.slug}`,
                 lastModified: post.updatedAt,
                 changeFrequency: 'weekly' as const,
                 priority: 0.7,
-            }))
-        )
+            }
+        })
     } catch (e) {
         console.warn('⚠️ Sitemaps: Could not fetch posts during build')
     }

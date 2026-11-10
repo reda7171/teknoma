@@ -347,9 +347,9 @@
     "QualityTitle": "Guaranteed Quality",
     "QualityDesc": "Original books only, checked before dispatch.",
     "DeliveryTitle": "Fast Delivery",
-    "DeliveryDesc": "Shipping everywhere in Morocco in 24/48h.",
+    "DeliveryDesc": "Fast shipping across Morocco: 24-48h in major cities, 48-72h in other regions.",
     "SupportTitle": "Customer Service",
-    "SupportDesc": "A dedicated team to support you 24/7.",
+    "SupportDesc": "A dedicated support team available Monday to Saturday, 9am to 7pm.",
     "OurLocation": "Our Location",
     "VisitUs": "Come and visit us in Rabat"
   },
@@ -372,7 +372,7 @@
   "HomePage": {
     "SeeAll": "See All",
     "hero": {
-      "Badge": "Free shipping over 300 MAD + Cash on delivery anywhere in Morocco",
+      "Badge": "Free shipping from 500 MAD + Cash on Delivery across Morocco",
       "TitlePart1": "Morocco's #1 Online Bookstore",
       "TitlePart2": "Book bundles from 100 DH",
       "Description": "Discover a premium selection of books and save with our exclusive bundles. Knowledge, with style.",
@@ -381,7 +381,7 @@
       "GoogleLogin": "Sign in with Google",
       "GoogleBonus": "+10 DH Free",
       "CustomBundle": "Create my Custom Bundle (-30%)",
-      "SocialProof": "⭐ 4.8/5 by over 1000 satisfied readers",
+      "SocialProof": "Cash on Delivery across Morocco · Customer support Mon-Sat",
       "EditorsChoice": "Editor's Choice",
       "Select": "SELECT",
       "PinnedBook": "Pinned Book in Hero Center",
@@ -572,7 +572,7 @@
     "Contact": "Contact",
     "Terms": "Terms of Service",
     "Privacy": "Privacy Policy",
-    "Slogan": "Beautifully curated knowledge for the modern mind. Worldwide delivery starting from Morocco.",
+    "Slogan": "Curated books and literary packs. Fast delivery across Morocco (24-72h) and worldwide via Amana International.",
     "Navigation": "Navigation",
     "Support": "Support",
     "Shipping": "Shipping",
@@ -585,13 +585,23 @@
     "DevelopedBy": "Developed by <name>Reda</name>",
     "DownloadApp": "Download the App",
     "SoonOn": "Coming soon on",
-    "AppComingSoon": "Coming Soon"
+    "AppComingSoon": "Coming Soon",
+    "NewsletterSuccess": "Thank you! You will receive our upcoming book selections.",
+    "Categories": {
+      "Bookstore": "Bookstore",
+      "Legal": "Legal Information"
+    },
+    "Links": {
+      "Dmca": "Copyright (DMCA)",
+      "TrackOrder": "Track Order",
+      "JoinTeam": "Join the Team"
+    }
   },
   "Common": {
     "Search": "Search",
     "SearchPlaceholder": "Title, author, description...",
     "UsedBook": "Used book",
-    "FreeShippingPromo": "Free delivery everywhere in Morocco for orders over 300 MAD!",
+    "FreeShippingPromo": "Free shipping across Morocco on orders over 500 MAD!",
     "Loading": "Loading...",
     "Price": "Price",
     "AddToCart": "Add to Cart",
@@ -682,31 +692,31 @@
     "Questions": {
       "Shipping": {
         "Question": "What are the shipping times?",
-        "Answer": "We deliver within 24-48 hours in major cities (Casablanca, Rabat, Marrakech, Tangier) and 48-72 hours for other regions."
+        "Answer": "We deliver within 24-48 business hours in major cities (Casablanca, Rabat, Marrakech, Tangier...) and 48-72 hours for other Moroccan regions, plus worldwide delivery via Amana International."
       },
       "Payment": {
         "Question": "What payment methods are accepted?",
-        "Answer": "We currently only accept Cash on Delivery (COD) to ensure your complete satisfaction upon receipt."
+        "Answer": "We offer Cash on Delivery (COD) across Morocco as well as secure online card payment and bank transfer."
       },
       "Returns": {
         "Question": "Can I return a book?",
-        "Answer": "Yes, you have 3 days after delivery to request a return if the book is damaged or does not correspond to your order."
+        "Answer": "You have 3 calendar days after delivery to request a free return or replacement if a book is defective, damaged, or wrong, or return an unused/sealed book in its original condition."
       },
       "DeliveryCost": {
         "Question": "How much does delivery cost?",
-        "Answer": "Delivery is free for orders over 400 MAD. For orders below this amount, a flat fee of 35 MAD applies."
+        "Answer": "Standard shipping across Morocco is 30 MAD, and delivery is free on orders over 500 MAD (and on eligible promotional bundles). Worldwide shipping via Amana International is 200 MAD."
       }
     }
   },
   "Returns": {
-    "Title": "Return Policy",
-    "Subtitle": "Return conditions",
-    "Intro": "Returns are accepted for defective products only. We do not accept exchanges.",
+    "Title": "Returns & Refunds",
+    "Subtitle": "Riwaya Customer Guarantee",
+    "Intro": "You have 3 calendar days after delivery to request a return, exchange, or refund under the terms below.",
     "Policy": {
-      "Point1": "A return is accepted only when the delivered product is defective, damaged, or incorrect.",
-      "Point2": "Report the issue within 3 calendar days of delivery and provide your order number and clear photos.",
-      "Point3": "Contact us through WhatsApp or at contact@riwaya.store before sending anything. Unauthorized returns may be refused.",
-      "Point4": "Returning a defective product is free. We do not accept exchanges. Once received and inspected, an approved return will be refunded."
+      "Point1": "Free returns and exchanges are accepted whenever the received book is defective, damaged in transit, or does not match your order.",
+      "Point2": "Unused books in their original, unread condition and packaging may also be returned or exchanged within 3 calendar days (standard 30 MAD return shipping applies).",
+      "Point3": "Contact us on WhatsApp (+212 702-220575) or at contact@riwaya.store within 3 calendar days of delivery with your order ID and clear photos.",
+      "Point4": "Once the returned parcel is received and inspected, we issue your refund via bank transfer or instant store credit cleanly."
     }
   },
   "Contact": {
@@ -1807,24 +1817,24 @@
     "seoText": "Riwaya.store is your online bookstore in Morocco. We offer a wide selection of books (novels, manga, fine arts, children's books, personal development, and English books) as well as all school supplies (school bags, pencil cases, and back-to-school essentials). Drop your school list online and enjoy fast home delivery anywhere in Morocco (Casablanca, Rabat, Tangier, etc.). All our products are 100% authentic with secure payment by credit card or cash on delivery."
   },
   "JoinUs": {
-    "heroTag": "Job Opportunity",
-    "heroTitle1": "Join",
-    "heroTitle2": "the Team",
-    "heroDescription": "Riwaya blog is looking for a talented and creative blogger for an official position on the blog. If you are talented, love blogging, and have many ideas, we are looking for you. Write a sample post + an introduction about yourself and send everything to Riwaya team.",
-    "conditionsTitle": "Participation Conditions",
-    "conditionsDescription": "Thank you for choosing to contribute your topics to Riwaya blog. We invite you to read these conditions so your topic can be published:",
-    "condition1Title": "We do not accept fully copied topics",
-    "condition1Desc": "Riwaya blog's policy over the past 31 years has been based on enriching Arabic technical content, therefore we do not accept topics copied entirely from other sites. On the other hand, we accept topics written in your own words even if they come from one or multiple sources.",
-    "condition2Title": "We do not accept previously covered topics",
-    "condition2Desc": "Of course, we cannot publish topics that have already been published in order to avoid repetition.",
-    "condition3Title": "We do not accept topics containing activation codes or software",
-    "condition3Desc": "At Riwaya blog, we ensure not to violate intellectual property rights. However, we accept topics containing official activation codes obtained through legal means.",
-    "condition4Title": "We do not accept poorly written topics",
-    "condition4Desc": "We all make mistakes, and a few minor errors are fine, but if they make sentences incomprehensible or if there are too many spelling mistakes, it is impossible to publish.",
-    "applyTitle": "How to Apply",
-    "applyDescription": "In order to send us your post, please write it in a Word file and send it to the blog via WhatsApp.",
-    "applyButton": "Contact us via WhatsApp",
-    "applyThanks": "Thank you"
+    "heroTag": "Join Riwaya",
+    "heroTitle1": "Join our",
+    "heroTitle2": "Editorial Team",
+    "heroDescription": "The Riwaya Journal is looking for passionate readers, literary reviewers, and book writers to contribute original reading guides, summaries, and cultural articles in Morocco.",
+    "conditionsTitle": "Editorial Contribution Guidelines",
+    "conditionsDescription": "To keep every guide helpful, accurate, and trustworthy for readers across Morocco, please follow our four editorial standards:",
+    "condition1Title": "Original, book-accurate analysis",
+    "condition1Desc": "Every review, summary, or reading guide must be written in your own words from direct reading of the book, with zero generic filler or copied content.",
+    "condition2Title": "Fresh literary topics",
+    "condition2Desc": "We prioritize new books, authors, and reading angles not yet covered on the journal to avoid duplicate content.",
+    "condition3Title": "Copyright and accurate attribution",
+    "condition3Desc": "Short excerpts must accurately credit the book title and author while strictly respecting intellectual property rights.",
+    "condition4Title": "Clear writing quality",
+    "condition4Desc": "Submissions are welcome in French, Arabic, or English with clear structure, clean spelling, and practical takeaways for readers.",
+    "applyTitle": "Send Your Application",
+    "applyDescription": "Write a short sample article (500 to 1,000 words) about a book of your choice along with a brief introduction and send it via WhatsApp or email at contact@riwaya.store.",
+    "applyButton": "Contact Editorial Team on WhatsApp",
+    "applyThanks": "Welcome to the Riwaya community"
   },
   "ContactPage": {
     "CustomerSupport": "Customer Support",
@@ -1861,7 +1871,7 @@
     "Title1": "Returns and",
     "Title2": "Refunds",
     "Section1Title": "1. Right of withdrawal",
-    "Section1Desc": "In accordance with current legislation, you have a period of <bold>3 calendar days</bold> from the receipt of your order to request an exchange or a return if the product does not suit you.",
+    "Section1Desc": "Under our store policy, you have <bold>3 calendar days</bold> from receiving your order to request an exchange or return (for a defective/wrong item or an unopened/unread book in original packaging).",
     "Section2Title": "2. Return conditions",
     "Section2Desc": "To be eligible for a return, your book must be in the same condition as when you received it (unread, without marks, creases, or annotations). The original packaging must be kept.",
     "Section3Title": "3. Defective items",
@@ -1869,33 +1879,33 @@
     "Section4Title": "4. Return procedure",
     "Section4Desc": "To initiate a return, please contact our customer service via WhatsApp or by email at contact@riwaya.store. Please include your order number and photos if the product is defective.",
     "Section5Title": "5. Return shipping costs",
-    "Section5Desc": "Return shipping is the customer's responsibility and costs <bold>35 MAD</bold>. If the item received is damaged, defective, or incorrect, Riwaya will replace it at no cost."
+    "Section5Desc": "Return and replacement of any damaged, defective, or wrong item is <bold>100% free</bold>. For convenience returns of unused items in original condition, a standard shipping fee of <bold>30 MAD</bold> applies."
   },
   "ShippingPolicyPage": {
     "Title": "Shipping Policy",
     "Section1Title": "1. Delivery areas",
-    "Section1Desc": "<bold>Riwaya</bold> delivers to all cities in the Kingdom of Morocco. Whether you are in Casablanca, Rabat, Marrakech, Tangier, or more remote areas, we ensure that your books arrive safely.",
+    "Section1Desc": "<bold>Riwaya</bold> delivers to every city in the Kingdom of Morocco (Casablanca, Rabat, Salé, Témara, Marrakech, Tangier, Fes, Agadir...) and offers international express delivery via <bold>Amana International</bold>.",
     "Section2Title": "2. Delivery times",
-    "Section2Desc": "Our delivery times generally vary between <bold>24h and 48h</bold> working days for major cities. For other regions, the delay can extend up to 4 working days.",
+    "Section2Desc": "Delivery times are generally <bold>24 to 48 business hours</bold> for major cities and <bold>48 to 72 business hours</bold> for other Moroccan regions (up to 4 business days for remote areas).",
     "Section3Title": "3. Delivery costs",
-    "Section3Desc": "Delivery costs are 25 MAD for Casablanca and 35 MAD for other cities. Delivery is free for any order over 300 MAD.",
+    "Section3Desc": "Standard shipping in Morocco is a flat <bold>30 MAD</bold>. Delivery is <bold>free on orders over 500 MAD</bold> (and on eligible bundles). Worldwide shipping via Amana International is <bold>200 MAD</bold>.",
     "Section4Title": "4. Order tracking",
-    "Section4Desc": "Once your order has been dispatched, you will receive a confirmation by SMS or WhatsApp with the necessary information to track the status of your delivery."
+    "Section4Desc": "Once shipped, you receive a WhatsApp or SMS confirmation and can track your order anytime from our tracking page."
   },
   "PrivacyPage": {
     "Title": "Privacy Policy",
     "Section1Title": "1. Data Collected",
-    "Section1Desc": "We collect the necessary data to process your orders (name, shipping address, phone number) as well as the information shared via our contact form, our newsletter, or WhatsApp. We also collect anonymized browsing data.",
+    "Section1Desc": "In compliance with <bold>Moroccan Law No. 09-08</bold> on personal data protection, we collect only the details necessary to process and deliver your orders (full name, delivery address, city, phone number, optional email) and provide customer care.",
     "Section2Title": "2. Use of Data",
-    "Section2Desc": "Your information is used for shipping your orders, customer support, and improving our store. We also use this data, with your consent, to personalize your experience and offer you relevant advertisements.",
+    "Section2Desc": "Your information is shared strictly with authorized parties required to fulfill your order: delivery couriers, payment processors (when paying online), and our support team. We never sell personal data to third parties.",
     "Section3Title": "3. Cookies and Analytics Tools",
     "Section3Desc": "Riwaya uses cookies, <bold>Google Analytics 4</bold>, and <bold>Google Tag Manager (GTM)</bold> to understand the use of our site, measure our audience, and continuously improve our services.",
     "Section4Title": "4. Google AdSense and Advertising",
     "Section4Desc": "Third-party vendors, including Google, use cookies to serve ads based on prior visits to our website or other sites. Google's use of advertising cookies enables it and its partners to serve ads based on your visit. You may opt out of personalized advertising by visiting <link>Google Ads Settings</link> or <aboutads>www.aboutads.info</aboutads>.",
     "Section5Title": "5. Retention Period",
-    "Section5Desc": "Data related to your orders is kept for the legal duration necessary for accounting and management purposes. Browsing data and cookies are kept according to current recommendations.",
+    "Section5Desc": "Order records are retained for the statutory accounting and tax retention period in Morocco. Analytics and advertising cookies are retained for up to <bold>13 months</bold> and can be disabled anytime in your browser settings.",
     "Section6Title": "6. Your Rights and Contact",
-    "Section6Desc": "In accordance with data protection laws, you have the right to access, rectify, and delete your personal data. To exercise these rights, contact us at <contact>contact@riwaya.store</contact>."
+    "Section6Desc": "Under Law 09-08, you have the right to access, rectify, and object to the processing of your personal data. Contact us anytime at <contact>contact@riwaya.store</contact>."
   },
   "CookieBanner": {
     "Message": "We use cookies to improve your experience on our site and personalize ads. By continuing to browse, you agree to our use of cookies.",
@@ -2023,7 +2033,7 @@
     "Step3Title": "Receive orders",
     "Step3Desc": "Be notified instantly of every new purchase by a customer on the platform.",
     "Step4Title": "Shipping & Payment",
-    "Step4Desc": "Manage your shipments with your customers and collect 100% of your sales with no commission.",
+    "Step4Desc": "Ship your parcels easily with our courier partners and receive weekly payouts after successful delivery and collection, minus our transparent partner commission.",
     "NouvelleCommande": "New order",
     "AlchimistePrice": "The Alchemist - 80 MAD",
     "SoldeDisponible": "Available balance",

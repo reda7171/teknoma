@@ -38,6 +38,7 @@ import ScrollDownIndicator from '@/components/ScrollDownIndicator'
 
 import { getLocalizedTitle, getLocalizedDescription, getLocalizedLongDescription, generateBookUrl } from '@/lib/i18n-utils'
 import { getBaseUrl, getOgImageUrl, normalizeImage } from '@/lib/utils'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
 
 // Availability must be read at request time to match external inventory feeds.
 export const dynamic = 'force-dynamic'
@@ -146,7 +147,7 @@ export async function generateMetadata({
         ]
     } else if (locale === 'en') {
         siteTitle = `${localizedTitle} - ${book.author} | Riwaya Library`
-        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Buy "${localizedTitle}" by ${book.author} on Riwaya. Fast delivery in Morocco. Price: ${book.price} درهم. ${book.stock > 0 ? 'In stock' : 'Out of stock'}.`
+        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Buy "${localizedTitle}" by ${book.author} on Riwaya. Fast delivery in Morocco. Price: ${book.price} MAD. ${book.stock > 0 ? 'In stock' : 'Out of stock'}.`
         keywords = [
             localizedTitle,
             book.author,
@@ -161,7 +162,7 @@ export async function generateMetadata({
         ]
     } else {
         siteTitle = `${localizedTitle} - ${book.author} | Librairie Riwaya`
-        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Achetez "${localizedTitle}" de ${book.author} sur Riwaya. Livraison rapide au Maroc. Prix: ${book.price} درهم. ${book.stock > 0 ? 'En stock' : 'Rupture de stock'}.`
+        description = localizedDescriptionText ? localizedDescriptionText.slice(0, 150) + '...' : `Achetez "${localizedTitle}" de ${book.author} sur Riwaya. Livraison rapide au Maroc. Prix: ${book.price} DH. ${book.stock > 0 ? 'En stock' : 'Rupture de stock'}.`
         keywords = [
             localizedTitle,
             book.author,
@@ -198,7 +199,7 @@ export async function generateMetadata({
         || process.env.FACEBOOK_CLIENT_ID
 
     return {
-        title: siteTitle,
+        title: { absolute: siteTitle },
         description: description,
         keywords: keywords,
         openGraph: {
@@ -233,7 +234,7 @@ export async function generateMetadata({
             'product:price:amount': `${book.price}`,
             'product:price:currency': 'MAD',
             'product:availability': getGoogleAvailability(book).replace('_', ' '),
-            'product:condition': 'new',
+            'product:condition': (book.condition === 'USED' || book.condition === 'GOOD') ? 'used' : 'new',
             'product:retailer_item_id': book.id,
             'og:price:amount': `${book.price}`,
             'og:price:currency': 'MAD',
@@ -697,17 +698,19 @@ export default async function BookDetailPage({
 
                             {/* Rating Summary */}
                             <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-                                <div className="flex items-center gap-2 bg-white px-4 md:px-5 py-2 md:py-3 rounded-2xl shadow-sm border border-gray-50">
-                                    <div className="flex items-center gap-1">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star
-                                                key={i}
-                                                className={`w-3 h-3 ${i < Math.round(averageRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-100'}`}
-                                            />
-                                        ))}
+                                {reviews.length > 0 && averageRating > 0 && (
+                                    <div className="flex items-center gap-2 bg-white px-4 md:px-5 py-2 md:py-3 rounded-2xl shadow-sm border border-gray-50">
+                                        <div className="flex items-center gap-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star
+                                                    key={i}
+                                                    className={`w-3 h-3 ${i < Math.round(averageRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-100'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <span className="text-[10px] font-black text-black ml-2 uppercase tracking-widest">{averageRating.toFixed(1)}</span>
                                     </div>
-                                    <span className="text-[10px] font-black text-black ml-2 uppercase tracking-widest">{averageRating > 0 ? averageRating.toFixed(1) : '5.0'}</span>
-                                </div>
+                                )}
                                 <span className="text-[9px] rtl:text-sm rtl:tracking-normal font-black text-gray-500 uppercase tracking-[0.2em]">
                                     {reviews.length > 0 ? tBook('ReaderReviews', { count: reviews.length }) : tBook('BeFirstToReview')}
                                 </span>
@@ -718,7 +721,7 @@ export default async function BookDetailPage({
                                 <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[3rem] p-5 md:p-10 shadow-2xl shadow-black/5">
                                     <div className="flex items-baseline gap-3 mb-3 md:mb-4">
                                         <span className="text-4xl md:text-7xl font-black text-black tracking-tighter leading-none">{book.price}</span>
-                                        <span className="text-xl font-black text-gray-500 uppercase tracking-widest">{locale === 'ar' ? 'درهم' : 'درهم'}</span>
+                                        <span className="text-xl font-black text-gray-500 uppercase tracking-widest">{locale === 'ar' ? 'درهم' : locale === 'en' ? 'MAD' : 'DH'}</span>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-2">
                                         <div className="flex items-center gap-2">
@@ -896,7 +899,7 @@ export default async function BookDetailPage({
                                                     <div className="flex-1 min-w-0">
                                                         <span className="text-sm sm:text-base font-black text-black group-hover:text-gray-600 line-clamp-2 transition-colors">{fbDisplayTitle}</span>
                                                         <p className="text-xs font-bold text-gray-500 mt-1 truncate">{fbBook.author}</p>
-                                                        <p className="text-sm font-black text-black mt-2">{fbBook.price} {locale === 'ar' ? 'درهم' : 'درهم'}</p>
+                                                        <p className="text-sm font-black text-black mt-2">{fbBook.price} {locale === 'ar' ? 'درهم' : locale === 'en' ? 'MAD' : 'DH'}</p>
                                                     </div>
                                                 </Link>
                                                 <AddToCartButton
@@ -936,18 +939,81 @@ export default async function BookDetailPage({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8">
                                         <h2 className="text-sm font-black text-black uppercase tracking-[0.3em]">{tBook('Technical')}</h2>
-                                        <dl className="space-y-5">
+                                        <dl className="space-y-4">
                                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
                                                 <dt className="text-xs font-black uppercase tracking-widest text-gray-500">{tBook('Reference')}</dt>
-                                                <dd className="text-sm font-black text-black tracking-widest break-all sm:text-right">{book.isbn || 'RIWAYA-GEN'}</dd>
+                                                <dd className="text-sm font-black text-black tracking-widest break-all sm:text-right">{book.isbn || `RW-${book.id.slice(0, 8).toUpperCase()}`}</dd>
                                             </div>
                                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
-                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-500">{tBook('Volume')}</dt>
-                                                <dd className="text-sm font-black text-black tracking-widest sm:text-right">~{Math.floor(Math.random() * 200) + 150} {tBook('Pages')}</dd>
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-500">
+                                                    {locale === 'ar' ? 'اللغة' : locale === 'en' ? 'Language' : 'Langue'}
+                                                </dt>
+                                                <dd className="text-sm font-black text-black tracking-wide sm:text-right">
+                                                    {(book.language || 'fr').toLowerCase().startsWith('ar')
+                                                        ? (locale === 'ar' ? 'العربية' : locale === 'en' ? 'Arabic' : 'Arabe')
+                                                        : (book.language || '').toLowerCase().startsWith('en')
+                                                        ? (locale === 'ar' ? 'الإنجليزية' : locale === 'en' ? 'English' : 'Anglais')
+                                                        : (locale === 'ar' ? 'الفرنسية' : locale === 'en' ? 'French' : 'Français')}
+                                                </dd>
                                             </div>
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-500">
+                                                    {locale === 'ar' ? 'الحالة' : locale === 'en' ? 'Condition' : 'État'}
+                                                </dt>
+                                                <dd className="text-sm font-black text-black tracking-wide sm:text-right">
+                                                    {(book.condition === 'USED' || book.condition === 'GOOD')
+                                                        ? (locale === 'ar' ? 'مستعمل (حالة ممتازة)' : locale === 'en' ? 'Pre-loved (Good condition)' : "D'occasion (Bon état)")
+                                                        : (locale === 'ar' ? 'جديد' : locale === 'en' ? 'New' : 'Neuf')}
+                                                </dd>
+                                            </div>
+                                            {book.category && (
+                                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
+                                                    <dt className="text-xs font-black uppercase tracking-widest text-gray-500">
+                                                        {locale === 'ar' ? 'التصنيف' : locale === 'en' ? 'Category' : 'Catégorie'}
+                                                    </dt>
+                                                    <dd className="text-sm font-black text-black tracking-wide sm:text-right">{book.category}</dd>
+                                                </div>
+                                            )}
+                                            {book.numberOfPages && book.numberOfPages > 0 && (
+                                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
+                                                    <dt className="text-xs font-black uppercase tracking-widest text-gray-500">{tBook('Volume')}</dt>
+                                                    <dd className="text-sm font-black text-black tracking-widest sm:text-right">{book.numberOfPages} {tBook('Pages')}</dd>
+                                                </div>
+                                            )}
                                         </dl>
                                     </div>
 
+                                    <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
+                                        <h2 className="text-sm font-black text-black uppercase tracking-[0.3em]">
+                                            {locale === 'ar' ? 'التوصيل والإرجاع' : locale === 'en' ? 'Shipping & Returns' : 'Livraison & Retours'}
+                                        </h2>
+                                        <dl className="space-y-4">
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-500">
+                                                    {locale === 'ar' ? 'تكلفة الشحن' : locale === 'en' ? 'Standard Fee' : 'Tarif Maroc'}
+                                                </dt>
+                                                <dd className="text-sm font-black text-black sm:text-right">
+                                                    {book.price >= STORE_POLICY.freeShippingThreshold
+                                                        ? (locale === 'ar' ? 'مجاني' : locale === 'en' ? 'Free' : 'Gratuit')
+                                                        : `${STORE_POLICY.shippingFeeMorocco} ${locale === 'ar' ? 'درهم' : locale === 'en' ? 'MAD' : 'DH'} (${locale === 'ar' ? 'مجاني من' : locale === 'en' ? 'free from' : 'offert dès'} ${STORE_POLICY.freeShippingThreshold})`}
+                                                </dd>
+                                            </div>
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-500">
+                                                    {locale === 'ar' ? 'مدة التوصيل' : locale === 'en' ? 'Delivery Time' : 'Délai'}
+                                                </dt>
+                                                <dd className="text-sm font-black text-black sm:text-right">24-48h / 48-72h</dd>
+                                            </div>
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-gray-50 gap-2">
+                                                <dt className="text-xs font-black uppercase tracking-widest text-gray-500">
+                                                    {locale === 'ar' ? 'سياسة الإرجاع' : locale === 'en' ? 'Returns' : 'Retours'}
+                                                </dt>
+                                                <dd className="text-sm font-black text-black sm:text-right">
+                                                    {STORE_POLICY.returnWindowDays} {locale === 'ar' ? 'أيام' : locale === 'en' ? 'calendar days' : 'jours calendaires'}
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                    </div>
                                 </div>
                             </div>
 

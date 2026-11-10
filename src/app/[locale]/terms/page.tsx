@@ -2,12 +2,22 @@ import { getTranslations } from 'next-intl/server'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { FileSignature, CreditCard, Truck, RefreshCcw, Copyright, FileWarning } from 'lucide-react'
+import { Metadata } from 'next'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: 'TermsPage' });
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
     return {
-        title: `${t('Title')} | Riwaya`
+        title: t('Title'),
+        description: isAr
+            ? 'الشروط العامة للبيع والاستخدام الخاصة بمكتبة رواية في المغرب.'
+            : isEn
+            ? 'Terms and Conditions of sale, Cash on Delivery, shipping, and returns on Riwaya.'
+            : 'Conditions générales de vente, paiement à la livraison, expédition et retours sur la librairie Riwaya.',
+        alternates: getCanonicalAlternates(`/${locale}/terms`, locale),
     }
 }
 

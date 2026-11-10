@@ -511,15 +511,16 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
 
                     const gaEventParams: Record<string, any> = {
                         transaction_id: fullOrder.id,
-                        value: Number(fullOrder.total),
+                        value: Number((Number(fullOrder.total) || 0).toFixed(2)),
                         currency: 'MAD',
-                        shipping: Number(fullOrder.shippingFees || 0),
+                        shipping: Number((Number(fullOrder.shippingFees) || 0).toFixed(2)),
+                        payment_type: data.paymentMethod || 'COD',
                         coupon: fullOrder.couponCode || undefined,
                         engagement_time_msec: 100,
                         items: fullOrder.items.map((i: any, index: number) => ({
                             item_id: i.bookId || i.packId || i.extraProductId || i.giftId || i.id,
                             item_name: i.book?.title || i.pack?.name || i.extraProduct?.name || 'Article',
-                            price: Number(i.price) || 0,
+                            price: Number((Number(i.price) || 0).toFixed(2)),
                             quantity: i.quantity || 1,
                             item_category: i.type || 'Books',
                             index

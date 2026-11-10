@@ -1,6 +1,6 @@
 import { getAdminRole } from '@/lib/actions/auth'
 import { getPostBySlug, incrementPostViews, getRelatedPosts, getPrevNextPosts } from '@/lib/actions/blog'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import Image from 'next/image'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/FooterWithFeatures'
@@ -47,16 +47,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     }
 
     const siteUrl = getBaseUrl()
-    const canonicalUrl = `${siteUrl}/${locale}/blog/${decodedSlug}`
+    const targetLocale = ['fr', 'en', 'ar'].includes(post.language || '') ? post.language : locale
+    const canonicalUrl = `${siteUrl}/${targetLocale}/blog/${post.slug || decodedSlug}`
     const fallbackApiUrl = `${siteUrl}/api/blog/${post.id}/image`
     const imageUrl = post.coverImage ? getOgImageUrl(post.coverImage, siteUrl, fallbackApiUrl) : null
 
     const baseKeywords = ["رواية", "riwaya", "book", "الكاتب", "authors", "كتب"]
     const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
     const keywords = [...tags, ...baseKeywords]
+    const resolvedAuthor = getDisplayAuthor(post.authorName || post.author?.fullName, targetLocale)
 
     return {
-        title: `${post.title} | Blog Riwaya`,
+        title: { absolute: `${post.title} | Blog Riwaya` },
         description: post.excerpt || post.title,
         keywords: keywords,
         openGraph: {
@@ -65,7 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             url: canonicalUrl,
             type: 'article',
             publishedTime: post.publishedAt?.toISOString(),
-            authors: post.author?.fullName ? [post.author.fullName] : ['Riwaya'],
+            authors: [resolvedAuthor],
             images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630, alt: post.title }] : [],
         },
         twitter: {
@@ -74,7 +76,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             description: post.excerpt || post.title,
             images: imageUrl ? [imageUrl] : [],
         },
-        alternates: { canonical: canonicalUrl },
+        alternates: {
+            canonical: canonicalUrl,
+            languages: {
+                [targetLocale]: canonicalUrl,
+                'x-default': canonicalUrl,
+            }
+        },
     }
 }
 
@@ -106,6 +114,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     if (!post) notFound()
 
+    // Redirection 301 si l'article est consulté sous un mauvais préfixe linguistique (ex: article EN sous /fr/blog/...)
+    if (post.language && ['fr', 'en', 'ar'].includes(post.language) && post.language !== locale) {
+        permanentRedirect(`/${post.language}/blog/${encodeURIComponent(post.slug)}`)
+    }
+
     const headersList = await headers()
     const country = headersList.get('cf-ipcountry') || headersList.get('x-vercel-ip-country') || 'Inconnu'
     await incrementPostViews(post.id, country)
@@ -115,6 +128,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const isAdmin = adminRole === 'ADMIN'
 
     const displayAuthor = getDisplayAuthor(post.authorName || post.author?.fullName, locale);
+    const hasCustomAuthorName = Boolean(
+        post.authorName &&
+        post.authorName.trim() !== '' &&
+        post.authorName.trim().toLowerCase() !== (post.author?.fullName || '').trim().toLowerCase()
+    );
+    const displayAuthorRole = hasCustomAuthorName
+        ? (locale === 'ar' ? 'محرر أدبي في رواية' : locale === 'en' ? 'Riwaya Literary Contributor' : 'Rédacteur littéraire Riwaya')
+        : (post.author?.bio || post.author?.editorialRole || t('ModeratorRole'));
 
     // Convertir markdown → HTML et réparer quelques soucis de formattage
     let rawContent = post.content || '';
@@ -687,6 +708,42 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             })()}
                         </article>
 
+                        {/* === CTA fin d'article vers la fiche du livre associé === */}
+                        {linkedBook && (
+                            <div className="mt-10 bg-white border-2 border-slate-100 rounded-3xl p-5 sm:p-7 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-5">
+                                <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
+                                    <div className="relative w-16 h-24 shrink-0 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 shadow-sm">
+                                        <Image
+                                            src={normalizeImage(linkedBook.image)}
+                                            alt={linkedBook.title}
+                                            fill
+                                            className="object-cover"
+                                            sizes="64px"
+                                        />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700 mb-1">
+                                            {linkedBook.stock > 0
+                                                ? (locale === 'ar' ? 'متوفر الآن • الدفع عند الاستلام' : locale === 'en' ? 'In stock • Cash on Delivery' : 'Disponible • Paiement à la livraison')
+                                                : (locale === 'ar' ? 'اطلبه مسبقاً من رواية' : locale === 'en' ? 'Available on Riwaya' : 'Voir la fiche sur Riwaya')}
+                                        </p>
+                                        <h3 className="text-base sm:text-lg font-black text-slate-900 line-clamp-1">{linkedBook.title}</h3>
+                                        <p className="text-xs font-bold text-slate-500 mt-0.5">
+                                            {linkedBook.author} · <span className="text-black font-black">{linkedBook.price} {locale === 'ar' ? 'درهم' : locale === 'en' ? 'MAD' : 'DH'}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <Link
+                                    href={generateBookUrl(linkedBook, locale)}
+                                    className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-black hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-md transition-all"
+                                >
+                                    <ShoppingBag className="w-4 h-4 text-amber-400" />
+                                    <span>{locale === 'ar' ? 'اطلب نسختك الآن' : locale === 'en' ? 'Get this book' : 'Commander le livre'}</span>
+                                    <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                                </Link>
+                            </div>
+                        )}
+
                         {/* === Tags & Partage === */}
                         <div className="mt-10 md:mt-14 pt-8 md:pt-10 border-t-2 border-gray-100">
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -737,7 +794,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                             <BadgeCheck className="w-4 h-4 md:w-5 md:h-5 text-blue-500 fill-blue-500/10 shrink-0" />
                                         </div>
                                         <p className="text-xs md:text-sm text-slate-500 font-medium truncate mb-4">
-                                            {(!post.authorName && post.author?.bio) ? post.author.bio : (post.author?.editorialRole || t('ModeratorRole'))}
+                                            {displayAuthorRole}
                                         </p>
 
                                         {/* Statistiques et Lien */}
@@ -907,7 +964,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/10 shrink-0" />
                                             </div>
                                             <p className="text-xs text-slate-500 font-medium truncate mb-4">
-                                                {(!post.authorName && post.author?.bio) ? post.author.bio : (post.author?.editorialRole || t('ModeratorRole'))}
+                                                {displayAuthorRole}
                                             </p>
 
                                             {/* Statistiques et Lien */}
@@ -1028,7 +1085,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="text-xs font-bold text-slate-900 line-clamp-2 group-hover:text-slate-600 transition-colors leading-tight">{displayTitle}</h4>
                                                     <p className="text-[10px] text-slate-500 truncate mt-1">{book.author}</p>
-                                                    <p className="text-xs font-black text-slate-600 mt-1">{book.price} درهم</p>
+                                                    <p className="text-xs font-black text-slate-600 mt-1">{book.price} {locale === 'ar' ? 'درهم' : locale === 'en' ? 'MAD' : 'DH'}</p>
                                                 </div>
                                             </Link>
                                             );

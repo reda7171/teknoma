@@ -37,6 +37,14 @@ export async function invalidateCatalogCache(bookId?: string) {
     ]).catch(() => {})
 }
 
+function normalizeLanguageFilter(language: string): string[] {
+    const l = language.trim().toLowerCase()
+    if (l === 'fr' || l === 'français' || l === 'francais' || l === 'french') return ['fr', 'Français', 'francais', 'French', 'FR']
+    if (l === 'ar' || l === 'arabe' || l === 'arabic' || l === 'العربية') return ['ar', 'Arabe', 'Arabic', 'العربية', 'AR']
+    if (l === 'en' || l === 'anglais' || l === 'english') return ['en', 'English', 'Anglais', 'EN']
+    return [language]
+}
+
 /**
  * Récupère tous les livres avec filtres optionnels (mis en cache dans Redis)
  */
@@ -74,7 +82,7 @@ async function fetchBooksDirect(filters?: BookFilters) {
 
         // Filtre par langue
         if (filters?.language && filters.language !== 'all') {
-            where.language = filters.language
+            where.language = { in: normalizeLanguageFilter(filters.language) }
         }
 
         // Filtre par auteur
@@ -297,7 +305,7 @@ async function fetchBooksCountDirect(filters?: BookFilters) {
         }
 
         if (filters?.language && filters.language !== 'all') {
-            where.language = filters.language
+            where.language = { in: normalizeLanguageFilter(filters.language) }
         }
 
         if (filters?.author) {
@@ -458,12 +466,16 @@ export async function getAllAuthors() {
 /**
  * Récupère les livres populaires (les plus visités / consultés)
  */
-export async function getPopularBooks(limit = 6) {
+export async function getPopularBooks(limit = 6, language?: string) {
+    const cacheKey = `book:popular:views:${limit}:${language || 'all'}`
     return getCached(
-        `book:popular:views:${limit}`,
+        cacheKey,
         async () => {
             return prisma.book.findMany({
-                where: { active: true },
+                where: {
+                    active: true,
+                    ...(language && language !== 'all' ? { language: { in: normalizeLanguageFilter(language) } } : {})
+                },
                 orderBy: [
                     { views: 'desc' },
                     { cartAdditions: 'desc' },
@@ -818,13 +830,24 @@ export async function getCategoryCounts(): Promise<CategoryCounts> {
     return counts;
 }
 
-export async function getHomepageStats() {
-    return getCached('homepage:stats', async () => {
-        return await prisma.$transaction([
+export async function getHomepageStats(): Promise<[number, number, number, number, number, number]> {
+    return getCached('homepage:stats:v2', async () => {
+        const [booksCount, customersCount, ordersCount, exchangesCount, citiesCount, reviewStats] = await prisma.$transaction([
             prisma.book.count({ where: { active: true } }),
-            prisma.user.count({ where: { role: 'USER' } }),
-            prisma.exchange.count({ where: { status: 'COMPLETED' } })
+            prisma.customer.count(),
+            prisma.order.count({ where: { status: { not: 'CANCELLED' } } }),
+            prisma.exchange.count({ where: { status: 'COMPLETED' } }),
+            prisma.cityDelivery.count({ where: { active: true } }),
+            prisma.review.aggregate({
+                where: { isApproved: true },
+                _count: { id: true },
+                _avg: { rating: true },
+            }),
         ])
+        const realReaders = Math.max(customersCount, ordersCount)
+        const avgRating = Number((reviewStats._avg?.rating || 0).toFixed(1))
+        const reviewsCount = reviewStats._count?.id || 0
+        return [booksCount, realReaders, exchangesCount, citiesCount, reviewsCount, avgRating]
     }, 300)
 }
 
