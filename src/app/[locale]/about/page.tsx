@@ -4,18 +4,25 @@ import Footer from '@/components/Footer'
 import { BookOpen, Heart, Users, Target, Sparkles, Award, Truck } from 'lucide-react'
 import Image from 'next/image'
 import { Metadata } from 'next'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
+import { getHomepageStats } from '@/lib/db/books'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     return {
-        title: locale === 'ar' ? 'من نحن | أحسن مكتبة في المغرب' : locale === 'en' ? 'About Us | Best Bookstore in Morocco' : 'À propos | Meilleure librairie au Maroc',
-        description: locale === 'ar' ? 'تعرف على قصة مكتبة رواية، أفضل مكتبة إلكترونية في المغرب. أكثر من 10,000 عميل راضٍ وتوصيل إلى 40 مدينة مغربية.' : locale === 'en' ? 'Discover the story of Riwaya, the best online bookstore in Morocco. Over 10,000 satisfied customers and delivery to 40 Moroccan cities.' : 'Découvrez l\'histoire de Riwaya, la meilleure librairie en ligne au Maroc. Plus de 10 000 clients satisfaits et livraison dans 40 villes marocaines.',
+        title: locale === 'ar' ? 'من نحن - مكتبة رواية بالمغرب' : locale === 'en' ? 'About Us - Riwaya Bookstore Morocco' : 'À propos - Librairie Riwaya au Maroc',
+        description: locale === 'ar' ? 'تعرف على قصة مكتبة رواية بالمغرب: كتب بالعربية والفرنسية والإنجليزية، باقات قراءة، والدفع عند الاستلام في كافة المدن.' : locale === 'en' ? 'Discover the story of Riwaya, an online bookstore in Morocco offering curated books, reading packs, and nationwide Cash on Delivery.' : 'Découvrez l\'histoire de Riwaya, librairie en ligne au Maroc : livres en arabe, français et anglais, packs thématiques et paiement à la livraison.',
+        alternates: getCanonicalAlternates(`/${locale}/about`, locale),
     }
 }
 
 export default async function AboutPage() {
-    const t = await getTranslations('Common')
-    const tAbout = await getTranslations('AboutPage')
+    const [t, tAbout, stats] = await Promise.all([
+        getTranslations('Common'),
+        getTranslations('AboutPage'),
+        getHomepageStats().catch(() => [0, 0, 0, 0, 0, 0] as [number, number, number, number, number, number]),
+    ])
+    const [, realReaders] = stats
 
     return (
         <div className="min-h-screen bg-pixio-cream overflow-hidden">
@@ -29,24 +36,22 @@ export default async function AboutPage() {
                         mainEntity: {
                             '@type': 'Organization',
                             name: 'Riwaya',
-                            description: 'Riwaya est la meilleure librairie en ligne au Maroc, avec plus de 10 000 clients satisfaits et une livraison rapide dans plus de 40 villes.',
-                            numberOfEmployees: {
-                                '@type': 'QuantitativeValue',
-                                value: 15
-                            },
+                            description: 'Riwaya est une librairie en ligne au Maroc dédiée aux livres en arabe, français et anglais avec packs thématiques et paiement à la livraison.',
                             foundingDate: '2023',
                             areaServed: {
                                 '@type': 'Country',
                                 name: 'Morocco'
                             },
-                            interactionStatistic: [
-                                {
-                                    '@type': 'InteractionCounter',
-                                    interactionType: 'https://schema.org/BuyAction',
-                                    userInteractionCount: 10000,
-                                    name: 'Clients Satisfaits'
-                                }
-                            ]
+                            ...(realReaders > 0 ? {
+                                interactionStatistic: [
+                                    {
+                                        '@type': 'InteractionCounter',
+                                        interactionType: 'https://schema.org/BuyAction',
+                                        userInteractionCount: realReaders,
+                                        name: 'Lecteurs'
+                                    }
+                                ]
+                            } : {})
                         }
                     })
                 }}

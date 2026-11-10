@@ -7,7 +7,8 @@ export const routing = defineRouting({
 
     // Used when no locale matches
     defaultLocale: 'ar',
-    localeDetection: true,
+    // Désactive la détection automatique Accept-Language qui forçait /en sur les crawlers et visiteurs depuis riwaya.ma
+    localeDetection: false,
     localeCookie: {
         name: 'NEXT_LOCALE',
         secure: process.env.NODE_ENV === 'production',

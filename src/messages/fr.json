@@ -318,9 +318,9 @@
     "QualityTitle": "Qualité Garantie",
     "QualityDesc": "Livres originaux uniquement, vérifiés avant envoi.",
     "DeliveryTitle": "Livraison Rapide",
-    "DeliveryDesc": "Expédition partout au Maroc en 24/48h.",
+    "DeliveryDesc": "Livraison sous 24-48h dans les grandes villes et 48-72h dans les autres régions du Maroc.",
     "SupportTitle": "Service Client",
-    "SupportDesc": "Une équipe dédiée pour vous accompagner 7j/7.",
+    "SupportDesc": "Une équipe dédiée à votre écoute du lundi au samedi, de 09h à 19h.",
     "OurLocation": "Notre Emplacement",
     "VisitUs": "Venez nous rendre visite à Rabat"
   },
@@ -343,7 +343,7 @@
   "HomePage": {
     "SeeAll": "Tout voir",
     "hero": {
-      "Badge": "Livraison gratuite dès 300 MAD + Paiement à la livraison partout au Maroc",
+      "Badge": "Livraison offerte dès 500 MAD + Paiement à la livraison partout au Maroc",
       "TitlePart1": "Librairie en ligne N°1 au Maroc",
       "TitlePart2": "Packs de livres à partir de 100 DH",
       "Description": "Découvrez une sélection premium de livres et économisez avec nos packs exclusifs. Le savoir, avec style.",
@@ -352,7 +352,7 @@
       "GoogleLogin": "Continuer avec Google",
       "GoogleBonus": "+10 DH Offerts",
       "CustomBundle": "Créer mon Pack Perso (-30%)",
-      "SocialProof": "⭐ 4.8/5 par plus de 1000 lecteurs satisfaits",
+      "SocialProof": "Paiement à la livraison partout au Maroc · Service client 6j/7",
       "EditorsChoice": "Choix de l'éditeur",
       "Select": "SÉLECTIONNER",
       "PinnedBook": "Livre épinglé au centre",
@@ -543,7 +543,7 @@
     "Contact": "Contact",
     "Terms": "Conditions",
     "Privacy": "Confidentialité",
-    "Slogan": "Des connaissances soigneusement sélectionnées pour l'esprit moderne. Livraison partout au Maroc.",
+    "Slogan": "Des livres choisis avec soin pour les lecteurs au Maroc. Livraison partout au Maroc (24-72h) et à l'international via Amana.",
     "Navigation": "Navigation",
     "Support": "Support",
     "Shipping": "Livraison",
@@ -556,7 +556,17 @@
     "DevelopedBy": "Développé par <name>Reda</name>",
     "DownloadApp": "Téléchargez l'App",
     "SoonOn": "Bientôt sur",
-    "AppComingSoon": "Bientôt disponible"
+    "AppComingSoon": "Bientôt disponible",
+    "NewsletterSuccess": "Merci ! Vous recevrez nos prochaines sélections littéraires.",
+    "Categories": {
+      "Bookstore": "Librairie",
+      "Legal": "Informations légales"
+    },
+    "Links": {
+      "Dmca": "Droits d'auteur (DMCA)",
+      "TrackOrder": "Suivi de commande",
+      "JoinTeam": "Rejoindre l'équipe"
+    }
   },
   "AuthModal": {
     "Title": "Connexion requise",
@@ -571,7 +581,7 @@
     "Search": "Rechercher",
     "SearchPlaceholder": "Titre, auteur, description...",
     "UsedBook": "Livre d'occasion",
-    "FreeShippingPromo": "Livraison Gratuite partout au Maroc dès 300 MAD d'achat !",
+    "FreeShippingPromo": "Livraison gratuite partout au Maroc dès 500 MAD d'achat !",
     "AddedToCartSuccess": "Article ajouté au panier avec succès !",
     "AddedToReadingList": "Ajouté à mes lectures !",
     "RemovedFromReadingList": "Retiré de mes lectures !",
@@ -662,31 +672,31 @@
     "Questions": {
       "Shipping": {
         "Question": "Quels sont les délais de livraison ?",
-        "Answer": "Nous livrons en 24-48h pour les grandes villes (Casablanca, Rabat, Marrakech, Tanger) et 48-72h pour les autres régions."
+        "Answer": "Nous livrons en 24-48h ouvrables pour les grandes villes (Casablanca, Rabat, Marrakech, Tanger...) et 48-72h pour les autres régions, ainsi qu'à l'international via Amana."
       },
       "Payment": {
         "Question": "Quels moyens de paiement acceptez-vous ?",
-        "Answer": "Nous acceptons uniquement le paiement à la livraison (Cash on Delivery) pour garantir votre satisfaction à la réception."
+        "Answer": "Nous proposons le paiement à la livraison (Cash on Delivery) partout au Maroc ainsi que le paiement sécurisé par carte bancaire ou virement."
       },
       "Returns": {
         "Question": "Puis-je retourner un livre ?",
-        "Answer": "Oui, vous disposez de 3 jours après la livraison pour signaler un problème si le livre est endommagé ou ne correspond pas à votre commande."
+        "Answer": "Vous disposez de 3 jours calendaires après réception pour demander un retour ou échange en cas de défaut, dommage ou erreur (retour gratuit), ou pour un livre neuf non ouvert dans son état d'origine."
       },
       "DeliveryCost": {
         "Question": "Combien coûte la livraison ?",
-        "Answer": "La livraison est gratuite pour toute commande supérieure à 400 MAD. En dessous, un tarif fixe de 35 MAD s'applique."
+        "Answer": "Les frais de livraison au Maroc sont de 30 MAD et la livraison est gratuite dès 500 MAD d'achat (ou sur les packs éligibles). Livraison internationale via Amana à 200 MAD."
       }
     }
   },
   "Returns": {
-    "Title": "Politique de Retour",
-    "Subtitle": "Conditions de retour",
-    "Intro": "Les retours sont acceptés uniquement pour les produits défectueux. Nous n'acceptons aucun échange.",
+    "Title": "Retours et Échanges",
+    "Subtitle": "Garantie client Riwaya",
+    "Intro": "Vous disposez de 3 jours calendaires après réception pour demander un retour, un échange ou un remboursement selon les conditions ci-dessous.",
     "Policy": {
-      "Point1": "Un retour est accepté uniquement si le produit reçu est défectueux, endommagé ou incorrect.",
-      "Point2": "Le problème doit être signalé dans les 3 jours calendaires suivant la livraison, avec le numéro de commande et des photos claires.",
-      "Point3": "Contactez-nous via WhatsApp ou à contact@riwaya.store avant tout envoi. Un retour non autorisé pourra être refusé.",
-      "Point4": "Le retour d'un produit défectueux est gratuit. Nous n'acceptons aucun échange. Après réception et inspection, tout retour approuvé donne lieu à un remboursement."
+      "Point1": "Les retours et échanges gratuits sont acceptés si le livre reçu est défectueux, endommagé pendant le transport ou différent de votre commande.",
+      "Point2": "Un article neuf peut également être retourné ou échangé sous 3 jours s'il est intact, non lu et dans son emballage d'origine (frais d'envoi standard de 30 MAD à la charge du client).",
+      "Point3": "Contactez-nous via WhatsApp (+212 702-220575) ou à contact@riwaya.store dans les 3 jours calendaires suivant la livraison avec votre numéro de commande et des photos.",
+      "Point4": "Après réception et vérification du colis, le remboursement est effectué par virement bancaire ou bon d'achat immédiat sans aucune complication."
     }
   },
   "Contact": {
@@ -1807,24 +1817,24 @@
     "seoText": "Riwaya.store est votre librairie en ligne au Maroc. Nous proposons un large choix de livres (romans, mangas, beaux-arts, livres pour enfants, développement personnel et anglais) ainsi que toutes les fournitures scolaires (cartables, trousses, indispensables de la rentrée). Déposez votre liste scolaire en ligne et profitez d'une livraison rapide à domicile partout au Maroc (Casablanca, Rabat, Tanger, etc.). Tous nos produits sont 100% authentiques avec possibilité de paiement cash à la livraison ou par carte bancaire sécurisée."
   },
   "JoinUs": {
-    "heroTag": "Opportunité",
+    "heroTag": "Rejoindre Riwaya",
     "heroTitle1": "Rejoignez",
-    "heroTitle2": "l'équipe",
-    "heroDescription": "Le blog Riwaya recherche un blogueur talentueux et créatif pour un poste officiel sur le blog. Si vous êtes talentueux, que vous aimez bloguer et que vous avez de nombreuses idées, nous vous recherchons. Écrivez un article d'essai + une présentation de vous-même et envoyez le tout à Riwaya team.",
-    "conditionsTitle": "Conditions de participation",
-    "conditionsDescription": "Merci d'avoir choisi de contribuer par vos sujets au blog Riwaya, nous vous invitons à lire ces conditions pour que votre sujet soit publié :",
-    "condition1Title": "Nous n'acceptons pas les sujets copiés",
-    "condition1Desc": "La politique du blog Riwaya depuis 31 ans repose sur l'enrichissement du contenu technique arabe et par conséquent, nous n'acceptons aucun sujet copié entièrement d'autres sites. En revanche, nous acceptons les sujets rédigés à votre manière, même s'ils proviennent d'une ou plusieurs sources.",
-    "condition2Title": "Nous n'acceptons pas les sujets déjà abordés",
-    "condition2Desc": "Bien sûr, nous ne pouvons pas publier des sujets qui ont déjà été publiés afin d'éviter les répétitions.",
-    "condition3Title": "Nous n'acceptons pas les sujets contenant des codes ou logiciels d'activation",
-    "condition3Desc": "Au blog Riwaya, nous veillons à ne pas enfreindre les droits de propriété intellectuelle. En revanche, nous acceptons tout sujet incluant des codes d'activation officiels obtenus par des moyens légaux.",
-    "condition4Title": "Nous n'acceptons pas les sujets mal formulés",
-    "condition4Desc": "Nous faisons tous des erreurs, et quelques petites fautes ne posent pas de problème, mais si elles rendent les phrases incompréhensibles ou si les fautes d'orthographe sont trop nombreuses, la publication est impossible.",
-    "applyTitle": "Comment postuler",
-    "applyDescription": "Afin de nous envoyer votre article, veuillez l'écrire dans un fichier Word et l'envoyer au blog via WhatsApp.",
-    "applyButton": "Contactez-nous sur WhatsApp",
-    "applyThanks": "Merci"
+    "heroTitle2": "la rédaction",
+    "heroDescription": "Le journal Riwaya recherche des lecteurs passionnés, chroniqueurs et rédacteurs littéraires pour enrichir nos guides de lecture, résumés d'ouvrages et analyses critiques au Maroc.",
+    "conditionsTitle": "Charte éditoriale de contribution",
+    "conditionsDescription": "Pour garantir la qualité, la fiabilité et l'utilité de chaque article publié sur le blog Riwaya, merci de respecter nos quatre engagements éditoriaux :",
+    "condition1Title": "Analyses originales et sourcées",
+    "condition1Desc": "Chaque critique, résumé ou guide de lecture doit être rédigé avec vos propres mots à partir d'une lecture réelle du livre, sans copier-coller d'autres sites ni descriptions génériques.",
+    "condition2Title": "Sujets littéraires inédits",
+    "condition2Desc": "Nous privilégions des angles nouveaux sur des livres, auteurs ou thématiques non encore couverts afin d'éviter les articles redondants.",
+    "condition3Title": "Respect des auteurs et des droits",
+    "condition3Desc": "Les citations restent courtes, fidèlement attribuées à l'auteur et à l'ouvrage concerné, dans le strict respect du droit d'auteur.",
+    "condition4Title": "Clarté et qualité rédactionnelle",
+    "condition4Desc": "Les articles peuvent être rédigés en français, en arabe ou en anglais avec une structure claire, une orthographe soignée et des conseils concrets pour le lecteur.",
+    "applyTitle": "Proposer votre candidature",
+    "applyDescription": "Envoyez-nous un court article d'essai (500 à 1 000 mots) portant sur un livre de votre choix accompagné de votre présentation via WhatsApp ou par email à contact@riwaya.store.",
+    "applyButton": "Contacter la rédaction sur WhatsApp",
+    "applyThanks": "À bientôt parmi nos lecteurs"
   },
   "ContactPage": {
     "CustomerSupport": "Support Client",
@@ -1861,7 +1871,7 @@
     "Title1": "Retours et",
     "Title2": "Remboursements",
     "Section1Title": "1. Droit de rétractation",
-    "Section1Desc": "Conformément à la législation en vigueur, vous disposez d'un délai de <bold>3 jours calendaires</bold> à compter de la réception de votre commande pour demander un échange ou un retour si le produit ne vous convient pas.",
+    "Section1Desc": "Conformément à nos conditions commerciales, vous disposez d'un délai de <bold>3 jours calendaires</bold> à compter de la réception de votre commande pour demander un échange ou un retour (produit défectueux/erroné ou article neuf intact dans son emballage d'origine).",
     "Section2Title": "2. Conditions de retour",
     "Section2Desc": "Pour être éligible à un retour, votre livre doit être dans le même état que celui dans lequel vous l'avez reçu (non lu, sans marques, pliures ou annotations). L'emballage original doit être conservé.",
     "Section3Title": "3. Articles défectueux",
@@ -1869,33 +1879,33 @@
     "Section4Title": "4. Procédure de retour",
     "Section4Desc": "Pour initier un retour, veuillez contacter notre service client via WhatsApp ou par email à contact@riwaya.store. Veuillez inclure votre numéro de commande et des photos si le produit est défectueux.",
     "Section5Title": "5. Frais de retour",
-    "Section5Desc": "Les frais d'expédition d'un retour sont à la charge du client et s'élèvent à <bold>35 MAD</bold>. Si l'article reçu est endommagé, défectueux ou incorrect, Riwaya prend en charge son remplacement sans frais."
+    "Section5Desc": "Le retour et le remplacement d'un article endommagé, défectueux ou incorrect sont <bold>100% gratuits</bold>. Pour un retour de convenance sur un article neuf non utilisé, les frais de réexpédition standard s'élèvent à <bold>30 MAD</bold>."
   },
   "ShippingPolicyPage": {
     "Title": "Politique de Livraison",
     "Section1Title": "1. Zones de livraison",
-    "Section1Desc": "<bold>Riwaya</bold> livre dans toutes les villes du Royaume du Maroc. Que vous soyez à Casablanca, Rabat, Marrakech, Tanger ou dans les zones plus reculées, nous nous assurons que vos livres arrivent à bon port.",
+    "Section1Desc": "<bold>Riwaya</bold> livre dans toutes les villes du Royaume du Maroc (Casablanca, Rabat, Salé, Témara, Marrakech, Tanger, Fès, Agadir...) et propose également l'expédition internationale express via <bold>Amana International</bold>.",
     "Section2Title": "2. Délais de livraison",
-    "Section2Desc": "Nos délais de livraison varient généralement entre <bold>24h et 48h</bold> ouvrables pour les grandes villes. Pour les autres régions, le délai peut s'étendre jusqu'à 4 jours ouvrables.",
+    "Section2Desc": "Nos délais de livraison sont généralement de <bold>24h à 48h ouvrables</bold> pour les grandes villes et de <bold>48h à 72h ouvrables</bold> pour les autres régions du Maroc (jusqu'à 4 jours ouvrables pour les zones éloignées).",
     "Section3Title": "3. Frais de livraison",
-    "Section3Desc": "Les frais de livraison s'élèvent à 25 MAD pour Casablanca et 35 MAD pour les autres villes. La livraison est offerte pour toute commande supérieure à 300 MAD.",
+    "Section3Desc": "Les frais de livraison au Maroc s'élèvent à <bold>30 MAD</bold> (tarif unique). La livraison est <bold>gratuite dès 500 MAD d'achat</bold> (et sur les packs promotionnels éligibles). L'expédition internationale via Amana International est facturée à <bold>200 MAD</bold>.",
     "Section4Title": "4. Suivi de commande",
-    "Section4Desc": "Une fois votre commande expédiée, vous recevrez une confirmation par SMS ou WhatsApp avec les informations nécessaires pour suivre l'état de votre livraison."
+    "Section4Desc": "Dès l'expédition de votre commande, vous recevez une notification WhatsApp ou SMS avec le suivi de livraison, et vous pouvez suivre votre colis depuis notre page de suivi."
   },
   "PrivacyPage": {
     "Title": "Politique de Confidentialité",
     "Section1Title": "1. Données collectées",
-    "Section1Desc": "Nous collectons les données nécessaires au traitement de vos commandes (nom, adresse de livraison, numéro de téléphone) ainsi que les informations partagées via notre formulaire de contact, notre newsletter ou WhatsApp. Nous recueillons également des données de navigation anonymisées.",
+    "Section1Desc": "Conformément à la <bold>loi marocaine n° 09-08</bold> relative à la protection des personnes physiques à l'égard du traitement des données à caractère personnel, nous collectons uniquement les données strictement nécessaires au traitement de vos commandes (nom, adresse de livraison, ville, téléphone, email optionnel) et à notre support client.",
     "Section2Title": "2. Utilisation des données",
-    "Section2Desc": "Vos informations servent à l'expédition de vos commandes, au support client et à l'amélioration de notre boutique. Nous utilisons également ces données, avec votre consentement, pour personnaliser votre expérience et vous proposer des annonces publicitaires pertinentes.",
+    "Section2Desc": "Vos données sont transmises uniquement aux destinataires habilités pour exécuter votre commande : nos partenaires logistiques de livraison, nos prestataires de paiement sécurisé (le cas échéant) et notre service client. Elles ne sont jamais vendues à des tiers.",
     "Section3Title": "3. Cookies et Outils d'analyse",
     "Section3Desc": "Riwaya utilise des cookies, <bold>Google Analytics 4</bold> et <bold>Google Tag Manager (GTM)</bold> pour comprendre l'utilisation de notre site, mesurer notre audience et améliorer nos services de manière continue.",
     "Section4Title": "4. Google AdSense et Publicité",
     "Section4Desc": "Des fournisseurs tiers, y compris Google, utilisent des cookies pour diffuser des annonces sur la base des visites antérieures des internautes sur notre site Web ou sur d'autres sites. Grâce aux cookies publicitaires, Google et ses partenaires adaptent les annonces diffusées auprès de vos visiteurs en fonction de leur navigation. Vous pouvez désactiver la publicité personnalisée dans les <link>Paramètres des annonces Google</link> ou sur <aboutads>www.aboutads.info</aboutads>.",
     "Section5Title": "5. Durée de conservation",
-    "Section5Desc": "Les données liées à vos commandes sont conservées pendant la durée légale nécessaire à des fins comptables et de gestion. Les données de navigation et cookies sont conservés selon les recommandations en vigueur.",
+    "Section5Desc": "Les données liées aux commandes sont conservées pendant la durée légale comptable et fiscale en vigueur au Maroc. Les journaux de navigation et cookies analytiques sont conservés pour une durée maximale de <bold>13 mois</bold> et peuvent être gérés à tout moment dans votre navigateur.",
     "Section6Title": "6. Vos droits et Contact",
-    "Section6Desc": "Conformément aux lois sur la protection des données, vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles. Pour exercer ces droits, contactez-nous à <contact>contact@riwaya.store</contact>."
+    "Section6Desc": "En application de la loi 09-08, vous disposez d'un droit d'accès, de rectification et d'opposition pour motif légitime sur vos données personnelles. Pour exercer ces droits, écrivez-nous à <contact>contact@riwaya.store</contact>."
   },
   "CookieBanner": {
     "Message": "Nous utilisons des cookies pour améliorer votre expérience sur notre site et personnaliser les annonces. En continuant à naviguer, vous acceptez notre utilisation des cookies.",
@@ -2023,7 +2033,7 @@
     "Step3Title": "Recevez les commandes",
     "Step3Desc": "Soyez notifié instantanément à chaque nouvel achat par un client de la plateforme.",
     "Step4Title": "Expédition & Paiement",
-    "Step4Desc": "Gérez vos expéditions avec vos clients et encaissez 100% de vos ventes sans commission.",
+    "Step4Desc": "Expédiez vos commandes via nos transporteurs partenaires et recevez vos virements hebdomadaires après livraison et encaissement, déduction faite de notre commission transparente.",
     "NouvelleCommande": "Nouvelle commande",
     "AlchimistePrice": "L'Alchimiste - 80 DH",
     "SoldeDisponible": "Solde disponible",

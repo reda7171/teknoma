@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         title: `${book.title} par ${book.author} — Échange de livres | Riwaya Community`,
         description: book.seoDescription || book.description || `Échangez ${book.title} de ${book.author} sur Riwaya Community au Maroc. Troc de livres direct entre lecteurs.`,
         keywords: book.seoKeywords || `${book.title}, ${book.author}, échange livre, troc livre maroc, Riwaya`,
+        ...(book.status !== 'AVAILABLE' ? { robots: { index: false, follow: false } } : {}),
         openGraph: {
             title: `${book.title} | Échange de livres Maroc`,
             description: book.seoDescription || book.description || `Découvrez et échangez ${book.title} sur la communauté Riwaya.`,
@@ -43,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
                 'fr': `${baseUrl}/fr/community/market/${id}`,
                 'ar': `${baseUrl}/ar/community/market/${id}`,
                 'en': `${baseUrl}/en/community/market/${id}`,
-                'x-default': `${baseUrl}/fr/community/market/${id}`,
+                'x-default': `${baseUrl}/ar/community/market/${id}`,
             }
         }
     }

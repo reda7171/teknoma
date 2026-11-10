@@ -3,17 +3,26 @@ import Footer from '@/components/Footer'
 import { FileText, AlertCircle, Edit, MessageCircle } from 'lucide-react'
 import { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
+import { getSetting } from '@/lib/server/site-settings'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     return {
-        title: locale === 'ar' ? 'إلتحق بفريق العمل | رواية' : locale === 'en' ? 'Join the Team | Riwaya' : "Rejoignez l'équipe | Riwaya",
-        description: locale === 'ar' ? 'إلتحق بفريق العمل. ابعث لنا تدوينتك التجريبية الآن.' : locale === 'en' ? 'Join the team. Send us your sample post now.' : "Rejoignez l'équipe. Envoyez-nous votre article d'essai maintenant.",
+        title: locale === 'ar' ? 'انضم إلى فريق التحرير' : locale === 'en' ? 'Join the Editorial Team' : "Rejoignez l'équipe éditoriale",
+        description: locale === 'ar' ? 'انضم إلى فريق التحرير الأدبي في مكتبة رواية بالمغرب وساهم في كتابة مراجعات وأدلة القراءة.' : locale === 'en' ? 'Join the Riwaya literary editorial team in Morocco and contribute authentic book reviews and reading guides.' : "Rejoignez la rédaction littéraire de Riwaya au Maroc pour publier des chroniques et guides de lecture.",
+        alternates: getCanonicalAlternates(`/${locale}/join-us`, locale),
     }
 }
 
 export default async function JoinUsPage() {
-    const t = await getTranslations('JoinUs');
+    const [t, contactPhone] = await Promise.all([
+        getTranslations('JoinUs'),
+        getSetting('contact_phone'),
+    ]);
+    const cleanPhone = (contactPhone || STORE_POLICY.defaultWhatsappNumber).replace(/[^0-9]/g, '') || STORE_POLICY.defaultWhatsappNumber;
+    const whatsappHref = `https://wa.me/${cleanPhone}`;
 
     return (
         <div className="min-h-screen bg-pixio-cream overflow-hidden">
@@ -81,7 +90,7 @@ export default async function JoinUsPage() {
                         </p>
                         
                         <a 
-                            href="https://wa.me/"
+                            href={whatsappHref}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-4 px-10 py-5 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full text-xl font-black transition-all duration-300 transform hover:-translate-y-2 shadow-xl shadow-[#25D366]/30"

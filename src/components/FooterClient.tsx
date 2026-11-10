@@ -78,7 +78,7 @@ function NewsletterForm({ t }: { t: any }) {
         return (
             <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                 <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
-                <p className="text-white text-sm font-bold">You will receive our news !</p>
+                <p className="text-white text-sm font-bold">{t('NewsletterSuccess')}</p>
             </div>
         )
     }
@@ -112,8 +112,6 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
     const locale = useLocale();
     const t = useTranslations('Footer');
     const tNav = useTranslations('Navigation');
-    const tTrack = useTranslations('Tracking');
-    const tJoinUs = useTranslations('JoinUs');
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -148,7 +146,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 md:gap-16 mb-8 sm:mb-14 md:mb-20">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8 md:gap-10 mb-8 sm:mb-14 md:mb-20">
                     <div className="space-y-6 col-span-2 md:col-span-1">
                         <Link href="/" className="flex items-center gap-2 group">
                             {siteLogo ? (
@@ -177,7 +175,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                         </p>
                     </div>
                     <div>
-                        <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Navigation')}</h3>
+                        <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Categories.Bookstore')}</h3>
                         <ul className="space-y-4" suppressHydrationWarning>
                             <li suppressHydrationWarning>
                                 <Link href="/books" title="Découvrir tous nos livres" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Books')}</Link>
@@ -186,6 +184,9 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                 <Link href="/books?usedOnly=true" title="Livres d'occasion à petits prix" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tNav('UsedBooks')}
                                 </Link>
+                            </li>
+                            <li suppressHydrationWarning>
+                                <Link href="/packs" title="Packs de livres économiques" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
                             </li>
                             <li suppressHydrationWarning>
                                 <Link href="/jeux-societe" title="Jeux de société pour tous" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
@@ -197,11 +198,16 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                     {tNav('KidsWorld')}
                                 </Link>
                             </li>
-                            <li suppressHydrationWarning>
-                                <Link href="/packs" title="Packs de livres économiques" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Packs')}</Link>
-                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Navigation')}</h3>
+                        <ul className="space-y-4" suppressHydrationWarning>
                             <li suppressHydrationWarning>
                                 <Link href="/about" title="En savoir plus sur notre histoire" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{t('About')}</Link>
+                            </li>
+                            <li suppressHydrationWarning>
+                                <Link href="/blog" title="Lire notre blog et nos actualités" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>{tNav('Journal')}</Link>
                             </li>
                             {features.exchange === true && (
                                 <li suppressHydrationWarning>
@@ -216,8 +222,8 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                 </li>
                             )}
                             <li suppressHydrationWarning>
-                                <Link href="/join-us" title="Rejoindre l'équipe Riwaya" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
-                                    {tJoinUs('heroTitle1')} {tJoinUs('heroTitle2')}
+                                <Link href="/join-us" title="Rejoindre la rédaction Riwaya" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
+                                    {t('Links.JoinTeam')}
                                 </Link>
                             </li>
                         </ul>
@@ -225,18 +231,17 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                     <div>
                         <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Support')}</h3>
                         <ul className="space-y-4">
+                            <li><Link href="/contact" title="Nous contacter" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Contact')}</Link></li>
                             <li><Link href="/shipping-policy" title="Politique et délais de livraison" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Shipping')}</Link></li>
                             <li><Link href="/returns" title="Conditions de retour et remboursement" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Returns')}</Link></li>
-                            <li><Link href="/privacy" title="Protection de vos données personnelles" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Privacy')}</Link></li>
+                            <li><Link href="/tracking" title="Suivre votre commande" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Links.TrackOrder')}</Link></li>
                             <li><Link href="/terms" title="Conditions générales d'utilisation" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Terms')}</Link></li>
-                            <li><Link href="/contact" title="Nous contacter" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Contact')}</Link></li>
+                            <li><Link href="/privacy" title="Protection de vos données personnelles" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Privacy')}</Link></li>
+                            <li><Link href="/dmca" title="Droits d'auteur et DMCA" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{t('Links.Dmca')}</Link></li>
                         </ul>
                     </div>
                     <div className="col-span-2 md:col-span-1">
                         <h3 className="text-[11px] rtl:text-base font-black uppercase tracking-[0.3em] rtl:tracking-normal text-white/50 mb-4 md:mb-8">{t('Journal')}</h3>
-                        <ul className="space-y-4 mb-8">
-                            <li><Link href="/blog" title="Lire notre blog et nos actualités" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight">{tNav('Journal')}</Link></li>
-                        </ul>
                         <NewsletterForm t={t} />
                         <div className="mt-4 flex justify-center md:justify-start">
                             <PushSubscribeButton />

@@ -1,4 +1,5 @@
-import { normalizeImage } from '@/lib/utils'
+import { normalizeImage, getBaseUrl } from '@/lib/utils'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
 import { getPublishedPosts, getPostCategories } from '@/lib/actions/blog'
 import { Link } from '@/i18n/routing'
 import Image from 'next/image'
@@ -20,26 +21,27 @@ export async function generateMetadata({
     const { locale } = await params
     const t = await getTranslations({ locale, namespace: 'Blog' })
 
+    const baseUrl = getBaseUrl()
+    const alternates = getCanonicalAlternates(`/${locale}/blog`, locale)
+
     return {
-        title: `${t('Title')} | Riwaya`,
+        title: t('Title'),
         description: t('Subtitle'),
         openGraph: {
             title: `${t('Title')} | Riwaya`,
             description: t('Subtitle'),
             type: 'website',
-            url: `https://riwaya.store/${locale}/blog`,
+            url: alternates.canonical,
             images: [
                 {
-                    url: 'https://riwaya.store/images/og-blog.png',
+                    url: `${baseUrl}/images/og-blog.png`,
                     width: 1200,
                     height: 630,
                     alt: 'Blog Riwaya'
                 }
             ]
         },
-        alternates: {
-            canonical: `https://riwaya.store/${locale}/blog`
-        }
+        alternates,
     }
 }
 export default async function BlogPage({

@@ -10,6 +10,11 @@ import TrackPurchaseOrder from '@/components/checkout/TrackPurchaseOrder'
 import { getAmanaTracking } from '@/lib/shipping/amana-tracking'
 import AmanaLiveTrackingWidget from '@/components/shipping/AmanaLiveTrackingWidget'
 
+// Empêcher l'indexation des pages de confirmation contenant les détails de commande
+export const metadata = {
+    robots: { index: false, follow: false },
+}
+
 export default async function OrderSuccessPage({
     params,
 }: {

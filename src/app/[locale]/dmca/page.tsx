@@ -1,6 +1,24 @@
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { Shield, Mail, FileText, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Metadata } from 'next'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params;
+    const isAr = locale === 'ar';
+    const isEn = locale === 'en';
+    return {
+        title: isAr ? 'حقوق النشر وسياسة DMCA' : isEn ? 'Copyright & DMCA Policy' : "Droits d'auteur et signalements DMCA",
+        description: isAr
+            ? 'سياسة حماية الملكية الفكرية وإجراءات الإبلاغ عن انتهاكات حقوق النشر في مكتبة رواية.'
+            : isEn
+            ? 'Intellectual property protection policy and DMCA copyright infringement notice procedure at Riwaya Bookstore.'
+            : "Politique de protection de la propriété intellectuelle et procédure de signalement DMCA sur la librairie Riwaya.",
+        alternates: getCanonicalAlternates(`/${locale}/dmca`, locale),
+    }
+}
 
 export default async function DMCAPage({
     params,
@@ -146,7 +164,7 @@ export default async function DMCAPage({
                             <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 mt-4">
                                 <p className="text-black font-black flex items-center gap-2">
                                     <Mail className="w-4 h-4" /> Email:
-                                    <a href="mailto:khedimatnet@gmail.com" className="text-blue-600 hover:underline lowercase normal-case">khedimatnet@gmail.com</a>
+                                    <a href={`mailto:${STORE_POLICY.copyrightEmail}`} className="text-blue-600 hover:underline lowercase normal-case">{STORE_POLICY.copyrightEmail}</a>
                                 </p>
                             </div>
                         </section>

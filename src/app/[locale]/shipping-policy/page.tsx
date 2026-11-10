@@ -3,6 +3,23 @@ import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { Truck, Clock, MapPin, ShieldCheck, Globe } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { Metadata } from 'next'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+    return {
+        title: isAr ? 'سياسة التوصيل والشحن بالمغرب' : isEn ? 'Shipping & Delivery Policy Morocco' : 'Livraison de livres au Maroc',
+        description: isAr
+            ? 'تعرف على أسعار ومواعيد توصيل الكتب في كافة مدن المغرب (30 درهم، ومجاني من 500 درهم) والشحن الدولي عبر أمانة.'
+            : isEn
+            ? 'Book shipping rates and delivery times across Morocco (30 MAD standard, free from 500 MAD) and worldwide Amana delivery.'
+            : 'Tarifs (30 MAD, gratuit dès 500 MAD) et délais de livraison de livres au Maroc (24-72h) et à l\'international via Amana.',
+        alternates: getCanonicalAlternates(`/${locale}/shipping-policy`, locale),
+    }
+}
 
 export default async function ShippingPolicyPage() {
     const t = await getTranslations('ShippingPolicyPage')

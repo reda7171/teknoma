@@ -150,8 +150,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     featuredAccessories,
   ] = await getCachedHomepageData(locale)
 
-  // Variables dérivées
-  const [totalBooks, totalUsers, totalExchanges] = stats
+  // Variables dérivées (chiffres réels vérifiés en base de données, sans majoration artificielle)
+  const [totalBooks, totalUsers, totalExchanges, totalCities = 0, totalReviews = 0, averageReviewRating = 0] = stats
+  const verifiedSocialProof = totalReviews > 0 && averageReviewRating > 0
+    ? (locale === 'ar'
+        ? `${averageReviewRating}/5 بناءً على ${totalReviews} تقييم موثق`
+        : locale === 'en'
+        ? `${averageReviewRating}/5 from ${totalReviews} verified reviews`
+        : `${averageReviewRating}/5 sur ${totalReviews} avis vérifiés`)
+    : t('hero.SocialProof')
   const audioTestimonials = audioTestimonialsResult?.testimonials || []
   const imageTestimonials = imageTestimonialsResult?.testimonials || []
   const newBooks = popularBooks.slice(0, 8)
@@ -610,10 +617,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   
                   {/* PREUVE SOCIALE */}
                   <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 text-sm text-gray-500 font-bold z-10">
-                    <div className="flex items-center gap-1">
-                      {[1,2,3,4,5].map((i) => <svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>)}
-                    </div>
-                    <p>{c('hero_social_proof', t('hero.SocialProof'))}</p>
+                    {totalReviews > 0 && (
+                      <div className="flex items-center gap-1">
+                        {[1,2,3,4,5].map((i) => <svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>)}
+                      </div>
+                    )}
+                    <p>{c('hero_social_proof', verifiedSocialProof)}</p>
                   </div>
                 </div>
               </div>
@@ -807,9 +816,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             key={key}
             {...getSectionProps('home_section_trust', 'bg-white')}
             stats={{
-              books: totalBooks + 500,
-              readers: totalUsers + 1000,
-              exchanges: totalExchanges + 200
+              books: totalBooks,
+              readers: totalUsers,
+              exchanges: totalExchanges,
+              cities: totalCities
             }}
           />
         )
@@ -1035,9 +1045,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <TrustSection
             key={key}
             stats={{
-              books: totalBooks + 500, // Ajout d'offset pour le décollage
-              readers: totalUsers + 1000,
-              exchanges: totalExchanges + 200
+              books: totalBooks,
+              readers: totalUsers,
+              exchanges: totalExchanges,
+              cities: totalCities
             }}
           />
         )

@@ -494,10 +494,10 @@ export function trackPurchase(data: PurchaseData) {
     // 3. Google Analytics 4 (purchase officiel standardisé)
     sendGa4EcommerceEvent('purchase', {
         transaction_id: data.id,
-        value: data.total,
+        value: Number((Number(data.total) || 0).toFixed(2)),
         currency: DEFAULT_CURRENCY,
         tax: 0,
-        shipping: data.shippingFee || 0,
+        shipping: Number((Number(data.shippingFee) || 0).toFixed(2)),
         coupon: data.coupon,
         payment_type: data.paymentMethod || 'Cash On Delivery (COD)',
         items: data.items.map((item, index) => ({

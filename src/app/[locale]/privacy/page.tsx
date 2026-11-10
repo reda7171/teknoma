@@ -3,6 +3,23 @@ import { getTranslations } from 'next-intl/server'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import { Shield, Lock, Eye, FileText, Database, Bell, UserCheck } from 'lucide-react'
+import { Metadata } from 'next'
+import { getCanonicalAlternates } from '@/lib/seo/canonical'
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+    const { locale } = await params
+    const isAr = locale === 'ar'
+    const isEn = locale === 'en'
+    return {
+        title: isAr ? 'سياسة الخصوصية وحماية البيانات' : isEn ? 'Privacy Policy & Data Protection' : 'Politique de confidentialité',
+        description: isAr
+            ? 'سياسة حماية المعطيات الشخصية في مكتبة رواية طبقاً للقانون المغربي رقم 09-08.'
+            : isEn
+            ? 'How Riwaya collects, uses, and protects your personal data under Moroccan Law No. 09-08.'
+            : 'Politique de confidentialité et protection des données personnelles Riwaya conforme à la loi marocaine 09-08.',
+        alternates: getCanonicalAlternates(`/${locale}/privacy`, locale),
+    }
+}
 
 export default async function PrivacyPage() {
     const t = await getTranslations('PrivacyPage')

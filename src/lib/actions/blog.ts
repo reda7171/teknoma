@@ -80,10 +80,7 @@ export async function getPostBySlug(slug: string, language?: string) {
             decodedSlug = slug;
         }
 
-        // Try exact match first (important for Arabic and non-Latin slugs)
-        let post = await prisma.post.findFirst({
-            where: { slug: decodedSlug, published: true },
-        include: {
+        const postInclude = {
             author: {
                 select: {
                     id: true,
@@ -98,7 +95,7 @@ export async function getPostBySlug(slug: string, language?: string) {
             },
             comments: {
                 where: { isApproved: true },
-                orderBy: { createdAt: 'desc' },
+                orderBy: { createdAt: 'desc' as const },
                 include: {
                     user: {
                         select: { fullName: true, image: true }
@@ -124,7 +121,21 @@ export async function getPostBySlug(slug: string, language?: string) {
                 }
             }
         }
-    });
+
+        // Priorité à l'article dans la langue demandée avant fallback pour redirection 301 canonique
+        let post = language
+            ? await prisma.post.findFirst({
+                where: { slug: decodedSlug, published: true, language },
+                include: postInclude
+            })
+            : null;
+
+        if (!post) {
+            post = await prisma.post.findFirst({
+                where: { slug: decodedSlug, published: true },
+                include: postInclude
+            });
+        }
 
     if (!post) {
         const normalizedSlug = decodedSlug

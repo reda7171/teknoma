@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getBaseUrl } from '@/lib/utils'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // 1 heure
@@ -97,7 +98,7 @@ export async function GET() {
             <g:shipping>
                 <g:country>MA</g:country>
                 <g:service>Livraison Standard Maroc</g:service>
-                <g:price>30.00 MAD</g:price>
+                <g:price>${book.price >= STORE_POLICY.freeShippingThreshold ? '0.00' : STORE_POLICY.shippingFeeMorocco.toFixed(2)} MAD</g:price>
             </g:shipping>
         </item>`
         }
@@ -129,7 +130,7 @@ export async function GET() {
             <g:shipping>
                 <g:country>MA</g:country>
                 <g:service>Livraison Standard Maroc</g:service>
-                <g:price>30.00 MAD</g:price>
+                <g:price>${pack.price >= STORE_POLICY.freeShippingThreshold ? '0.00' : STORE_POLICY.shippingFeeMorocco.toFixed(2)} MAD</g:price>
             </g:shipping>
         </item>`
         }

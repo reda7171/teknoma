@@ -7,6 +7,7 @@ import { getAllSettings } from '@/lib/server/site-settings'
 import { Metadata } from 'next'
 import ContactForm from '@/components/contact/ContactForm'
 import ContactFaq, { FaqItem } from '@/components/contact/ContactFaq'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
 
 export async function generateMetadata({
     params,
@@ -18,10 +19,10 @@ export async function generateMetadata({
     const isEn = locale === 'en'
 
     const title = isAr
-        ? 'تواصل معنا | خدمة العملاء والدعم | رواية'
+        ? 'تواصل معنا - خدمة العملاء والدعم'
         : isEn
-        ? 'Contact Us | Customer Support & Assistance | Riwaya'
-        : 'Contactez-nous | Service Client & Support | Riwaya'
+        ? 'Contact Us - Customer Support & Assistance'
+        : 'Contactez-nous - Service Client & Support'
 
     const description = isAr
         ? 'فريق رواية رهن إشارتكم لجميع استفساراتكم حول الكتب، الطلبات والتوصيل عبر واتساب، الهاتف أو البريد الإلكتروني.'
@@ -40,7 +41,7 @@ export async function generateMetadata({
                 'fr': `${siteUrl}/fr/contact`,
                 'ar': `${siteUrl}/ar/contact`,
                 'en': `${siteUrl}/en/contact`,
-                'x-default': `${siteUrl}/fr/contact`
+                'x-default': `${siteUrl}/ar/contact`
             }
         },
         openGraph: {
@@ -81,12 +82,12 @@ export default async function ContactPage({
         ? [
             {
                 question: 'ما هي شروط وإجراءات إرجاع أو استبدال الكتب؟',
-                answer: 'لديكم مهلة 3 أيام بعد الاستلام لطلب الإرجاع أو الاستبدال إذا كان الكتاب لا يطابق توقعاتكم. يتم استرجاع المبلغ عبر تحويل بنكي أو قسيمة شراء فورية دون أي تعقيد.',
+                answer: `لديكم مهلة ${STORE_POLICY.returnWindowDays} أيام تقويمية بعد الاستلام لطلب الإرجاع أو الاستبدال مجاناً في حال وجود عيب أو تلف أو خطأ في الطلب، أو إرجاع كتاب جديد غير مقروء في تغليفه الأصلي (تُطبق رسوم الشحن ${STORE_POLICY.shippingFeeMorocco} درهماً).`,
                 category: 'RETURN'
             },
             {
                 question: 'ما هي مواعيد الشحن وتكاليف التوصيل في المغرب؟',
-                answer: 'يتم تجهيز وشحن الطلبات خلال 24 ساعة. التوصيل يستغرق من 24 إلى 48 ساعة في كافة مدن المغرب بسعر 30 درهم (ومجاني للطلبات فوق 500 درهم). كما يتوفر الشحن الدولي السريع عبر أمانة.',
+                answer: `يتم تجهيز وشحن الطلبات خلال 24 ساعة. التوصيل يستغرق 24-48 ساعة للمدن الكبرى و48-72 ساعة لباقي المدن بسعر ${STORE_POLICY.shippingFeeMorocco} درهم (ومجاني للطلبات من ${STORE_POLICY.freeShippingThreshold} درهم فما فوق). كما يتوفر الشحن الدولي عبر أمانة (${STORE_POLICY.shippingFeeWorldwide} درهم).`,
                 category: 'SHIPPING'
             },
             {
@@ -99,12 +100,12 @@ export default async function ContactPage({
         ? [
             {
                 question: 'What are the return and exchange terms?',
-                answer: 'You have 3 calendar days after receipt to request a free return or exchange if a book does not match your expectations. Refunds are issued via bank transfer or an instant store voucher.',
+                answer: `You have ${STORE_POLICY.returnWindowDays} calendar days after receipt to request a free return or replacement if a book is defective, damaged, or wrong, or return an unused/sealed book in original packaging (${STORE_POLICY.shippingFeeMorocco} MAD return fee). Refunds are issued via bank transfer or store voucher.`,
                 category: 'RETURN'
             },
             {
                 question: 'What are the shipping times and delivery fees?',
-                answer: 'Orders are dispatched within 24h. Delivery takes 24h to 48h throughout Morocco for 30 MAD (free for orders above 500 MAD). Worldwide express shipping is handled via Amana International.',
+                answer: `Orders are dispatched within 24h. Delivery takes 24-48h in major cities and 48-72h in other Moroccan regions for ${STORE_POLICY.shippingFeeMorocco} MAD (free for orders of ${STORE_POLICY.freeShippingThreshold} MAD or more). Worldwide shipping via Amana International is ${STORE_POLICY.shippingFeeWorldwide} MAD.`,
                 category: 'SHIPPING'
             },
             {
@@ -116,12 +117,12 @@ export default async function ContactPage({
         : [
             {
                 question: 'Quelles sont les modalités de retour et d\'échange ?',
-                answer: 'Vous disposez de 3 jours calendaires après réception pour demander un retour ou un échange sans frais si le livre présente un défaut ou ne correspond pas à vos attentes. Le remboursement s\'effectue par virement bancaire ou bon d\'achat immédiat.',
+                answer: `Vous disposez de ${STORE_POLICY.returnWindowDays} jours calendaires après réception pour demander un retour ou échange gratuit en cas de livre défectueux, endommagé ou erroné, ou retourner un livre neuf non lu dans son emballage d'origine (frais d'envoi de ${STORE_POLICY.shippingFeeMorocco} DH). Remboursement par virement bancaire ou bon d'achat.`,
                 category: 'RETURN'
             },
             {
                 question: 'Quels sont les délais d\'expédition et frais de livraison ?',
-                answer: 'Les commandes sont préparées et expédiées sous 24h. La livraison s\'effectue en 24h à 48h partout au Maroc pour 30 DH (offerte dès 500 DH d\'achat). Les envois internationaux express sont pris en charge par Amana International.',
+                answer: `Les commandes sont expédiées sous 24h. La livraison s'effectue en 24-48h dans les grandes villes et 48-72h dans les autres régions du Maroc pour ${STORE_POLICY.shippingFeeMorocco} DH (offerte dès ${STORE_POLICY.freeShippingThreshold} DH d'achat). Expédition internationale via Amana International (${STORE_POLICY.shippingFeeWorldwide} DH).`,
                 category: 'SHIPPING'
             },
             {

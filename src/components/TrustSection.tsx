@@ -105,7 +105,7 @@ function StatCard({ icon, number, label, bgColor, iconColor, idx }: StatCardProp
     )
 }
 
-export default function TrustSection({ stats, className, style }: { stats?: { books: number, readers: number, exchanges: number }, className?: string, style?: React.CSSProperties }) {
+export default function TrustSection({ stats, className, style }: { stats?: { books: number, readers: number, exchanges: number, cities?: number }, className?: string, style?: React.CSSProperties }) {
     const t = useTranslations('HomePage.Trust')
     const pulseClass = useResponsiveAnimation('animate-pulse')
     const pingClass = useResponsiveAnimation('animate-ping')
@@ -113,28 +113,28 @@ export default function TrustSection({ stats, className, style }: { stats?: { bo
     const statsData = [
         {
             icon: <BookCheck className="w-10 h-10" />,
-            number: stats?.books ? `${stats.books}+` : "1500+",
+            number: `${stats?.books ?? 0}`,
             label: t('Items.Books'),
             bgColor: "bg-pixio-yellow/30",
             iconColor: "text-amber-600"
         },
         {
             icon: <Globe className="w-10 h-10" />,
-            number: "50+",
+            number: `${stats?.cities && stats.cities > 0 ? stats.cities : 50}+`,
             label: t('Items.Cities'),
             bgColor: "bg-emerald-50",
             iconColor: "text-emerald-600"
         },
         {
             icon: <Users2 className="w-10 h-10" />,
-            number: stats?.readers ? `${stats.readers}+` : "1200+",
+            number: `${stats?.readers ?? 0}`,
             label: t('Items.Readers'),
             bgColor: "bg-rose-50",
             iconColor: "text-rose-500"
         },
         {
             icon: <Repeat className="w-10 h-10" />,
-            number: stats?.exchanges ? `${stats.exchanges}+` : "300+",
+            number: `${stats?.exchanges ?? 0}`,
             label: t('Items.Exchanges'),
             bgColor: "bg-emerald-50",
             iconColor: "text-emerald-600"

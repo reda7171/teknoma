@@ -29,6 +29,23 @@ export default function middleware(request: NextRequest) {
     return new NextResponse('Access Denied', { status: 403 });
   }
 
+  // Redirection 301 permanente des domaines secondaires (riwaya.ma, www.*) vers l'hôte canonique configuré
+  const rawHost = (request.headers.get('x-forwarded-host') || request.headers.get('host') || '').split(':')[0].toLowerCase();
+  const canonicalBase = (process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store').replace(/\/+$/, '');
+  const canonicalHost = (() => {
+    try { return new URL(canonicalBase).hostname.toLowerCase(); } catch { return 'riwaya.store'; }
+  })();
+  if (
+    process.env.NODE_ENV === 'production' &&
+    rawHost &&
+    rawHost !== canonicalHost &&
+    (rawHost === 'riwaya.ma' || rawHost === 'www.riwaya.ma' || rawHost === 'riwaya.store' || rawHost === 'www.riwaya.store')
+  ) {
+    const targetPath = request.nextUrl.pathname === '/' ? '/ar' : request.nextUrl.pathname;
+    const redirectUrl = new URL(`${targetPath}${request.nextUrl.search}`, canonicalBase);
+    return NextResponse.redirect(redirectUrl, 301);
+  }
+
   let pathname: string;
   try { pathname = decodeURIComponent(request.nextUrl.pathname) } catch { return new NextResponse(null, { status: 400 }) }
   if (pathname.startsWith('/uploads/school-lists/')) {
@@ -65,9 +82,19 @@ export default function middleware(request: NextRequest) {
     response.headers.set('X-Robots-Tag', 'noindex, noarchive');
   }
 
-  // Bloquer l'indexation de l'espace administration pour préserver 100% du crawl budget
-  if (pathname.includes('/admin')) {
+  // Prévention spam UGC & blocage d'indexation des routes privées, transactionnelles, profils, vendeurs et recherches internes
+  const normalizedNoIndexPath = pathname.toLowerCase();
+  const isPrivateOrUgcPath =
+    /^\/(?:(?:ar|fr|en)\/)?(?:admin|seller|cart|checkout|orders|track|wishlist|reading-list|reset-password|deposer-liste)(?:\/|$)/.test(normalizedNoIndexPath) ||
+    /^\/(?:(?:ar|fr|en)\/)?community\/(?:profile|exchanges|exchange|notifications|login|register|reading-list|books)(?:\/|$)/.test(normalizedNoIndexPath);
+
+  if (isPrivateOrUgcPath) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  } else if (
+    (request.nextUrl.searchParams.has('search') || request.nextUrl.searchParams.has('q')) &&
+    !response.headers.has('X-Robots-Tag')
+  ) {
+    response.headers.set('X-Robots-Tag', 'noindex, follow');
   }
 
   // Set HTTP Canonical Link header (RFC 5988 / Google Search Central)

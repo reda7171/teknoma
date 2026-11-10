@@ -70,18 +70,19 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
                     'ar': `${baseUrl}/ar/books?usedOnly=true`,
                     'fr': `${baseUrl}/fr/books?usedOnly=true`,
                     'en': `${baseUrl}/en/books?usedOnly=true`,
-                    'x-default': `${baseUrl}/fr/books?usedOnly=true`,
+                    'x-default': `${baseUrl}/ar/books?usedOnly=true`,
                 },
             },
         }
     }
 
     const categoryName = resolvedParams.category ? (tCats.has(resolvedParams.category as any) ? String(tCats(resolvedParams.category as any)) : resolvedParams.category) : null
-    const title = categoryName ? `${categoryName} | Riwaya` : String(tBooksPage('Title')) + ' | Riwaya'
+    const title = categoryName ? `${categoryName}` : String(tBooksPage('Title'))
 
     return {
         title,
         description: `Explorez notre collection de livres ${categoryName ? `en ${categoryName}` : 'de développement personnel et business'} sur Riwaya. Livraison disponible dans tout le Maroc.`,
+        ...(resolvedParams.search ? { robots: { index: false, follow: true } } : {}),
         openGraph: {
             title,
             description: `Explorez notre collection de livres ${categoryName ? `en ${categoryName}` : 'de développement personnel et business'} sur Riwaya. Livraison disponible dans tout le Maroc.`,
@@ -128,6 +129,11 @@ export default async function BooksPage({
     // Parser le prix dans la recherche si elle existe
     const priceFilter = sParams.search ? parsePriceFilter(sParams.search) : { minPrice: undefined, maxPrice: undefined, cleanQuery: sParams.search };
 
+    // Détecter si une catégorie vise explicitement une langue pour éviter les mélanges
+    const catLower = (sParams.category || '').toLowerCase();
+    const inferredLang = sParams.language
+        || (/fran[cç]ais|french/.test(catLower) ? 'fr' : /anglais|english/.test(catLower) ? 'en' : /arabe|arabic|عربية/.test(catLower) ? 'ar' : undefined);
+
     const filterObj = {
         category: sParams.category,
         subCategory: sParams.subCategory,
@@ -135,7 +141,7 @@ export default async function BooksPage({
         minPrice: priceFilter.minPrice,
         maxPrice: priceFilter.maxPrice,
         active: true,
-        language: sParams.language,
+        language: inferredLang,
         inStock: sParams.inStock === undefined ? true : sParams.inStock === 'true',
         usedOnly: sParams.usedOnly === 'true' || sParams.isUsed === 'true',
         isUsed: sParams.isUsed === 'true' || sParams.usedOnly === 'true',

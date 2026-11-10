@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isEn = locale === 'en'
 
     const title = isAr
-        ? 'كن بائعاً أو موزعاً للكتب | متجر رواية المغرب'
+        ? 'كن بائعاً أو موزعاً للكتب في المغرب'
         : isEn
-            ? 'Become a Book Seller & Partner | Riwaya Morocco'
-            : 'Devenir Vendeur & Revendeur de Livres | Riwaya Maroc'
+            ? 'Become a Book Seller & Partner in Morocco'
+            : 'Devenir Vendeur & Revendeur de Livres au Maroc'
 
     const description = isAr
         ? 'انضم إلى أكبر منصة ومكتبة لبيع الكتب في المغرب. اعرض كتبك كموزع أو بائع مستقل واستفد من آلاف القراء في جميع المدن المغربية.'
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
                 'fr': `${baseUrl}/fr/devenir-vendeur`,
                 'ar': `${baseUrl}/ar/devenir-vendeur`,
                 'en': `${baseUrl}/en/devenir-vendeur`,
-                'x-default': `${baseUrl}/fr/devenir-vendeur`,
+                'x-default': `${baseUrl}/ar/devenir-vendeur`,
             }
         }
     }

@@ -11,12 +11,24 @@ import { getCommunityUser } from '@/lib/actions/community-auth'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string, locale: string }> }) {
     const { id, locale } = await params
-    const user = await prisma.user.findUnique({ where: { id } })
-    if (!user) return {}
+    const user = await prisma.user.findUnique({
+        where: { id },
+        select: {
+            fullName: true,
+            bio: true,
+            editorialRole: true,
+            _count: { select: { posts: { where: { published: true } } } },
+            posts: { where: { published: true, language: locale }, select: { id: true }, take: 1 }
+        }
+    })
+    // Bloquer l'indexation et l'exposition des profils utilisateurs sans rôle éditorial ni article publié
+    if (!user || (user._count.posts === 0 && !user.editorialRole)) return {}
 
+    const authorName = user.fullName || 'Rédaction Riwaya'
     return {
-        title: `${user.fullName || user.email} | Blog Riwaya`,
-        description: user.bio || `Découvrez les articles écrits par ${user.fullName || user.email} sur le blog Riwaya.`
+        title: `${authorName} | Blog Riwaya`,
+        description: user.bio || `Découvrez les articles écrits par ${authorName} sur le blog Riwaya.`,
+        ...(user.posts.length === 0 ? { robots: { index: false, follow: true } } : {})
     }
 }
 
@@ -30,6 +42,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
     const user = await prisma.user.findUnique({
         where: { id },
         include: {
+            _count: { select: { posts: { where: { published: true } } } },
             posts: {
                 where: { published: true, language: locale },
                 orderBy: { publishedAt: 'desc' },
@@ -41,9 +54,11 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
         }
     })
 
-    if (!user) {
+    if (!user || (user._count.posts === 0 && !user.editorialRole && !isAdmin)) {
         notFound()
     }
+
+    const authorName = user.fullName || 'Rédaction Riwaya'
 
     return (
         <main className="min-h-screen bg-slate-50 flex flex-col">
@@ -58,7 +73,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                         "@type": "ProfilePage",
                         "mainEntity": {
                             "@type": "Person",
-                            "name": user.fullName || user.email?.split('@')[0],
+                            "name": authorName,
                             "url": `https://riwaya.store/${locale}/blog/author/${user.id}`,
                             ...(user.image ? { "image": user.image.startsWith('http') ? user.image : `https://riwaya.store${user.image.startsWith('/') ? '' : '/'}${user.image}` } : {}),
                             ...(user.bio ? { "description": user.bio } : {}),
@@ -116,7 +131,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                         {/* Infos de l'auteur */}
                         <div className="flex-1 text-center md:text-start pt-4 md:pt-0">
                             <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
-                                {user.fullName || user.email?.split('@')[0]}
+                                {authorName}
                                 <span className="text-xs rtl:text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase rtl:uppercase-none tracking-widest rtl:tracking-normal font-bold">
                                     {user.role}
                                 </span>
