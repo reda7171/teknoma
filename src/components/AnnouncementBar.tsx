@@ -22,7 +22,10 @@ export default function AnnouncementBar({
 
     const isDefaultMsg = message.trim() === "Livraison Gratuite partout au Maroc dès 300 درهم d'achat !" ||
                          message.trim() === "توصيل مجاني في جميع أنحاء المغرب ابتداءً من 300 درهم!" ||
-                         message.trim() === "Free delivery everywhere in Morocco for orders over 300 درهم!";
+                         message.trim() === "Free delivery everywhere in Morocco for orders over 300 درهم!" ||
+                         message.trim() === "Livraison Gratuite partout au Maroc dès 500 MAD d'achat !" ||
+                         message.trim() === "توصيل مجاني في جميع أنحاء المغرب ابتداءً من 500 درهم!" ||
+                         message.trim() === "Free delivery everywhere in Morocco for orders over 500 MAD!";
 
     const displayMessage = isDefaultMsg ? t('FreeShippingPromo') : message;
 

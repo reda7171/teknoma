@@ -23,6 +23,13 @@ export default async function TrackingConfigPage() {
     const fbMarketingAccessToken = await getSetting('fb_marketing_access_token') || ''
     const fbAdAccountId = await getSetting('fb_ad_account_id') || ''
     const fbPageId = await getSetting('fb_page_id') || ''
+    const googleAdsCustomerId = await getSetting('google_ads_customer_id') || ''
+    const googleAdsLoginCustomerId = await getSetting('google_ads_login_customer_id') || ''
+    const googleAdsDeveloperToken = await getSetting('google_ads_developer_token') || ''
+    const googleAdsClientId = await getSetting('google_ads_client_id') || ''
+    const googleAdsClientSecret = await getSetting('google_ads_client_secret') || ''
+    const googleAdsRefreshToken = await getSetting('google_ads_refresh_token') || ''
+    const googleAdsConversionActionId = await getSetting('google_ads_conversion_action_id') || ''
 
     return (
         <div className="space-y-12">
@@ -64,6 +71,15 @@ export default async function TrackingConfigPage() {
                             initialFbMarketingAccessToken={fbMarketingAccessToken}
                             initialFbAdAccountId={fbAdAccountId}
                             initialFbPageId={fbPageId}
+                            initialGoogleAds={{
+                                customerId: googleAdsCustomerId,
+                                loginCustomerId: googleAdsLoginCustomerId,
+                                developerToken: googleAdsDeveloperToken,
+                                clientId: googleAdsClientId,
+                                clientSecret: googleAdsClientSecret,
+                                refreshToken: googleAdsRefreshToken,
+                                conversionActionId: googleAdsConversionActionId,
+                            }}
                         />
                     </div>
                 </div>

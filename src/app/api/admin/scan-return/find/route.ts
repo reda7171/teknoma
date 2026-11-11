@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedAdmin, hasAdminRole, ORDER_OPERATION_ROLES } from '@/lib/admin-auth'
 
+import { getJsonBooleanMap, RECOVERY_STATUSES_KEY } from '@/lib/server/order-stock'
+
 export async function GET(request: Request) {
     const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER","CONFIRMATOR"])
     if (accessDenied) return accessDenied
@@ -47,8 +49,9 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Aucune commande trouvée pour ce numéro de suivi" }, { status: 404 })
         }
 
-        if (order.status === 'RETURNED') {
-            return NextResponse.json({ error: "Cette commande est déjà marquée comme retournée." }, { status: 400 })
+        const recoveryMap = await getJsonBooleanMap(prisma, RECOVERY_STATUSES_KEY)
+        if (order.status === 'RETURNED' && recoveryMap[order.id] === true) {
+            return NextResponse.json({ error: "Ce colis retour a déjà été scanné et récupéré au dépôt." }, { status: 400 })
         }
 
         return NextResponse.json({ order })

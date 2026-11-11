@@ -1,7 +1,16 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { revalidatePath } from 'next/cache'
 import { verifyAdmin } from '@/lib/actions/auth'
+import { createAuditLog } from '@/lib/server/audit'
+import { invalidateCatalogCache } from '@/lib/db/books'
+import {
+    applyOrderStockDelta,
+    isOrderStockRestored,
+    setOrderStockRestored,
+    setReturnRecoveredFlag,
+} from '@/lib/server/order-stock'
 
 export interface ReturnReminder {
     id: string
@@ -110,25 +119,91 @@ export async function getPendingReturnReminders(): Promise<ReturnReminder[]> {
     }
 }
 
-/** Enregistre si le colis retourné a été physiquement récupéré auprès du transporteur. */
+/**
+ * Enregistre si le colis retourné a été physiquement récupéré auprès du transporteur
+ * et réintègre (ou annule la réintégration) du stock en conséquence.
+ */
 export async function updateReturnRecoveryStatus(orderId: string, isRecovered: boolean) {
     try {
-        await verifyAdmin()
-        const setting = await prisma.siteSettings.findUnique({ where: { key: 'return_recovery_statuses' } })
-        let statuses: Record<string, boolean> = {}
-        try {
-            statuses = setting?.value ? JSON.parse(setting.value) : {}
-        } catch {
-            statuses = {}
+        await verifyAdmin(["ADMIN", "MANAGER", "CONFIRMATOR"])
+
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                items: {
+                    include: {
+                        pack: { include: { books: true } },
+                    },
+                },
+            },
+        })
+
+        if (!order) {
+            return { success: false, error: 'Commande introuvable' }
         }
 
-        statuses[orderId] = isRecovered
-        await prisma.siteSettings.upsert({
-            where: { key: 'return_recovery_statuses' },
-            update: { value: JSON.stringify(statuses) },
-            create: { key: 'return_recovery_statuses', value: JSON.stringify(statuses) }
+        let stockAction: 'RESTORED' | 'DEDUCTED' | 'NONE' = 'NONE'
+
+        await prisma.$transaction(async (tx) => {
+            await setReturnRecoveredFlag(tx, orderId, isRecovered)
+            const alreadyRestored = await isOrderStockRestored(tx, orderId)
+
+            if (isRecovered && !alreadyRestored) {
+                await applyOrderStockDelta(tx, orderId, order.items, 'RESTORE')
+                await setOrderStockRestored(tx, orderId, true)
+                await tx.orderStatusHistory.create({
+                    data: {
+                        orderId,
+                        status: order.status,
+                        comment: 'Colis retour déclaré récupéré — stock réintégré',
+                        createdBy: 'ADMIN',
+                    },
+                })
+                stockAction = 'RESTORED'
+            } else if (!isRecovered && alreadyRestored) {
+                await applyOrderStockDelta(
+                    tx,
+                    orderId,
+                    order.items,
+                    'DEDUCT',
+                    `Annulation récupération colis retour #${orderId}`
+                )
+                await setOrderStockRestored(tx, orderId, false)
+                await tx.orderStatusHistory.create({
+                    data: {
+                        orderId,
+                        status: order.status,
+                        comment: 'Colis retour déclaré non récupéré — réintégration stock annulée',
+                        createdBy: 'ADMIN',
+                    },
+                })
+                stockAction = 'DEDUCTED'
+            }
         })
-        return { success: true }
+
+        await createAuditLog({
+            action: isRecovered ? 'RETURN_RECOVERED_STOCK' : 'RETURN_UNRECOVERED',
+            entity: 'ORDER',
+            entityId: orderId,
+            details: `Déclaration colis récupéré=${isRecovered} (mouvement stock: ${stockAction})`,
+        })
+
+        if (stockAction !== 'NONE') {
+            for (const item of order.items) {
+                if (item.bookId) await invalidateCatalogCache(item.bookId)
+            }
+            revalidatePath('/[locale]/books', 'page')
+            revalidatePath('/admin/books')
+        }
+        revalidatePath('/[locale]/admin/orders', 'page')
+        revalidatePath('/fr/admin/orders')
+        revalidatePath('/ar/admin/orders')
+        revalidatePath('/en/admin/orders')
+        revalidatePath(`/fr/admin/orders/${orderId}`)
+        revalidatePath(`/ar/admin/orders/${orderId}`)
+        revalidatePath(`/en/admin/orders/${orderId}`)
+
+        return { success: true, stockAction }
     } catch (error: unknown) {
         return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' }
     }

@@ -188,6 +188,63 @@ async function main() {
 
     // 4. WhatsApp Message Logs (only real messages are logged dynamically)
 
+    // 5. Ad Campaign Spends (démonstration Meta & Google si la table est vide, purgée dès synchro réelle)
+    const adSpendCount = await prisma.adCampaignSpend.count()
+    if (adSpendCount === 0) {
+        const now = new Date()
+        const thirtyDaysAgo = new Date(now)
+        thirtyDaysAgo.setDate(now.getDate() - 29)
+        const fmt = (d: Date) => d.toISOString().slice(0, 10)
+
+        await prisma.adCampaignSpend.createMany({
+            data: [
+                {
+                    platform: 'META',
+                    campaignId: 'seed_meta_best_sellers',
+                    campaignName: '[Riwaya] Best-Sellers Maroc',
+                    utmSlug: 'best-sellers-maroc',
+                    channelType: 'OUTCOME_SALES',
+                    status: 'PAUSED',
+                    datePreset: 'last_30d',
+                    currency: 'MAD',
+                    spend: 450,
+                    spendMad: 450,
+                    fxRateToMad: 1,
+                    impressions: 24500,
+                    clicks: 610,
+                    ctr: 2.49,
+                    cpcMad: 0.74,
+                    platformConv: 14,
+                    dateStart: fmt(thirtyDaysAgo),
+                    dateStop: fmt(now),
+                    syncedAt: now,
+                },
+                {
+                    platform: 'GOOGLE',
+                    campaignId: 'seed_google_search_cod',
+                    campaignName: '[Riwaya] Search - Librairie Maroc COD',
+                    utmSlug: 'search-librairie-maroc-cod',
+                    channelType: 'SEARCH',
+                    status: 'PAUSED',
+                    datePreset: 'last_30d',
+                    currency: 'MAD',
+                    spend: 380,
+                    spendMad: 380,
+                    fxRateToMad: 1,
+                    impressions: 9400,
+                    clicks: 495,
+                    ctr: 5.27,
+                    cpcMad: 0.77,
+                    platformConv: 12,
+                    dateStart: fmt(thirtyDaysAgo),
+                    dateStop: fmt(now),
+                    syncedAt: now,
+                },
+            ],
+            skipDuplicates: true,
+        })
+    }
+
     console.log('Seed completed successfully.')
 }
 

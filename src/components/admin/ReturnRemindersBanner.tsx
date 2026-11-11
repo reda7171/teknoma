@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { RotateCcw, MessageCircle, Truck, ChevronDown, ChevronUp, Phone, Check } from 'lucide-react'
 import { getPendingReturnReminders, updateReturnRecoveryStatus, updateShippingCompanySupportPhone, ReturnReminder } from '@/lib/actions/return-reminders'
 import Link from 'next/link'
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function ReturnRemindersBanner({ locale }: Props) {
+    const router = useRouter()
     const [reminders, setReminders] = useState<ReturnReminder[]>([])
     const [loading, setLoading] = useState(true)
     const [isExpanded, setIsExpanded] = useState(false)
@@ -69,6 +71,7 @@ export default function ReturnRemindersBanner({ locale }: Props) {
             setReminders(previous => previous.map(reminder =>
                 reminder.id === orderId ? { ...reminder, isRecovered } : reminder
             ))
+            router.refresh()
         }
         setSavingRecoveryId(null)
     }

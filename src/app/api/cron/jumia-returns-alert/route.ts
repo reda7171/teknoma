@@ -58,7 +58,8 @@ export async function GET(req: Request) {
             try { processedReturns = new Set(JSON.parse(processedSetting.value)) } catch (e) {}
         }
 
-        const allToProcess = [...returnedOrders, ...canceledOrders]
+        // Ne pas impacter le stock automatiquement sur un retour avant récupération physique du colis
+        const allToProcess = [...canceledOrders]
         const unprocessedOrders = allToProcess.filter((o: any) => !processedReturns.has((o.id || o.orderId || o.number)?.toString()))
 
         for (const order of unprocessedOrders) {

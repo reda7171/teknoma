@@ -2,6 +2,17 @@ import { authorizeAdminApi } from '@/lib/api-authorization'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedAdmin, hasAdminRole, ORDER_OPERATION_ROLES } from '@/lib/admin-auth'
+import { revalidatePath } from 'next/cache'
+import { invalidateCatalogCache } from '@/lib/db/books'
+import { createAuditLog } from '@/lib/server/audit'
+import {
+    applyOrderStockDelta,
+    getJsonBooleanMap,
+    isOrderStockRestored,
+    RECOVERY_STATUSES_KEY,
+    setOrderStockRestored,
+    setReturnRecoveredFlag,
+} from '@/lib/server/order-stock'
 
 export async function POST(request: Request) {
     const accessDenied = await authorizeAdminApi(["ADMIN","MANAGER","CONFIRMATOR"])
@@ -34,47 +45,64 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Commande introuvable" }, { status: 404 })
         }
 
-        if (order.status === 'RETURNED') {
-            return NextResponse.json({ error: "Commande déjà retournée" }, { status: 400 })
+        const recoveryMap = await getJsonBooleanMap(prisma, RECOVERY_STATUSES_KEY)
+        if (order.status === 'RETURNED' && recoveryMap[order.id] === true) {
+            return NextResponse.json({ error: "Ce colis retour a déjà été scanné et récupéré." }, { status: 400 })
         }
 
-        // Update status and stock in a transaction
+        let stockRestoredNow = false
+
+        // Scan physique QR au dépôt = retour + colis récupéré + réintégration stock idempotente
         await prisma.$transaction(async (tx) => {
-            // 1. Update Order status
             await tx.order.update({
                 where: { id: orderId },
                 data: { status: 'RETURNED' }
             })
 
-            // 2. Add history
+            await setReturnRecoveredFlag(tx, orderId, true)
+
+            const alreadyRestored = await isOrderStockRestored(tx, orderId)
+            if (!alreadyRestored) {
+                await applyOrderStockDelta(tx, orderId, order.items, 'RESTORE')
+                await setOrderStockRestored(tx, orderId, true)
+                stockRestoredNow = true
+            }
+
             await tx.orderStatusHistory.create({
                 data: {
                     orderId: orderId,
                     status: 'RETURNED',
-                    comment: 'Retour scanné via Scan Retour (QR)'
+                    comment: stockRestoredNow
+                        ? 'Colis retour scanné et récupéré au dépôt (QR) — stock réintégré'
+                        : 'Colis retour scanné et déclaré récupéré au dépôt (QR)',
+                    createdBy: admin.email || 'ADMIN'
                 }
             })
-
-            // 3. Impact stock
-            for (const item of order.items) {
-                if (item.type === 'BOOK' && item.bookId) {
-                    await tx.book.updateMany({
-                        where: { id: item.bookId },
-                        data: { stock: { increment: item.quantity } }
-                    })
-                } else if (item.type === 'PACK' && item.packId && item.pack) {
-                    // Update stock for all books in the pack
-                    for (const packBook of item.pack.books) {
-                        await tx.book.updateMany({
-                            where: { id: packBook.bookId },
-                            data: { stock: { increment: item.quantity } }
-                        })
-                    }
-                }
-            }
         })
 
-        return NextResponse.json({ success: true, message: "Commande retournée et stock mis à jour." })
+        await createAuditLog({
+            action: 'SCAN_RETURN_RECOVERED',
+            entity: 'ORDER',
+            entityId: orderId,
+            details: `Scan QR colis récupéré (stock réintégré: ${stockRestoredNow})`
+        })
+
+        if (stockRestoredNow) {
+            for (const item of order.items) {
+                if (item.bookId) await invalidateCatalogCache(item.bookId)
+            }
+            revalidatePath('/[locale]/books', 'page')
+            revalidatePath('/admin/books')
+        }
+        revalidatePath('/[locale]/admin/orders', 'page')
+        revalidatePath(`/fr/admin/orders/${orderId}`)
+
+        return NextResponse.json({
+            success: true,
+            message: stockRestoredNow
+                ? "Colis déclaré récupéré et stock réintégré."
+                : "Colis déclaré récupéré (le stock était déjà réintégré)."
+        })
 
     } catch (error) {
         console.error("Erreur scan-return process:", error)

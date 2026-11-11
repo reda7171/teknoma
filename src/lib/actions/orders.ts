@@ -486,11 +486,21 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 }
 
                 // Envoi Google Analytics 4 Measurement Protocol avec Enhanced Conversions (Server-Side)
-                const gaMeasurementId = await getSetting('google_analytics_id') || process.env.NEXT_PUBLIC_GA_ID || process.env.GA_MEASUREMENT_ID
-                const gaApiSecret = await getSetting('google_analytics_api_secret') || process.env.GA_API_SECRET || process.env.GOOGLE_ANALYTICS_API_SECRET
+                const { getGa4MpConfig, logGa4MpEvent } = await import('@/lib/server/ga4-mp-logger')
+                const { measurementId: gaMeasurementId, apiSecret: gaApiSecret } = await getGa4MpConfig()
 
                 let gaPromise = Promise.resolve()
-                if (gaMeasurementId && gaApiSecret) {
+                if (gaMeasurementId && !gaApiSecret) {
+                    gaPromise = logGa4MpEvent({
+                        action: 'MP_COLLECT_MISSING_CONFIG',
+                        orderId: fullOrder.id,
+                        paymentMethod: data.paymentMethod || 'COD',
+                        value: Number((Number(fullOrder.total) || 0).toFixed(2)),
+                        measurementId: gaMeasurementId,
+                        error: 'Clé API Secret GA4 manquante (google_analytics_api_secret)',
+                        source: 'checkout',
+                    })
+                } else if (gaMeasurementId && gaApiSecret) {
                     const gaCookieMatch = cookieHeader.match(/(?:^|;\s*)_ga=GA\d\.\d\.(\d+\.\d+)/)
                     const clientId = data.gaClientId || (gaCookieMatch ? gaCookieMatch[1] : undefined) || `${Math.floor(Math.random() * 1000000000)}.${Math.floor(Date.now() / 1000)}`
 
@@ -509,9 +519,10 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                     if (gaHashedEmail) gaUserData.sha256_email_address = gaHashedEmail
                     if (gaHashedPhone) gaUserData.sha256_phone_number = gaHashedPhone
 
+                    const roundedOrderValue = Number((Number(fullOrder.total) || 0).toFixed(2))
                     const gaEventParams: Record<string, any> = {
                         transaction_id: fullOrder.id,
-                        value: Number((Number(fullOrder.total) || 0).toFixed(2)),
+                        value: roundedOrderValue,
                         currency: 'MAD',
                         shipping: Number((Number(fullOrder.shippingFees) || 0).toFixed(2)),
                         payment_type: data.paymentMethod || 'COD',
@@ -540,7 +551,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                         }]
                     }
 
-                    gaPromise = fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${gaMeasurementId}&api_secret=${gaApiSecret}`, {
+                    gaPromise = fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(gaMeasurementId)}&api_secret=${encodeURIComponent(gaApiSecret)}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(gaPayload)
@@ -548,8 +559,29 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                         if (!res.ok) {
                             const errBody = await res.text().catch(() => '')
                             console.error('GA4 Measurement Protocol Error:', res.status, errBody)
+                            await logGa4MpEvent({
+                                action: 'MP_COLLECT_ERROR',
+                                orderId: fullOrder.id,
+                                status: res.status,
+                                paymentMethod: data.paymentMethod || 'COD',
+                                value: roundedOrderValue,
+                                measurementId: gaMeasurementId,
+                                error: errBody || `HTTP ${res.status}`,
+                                source: 'checkout',
+                            })
                         }
-                    }).catch(console.error)
+                    }).catch(async (err) => {
+                        console.error('GA4 Measurement Protocol Network Error:', err)
+                        await logGa4MpEvent({
+                            action: 'MP_COLLECT_NETWORK_ERROR',
+                            orderId: fullOrder.id,
+                            paymentMethod: data.paymentMethod || 'COD',
+                            value: roundedOrderValue,
+                            measurementId: gaMeasurementId,
+                            error: err instanceof Error ? err.message : String(err),
+                            source: 'checkout',
+                        })
+                    })
                 }
 
                 // Tâches en arrière-plan liées au stock (déplacées hors de la transaction pour éviter d'épuiser le pool de connexions)

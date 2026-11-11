@@ -10,11 +10,15 @@ import { sendTelegramMessage, escapeHtml } from '@/lib/telegram'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 import { OrderStatus } from '@prisma/client'
-import { allocateOrderItemStock, restoreOrderItemStock } from "@/lib/server/warehouse"
+import {
+    applyOrderStockDelta,
+    isOrderStockRestored,
+    setOrderStockRestored,
+} from '@/lib/server/order-stock'
 
 /**
  * Mettre à jour le statut d'une commande
- * Si RETURNED ou CANCELLED : réintègre le stock des livres
+ * Si CANCELLED (non encore retournée) : réintègre le stock. Si RETURNED : le stock attend la déclaration "colis récupéré".
  */
 export async function updateOrderStatus(orderId: string, status: OrderStatus, options?: { skipSyncToProvider?: boolean, historyComment?: string }) {
     try {
@@ -38,11 +42,9 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
         if (!order) return { success: false, error: 'Commande introuvable' }
 
         const prevStatus = order.status
-        const isNowReturned = status === 'RETURNED' || status === 'CANCELLED'
-
-        // Si le statut précédent est déjà CANCELLED ou RETURNED, le stock a déjà été réintégré.
-        // Sinon, le stock avait été décrémenté (lors de la création de la commande), et il faut le réintégrer.
-        const wasAlreadyRestored = ['CANCELLED', 'RETURNED'].includes(prevStatus)
+        // Un retour ne doit plus réintégrer le stock automatiquement : il faut déclarer "colis récupéré"
+        const shouldRestoreOnCancel = status === 'CANCELLED' && prevStatus !== 'CANCELLED' && prevStatus !== 'RETURNED'
+        let stockRestoredNow = false
 
         await prisma.$transaction(async (tx) => {
             // Récupérer la compagnie de livraison
@@ -78,42 +80,14 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
                 }
             }
 
-            // Réintégrer le stock si retour/annulation d'une commande qui avait décrémenté le stock
-            if (isNowReturned && !wasAlreadyRestored) {
-                for (const item of order.items) {
-                    if ((item as any).warehouseId) {
-                        await restoreOrderItemStock(tx, {
-                            bookId: item.bookId,
-                            extraProductId: item.extraProductId,
-                            warehouseId: (item as any).warehouseId,
-                            quantity: item.quantity,
-                            orderId
-                        })
-                    }
-                    if (item.type === 'BOOK' && item.bookId) {
-                        await tx.book.updateMany({
-                            where: { id: item.bookId },
-                            data: { stock: { increment: item.quantity } }
-                        })
-                    } else if (item.type === 'ACCESSORY' && item.extraProductId) {
-                        await tx.extraProduct.updateMany({
-                            where: { id: item.extraProductId },
-                            data: { stock: { increment: item.quantity } }
-                        })
-                    } else if (item.type === 'PACK' && item.pack) {
-                        for (const packBook of item.pack.books) {
-                            await tx.book.updateMany({
-                                where: { id: packBook.bookId },
-                                data: { stock: { increment: item.quantity } }
-                            })
-                        }
-                    }
+            // Réintégrer le stock uniquement lors d'une annulation (pas lors d'un retour avant récupération physique)
+            if (shouldRestoreOnCancel) {
+                const alreadyRestored = await isOrderStockRestored(tx, orderId)
+                if (!alreadyRestored) {
+                    await applyOrderStockDelta(tx, orderId, order.items, 'RESTORE')
+                    await setOrderStockRestored(tx, orderId, true)
+                    stockRestoredNow = true
                 }
-            }
-
-            // Empêcher le double remboursement si on annule depuis RETURNED
-            if (status === 'CANCELLED' && prevStatus === 'RETURNED') {
-                // Déjà remis en stock, ne rien faire
             }
         })
 
@@ -124,9 +98,11 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
         revalidatePath('/admin/orders')
         revalidatePath(`/admin/orders/${orderId}`)
 
-        const stockNote = isNowReturned && !wasAlreadyRestored
+        const stockNote = stockRestoredNow
             ? ` | Stock des produits réintégré (${order.items.length} articles)`
-            : ''
+            : status === 'RETURNED'
+                ? ' | Stock inchangé (en attente de récupération du colis)'
+                : ''
 
         await createAuditLog({
             action: 'UPDATE_STATUS',

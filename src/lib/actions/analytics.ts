@@ -2,6 +2,14 @@
 
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/actions/auth'
+import {
+    getUnifiedAdsRoasReport,
+    type UnifiedAdsRoasReport,
+    type AdPlatformFilter,
+} from '@/lib/server/ads-roas-report'
+import type { AdDatePreset } from '@/lib/server/ads-fx'
+
+export type { UnifiedAdsRoasReport, AdPlatformFilter, AdDatePreset }
 
 /**
  * Récupérer les données pour le dashboard analytics
@@ -575,6 +583,294 @@ export async function getCampaignCodAnalytics() {
             },
             sources: [],
             topCampaigns: [],
+        }
+    }
+}
+
+export interface PilotCouponMetric {
+    code: string
+    isActive: boolean
+    affiliateName: string | null
+    discountLabel: string
+    totalOrders: number
+    deliveredOrders: number
+    cancelledOrders: number
+    deliveryRate: number
+    grossRevenue: number
+    deliveredRevenue: number
+    totalDiscount: number
+    topChannels: string[]
+}
+
+export interface PilotChannelMetric {
+    source: string
+    medium: string
+    totalOrders: number
+    promoOrders: number
+    deliveredOrders: number
+    deliveryRate: number
+    grossRevenue: number
+    deliveredRevenue: number
+    aov: number
+    topCoupon: string | null
+}
+
+export interface PilotPromoAnalyticsData {
+    summary: {
+        totalPromoOrders: number
+        deliveredPromoRevenue: number
+        totalDiscountGranted: number
+        activeCouponsCount: number
+        trackedChannelsCount: number
+    }
+    couponStats: PilotCouponMetric[]
+    channelStats: PilotChannelMetric[]
+    activeCoupons: Array<{ code: string; discountLabel: string }>
+}
+
+/**
+ * Tableau croisé des canaux pilotes UTM (Avito, Wffer, Hemizate...) et codes promo COD
+ */
+export async function getPilotPromoChannelAnalytics(): Promise<PilotPromoAnalyticsData> {
+    try {
+        await verifyAdmin()
+
+        const [orders, coupons] = await Promise.all([
+            prisma.order.findMany({
+                select: {
+                    id: true,
+                    total: true,
+                    discount: true,
+                    couponCode: true,
+                    status: true,
+                    utmSource: true,
+                    utmMedium: true,
+                    utmCampaign: true,
+                    fbclid: true,
+                    ttclid: true,
+                    createdAt: true,
+                },
+                orderBy: { createdAt: 'desc' },
+                take: 2000,
+            }),
+            prisma.coupon.findMany({
+                select: {
+                    code: true,
+                    discount: true,
+                    type: true,
+                    isActive: true,
+                    affiliateName: true,
+                    expiresAt: true,
+                },
+                orderBy: { createdAt: 'desc' },
+                take: 100,
+            }),
+        ])
+
+        const couponMap = new Map<string, PilotCouponMetric & { channelCounts: Record<string, number> }>()
+        const activeCoupons: Array<{ code: string; discountLabel: string }> = []
+        const now = new Date()
+
+        for (const c of coupons) {
+            const code = c.code.trim().toUpperCase()
+            const discountLabel = c.type === 'PERCENTAGE' ? `-${c.discount}%` : `-${c.discount} MAD`
+            const isValidNow = Boolean(c.isActive && (!c.expiresAt || c.expiresAt > now))
+            if (isValidNow) activeCoupons.push({ code, discountLabel })
+
+            couponMap.set(code, {
+                code,
+                isActive: isValidNow,
+                affiliateName: c.affiliateName || null,
+                discountLabel,
+                totalOrders: 0,
+                deliveredOrders: 0,
+                cancelledOrders: 0,
+                deliveryRate: 0,
+                grossRevenue: 0,
+                deliveredRevenue: 0,
+                totalDiscount: 0,
+                topChannels: [],
+                channelCounts: {},
+            })
+        }
+
+        const channelMap = new Map<string, PilotChannelMetric & { couponCounts: Record<string, number> }>()
+        let totalPromoOrders = 0
+        let deliveredPromoRevenue = 0
+        let totalDiscountGranted = 0
+
+        for (const o of orders) {
+            const rawSource = o.utmSource ? o.utmSource.toLowerCase().trim() : ''
+            const src = rawSource || (o.fbclid ? 'facebook' : o.ttclid ? 'tiktok' : 'direct_organique')
+            const isDelivered = o.status === 'DELIVERED'
+            const isCancelled = o.status === 'CANCELLED' || o.status === 'RETURNED'
+            const orderTotal = Number(o.total || 0)
+            const orderDiscount = Number(o.discount || 0)
+            const code = o.couponCode ? o.couponCode.trim().toUpperCase() : null
+
+            let ch = channelMap.get(src)
+            if (!ch) {
+                ch = {
+                    source: src,
+                    medium: o.utmMedium || (src === 'direct_organique' ? 'organique' : 'utm/social'),
+                    totalOrders: 0,
+                    promoOrders: 0,
+                    deliveredOrders: 0,
+                    deliveryRate: 0,
+                    grossRevenue: 0,
+                    deliveredRevenue: 0,
+                    aov: 0,
+                    topCoupon: null,
+                    couponCounts: {},
+                }
+                channelMap.set(src, ch)
+            }
+
+            ch.totalOrders += 1
+            ch.grossRevenue += orderTotal
+            if (isDelivered) {
+                ch.deliveredOrders += 1
+                ch.deliveredRevenue += orderTotal
+            }
+
+            if (code) {
+                totalPromoOrders += 1
+                totalDiscountGranted += orderDiscount
+                if (isDelivered) deliveredPromoRevenue += orderTotal
+                ch.promoOrders += 1
+                ch.couponCounts[code] = (ch.couponCounts[code] || 0) + 1
+
+                let cp = couponMap.get(code)
+                if (!cp) {
+                    cp = {
+                        code,
+                        isActive: false,
+                        affiliateName: null,
+                        discountLabel: 'Code historique',
+                        totalOrders: 0,
+                        deliveredOrders: 0,
+                        cancelledOrders: 0,
+                        deliveryRate: 0,
+                        grossRevenue: 0,
+                        deliveredRevenue: 0,
+                        totalDiscount: 0,
+                        topChannels: [],
+                        channelCounts: {},
+                    }
+                    couponMap.set(code, cp)
+                }
+
+                cp.totalOrders += 1
+                cp.grossRevenue += orderTotal
+                cp.totalDiscount += orderDiscount
+                cp.channelCounts[src] = (cp.channelCounts[src] || 0) + 1
+                if (isDelivered) {
+                    cp.deliveredOrders += 1
+                    cp.deliveredRevenue += orderTotal
+                } else if (isCancelled) {
+                    cp.cancelledOrders += 1
+                }
+            }
+        }
+
+        const couponStats: PilotCouponMetric[] = Array.from(couponMap.values())
+            .map(({ channelCounts, ...rest }) => ({
+                ...rest,
+                deliveryRate: rest.totalOrders > 0 ? Math.round((rest.deliveredOrders / rest.totalOrders) * 100) : 0,
+                grossRevenue: Math.round(rest.grossRevenue),
+                deliveredRevenue: Math.round(rest.deliveredRevenue),
+                totalDiscount: Math.round(rest.totalDiscount),
+                topChannels: Object.entries(channelCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3)
+                    .map(([name, cnt]) => `${name} (${cnt})`),
+            }))
+            .sort((a, b) => b.totalOrders - a.totalOrders || Number(b.isActive) - Number(a.isActive))
+
+        const channelStats: PilotChannelMetric[] = Array.from(channelMap.values())
+            .map(({ couponCounts, ...rest }) => {
+                const topEntry = Object.entries(couponCounts).sort((a, b) => b[1] - a[1])[0]
+                return {
+                    ...rest,
+                    deliveryRate: rest.totalOrders > 0 ? Math.round((rest.deliveredOrders / rest.totalOrders) * 100) : 0,
+                    grossRevenue: Math.round(rest.grossRevenue),
+                    deliveredRevenue: Math.round(rest.deliveredRevenue),
+                    aov: rest.deliveredOrders > 0 ? Math.round(rest.deliveredRevenue / rest.deliveredOrders) : 0,
+                    topCoupon: topEntry ? `${topEntry[0]} (${topEntry[1]})` : null,
+                }
+            })
+            .sort((a, b) => b.promoOrders - a.promoOrders || b.totalOrders - a.totalOrders)
+
+        return {
+            summary: {
+                totalPromoOrders,
+                deliveredPromoRevenue: Math.round(deliveredPromoRevenue),
+                totalDiscountGranted: Math.round(totalDiscountGranted),
+                activeCouponsCount: activeCoupons.length,
+                trackedChannelsCount: channelStats.filter((c) => c.source !== 'direct_organique').length,
+            },
+            couponStats,
+            channelStats,
+            activeCoupons,
+        }
+    } catch {
+        return {
+            summary: {
+                totalPromoOrders: 0,
+                deliveredPromoRevenue: 0,
+                totalDiscountGranted: 0,
+                activeCouponsCount: 0,
+                trackedChannelsCount: 0,
+            },
+            couponStats: [],
+            channelStats: [],
+            activeCoupons: [],
+        }
+    }
+}
+
+/**
+ * Rapport ROAS réel unifié par campagne (Meta Ads + Google Ads vs commandes COD livrées).
+ */
+export async function getUnifiedAdsRoasAnalytics(
+    preset: AdDatePreset = 'last_30d',
+    platformFilter: AdPlatformFilter = 'ALL'
+): Promise<UnifiedAdsRoasReport> {
+    try {
+        await verifyAdmin()
+        return await getUnifiedAdsRoasReport({ preset, platformFilter, autoSyncIfStale: true })
+    } catch {
+        return {
+            preset,
+            platformFilter,
+            hasMetaCredentials: false,
+            hasGoogleCredentials: false,
+            accountCurrency: 'MAD',
+            fxRateToMad: 1,
+            lastSyncedAt: null,
+            warnings: [],
+            summary: {
+                totalSpendOriginal: 0,
+                totalSpendMad: 0,
+                totalImpressions: 0,
+                totalClicks: 0,
+                avgCtr: 0,
+                totalOrders: 0,
+                totalDeliveredOrders: 0,
+                totalDeliveredRevenue: 0,
+                totalGrossRevenue: 0,
+                unmatchedOrdersCount: 0,
+                unmatchedDeliveredRevenue: 0,
+                globalRealRoas: 0,
+                globalGrossRoas: 0,
+                globalCpaMad: 0,
+                globalNetMarginMad: 0,
+                byPlatform: {
+                    META: { spendMad: 0, deliveredRevenue: 0, orders: 0, deliveredOrders: 0, realRoas: 0 },
+                    GOOGLE: { spendMad: 0, deliveredRevenue: 0, orders: 0, deliveredOrders: 0, realRoas: 0 },
+                },
+            },
+            campaigns: [],
         }
     }
 }

@@ -75,6 +75,9 @@ export default function AdminLayout({
 }) {
     const { locale } = useParams()
     const lang = typeof locale === 'string' ? locale : 'fr'
+    const pathname = usePathname()
+    const router = useRouter()
+    const isLoginPage = Boolean(pathname?.endsWith('/admin/login'))
     const [featureSettings, setFeatureSettings] = useState<Record<string, string>>({})
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(true) // Collapsed by default
@@ -86,20 +89,48 @@ export default function AdminLayout({
     })
 
     useEffect(() => {
+        if (isLoginPage) {
+            setUserRole(null)
+            return
+        }
+        let cancelled = false
         getSettingsByCategory('features')
-            .then(setFeatureSettings)
-            .catch(console.error)
-            
-        getAdminRole().then(setUserRole).catch(console.error)
+            .then((settings) => { if (!cancelled) setFeatureSettings(settings) })
+            .catch(() => {})
+
+        getAdminRole()
+            .then((role) => { if (!cancelled) setUserRole(role) })
+            .catch(() => {})
+
+        return () => {
+            cancelled = true
+        }
+    }, [isLoginPage])
+
+    useEffect(() => {
+        if (isLoginPage || !userRole || !['ADMIN', 'MANAGER', 'CONFIRMATOR'].includes(userRole)) {
+            setPendingJumiaCount(0)
+            return
+        }
+        let cancelled = false
+        let interval: ReturnType<typeof setInterval> | null = null
 
         import('@/app/[locale]/admin/jumia-orders/actions').then(({ getPendingJumiaOrdersCount }) => {
-            getPendingJumiaOrdersCount().then(setPendingJumiaCount).catch(console.error)
-            const interval = setInterval(() => {
-                getPendingJumiaOrdersCount().then(setPendingJumiaCount).catch(console.error)
-            }, 60 * 1000) // update every minute
-            return () => clearInterval(interval)
+            if (cancelled) return
+            const loadCount = () => {
+                getPendingJumiaOrdersCount()
+                    .then((count) => { if (!cancelled) setPendingJumiaCount(count) })
+                    .catch(() => {})
+            }
+            loadCount()
+            interval = setInterval(loadCount, 60 * 1000)
         })
-    }, [])
+
+        return () => {
+            cancelled = true
+            if (interval) clearInterval(interval)
+        }
+    }, [isLoginPage, userRole])
 
     const toggleMenu = (name: string) => {
         if (sidebarCollapsed) {
@@ -322,9 +353,6 @@ export default function AdminLayout({
         return filteredNav
     }, [allNavigation, features, userRole])
 
-    const pathname = usePathname()
-    const router = useRouter()
-
     useEffect(() => {
         navigation.forEach(item => {
             if (item.children && item.children.some(child => pathname === child.href)) {
@@ -355,8 +383,6 @@ export default function AdminLayout({
         router.push(`/${lang}/admin/login`)
         router.refresh()
     }
-
-    const isLoginPage = pathname?.endsWith('/admin/login')
 
     if (isLoginPage) {
         return (

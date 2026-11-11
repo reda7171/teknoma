@@ -153,6 +153,10 @@ jobs:
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/log/riwaya
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S touch /var/log/riwaya/jumia-status-cron.log
               (crontab -l 2>/dev/null | grep -q "jumia-status-cron.sh") || (crontab -l 2>/dev/null; echo "*/10 * * * * flock -n /tmp/riwaya-jumia-status.lock /var/www/riwayama/scripts/jumia-status-cron.sh >> /var/log/riwaya/jumia-status-cron.log 2>&1") | crontab -
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i 's/\r$//' scripts/sync-ads-spend-cron.sh || true
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/sync-ads-spend-cron.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S touch /var/log/riwaya/ads-spend-cron.log
+              (crontab -l 2>/dev/null | grep -q "sync-ads-spend-cron.sh") || (crontab -l 2>/dev/null; echo "0 */2 * * * flock -n /tmp/riwaya-ads-spend.lock /var/www/riwayama/scripts/sync-ads-spend-cron.sh >> /var/log/riwaya/ads-spend-cron.log 2>&1") | crontab -
               (crontab -l 2>/dev/null | grep -q "abandoned-cart-reminder") || (crontab -l 2>/dev/null; echo "*/15 * * * * curl -s 'https://riwaya.store/api/cron/abandoned-cart-reminder?key=une_cle_secrete_pour_cron_2026' > /dev/null 2>&1") | crontab -
             fi
 
@@ -165,6 +169,15 @@ jobs:
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i '/502.html/d' "$NGINX_CONF" || true
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S rm -f /var/www/errors/502*.html /var/www/errors/502_custom.html || true
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S nginx -t && echo "${{ secrets.VPS_PASSWORD }}" | sudo -S systemctl reload nginx || true
+            fi
+            # ──────────────────────────────────────────────────────────────
+
+            # ─── Fail2ban : ban 2h et fenetre 2h au lieu de 15min ─────────
+            if [ -f "scripts/configure-fail2ban.sh" ]; then
+              echo "Configuration Fail2ban (ban 2h / findtime 2h)..."
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i 's/\r$//' scripts/configure-fail2ban.sh || true
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/configure-fail2ban.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S ./scripts/configure-fail2ban.sh || true
             fi
             # ──────────────────────────────────────────────────────────────
 

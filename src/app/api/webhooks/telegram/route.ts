@@ -396,31 +396,17 @@ export async function POST(req: Request) {
                     if (!existingOrder) throw new Error('Order not found')
 
                     const prevStatus = existingOrder.status
-                    const isNowReturned = newStatus === 'RETURNED' || newStatus === 'CANCELLED'
-                    const wasAlreadyRestored = ['CANCELLED', 'RETURNED'].includes(prevStatus)
+                    // Le retour ne doit réintégrer le stock qu'une fois le colis déclaré récupéré
+                    const shouldRestoreOnCancel = newStatus === 'CANCELLED' && prevStatus !== 'CANCELLED' && prevStatus !== 'RETURNED'
+
+                    const { applyOrderStockDelta, isOrderStockRestored, setOrderStockRestored } = await import('@/lib/server/order-stock')
 
                     const order = await prisma.$transaction(async (tx) => {
-                        // Restock if needed
-                        if (isNowReturned && !wasAlreadyRestored) {
-                            for (const item of existingOrder.items) {
-                                if (item.type === 'BOOK' && item.bookId) {
-                                    await tx.book.updateMany({
-                                        where: { id: item.bookId },
-                                        data: { stock: { increment: item.quantity } }
-                                    })
-                                } else if (item.type === 'ACCESSORY' && item.extraProductId) {
-                                    await tx.extraProduct.updateMany({
-                                        where: { id: item.extraProductId },
-                                        data: { stock: { increment: item.quantity } }
-                                    })
-                                } else if (item.type === 'PACK' && item.pack) {
-                                    for (const packBook of item.pack.books) {
-                                        await tx.book.updateMany({
-                                            where: { id: packBook.bookId },
-                                            data: { stock: { increment: item.quantity } }
-                                        })
-                                    }
-                                }
+                        if (shouldRestoreOnCancel) {
+                            const alreadyRestored = await isOrderStockRestored(tx, orderId)
+                            if (!alreadyRestored) {
+                                await applyOrderStockDelta(tx, orderId, existingOrder.items, 'RESTORE')
+                                await setOrderStockRestored(tx, orderId, true)
                             }
                         }
 
