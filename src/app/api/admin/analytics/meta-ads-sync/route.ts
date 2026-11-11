@@ -29,6 +29,9 @@ const SyncBodySchema = z.object({
  * Retourne le rapport ROAS consolidé (Meta Ads + Google Ads) ou génère le script AdsApp (ADMIN).
  */
 export async function GET(req: Request) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     const ip = await getIpIdentifier()
     const rl = await rateLimit(`ads-roas-get:${ip}`, { limit: 60, windowMs: 60_000 })
     if (!rl.success) {
@@ -53,9 +56,6 @@ export async function GET(req: Request) {
         const script = buildGoogleAdsSpendSyncScript(`${siteUrl}/api/webhooks/google-ads/spend`, cronSecret)
         return NextResponse.json({ success: true, script })
     }
-
-    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
-    if (accessDenied) return accessDenied
 
     try {
         const presetParsed = PresetSchema.safeParse(url.searchParams.get('preset') || 'last_30d')
@@ -83,14 +83,14 @@ export async function GET(req: Request) {
  * Force la synchronisation des coûts Meta Ads et/ou Google Ads et recalcule le ROAS réel.
  */
 export async function POST(req: Request) {
+    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
+    if (accessDenied) return accessDenied
+
     const ip = await getIpIdentifier()
     const rl = await rateLimit(`ads-roas-post:${ip}`, { limit: 20, windowMs: 60_000 })
     if (!rl.success) {
         return NextResponse.json({ error: 'Trop de requêtes de synchronisation' }, { status: 429 })
     }
-
-    const accessDenied = await authorizeAdminApi(['ADMIN', 'MANAGER'])
-    if (accessDenied) return accessDenied
 
     try {
         const rawBody = await req.json().catch(() => ({}))
