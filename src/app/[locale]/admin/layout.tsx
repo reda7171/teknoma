@@ -233,7 +233,7 @@ export default function AdminLayout({
             href: `/${lang}/admin/marketing`,
             icon: Sparkles,
             children: [
-                { name: 'Google Ads (IA & PMax)', href: `/${lang}/admin/ads`, icon: Target, isModalTrigger: true, badge: 'IA' },
+                { name: 'Google & Meta Ads (IA)', href: `/${lang}/admin/ads`, icon: Target, isModalTrigger: true, badge: 'IA' },
                 { name: 'Campagnes & Offres', href: `/${lang}/admin/marketing`, icon: Sparkles },
                 { name: 'Notifications Push', href: `/${lang}/admin/push-campaigns`, icon: Bell },
                 { name: 'Mailing / Newsletters', href: `/${lang}/admin/mailing`, icon: Mail },
