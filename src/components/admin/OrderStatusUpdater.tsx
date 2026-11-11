@@ -25,9 +25,10 @@ export default function OrderStatusUpdater({ orderId, currentStatus }: { orderId
         // Confirmation pour les statuts destructifs
         const needsConfirm = newStatus === 'RETURNED' || newStatus === 'CANCELLED'
         if (needsConfirm) {
-            const label = newStatus === 'RETURNED' ? 'Retournée' : 'Annulée'
             const ok = window.confirm(
-                `Marquer comme "${label}" ?\n\nAttention : le stock des livres sera automatiquement réintégré si la commande était confirmée/expédiée.`
+                newStatus === 'RETURNED'
+                    ? 'Marquer comme "Retournée" ?\n\nLe stock ne sera PAS réintégré tant que le colis n\'aura pas été déclaré récupéré.'
+                    : 'Marquer comme "Annulée" ?\n\nLe stock des livres sera automatiquement réintégré.'
             )
             if (!ok) return
         }

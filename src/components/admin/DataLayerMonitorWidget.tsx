@@ -19,8 +19,36 @@ import {
     Layers,
     Filter,
     ArrowRight,
-    Search
+    Search,
+    AlertTriangle,
+    RefreshCw,
+    ServerCrash,
+    ShieldCheck
 } from 'lucide-react'
+
+interface Ga4MpAlertLog {
+    id: string
+    action: string
+    orderId: string | null
+    status: number | null
+    error: string
+    paymentMethod: string | null
+    value: number | null
+    currency: string
+    measurementId: string | null
+    source: string
+    createdAt: string
+    isUnresolved: boolean
+}
+
+interface Ga4MpMonitorState {
+    logs: Ga4MpAlertLog[]
+    unresolvedCount: number
+    totalRecent: number
+    hasConfig: boolean
+    hasMeasurementId: boolean
+    hasApiSecret: boolean
+}
 import {
     DataLayerMonitoredEvent,
     FUNNEL_STEPS,
@@ -47,12 +75,109 @@ export default function DataLayerMonitorWidget({
     const [expandedEventId, setExpandedEventId] = useState<string | null>(null)
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const [isSimulatingAll, setIsSimulatingAll] = useState(false)
+    const [mpState, setMpState] = useState<Ga4MpMonitorState>({
+        logs: [],
+        unresolvedCount: 0,
+        totalRecent: 0,
+        hasConfig: true,
+        hasMeasurementId: true,
+        hasApiSecret: true,
+    })
+    const [mpLoading, setMpLoading] = useState(false)
+    const [mpTesting, setMpTesting] = useState(false)
+    const [mpExpanded, setMpExpanded] = useState(false)
+    const [mpBanner, setMpBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const channelRef = useRef<BroadcastChannel | null>(null)
+
+    const fetchMpLogs = async () => {
+        setMpLoading(true)
+        try {
+            const res = await fetch('/api/admin/analytics/ga4-mp-logs', { cache: 'no-store' })
+            if (!res.ok) return
+            const data = await res.json()
+            if (data.success) {
+                setMpState({
+                    logs: data.logs || [],
+                    unresolvedCount: data.unresolvedCount || 0,
+                    totalRecent: data.totalRecent || 0,
+                    hasConfig: Boolean(data.hasConfig),
+                    hasMeasurementId: Boolean(data.hasMeasurementId),
+                    hasApiSecret: Boolean(data.hasApiSecret),
+                })
+            }
+        } catch {
+            // Silencieux en cas de coupure réseau temporaire
+        } finally {
+            setMpLoading(false)
+        }
+    }
+
+    const handleAcknowledgeMpAlerts = async () => {
+        setMpLoading(true)
+        try {
+            const res = await fetch('/api/admin/analytics/ga4-mp-logs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'acknowledge' }),
+            })
+            const data = await res.json()
+            if (res.ok && data.success) {
+                setMpState(prev => ({
+                    ...prev,
+                    logs: data.logs || prev.logs,
+                    unresolvedCount: data.unresolvedCount || 0,
+                    totalRecent: data.totalRecent || 0,
+                }))
+                setMpBanner({ type: 'success', text: 'Alertes Measurement Protocol acquittées.' })
+                setMpExpanded(false)
+            }
+        } catch {
+            setMpBanner({ type: 'error', text: 'Impossible d\'acquitter les alertes.' })
+        } finally {
+            setMpLoading(false)
+        }
+    }
+
+    const handleTestMpDebug = async () => {
+        setMpTesting(true)
+        setMpBanner(null)
+        try {
+            const res = await fetch('/api/admin/analytics/ga4-mp-logs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'test_debug' }),
+            })
+            const data = await res.json()
+            setMpState(prev => ({
+                ...prev,
+                logs: data.logs || prev.logs,
+                unresolvedCount: data.unresolvedCount ?? prev.unresolvedCount,
+                totalRecent: data.totalRecent ?? prev.totalRecent,
+            }))
+            if (data.success) {
+                setMpBanner({ type: 'success', text: `Endpoint debug/mp/collect validé (HTTP ${data.httpStatus || 200}, 0 avertissement).` })
+            } else {
+                setMpBanner({ type: 'error', text: data.error || 'Anomalie détectée par /debug/mp/collect — consultez le journal ci-dessous.' })
+                setMpExpanded(true)
+            }
+        } catch {
+            setMpBanner({ type: 'error', text: 'Erreur réseau lors du diagnostic /debug/mp/collect.' })
+        } finally {
+            setMpTesting(false)
+        }
+    }
 
     // Initial load and listeners
     useEffect(() => {
-        // 1. Charge les événements existants
+        // 1. Charge les événements existants + sonde serveur GA4 Measurement Protocol
         setEvents(getMonitoredDataLayerEvents())
+        fetchMpLogs()
+
+        const pollTimer = setInterval(() => {
+            if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+                fetchMpLogs()
+            }
+        }, 15000)
 
         // 2. BroadcastChannel pour synchronisation entre onglets
         if (typeof BroadcastChannel !== 'undefined') {
@@ -91,6 +216,7 @@ export default function DataLayerMonitorWidget({
         window.addEventListener('riwaya:datalayer_clear', handleClearEvent)
 
         return () => {
+            clearInterval(pollTimer)
             if (channelRef.current) {
                 channelRef.current.close()
             }
@@ -255,6 +381,137 @@ export default function DataLayerMonitorWidget({
                         </div>
                         <p className="text-2xl font-black text-red-600 tracking-tight mt-1">{errorEvents}</p>
                     </div>
+                </div>
+
+                {/* Alerte Temps Réel GA4 Measurement Protocol (mp/collect) */}
+                <div
+                    className={`mt-5 rounded-2xl border p-4 transition-all ${
+                        mpState.unresolvedCount > 0 || !mpState.hasConfig
+                            ? 'bg-red-50/90 border-red-200'
+                            : 'bg-emerald-50/60 border-emerald-200'
+                    }`}
+                >
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div className="flex items-start sm:items-center gap-3">
+                            {mpState.unresolvedCount > 0 || !mpState.hasConfig ? (
+                                <ServerCrash className="w-5 h-5 text-red-600 shrink-0 mt-0.5 sm:mt-0" />
+                            ) : (
+                                <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5 sm:mt-0" />
+                            )}
+                            <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <p className={`text-xs font-black uppercase tracking-wider ${
+                                        mpState.unresolvedCount > 0 || !mpState.hasConfig ? 'text-red-900' : 'text-emerald-900'
+                                    }`}>
+                                        GA4 Measurement Protocol (mp/collect serveur)
+                                    </p>
+                                    {mpState.unresolvedCount > 0 && (
+                                        <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black animate-pulse">
+                                            {mpState.unresolvedCount} alerte{mpState.unresolvedCount > 1 ? 's' : ''} active{mpState.unresolvedCount > 1 ? 's' : ''}
+                                        </span>
+                                    )}
+                                    {!mpState.hasConfig && (
+                                        <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white text-[10px] font-black">
+                                            {!mpState.hasMeasurementId ? 'Measurement ID manquant' : 'API Secret manquant'}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-[11px] font-semibold text-gray-700 mt-0.5">
+                                    {mpState.unresolvedCount > 0
+                                        ? `${mpState.totalRecent} erreur(s) mp/collect détectée(s) sur les dernières 24h (synchronisation auto 15s).`
+                                        : 'Suivi serveur des conversions COD opérationnel · 0 erreur mp/collect non acquittée (24h).'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                                onClick={handleTestMpDebug}
+                                disabled={mpTesting}
+                                className="px-3 py-1.5 bg-black text-white hover:bg-gray-800 rounded-xl text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1.5 disabled:opacity-50"
+                            >
+                                <Play className="w-3 h-3" />
+                                {mpTesting ? 'Diagnostic...' : 'Tester debug/mp/collect'}
+                            </button>
+                            <button
+                                onClick={fetchMpLogs}
+                                disabled={mpLoading}
+                                className="px-3 py-1.5 bg-white text-gray-700 border border-gray-200 hover:border-gray-300 rounded-xl text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1.5"
+                            >
+                                <RefreshCw className={`w-3 h-3 ${mpLoading ? 'animate-spin' : ''}`} />
+                                Actualiser
+                            </button>
+                            {mpState.logs.length > 0 && (
+                                <button
+                                    onClick={() => setMpExpanded(!mpExpanded)}
+                                    className="px-3 py-1.5 bg-white text-black border border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-wider"
+                                >
+                                    {mpExpanded ? 'Masquer logs' : `Logs (${mpState.logs.length})`}
+                                </button>
+                            )}
+                            {mpState.unresolvedCount > 0 && (
+                                <button
+                                    onClick={handleAcknowledgeMpAlerts}
+                                    disabled={mpLoading}
+                                    className="px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 rounded-xl text-[10px] font-black uppercase tracking-wider"
+                                >
+                                    Acquitter
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {mpBanner && (
+                        <div className={`mt-3 px-3.5 py-2 rounded-xl text-xs font-bold border ${
+                            mpBanner.type === 'success'
+                                ? 'bg-white text-emerald-800 border-emerald-200'
+                                : 'bg-white text-red-800 border-red-200'
+                        }`}>
+                            {mpBanner.text}
+                        </div>
+                    )}
+
+                    {(mpExpanded || mpState.unresolvedCount > 0) && mpState.logs.length > 0 && (
+                        <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1">
+                            {mpState.logs.map((log) => (
+                                <div
+                                    key={log.id}
+                                    className={`p-3 rounded-xl border bg-white text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                                        log.isUnresolved ? 'border-red-300' : 'border-gray-200 opacity-75'
+                                    }`}
+                                >
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded bg-red-100 text-red-800">
+                                                {log.action}
+                                            </span>
+                                            {log.status !== null && (
+                                                <span className="font-mono text-[10px] font-black text-black">
+                                                    HTTP {log.status}
+                                                </span>
+                                            )}
+                                            {log.orderId && (
+                                                <span className="font-mono text-[10px] text-gray-600">
+                                                    #{log.orderId}
+                                                </span>
+                                            )}
+                                            {typeof log.value === 'number' && (
+                                                <span className="text-[10px] font-bold text-gray-700">
+                                                    {log.value} {log.currency} ({log.paymentMethod || 'COD'})
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-[11px] font-medium text-red-800 mt-1 break-words">
+                                            {log.error}
+                                        </p>
+                                    </div>
+                                    <span className="text-[10px] font-mono text-gray-500 shrink-0">
+                                        {new Date(log.createdAt).toLocaleString('fr-FR')}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -5,6 +5,8 @@ import Script from 'next/script'
 import { HelpCircle, Truck, CreditCard, RotateCcw, ShieldCheck, ChevronDown, BookOpen, Users, Package } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { Metadata } from 'next'
+import { Link } from '@/i18n/routing'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params
@@ -15,9 +17,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         en: 'FAQ — Your Questions about Riwaya | Delivery, Payment, Returns',
     }
     const descriptions: Record<string, string> = {
-        fr: 'Toutes les réponses à vos questions sur la librairie Riwaya : délais de livraison au Maroc, paiement à la livraison (COD), retours et échanges de livres, disponibilité des stocks.',
-        ar: 'إجابات على جميع أسئلتكم حول مكتبة رواية: مواعيد التوصيل في المغرب، الدفع عند الاستلام، إرجاع وتبادل الكتب، وتوفر المخزون.',
-        en: 'All answers to your questions about Riwaya bookstore: delivery times in Morocco, cash on delivery (COD), book returns and exchanges, stock availability.',
+        fr: `Toutes les réponses à vos questions sur la librairie Riwaya : livraison ${STORE_POLICY.deliveryMajorCitiesMinHours}-${STORE_POLICY.deliveryMajorCitiesMaxHours}h au Maroc (${STORE_POLICY.shippingFeeMorocco} MAD, gratuit dès ${STORE_POLICY.freeShippingThreshold} MAD), COD et retours ${STORE_POLICY.returnWindowDays} jours.`,
+        ar: `إجابات شاملة حول مكتبة رواية: التوصيل في المغرب (${STORE_POLICY.shippingFeeMorocco} درهم ومجاني ابتداءً من ${STORE_POLICY.freeShippingThreshold} درهم)، الدفع عند الاستلام والإرجاع خلال ${STORE_POLICY.returnWindowDays} أيام.`,
+        en: `Answers about Riwaya bookstore: delivery in Morocco (${STORE_POLICY.shippingFeeMorocco} MAD, free from ${STORE_POLICY.freeShippingThreshold} MAD), international Amana shipping (${STORE_POLICY.shippingFeeWorldwide} MAD), COD, and ${STORE_POLICY.returnWindowDays}-day returns.`,
     }
 
     return {
@@ -29,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
                 'fr': 'https://riwaya.store/fr/faq',
                 'ar': 'https://riwaya.store/ar/faq',
                 'en': 'https://riwaya.store/en/faq',
+                'x-default': 'https://riwaya.store/ar/faq',
             }
         }
     }
@@ -46,7 +49,11 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
             questions: [
                 {
                     q: locale === 'ar' ? 'ما هي مواعيد التوصيل؟' : locale === 'en' ? 'What are the delivery times?' : 'Quels sont les délais de livraison ?',
-                    a: locale === 'ar' ? 'للدار البيضاء والمناطق المجاورة، يتم التوصيل خلال 24 إلى 48 ساعة. لسائر مدن المغرب، يستغرق التوصيل من يومين إلى أربعة أيام عمل.' : locale === 'en' ? 'For Casablanca and surrounding areas, delivery takes 24 to 48 hours. For other cities in Morocco, expect 2 to 4 business days.' : "Pour Casablanca et environs, la livraison s'effectue en 24h à 48h. Pour les autres villes du Maroc, comptez entre 2 et 4 jours ouvrables."
+                    a: locale === 'ar'
+                        ? `للمدن الكبرى (الرباط، الدار البيضاء، سلا، تمارة...)، يتم التوصيل خلال ${STORE_POLICY.deliveryMajorCitiesMinHours} إلى ${STORE_POLICY.deliveryMajorCitiesMaxHours} ساعة. لباقي مناطق المغرب، يستغرق التوصيل ${STORE_POLICY.deliveryOtherRegionsHours}.`
+                        : locale === 'en'
+                            ? `For major cities (Rabat, Casablanca, Salé, Temara...), delivery takes ${STORE_POLICY.deliveryMajorCitiesMinHours} to ${STORE_POLICY.deliveryMajorCitiesMaxHours}h. For other regions in Morocco, expect ${STORE_POLICY.deliveryOtherRegionsHours}.`
+                            : `Pour les grandes villes (Rabat, Casablanca, Salé, Témara...), la livraison s'effectue en ${STORE_POLICY.deliveryMajorCitiesMinHours}-${STORE_POLICY.deliveryMajorCitiesMaxHours}h. Pour les autres régions du Maroc, comptez ${STORE_POLICY.deliveryOtherRegionsHours}.`
                 },
                 {
                     q: locale === 'ar' ? 'هل يمكنني تتبع طردي؟' : locale === 'en' ? 'Can I track my package?' : 'Puis-je suivre mon colis ?',
@@ -54,7 +61,11 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                 },
                 {
                     q: locale === 'ar' ? 'ما هي تكاليف التوصيل؟' : locale === 'en' ? 'What are the delivery costs?' : 'Quels sont les frais de livraison ?',
-                    a: locale === 'ar' ? 'التوصيل بـ 25 درهم للدار البيضاء و35 درهمًا لسائر المدن. مجاني لكل طلب يتجاوز 300 درهم.' : locale === 'en' ? 'Delivery costs 25 درهم for Casablanca and 35 درهم for other cities. Free for any order over 300 درهم.' : 'La livraison est de 25 درهم pour Casablanca et 35 درهم pour les autres villes. Elle est offerte pour toute commande supérieure à 300 درهم.'
+                    a: locale === 'ar'
+                        ? `التوصيل الموحد في المغرب بـ ${STORE_POLICY.shippingFeeMorocco} درهم، ومجاني لكل طلب يبلغ ${STORE_POLICY.freeShippingThreshold} درهم أو أكثر. الشحن الدولي عبر أمانة ابتداءً من ${STORE_POLICY.shippingFeeWorldwide} درهم.`
+                        : locale === 'en'
+                            ? `Standard shipping anywhere in Morocco is a flat ${STORE_POLICY.shippingFeeMorocco} MAD, and free for orders of ${STORE_POLICY.freeShippingThreshold} MAD or more. Worldwide tracked Amana shipping starts at ${STORE_POLICY.shippingFeeWorldwide} MAD.`
+                            : `La livraison partout au Maroc est au tarif unique de ${STORE_POLICY.shippingFeeMorocco} MAD, et gratuite dès ${STORE_POLICY.freeShippingThreshold} MAD d'achat. L'expédition internationale via Amana est proposée dès ${STORE_POLICY.shippingFeeWorldwide} MAD.`
                 },
                 {
                     q: locale === 'ar' ? 'هل تقومون بالتوصيل إلى جميع مدن المغرب؟' : locale === 'en' ? 'Do you deliver to all cities in Morocco?' : 'Livrez-vous dans toutes les villes du Maroc ?',
@@ -86,7 +97,11 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
             questions: [
                 {
                     q: locale === 'ar' ? 'هل يمكنني إرجاع كتاب؟' : locale === 'en' ? 'Can I return a book?' : 'Puis-je retourner un livre ?',
-                    a: locale === 'ar' ? 'بالتأكيد. لديكم 3 أيام بعد الاستلام لطلب الإرجاع إذا كان الكتاب لا يتطابق مع توقعاتكم أو يحتوي على عيب.' : locale === 'en' ? 'Absolutely. You have 3 calendar days after receipt to request a return if the book does not match your expectations or has a defect.' : "Absolument. Vous disposez de 3 jours calendaires après réception pour demander un retour si le livre ne correspond pas à vos attentes ou s'il présente un défaut."
+                    a: locale === 'ar'
+                        ? `نعم، لديكم مهلة ${STORE_POLICY.returnWindowDays} أيام بعد الاستلام لطلب الإرجاع في حالته الأصلية. الاسترجاع أو الاستبدال مجاني بالكامل إذا كان الكتاب معيباً أو غير مطابق للطلب.`
+                        : locale === 'en'
+                            ? `Yes, you have ${STORE_POLICY.returnWindowDays} calendar days after delivery to request a return in original unread condition. Returns and replacements are 100% free if the item arrived damaged or incorrect.`
+                            : `Oui, vous disposez de ${STORE_POLICY.returnWindowDays} jours calendaires après réception pour demander un retour en état neuf non lu. Le retour ou remplacement est 100 % gratuit si l'ouvrage est endommagé ou non conforme.`
                 },
                 {
                     q: locale === 'ar' ? 'كيف يتم الاسترداد؟' : locale === 'en' ? 'How is the refund processed?' : 'Comment s\'effectue le remboursement ?',
@@ -140,7 +155,11 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                 },
                 {
                     q: locale === 'ar' ? 'كيف أتواصل مع مكتبة رواية؟' : locale === 'en' ? 'How do I contact Riwaya bookstore?' : 'Comment contacter la librairie Riwaya ?',
-                    a: locale === 'ar' ? 'يمكنكم التواصل معنا عبر واتساب، أو البريد الإلكتروني، أو صفحاتنا على الشبكات الاجتماعية. نحن متاحون 7 أيام في الأسبوع.' : locale === 'en' ? 'You can contact us via WhatsApp, email, or our social media pages. We are available 7 days a week.' : "Vous pouvez nous contacter via WhatsApp, email, ou nos pages sur les réseaux sociaux. Nous sommes disponibles 7j/7."
+                    a: locale === 'ar'
+                        ? `يمكنكم التواصل معنا عبر واتساب أو عبر البريد الإلكتروني ${STORE_POLICY.contactEmail}. فريقنا متاح: ${STORE_POLICY.supportHours.ar}.`
+                        : locale === 'en'
+                            ? `You can reach us via WhatsApp or at ${STORE_POLICY.contactEmail}. Our support team is available ${STORE_POLICY.supportHours.en}.`
+                            : `Vous pouvez nous contacter via WhatsApp ou par email à ${STORE_POLICY.contactEmail}. Notre service client répond ${STORE_POLICY.supportHours.fr}.`
                 }
             ]
         }
@@ -239,15 +258,14 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
                         </h2>
                         <p className="text-gray-400 font-medium mb-8 max-w-lg mx-auto">
                             {locale === 'ar'
-                                ? 'دعمنا عبر واتساب متاح 7 أيام في الأسبوع لمساعدتكم في اختياراتكم أو تتبع طلباتكم.'
+                                ? `دعمنا عبر واتساب والبريد (${STORE_POLICY.contactEmail}) متاح ${STORE_POLICY.supportHours.ar} لمساعدتكم في اختياراتكم أو تتبع طلباتكم.`
                                 : locale === 'en'
-                                    ? 'Our WhatsApp support is available 7 days a week to help you with your choices or order tracking.'
-                                    : 'Notre support WhatsApp est disponible 7j/7 pour vous aider dans vos choix ou le suivi de vos commandes.'
-                            }
+                                    ? `Our WhatsApp & email support (${STORE_POLICY.contactEmail}) is available ${STORE_POLICY.supportHours.en} to help you with book selection or order tracking.`
+                                    : `Notre support WhatsApp et email (${STORE_POLICY.contactEmail}) est disponible ${STORE_POLICY.supportHours.fr} pour vous accompagner.`}
                         </p>
-                        <a href="/contact" className="inline-flex items-center justify-center px-10 py-5 bg-pixio-yellow text-black font-black text-xs uppercase tracking-[0.2em] rounded-full hover:scale-105 transition-all shadow-xl">
+                        <Link href="/contact" className="inline-flex items-center justify-center px-10 py-5 bg-pixio-yellow text-black font-black text-xs uppercase tracking-[0.2em] rounded-full hover:scale-105 transition-all shadow-xl">
                             {locale === 'ar' ? 'تواصل مع الدعم' : locale === 'en' ? 'Contact Support' : 'Contacter le Support'}
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

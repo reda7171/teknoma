@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isProductInStock } from '@/lib/product-availability'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalider toutes les heures
@@ -85,8 +86,8 @@ export async function GET() {
             const regularPrice = hasDiscount ? totalOriginalPrice : displayPrice
             const salePrice = hasDiscount ? displayPrice : null
 
-            const isFreeShipping = displayPrice >= 300
-            const shippingFee = isFreeShipping ? 0 : 35
+            const isFreeShipping = displayPrice >= STORE_POLICY.freeShippingThreshold
+            const shippingFee = isFreeShipping ? 0 : STORE_POLICY.shippingFeeMorocco
 
             // Vérifier si le stock de tous les livres du pack est disponible
             const allInStock = pack.active && pack.books.length > 0 && pack.books.every(pb => isProductInStock(pb.book))
@@ -129,7 +130,7 @@ export async function GET() {
             xml += `      <g:custom_label_0>Pack</g:custom_label_0>\n`
             xml += `      <g:custom_label_1>${pack.books.length} livres</g:custom_label_1>\n`
             xml += `      <g:custom_label_2>${hasDiscount ? 'Promo' : 'Standard'}</g:custom_label_2>\n`
-            xml += `      <g:custom_label_3>${isFreeShipping ? 'Livraison Gratuite' : 'Livraison 35 DH'}</g:custom_label_3>\n`
+            xml += `      <g:custom_label_3>${isFreeShipping ? 'Livraison Gratuite' : `Livraison ${STORE_POLICY.shippingFeeMorocco} MAD`}</g:custom_label_3>\n`
 
             // Détails de livraison spécifiques au Maroc
             xml += `      <g:shipping>\n`

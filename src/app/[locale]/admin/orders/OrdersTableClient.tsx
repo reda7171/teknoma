@@ -227,6 +227,7 @@ export default function OrdersTableClient({
                     ...o,
                     isRecovered: nextStatus
                 } : o))
+                router.refresh()
             }
         } catch (error) {
             console.error('Error updating recovery status:', error)
@@ -566,7 +567,15 @@ export default function OrdersTableClient({
                                                                     ? 'text-emerald-800 bg-emerald-50 border-emerald-300 hover:bg-emerald-100'
                                                                     : 'text-rose-800 bg-rose-50 border-rose-300 hover:bg-rose-100'
                                                             } ${togglingRecoveryId === order.id ? 'opacity-50 cursor-wait' : ''}`}
-                                                            title={locale === 'ar' ? 'انقر لتغيير حالة الاسترداد' : locale === 'en' ? 'Click to toggle recovery status' : 'Cliquer pour basculer : Récupéré / Non Récupéré'}
+                                                            title={
+                                                                locale === 'ar'
+                                                                    ? 'انقر لتأكيد استرداد الطرد وإرجاع المخزون'
+                                                                    : locale === 'en'
+                                                                        ? 'Click to declare parcel recovered and restore stock'
+                                                                        : order.isRecovered
+                                                                            ? 'Colis récupéré (stock réintégré) — cliquer pour annuler'
+                                                                            : 'Déclarer colis récupéré pour réintégrer le stock'
+                                                            }
                                                         >
                                                             {order.isRecovered
                                                                 ? (locale === 'ar' ? '✓ تم الاسترداد' : locale === 'en' ? '✓ Recovered' : '✓ Récupéré')

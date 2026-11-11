@@ -7,6 +7,7 @@ import DeliveryConfigForm from './DeliveryConfigForm'
 import ShippingCompaniesClient from './ShippingCompaniesClient'
 import { Truck, Package } from 'lucide-react'
 import TestWithYouConnectionButton from '@/components/admin/TestWithYouConnectionButton'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
 
 export const metadata = {
     title: 'Logistique & Livraison | Admin Riwaya',
@@ -23,7 +24,7 @@ export default async function DeliveryConfigPage() {
 
 
     const announcementEnabled = await getSetting('announcement_bar_enabled') || 'false'
-    const announcementMessage = await getSetting('announcement_bar_message') || 'Livraison Gratuite partout au Maroc dès 300 درهم d\'achat !'
+    const announcementMessage = await getSetting('announcement_bar_message') || `Livraison Gratuite partout au Maroc dès ${STORE_POLICY.freeShippingThreshold} MAD d'achat !`
     const announcementBgColor = await getSetting('announcement_bar_bg_color') || '#000000'
     const announcementTextColor = await getSetting('announcement_bar_text_color') || '#FFFFFF'
     const companies = await getShippingCompanies()

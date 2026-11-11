@@ -24,9 +24,15 @@ import {
     getConversionRate,
     getOrderStatusDistribution,
     getBadgeStats,
+    getPilotPromoChannelAnalytics,
+    getUnifiedAdsRoasAnalytics,
+    type PilotPromoAnalyticsData,
+    type UnifiedAdsRoasReport,
 } from '@/lib/actions/analytics'
 import Image from 'next/image'
 import DataLayerMonitorWidget from '@/components/admin/DataLayerMonitorWidget'
+import PilotPromoChannelWidget from '@/components/admin/PilotPromoChannelWidget'
+import MetaAdsRoasWidget from '@/components/admin/MetaAdsRoasWidget'
 
 const AccessibleTooltip = Tooltip as any;
 
@@ -40,6 +46,8 @@ export default function AnalyticsClient() {
     const [conversion, setConversion] = useState<any>(null)
     const [statusDist, setStatusDist] = useState<any[]>([])
     const [badgeStats, setBadgeStats] = useState<any[]>([])
+    const [pilotAnalytics, setPilotAnalytics] = useState<PilotPromoAnalyticsData | null>(null)
+    const [metaRoasAnalytics, setMetaRoasAnalytics] = useState<UnifiedAdsRoasReport | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -49,13 +57,15 @@ export default function AnalyticsClient() {
     async function loadData() {
         setLoading(true)
         try {
-            const [statsData, revenue, products, conv, status, badges] = await Promise.all([
+            const [statsData, revenue, products, conv, status, badges, pilotData, metaRoas] = await Promise.all([
                 getDashboardStats(),
                 getRevenueByPeriod(period),
                 getTopProducts(5),
                 getConversionRate(),
                 getOrderStatusDistribution(),
                 getBadgeStats(),
+                getPilotPromoChannelAnalytics(),
+                getUnifiedAdsRoasAnalytics('last_30d', 'ALL'),
             ])
 
             setStats(statsData)
@@ -64,6 +74,8 @@ export default function AnalyticsClient() {
             setConversion(conv)
             setStatusDist(status)
             setBadgeStats(badges)
+            setPilotAnalytics(pilotData)
+            setMetaRoasAnalytics(metaRoas)
         } catch (error) {
             console.error('Erreur chargement analytics:', error)
         } finally {
@@ -254,6 +266,12 @@ export default function AnalyticsClient() {
 
             {/* Monitoring DataLayer GA4 en temps réel */}
             <DataLayerMonitorWidget />
+
+            {/* Coûts Meta Ads & ROAS Réel par campagne */}
+            <MetaAdsRoasWidget initialData={metaRoasAnalytics} />
+
+            {/* Suivi Canaux Pilotes & Codes Promo */}
+            <PilotPromoChannelWidget data={pilotAnalytics} />
 
             {/* Badges Cliqués */}
             {badgeStats.length > 0 && (

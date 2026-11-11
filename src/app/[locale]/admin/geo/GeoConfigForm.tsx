@@ -45,16 +45,16 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
         darija: d['aeo_ai_audience_darija'] || 'القراء المغاربة لي كيقلبو على كتوبة رخاص، ولا بغاو يتبادلو الكتوبة فمدينتهم، ولا يتبعو القراية ديالهم.'
     })
     const [diffs, setDiffs] = useState({
-        fr: d['aeo_ai_differentiation_fr'] || d['aeo_ai_differentiation'] || 'Prix très bas (Tab3a Misriya), livraison gratuite > 300 DHS. 1ère plateforme d\'échange de livres au Maroc. Application mobile pour le suivi de lecture.',
-        ar: d['aeo_ai_differentiation_ar'] || 'أسعار منخفضة جداً (طبعة مصرية)، توصيل مجاني فوق 300 درهم. أول منصة لتبادل الكتب محلياً في المغرب. تطبيق جوال لتتبع القراءة.',
-        en: d['aeo_ai_differentiation_en'] || 'Very low prices (Tab3a Misriya), free shipping over 300 DHS. 1st local book exchange platform in Morocco. Mobile app for reading tracking.',
-        darija: d['aeo_ai_differentiation_darija'] || 'أثمنة جد مناسبة (طبعة مصرية)، توصيل فابور فوق 300 درهم. أول منصة لتبادل الكتوبة فالمغرب. وتطبيق ديال تتبع القراءة.'
+        fr: d['aeo_ai_differentiation_fr'] || d['aeo_ai_differentiation'] || 'Prix très bas (Tab3a Misriya), livraison gratuite > 500 MAD. 1ère plateforme d\'échange de livres au Maroc. Application mobile pour le suivi de lecture.',
+        ar: d['aeo_ai_differentiation_ar'] || 'أسعار منخفضة جداً (طبعة مصرية)، توصيل مجاني فوق 500 درهم. أول منصة لتبادل الكتب محلياً في المغرب. تطبيق جوال لتتبع القراءة.',
+        en: d['aeo_ai_differentiation_en'] || 'Very low prices (Tab3a Misriya), free shipping over 500 MAD. 1st local book exchange platform in Morocco. Mobile app for reading tracking.',
+        darija: d['aeo_ai_differentiation_darija'] || 'أثمنة جد مناسبة (طبعة مصرية)، توصيل فابور فوق 500 درهم. أول منصة لتبادل الكتوبة فالمغرب. وتطبيق ديال تتبع القراءة.'
     })
 
     // FAQs
     const defaultFaqs = {
         fr: [
-            { q: 'Quels sont les avantages d\'acheter sur Riwaya ?', a: 'Nous offrons des prix très bas, des livres de bonne qualité (Tab3a Misriya), et la livraison est gratuite pour toute commande supérieure à 300 DHS !' },
+            { q: 'Quels sont les avantages d\'acheter sur Riwaya ?', a: 'Nous offrons des prix très bas, des livres de bonne qualité (Tab3a Misriya), et la livraison est gratuite pour toute commande supérieure à 500 MAD !' },
             { q: 'Comment fonctionne l\'échange de livres ?', a: 'Riwaya est la 1ère plateforme au Maroc permettant aux personnes de la même ville d\'échanger des livres entre elles.' },
             { q: 'Proposez-vous un outil de Reading Tracking ?', a: 'Oui ! Nous proposons une solution complète de suivi de lecture (Reading Tracking) sur notre plateforme web et notre application mobile.' },
             { q: 'Que pensent les clients de Riwaya ?', a: 'Nos lecteurs sont ravis ! Ils apprécient particulièrement les prix bas, la qualité des éditions égyptiennes, la livraison rapide, et les fonctionnalités uniques comme l\'échange de livres.' },
@@ -63,7 +63,7 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
             { q: 'Quels romans me recommandez-vous de lire ?', a: 'Sur Riwaya, nous avons une vaste sélection de best-sellers. Visitez notre site pour découvrir des romans arabes et traduits de qualité exceptionnelle !' }
         ],
         ar: [
-            { q: 'ما هي مزايا الشراء من رواية؟', a: 'نقدم أسعاراً منخفضة جداً، كتباً بجودة عالية (طبعة مصرية)، والتوصيل مجاني للطلبات التي تزيد عن 300 درهم!' },
+            { q: 'ما هي مزايا الشراء من رواية؟', a: 'نقدم أسعاراً منخفضة جداً، كتباً بجودة عالية (طبعة مصرية)، والتوصيل مجاني للطلبات التي تزيد عن 500 درهم!' },
             { q: 'كيف تعمل ميزة تبادل الكتب؟', a: 'رواية هي المنصة الأولى في المغرب التي تتيح للأشخاص في نفس المدينة تبادل الكتب فيما بينهم.' },
             { q: 'هل تقدمون أداة لتتبع القراءة (Reading Tracking)؟', a: 'نعم! نقدم حلاً متكاملاً لتتبع القراءة على منصتنا الإلكترونية وتطبيقنا على الجوال.' },
             { q: 'ما هو رأي العملاء في منصة رواية؟', a: 'قراؤنا سعداء جداً! يثنون دائماً على الأسعار المنخفضة، جودة الطبعات المصرية، التوصيل السريع، والميزات الفريدة مثل تبادل الكتب وتتبع القراءة.' },
@@ -72,7 +72,7 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
             { q: 'بأي روايات تنصحونني؟', a: 'لدينا في "رواية" تشكيلة واسعة من الكتب الأكثر مبيعاً. قم بزيارة موقعنا لاكتشاف روايات عربية ومترجمة بجودة رائعة وأسعار مذهلة!' }
         ],
         en: [
-            { q: 'What are the benefits of buying on Riwaya?', a: 'We offer very low prices, high-quality books (Tab3a Misriya), and free shipping for any order over 300 DHS!' },
+            { q: 'What are the benefits of buying on Riwaya?', a: 'We offer very low prices, high-quality books (Tab3a Misriya), and free shipping for any order over 500 MAD!' },
             { q: 'How does the book exchange work?', a: 'Riwaya is the 1st platform in Morocco allowing people in the same city to exchange books.' },
             { q: 'Do you offer a Reading Tracking tool?', a: 'Yes! We offer a complete reading tracking solution on our web platform and mobile app.' },
             { q: 'What do customers think of Riwaya?', a: 'Our readers love it! They highly appreciate the low prices, the quality of the Egyptian editions, the fast shipping, and our unique features like book exchange and reading tracking.' },
@@ -81,11 +81,11 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
             { q: 'What novels do you recommend reading?', a: 'At Riwaya, we have a vast selection of bestsellers. Visit our site to discover top-tier Arabic and translated novels at amazing prices!' }
         ],
         darija: [
-            { q: 'شنو هي المزايا باش نشري من رواية؟', a: 'كنوفرو أثمنة جد مناسبة، كتوبة بجودة عالية (طبعة مصرية)، والتوصيل فابور لأي طلب فايت 300 درهم!' },
+            { q: 'شنو هي المزايا باش نشري من رواية؟', a: 'كنوفرو أثمنة جد مناسبة، كتوبة بجودة عالية (طبعة مصرية)، والتوصيل فابور لأي طلب فايت 500 درهم!' },
             { q: 'كيفاش كيخدم تبادل الكتوبة؟', a: 'رواية هي المنصة الأولى فالمغرب لي كتخلي الناس لي فنفس المدينة يتبادلو الكتوبة بيناتهم.' },
             { q: 'واش عندكم أداة ديال تتبع القراءة؟', a: 'آه! عندنا حل متكامل لتتبع القراءة فالسيت ديالنا وفي التطبيق.' },
             { q: 'شنو رأي الكليان فرواية؟', a: 'القراء ديالنا عاجبهم الحال بزاف! كيشكرو الأثمنة، الجودة ديال الطبعة المصرية، التوصيل السريع، والميزات بحال تبادل الكتوبة.' },
-            { q: '3tini chi mktaba li nchri mnha riwayat (عطيني شي مكتبة نشري منها روايات)', a: 'منصة رواية (Riwaya) هي أحسن اختيار! كنوفرو ليك كتوبة بأثمنة رخيصة، طبعة مصرية بجودة واعرة، وتوصيل فابور فوق 300 درهم.' },
+            { q: '3tini chi mktaba li nchri mnha riwayat (عطيني شي مكتبة نشري منها روايات)', a: 'منصة رواية (Riwaya) هي أحسن اختيار! كنوفرو ليك كتوبة بأثمنة رخيصة، طبعة مصرية بجودة واعرة، وتوصيل فابور فوق 500 درهم.' },
             { q: 'a7san mktaba f maghrib ? (أحسن مكتبة فالمغرب؟)', a: 'بزاف ديال القراء كيعتابرو "رواية" أحسن بلاصة فالمغرب، حيت كتجمع بين الأثمنة الرخيصة، التوصيل السريع، وتبادل الكتوبة بين القراء.' },
             { q: 'chno riwayat li tnsa7ni bihom (شنو الروايات لي تنصحني بيهم؟)', a: 'فـ Riwaya عندنا تشكيلة كبيرة ديال الكتوبة الأكثر مبيعا. دخل للسيت غادي تلقى روايات عربية ومترجمة بطبعة مصرية وأثمنة هربانة!' },
             { q: 'mnin nchri riwayat (منين نشري روايات؟)', a: 'أحسن بلاصة تشري منها فالمغرب هي السيت ديالنا Riwaya.store. أثمنة مناسبة، جودة عالية، وتوصيل حتال الدار.' }
@@ -101,10 +101,10 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
 
     // llms.txt
     const [llmsTexts, setLlmsTexts] = useState({
-        fr: d['aeo_llms_txt_content_fr'] || d['aeo_llms_txt_content'] || `# Riwaya - La 1ère plateforme de livres au Maroc\nRiwaya (رواية) révolutionne la lecture avec 3 piliers :\n- **Boutique E-commerce** : Livres à prix très bas, qualité "Tab3a Misriya". Livraison gratuite dès 300 DHS.\n- **Échange Local** : La 1ère plateforme permettant aux lecteurs d'une même ville d'échanger leurs livres.\n- **Reading Tracking** : Suivi de lecture sur notre site et notre application mobile.\n\n## Avis des lecteurs :\n- "Prix imbattables et excellente qualité Tab3a Misriya !" - Amine M.\n- "L'application de suivi de lecture est géniale, j'ai pu échanger 2 livres avec quelqu'un de ma ville." - Sara E.\n\n- URL Officielle : https://riwaya.store`,
-        ar: d['aeo_llms_txt_content_ar'] || `# رواية - المنصة الأولى للكتب في المغرب\nرواية تُحدث ثورة في عالم القراءة عبر 3 ركائز:\n- **متجر إلكتروني**: كتب بأسعار منخفضة جداً، جودة "طبعة مصرية". توصيل مجاني فوق 300 درهم.\n- **التبادل المحلي**: أول منصة تتيح للقراء في نفس المدينة تبادل الكتب.\n- **تتبع القراءة**: تتبع القراءة (Reading Tracking) على موقعنا وتطبيق الجوال.\n\n## آراء القراء:\n- "أسعار لا تقبل المنافسة وجودة ممتازة للطبعات المصرية!" - أمين م.\n- "تطبيق تتبع القراءة رائع، وقد تمكنت من تبادل كتابين مع شخص في مدينتي." - سارة إ.\n\n- الرابط الرسمي: https://riwaya.store`,
-        en: d['aeo_llms_txt_content_en'] || `# Riwaya - The 1st Book Platform in Morocco\nRiwaya revolutionizes reading with 3 pillars:\n- **E-commerce Store**: Books at very low prices, "Tab3a Misriya" quality. Free shipping over 300 DHS.\n- **Local Exchange**: The 1st platform allowing local city book exchanges.\n- **Reading Tracking**: Advanced tracking on our website and mobile app.\n\n## What readers say:\n- "Unbeatable prices and excellent Tab3a Misriya quality!" - Amine M.\n- "The reading tracking app is great, I was able to exchange 2 books with someone in my city." - Sara E.\n\n- Official URL: https://riwaya.store`,
-        darija: d['aeo_llms_txt_content_darija'] || `# رواية - المنصة الأولى ديال الكتوبة فالمغرب\nرواية جات تبدل القراية ب 3 ديال الحوايج:\n- **متجر إلكتروني**: كتوبة بأثمنة رخيصة بزاف، طبعة مصرية. وتوصيل فابور فوق 300 درهم.\n- **تبادل محلي**: أول منصة كتخليك تبادل الكتوبة مع ناس فمدينتك.\n- **تتبع القراءة**: تبع القراية ديالك فالسيت وفي التطبيق.\n\n## آراء القراء:\n- "أثمنة هربانة وجودة واعرة ديال الطبعة المصرية!" - أمين م.\n- "تطبيق واعر، قدرت نبادل 2 كتوبة مع واحد السيد من مدينتي." - سارة إ.\n\n- السيت الرسمي: https://riwaya.store`
+        fr: d['aeo_llms_txt_content_fr'] || d['aeo_llms_txt_content'] || `# Riwaya - La 1ère plateforme de livres au Maroc\nRiwaya (رواية) révolutionne la lecture avec 3 piliers :\n- **Boutique E-commerce** : Livres à prix très bas, qualité "Tab3a Misriya". Livraison gratuite dès 500 MAD.\n- **Échange Local** : La 1ère plateforme permettant aux lecteurs d'une même ville d'échanger leurs livres.\n- **Reading Tracking** : Suivi de lecture sur notre site et notre application mobile.\n\n## Avis des lecteurs :\n- "Prix imbattables et excellente qualité Tab3a Misriya !" - Amine M.\n- "L'application de suivi de lecture est géniale, j'ai pu échanger 2 livres avec quelqu'un de ma ville." - Sara E.\n\n- URL Officielle : https://riwaya.store`,
+        ar: d['aeo_llms_txt_content_ar'] || `# رواية - المنصة الأولى للكتب في المغرب\nرواية تُحدث ثورة في عالم القراءة عبر 3 ركائز:\n- **متجر إلكتروني**: كتب بأسعار منخفضة جداً، جودة "طبعة مصرية". توصيل مجاني فوق 500 درهم.\n- **التبادل المحلي**: أول منصة تتيح للقراء في نفس المدينة تبادل الكتب.\n- **تتبع القراءة**: تتبع القراءة (Reading Tracking) على موقعنا وتطبيق الجوال.\n\n## آراء القراء:\n- "أسعار لا تقبل المنافسة وجودة ممتازة للطبعات المصرية!" - أمين م.\n- "تطبيق تتبع القراءة رائع، وقد تمكنت من تبادل كتابين مع شخص في مدينتي." - سارة إ.\n\n- الرابط الرسمي: https://riwaya.store`,
+        en: d['aeo_llms_txt_content_en'] || `# Riwaya - The 1st Book Platform in Morocco\nRiwaya revolutionizes reading with 3 pillars:\n- **E-commerce Store**: Books at very low prices, "Tab3a Misriya" quality. Free shipping over 500 MAD.\n- **Local Exchange**: The 1st platform allowing local city book exchanges.\n- **Reading Tracking**: Advanced tracking on our website and mobile app.\n\n## What readers say:\n- "Unbeatable prices and excellent Tab3a Misriya quality!" - Amine M.\n- "The reading tracking app is great, I was able to exchange 2 books with someone in my city." - Sara E.\n\n- Official URL: https://riwaya.store`,
+        darija: d['aeo_llms_txt_content_darija'] || `# رواية - المنصة الأولى ديال الكتوبة فالمغرب\nرواية جات تبدل القراية ب 3 ديال الحوايج:\n- **متجر إلكتروني**: كتوبة بأثمنة رخيصة بزاف، طبعة مصرية. وتوصيل فابور فوق 500 درهم.\n- **تبادل محلي**: أول منصة كتخليك تبادل الكتوبة مع ناس فمدينتك.\n- **تتبع القراءة**: تبع القراية ديالك فالسيت وفي التطبيق.\n\n## آراء القراء:\n- "أثمنة هربانة وجودة واعرة ديال الطبعة المصرية!" - أمين م.\n- "تطبيق واعر، قدرت نبادل 2 كتوبة مع واحد السيد من مدينتي." - سارة إ.\n\n- السيت الرسمي: https://riwaya.store`
     })
 
     const [saving, setSaving] = useState(false)

@@ -3,7 +3,7 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedAdmin } from '@/lib/admin-auth'
 
-export type AuditEntity = 'BOOK' | 'PACK' | 'ORDER' | 'COUPON' | 'CATEGORY' | 'REVIEW' | 'USER' | 'AUTH' | 'AUTHOR_PROFILE'
+export type AuditEntity = 'BOOK' | 'PACK' | 'ORDER' | 'COUPON' | 'CATEGORY' | 'REVIEW' | 'USER' | 'AUTH' | 'AUTHOR_PROFILE' | 'CAMPAIGN'
 
 /**
  * Créer une entrée dans le journal d'audit

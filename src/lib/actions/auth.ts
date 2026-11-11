@@ -34,11 +34,11 @@ export async function login(formData: FormData): Promise<LoginResult> {
     const password = formData.get('password') as string
 
     const ip = await getIpIdentifier()
-    const limiter = await rateLimit(`login_${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 }) // 5 essais par 15 min
+    const limiter = await rateLimit(`login_${ip}`, { limit: 5, windowMs: 2 * 60 * 60 * 1000 }) // 5 essais par 2 heures
 
     if (!limiter.success) {
-        sendTelegramMessage(`🚨 *Alerte Sécurité*\nTrop de tentatives de connexion bloquées.\n🌐 IP: ${ip || 'Inconnue'}`).catch(console.error)
-        return { success: false, error: "Trop de tentatives. Veuillez réessayer dans 15 minutes." }
+        sendTelegramMessage(`🚨 *Alerte Sécurité*\nTrop de tentatives de connexion bloquées (blocage 2h).\n🌐 IP: ${ip || 'Inconnue'}`).catch(console.error)
+        return { success: false, error: "Trop de tentatives. Veuillez réessayer dans 2 heures." }
     }
 
     try {

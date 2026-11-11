@@ -385,3 +385,53 @@ export async function restoreOrderItemStock(
         })
     }
 }
+
+/**
+ * Déduit le stock dans un entrepôt (ex: si un retour récupéré est annulé).
+ */
+export async function deductOrderItemStock(
+    tx: any,
+    params: {
+        bookId?: string | null
+        extraProductId?: string | null
+        warehouseId?: string | null
+        quantity: number
+        orderId: string
+        note?: string
+    }
+) {
+    const { bookId, extraProductId, warehouseId, quantity, orderId, note } = params
+    if (!warehouseId) return
+
+    if (bookId) {
+        await tx.inventory.upsert({
+            where: { bookId_warehouseId: { bookId, warehouseId } },
+            update: { quantity: { decrement: quantity } },
+            create: { bookId, warehouseId, quantity: -quantity }
+        })
+        await tx.stockMovement.create({
+            data: {
+                bookId,
+                fromWarehouseId: warehouseId,
+                quantity,
+                type: 'EXIT',
+                note: note || `Annulation récupération retour #${orderId}`
+            }
+        })
+    } else if (extraProductId) {
+        await tx.inventory.upsert({
+            where: { extraProductId_warehouseId: { extraProductId, warehouseId } },
+            update: { quantity: { decrement: quantity } },
+            create: { extraProductId, warehouseId, quantity: -quantity }
+        })
+        await tx.stockMovement.create({
+            data: {
+                extraProductId,
+                fromWarehouseId: warehouseId,
+                quantity,
+                type: 'EXIT',
+                note: note || `Annulation récupération retour #${orderId}`
+            }
+        })
+    }
+}

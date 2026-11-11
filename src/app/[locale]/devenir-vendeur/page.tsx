@@ -380,7 +380,7 @@ export default async function BecomeSellerPage({ params }: { params: Promise<{ l
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0 text-emerald-400 text-xs font-bold bg-neutral-800 px-2.5 py-1 rounded-full">
                                             <TrendingUp className="w-3.5 h-3.5" />
-                                            <span>0% com.</span>
+                                            <span>{isAr ? '0% اشتراك' : isEn ? '0% sub.' : '0% abo.'}</span>
                                         </div>
                                     </div>
                                 </div>

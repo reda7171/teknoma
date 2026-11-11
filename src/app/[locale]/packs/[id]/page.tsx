@@ -21,6 +21,7 @@ import { getApprovedAudioTestimonials } from '@/lib/actions/audio-testimonials'
 import { getApprovedImageTestimonials } from '@/lib/actions/image-testimonials'
 import { getLocalizedTitle, getLocalizedPackTitle, getLocalizedPackDescription } from '@/lib/i18n-utils'
 import { getSchemaAvailability, isProductInStock } from '@/lib/product-availability'
+import { STORE_POLICY } from '@/lib/constants/store-policy'
 
 export async function generateMetadata({
     params,
@@ -387,10 +388,10 @@ export default async function PackDetailPage({
                 acceptedAnswer: {
                     '@type': 'Answer',
                     text: locale === 'ar'
-                        ? `التوصيل مجاني للطلبات التي تتجاوز 300 درهم. الدفع عند الاستلام في جميع أنحاء المغرب، من 24 إلى 48 ساعة للدار البيضاء وبين يومين وأربعة أيام للمدن الأخرى.`
+                        ? `التوصيل الموحد في المغرب بـ ${STORE_POLICY.shippingFeeMorocco} درهم، ومجاني للطلبات من ${STORE_POLICY.freeShippingThreshold} درهم فما فوق. الدفع عند الاستلام خلال ${STORE_POLICY.deliveryMajorCitiesMinHours}-${STORE_POLICY.deliveryMajorCitiesMaxHours} ساعة للمدن الكبرى و${STORE_POLICY.deliveryOtherRegionsHours} لباقي المدن.`
                         : locale === 'en'
-                            ? `Delivery is free for orders over 300 درهم. Cash on delivery across Morocco, 24-48h for Casablanca and 2-4 days for other cities.`
-                            : `La livraison est gratuite pour les commandes supérieures à 300 درهم. Paiement à la livraison partout au Maroc, 24-48h pour Casablanca et 2 à 4 jours pour les autres villes.`
+                            ? `Standard shipping in Morocco is ${STORE_POLICY.shippingFeeMorocco} MAD and free for orders of ${STORE_POLICY.freeShippingThreshold} MAD or more. Cash on delivery in ${STORE_POLICY.deliveryMajorCitiesMinHours}-${STORE_POLICY.deliveryMajorCitiesMaxHours}h for major cities and ${STORE_POLICY.deliveryOtherRegionsHours} for other regions.`
+                            : `La livraison est à ${STORE_POLICY.shippingFeeMorocco} MAD partout au Maroc, et gratuite dès ${STORE_POLICY.freeShippingThreshold} MAD. Paiement à la livraison en ${STORE_POLICY.deliveryMajorCitiesMinHours}-${STORE_POLICY.deliveryMajorCitiesMaxHours}h dans les grandes villes et ${STORE_POLICY.deliveryOtherRegionsHours} pour les autres régions.`
                 }
             }
         ]

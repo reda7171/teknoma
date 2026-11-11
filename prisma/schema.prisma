@@ -1603,3 +1603,34 @@ model SupplierContact {
   @@index([phone])
   @@map("supplier_contacts")
 }
+
+// Coûts importés automatiquement depuis Meta & Google Ads API par campagne pour le ROAS réel
+model AdCampaignSpend {
+  id            String   @id @default(uuid())
+  platform      String   @default("META") @db.VarChar(20) // META | GOOGLE
+  campaignId    String   @db.VarChar(100)
+  campaignName  String   @db.VarChar(255)
+  utmSlug       String   @db.VarChar(100)
+  channelType   String?  @db.VarChar(80)
+  status        String   @default("PAUSED") @db.VarChar(50)
+  datePreset    String   @default("last_30d") @db.VarChar(40)
+  currency      String   @default("MAD") @db.VarChar(10)
+  spend         Float    @default(0)
+  spendMad      Float    @default(0)
+  fxRateToMad   Float    @default(1)
+  impressions   Int      @default(0)
+  clicks        Int      @default(0)
+  ctr           Float    @default(0)
+  cpcMad        Float    @default(0)
+  platformConv  Float    @default(0)
+  dateStart     String?  @db.VarChar(20)
+  dateStop      String?  @db.VarChar(20)
+  syncedAt      DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([platform, campaignId, datePreset])
+  @@index([platform, datePreset])
+  @@index([utmSlug])
+  @@index([syncedAt])
+  @@map("ad_campaign_spends")
+}

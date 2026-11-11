@@ -8,6 +8,8 @@ import { normalizeImage } from '@/lib/utils'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { ArrowLeft, User, Phone, MapPin, Calendar, Clock, Package, ShoppingBag, Truck } from 'lucide-react'
 import OrderStatusUpdater from '@/components/admin/OrderStatusUpdater'
+import ReturnRecoveryBadgeButton from '@/components/admin/ReturnRecoveryBadgeButton'
+import { getJsonBooleanMap, RECOVERY_STATUSES_KEY } from '@/lib/server/order-stock'
 import DeliverySyncButton from '@/components/admin/DeliverySyncButton'
 import OrderEditModal from '@/components/admin/OrderEditModal'
 import DeleteOrderButton from '@/components/admin/DeleteOrderButton'
@@ -87,6 +89,9 @@ export default async function OrderDetailsPage({
         orderBy: { name: 'asc' }
     })
 
+    const recoveryMap = await getJsonBooleanMap(prisma, RECOVERY_STATUSES_KEY)
+    const isReturnRecovered = recoveryMap[order.id] === true
+
     return (
         <div className="space-y-8 relative">
             <OrderNavArrows prevOrder={prevOrder} nextOrder={nextOrder} locale={locale} />
@@ -122,6 +127,9 @@ export default async function OrderDetailsPage({
                     companies={activeCompanies}
                     />
                     <OrderStatusUpdater orderId={order.id} currentStatus={order.status} />
+                    {order.status === 'RETURNED' && (
+                        <ReturnRecoveryBadgeButton orderId={order.id} initialRecovered={isReturnRecovered} />
+                    )}
                 </div>
             </div>
 

@@ -178,7 +178,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "كيف أتتبع طلبيتي أو أتواصل مع خدمة العملاء؟",
-          a: "فور تسجيل طلبكم، يتواصل معكم فريقنا عبر الواتساب لتأكيد الشحن والتتبع. كما أن خدمة عملائنا رهن إشارتكم 7 أيام في الأسبوع للإجابة على جميع تساؤلاتكم."
+          a: `فور تسجيل طلبكم، يتواصل معكم فريقنا عبر الواتساب لتأكيد الشحن والتتبع. خدمة عملائنا متاحة ${STORE_POLICY.supportHours.ar} للإجابة على جميع تساؤلاتكم.`
         }
       ]
     } else if (locale === 'en') {
@@ -213,7 +213,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "How can I track my order or reach customer support?",
-          a: "As soon as your order is confirmed, our team updates you via WhatsApp and SMS with tracking details. Customer support is available 7 days a week to assist you."
+          a: `As soon as your order is confirmed, our team updates you via WhatsApp and SMS with tracking details. Customer support is available ${STORE_POLICY.supportHours.en} to assist you.`
         }
       ]
     } else {
@@ -248,7 +248,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "Comment suivre ma commande ou contacter le service client ?",
-          a: "Dès validation, notre équipe vous contacte sur WhatsApp avec les informations de suivi. Notre service client reste joignable 7 jours sur 7 pour vous accompagner."
+          a: `Dès validation, notre équipe vous contacte sur WhatsApp avec les informations de suivi. Notre service client reste joignable ${STORE_POLICY.supportHours.fr} pour vous accompagner.`
         }
       ]
     }

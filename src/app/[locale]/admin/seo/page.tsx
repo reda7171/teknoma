@@ -83,6 +83,8 @@ export default async function SeoConfigPage({
                 author: b.author,
                 language: b.language || 'fr',
                 reasons,
+                descriptionLength: descLen,
+                isShortDescription: descLen < 150,
             })
         }
     }
@@ -177,7 +179,7 @@ export default async function SeoConfigPage({
 
             {/* Widget Audit Qualité Catalogue & Blog */}
             <CatalogBlogQualityAudit
-                bookIssues={bookIssues.slice(0, 25)}
+                bookIssues={bookIssues.slice(0, 50)}
                 postIssues={postIssues.slice(0, 25)}
                 totalBooksChecked={auditBooksRaw.length}
                 totalPostsChecked={auditPostsRaw.length}

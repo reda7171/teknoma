@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { updateSetting } from '@/lib/actions/site-settings'
+import { testFacebookMarketingToken } from '@/lib/actions/facebook-ads'
 import { useRouter } from 'next/navigation'
 import { Facebook, Cpu, Save, Loader2, CheckCircle2, AlertCircle, Eye, EyeOff, Music, Search, BarChart } from 'lucide-react'
+import GoogleAdsConfigSection, { type GoogleAdsSettingsState } from '@/components/admin/GoogleAdsConfigSection'
 
 interface Props {
     initialFbPixelId: string
@@ -18,6 +20,7 @@ interface Props {
     initialFbMarketingAccessToken: string
     initialFbAdAccountId: string
     initialFbPageId: string
+    initialGoogleAds?: GoogleAdsSettingsState
 }
 
 export default function TrackingConfigForm({ 
@@ -32,7 +35,8 @@ export default function TrackingConfigForm({
     initialGoogleAnalyticsApiSecret,
     initialFbMarketingAccessToken,
     initialFbAdAccountId,
-    initialFbPageId
+    initialFbPageId,
+    initialGoogleAds
 }: Props) {
     const [fbPixelId, setFbPixelId] = useState(initialFbPixelId)
     const [geminiApiKey, setGeminiApiKey] = useState(initialGeminiApiKey)
@@ -46,6 +50,17 @@ export default function TrackingConfigForm({
     const [fbMarketingAccessToken, setFbMarketingAccessToken] = useState(initialFbMarketingAccessToken)
     const [fbAdAccountId, setFbAdAccountId] = useState(initialFbAdAccountId)
     const [fbPageId, setFbPageId] = useState(initialFbPageId)
+    const [googleAds, setGoogleAds] = useState<GoogleAdsSettingsState>(
+        initialGoogleAds || {
+            customerId: '',
+            loginCustomerId: '',
+            developerToken: '',
+            clientId: '',
+            clientSecret: '',
+            refreshToken: '',
+            conversionActionId: '',
+        }
+    )
     
     const [showApiKey, setShowApiKey] = useState(false)
     const [showTiktokToken, setShowTiktokToken] = useState(false)
@@ -53,8 +68,26 @@ export default function TrackingConfigForm({
     const [showGaSecret, setShowGaSecret] = useState(false)
     
     const [loading, setLoading] = useState(false)
+    const [testingFbToken, setTestingFbToken] = useState(false)
+    const [fbTestStatus, setFbTestStatus] = useState<{ ok: boolean; text: string } | null>(null)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
     const router = useRouter()
+
+    async function handleTestFbToken() {
+        setTestingFbToken(true)
+        setFbTestStatus(null)
+        try {
+            const res = await testFacebookMarketingToken(fbMarketingAccessToken, fbAdAccountId)
+            setFbTestStatus({
+                ok: Boolean(res.success),
+                text: res.success ? (res.message || 'Token valide') : (res.error || 'Token invalide'),
+            })
+        } catch {
+            setFbTestStatus({ ok: false, text: 'Erreur lors du test du token Meta.' })
+        } finally {
+            setTestingFbToken(false)
+        }
+    }
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault()
@@ -73,6 +106,13 @@ export default function TrackingConfigForm({
             await updateSetting('fb_marketing_access_token', fbMarketingAccessToken, 'api', 'Facebook Marketing API Token')
             await updateSetting('fb_ad_account_id', fbAdAccountId, 'api', 'Facebook Ad Account ID')
             await updateSetting('fb_page_id', fbPageId, 'api', 'Facebook Page ID')
+            await updateSetting('google_ads_customer_id', googleAds.customerId, 'api', 'Google Ads Customer ID')
+            await updateSetting('google_ads_login_customer_id', googleAds.loginCustomerId, 'api', 'Google Ads MCC Login Customer ID')
+            await updateSetting('google_ads_developer_token', googleAds.developerToken, 'api', 'Google Ads Developer Token')
+            await updateSetting('google_ads_client_id', googleAds.clientId, 'api', 'Google Ads OAuth Client ID')
+            await updateSetting('google_ads_client_secret', googleAds.clientSecret, 'api', 'Google Ads OAuth Client Secret')
+            await updateSetting('google_ads_refresh_token', googleAds.refreshToken, 'api', 'Google Ads OAuth Refresh Token')
+            await updateSetting('google_ads_conversion_action_id', googleAds.conversionActionId, 'api', 'Google Ads Conversion Action ID')
 
             setMessage({ type: 'success', text: 'Configuration enregistrée avec succès !' })
             router.refresh()
@@ -115,20 +155,41 @@ export default function TrackingConfigForm({
 
             {/* Facebook Marketing API Section */}
             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm transition-all hover:shadow-md">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                        <Facebook className="w-5 h-5 text-blue-600" />
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <Facebook className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-gray-900">Facebook Ads API</h2>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1">Lancement de publicités</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-xl font-black text-gray-900">Facebook Ads API</h2>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1">Lancement de publicités</p>
-                    </div>
+                    <button
+                        type="button"
+                        disabled={testingFbToken || !fbMarketingAccessToken.trim()}
+                        onClick={handleTestFbToken}
+                        className="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-black transition-all disabled:opacity-50 inline-flex items-center gap-1.5"
+                    >
+                        {testingFbToken && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                        <span>Tester le token Meta Ads</span>
+                    </button>
                 </div>
+
+                {fbTestStatus && (
+                    <div className={`mb-4 p-3 rounded-2xl text-xs font-bold border ${
+                        fbTestStatus.ok
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : 'bg-red-50 text-red-800 border-red-200'
+                    }`}>
+                        {fbTestStatus.text}
+                    </div>
+                )}
 
                 <div className="space-y-4">
                     <div>
                         <label className="block text-[13px] font-black text-gray-700 uppercase tracking-wider mb-2 ml-1">
-                            Access Token
+                            Access Token (System User permanent recommandé)
                         </label>
                         <div className="relative">
                             <input
@@ -146,6 +207,9 @@ export default function TrackingConfigForm({
                                 {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                         </div>
+                        <p className="mt-2 text-[11px] text-gray-500 font-medium ml-1">
+                            Pour éviter l&apos;expiration tous les 60 jours (code 190), générez un jeton d&apos;utilisateur système permanent dans Meta Business Manager &gt; Paramètres &gt; Utilisateurs système (permissions <code className="font-mono">ads_management</code> et <code className="font-mono">ads_read</code>).
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -176,6 +240,9 @@ export default function TrackingConfigForm({
                     </div>
                 </div>
             </div>
+
+            {/* Google Ads API Section */}
+            <GoogleAdsConfigSection values={googleAds} onChange={setGoogleAds} />
 
             {/* Gemini AI Section */}
             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm transition-all hover:shadow-md">

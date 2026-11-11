@@ -25,15 +25,18 @@ export default function GoogleOneTap() {
     const initializedRef = useRef(false)
 
     useEffect(() => {
-        if (initializedRef.current) return
         if (typeof window === 'undefined') return
+        // FedCM / Google One Tap nécessite HTTPS en production ; éviter le rejet NetworkError sur http://localhost en dev
+        if (window.location.protocol !== 'https:' && process.env.NEXT_PUBLIC_FORCE_ONE_TAP !== 'true') return
         if (typeof document !== 'undefined' && document.cookie.includes('riwaya_authenticated=1')) return
 
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "967210658791-vn1et4a1cr5b78as8vh5f3h1jfs153kh.apps.googleusercontent.com"
         if (!clientId) return
 
+        let isCancelled = false
+
         const handleCredentialResponse = async (response: { credential?: string }) => {
-            if (!response.credential) return
+            if (!response.credential || isCancelled) return
             try {
                 const result = await googleOneTapLogin(response.credential)
                 if (result.success) {
@@ -49,7 +52,7 @@ export default function GoogleOneTap() {
         }
 
         const initGsi = () => {
-            if (!window.google?.accounts?.id || initializedRef.current) return
+            if (isCancelled || initializedRef.current || !window.google?.accounts?.id) return
             initializedRef.current = true
             try {
                 window.google.accounts.id.initialize({
@@ -57,7 +60,7 @@ export default function GoogleOneTap() {
                     callback: handleCredentialResponse,
                     auto_select: false,
                     cancel_on_tap_outside: true,
-                    use_fedcm_for_prompt: false,
+                    use_fedcm_for_prompt: true,
                     itp_support: true,
                 })
                 window.google.accounts.id.prompt((notification: any) => {
@@ -74,26 +77,35 @@ export default function GoogleOneTap() {
             }
         }
 
-        if (window.google?.accounts?.id) {
-            initGsi()
-        } else {
-            const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]')
-            if (existingScript) {
-                existingScript.addEventListener('load', initGsi, { once: true })
+        // Temporiser légèrement pour éviter qu'un double montage React StrictMode n'annule FedCM get() en plein vol
+        const bootTimer = window.setTimeout(() => {
+            if (isCancelled) return
+            if (window.google?.accounts?.id) {
+                initGsi()
             } else {
-                const script = document.createElement('script')
-                script.src = 'https://accounts.google.com/gsi/client'
-                script.async = true
-                script.defer = true
-                script.onload = initGsi
-                document.head.appendChild(script)
+                const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]')
+                if (existingScript) {
+                    existingScript.addEventListener('load', initGsi, { once: true })
+                } else {
+                    const script = document.createElement('script')
+                    script.src = 'https://accounts.google.com/gsi/client'
+                    script.async = true
+                    script.defer = true
+                    script.onload = initGsi
+                    document.head.appendChild(script)
+                }
             }
-        }
+        }, 150)
 
         return () => {
-            try {
-                window.google?.accounts?.id?.cancel()
-            } catch {}
+            isCancelled = true
+            window.clearTimeout(bootTimer)
+            if (initializedRef.current) {
+                initializedRef.current = false
+                try {
+                    window.google?.accounts?.id?.cancel()
+                } catch {}
+            }
         }
     }, [router, showNotification])
 
