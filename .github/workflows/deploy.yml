@@ -188,23 +188,42 @@ jobs:
             echo "Telechargement de la nouvelle image Docker..."
             echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
+            # Garantir la presence des secrets WAHA dans .env pour permettre docker compose up sans valeur par defaut faible
+            if [ -f ".env" ]; then
+              if ! echo "${{ secrets.VPS_PASSWORD }}" | sudo -S grep -qE '^WAHA_DASHBOARD_PASSWORD=["'\'']?[^"'\''[:space:]#]+' .env; then
+                RAND_WAHA_PASS=$(openssl rand -hex 24)
+                echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i '/^WAHA_DASHBOARD_PASSWORD=/d' .env
+                echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sh -c "printf '\nWAHA_DASHBOARD_PASSWORD=%s\n' '${RAND_WAHA_PASS}' >> .env"
+              fi
+              if ! echo "${{ secrets.VPS_PASSWORD }}" | sudo -S grep -qE '^WAHA_API_KEY=["'\'']?[^"'\''[:space:]#]+' .env; then
+                RAND_WAHA_KEY=$(openssl rand -hex 24)
+                echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i '/^WAHA_API_KEY=/d' .env
+                echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sh -c "printf '\nWAHA_API_KEY=%s\n' '${RAND_WAHA_KEY}' >> .env"
+              fi
+            fi
+
             # Rechargement atomique sans interruption (Zero-Downtime)
             echo "Rechargement atomique du service..."
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps app
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps --force-recreate app || {
+              echo "ERREUR critique: docker compose up app a echoue!"
+              exit 1
+            }
 
-            # Verification immediate de disponibilite HTTP
-            echo "Attente de reponse HTTP 200 sur port 3000..."
+            # Verification immediate de disponibilite HTTP + version de deploiement
+            echo "Attente de reponse HTTP 200 et verification de version ${{ github.sha }} sur port 3000..."
             READY=0
-            for i in $(seq 1 30); do
-              if curl -s -f http://127.0.0.1:3000/fr > /dev/null 2>&1; then
-                echo "Application operationnelle (HTTP 200 OK) en ${i}s"
+            for i in $(seq 1 45); do
+              BODY=$(curl -s -f -L --max-time 5 http://127.0.0.1:3000/fr || true)
+              if [ -n "$BODY" ] && echo "$BODY" | grep -q "${{ github.sha }}"; then
+                echo "Application operationnelle (HTTP 200 OK, version ${{ github.sha }}) en ${i} checks"
                 READY=1
                 break
               fi
-              sleep 1
+              sleep 2
             done
             if [ $READY -eq 0 ]; then
-              echo "Controle sante : conteneur actif mais demarrage prolonge"
+              echo "ERREUR: Le port 3000 ne sert pas la version attendue ${{ github.sha }}."
+              exit 1
             fi
 
             # Rechargement et contrôle du conteneur WhatsApp (WAHA)

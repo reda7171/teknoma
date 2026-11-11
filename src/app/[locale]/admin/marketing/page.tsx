@@ -375,7 +375,7 @@ export default function MarketingPage() {
                         className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 md:px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl font-bold transition-all shadow-lg active:scale-95"
                     >
                         <Sparkles className="w-4 h-4 text-amber-400" />
-                        <span>Campagne Google Ads (IA)</span>
+                        <span>Google &amp; Meta Ads (IA)</span>
                     </button>
 
                     {/* Mode sélection */}
