@@ -1,5 +1,7 @@
 'use client'
 
+import { trackEvent as trackFbPixelEvent } from '@/components/FacebookPixel'
+
 export interface Ga4Item {
     item_id: string
     item_name: string
@@ -470,25 +472,23 @@ export function trackPurchase(data: PurchaseData) {
 
     const totalQty = data.items.reduce((acc, item) => acc + (item.quantity || 1), 0)
 
-    // 2. Meta Pixel (Facebook)
-    if (typeof (window as any).fbq === 'function') {
-        try {
-            ;(window as any).fbq('track', 'Purchase', {
-                content_ids: data.items.map(item => item.id),
-                content_type: 'product',
-                contents: data.items.map(item => ({
-                    id: item.id,
-                    quantity: item.quantity || 1,
-                    item_price: item.price,
-                })),
-                value: data.total,
-                currency: DEFAULT_CURRENCY,
-                num_items: totalQty,
-                order_id: data.id,
-            })
-        } catch (e) {
-            console.warn('[Pixel] Erreur suivi Purchase:', e)
-        }
+    // 2. Meta Pixel (Facebook) avec déduplication CAPI via eventID
+    try {
+        trackFbPixelEvent('Purchase', {
+            content_ids: data.items.map(item => item.id),
+            content_type: 'product',
+            contents: data.items.map(item => ({
+                id: item.id,
+                quantity: item.quantity || 1,
+                item_price: item.price,
+            })),
+            value: Number((Number(data.total) || 0).toFixed(2)),
+            currency: DEFAULT_CURRENCY,
+            num_items: totalQty,
+            order_id: data.id,
+        }, { eventID: data.id })
+    } catch (e) {
+        console.warn('[Pixel] Erreur suivi Purchase:', e)
     }
 
     // 3. Google Analytics 4 (purchase officiel standardisé)

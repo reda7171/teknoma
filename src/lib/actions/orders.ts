@@ -421,8 +421,13 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 const cookieHeader = requestHeaders.get('cookie') || ''
 
                 // Envoi CAPI Facebook (Server-Side) avec déduplication event_id et enrichissement EMQ
-                const fbPixelId = await getSetting('facebook_pixel_id')
-                const fbAccessToken = await getSetting('facebook_access_token') || process.env.FACEBOOK_ACCESS_TOKEN
+                const [fbPixelIdRaw, fbCapiTokenRaw, fbAccessTokenRaw] = await Promise.all([
+                    getSetting('facebook_pixel_id'),
+                    getSetting('facebook_capi_access_token'),
+                    getSetting('facebook_access_token'),
+                ])
+                const fbPixelId = (fbPixelIdRaw || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || '').trim()
+                const fbAccessToken = (fbCapiTokenRaw || fbAccessTokenRaw || process.env.FACEBOOK_ACCESS_TOKEN || '').trim()
 
                 let fbPromise = Promise.resolve()
                 if (fbPixelId && fbAccessToken) {
@@ -473,7 +478,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                         }]
                     }
 
-                    fbPromise = fetch(`https://graph.facebook.com/v19.0/${fbPixelId}/events?access_token=${fbAccessToken}`, {
+                    fbPromise = fetch(`https://graph.facebook.com/v19.0/${encodeURIComponent(fbPixelId)}/events?access_token=${encodeURIComponent(fbAccessToken)}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(eventData)

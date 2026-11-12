@@ -2545,6 +2545,7 @@
     "AdsTxtCheckTitle": "ads.txt File",
     "LegalPagesTitle": "Legal & Policy Pages",
     "RobotsTitle": "Robots.txt Crawlers",
+    "ContentQualityTitle": "Editorial & Catalog Content Quality",
     "ResubmitTip": "Your site is ready for review. Head over to Google AdSense console to request a re-review.",
     "EnableNow": "Enable AdSense in 1 click"
   },
@@ -2589,5 +2590,29 @@
     "googleScriptHelp": "Paste this script in Google Ads (Tools > Scripts > Daily schedule) to push campaign spend without Developer Token approval.",
     "copyScript": "Copy script",
     "scriptCopied": "Script copied"
+  },
+  "AdminAdsRoasChart": {
+    "sourceImported": "Imported API Spend (Meta & Google)",
+    "sourceAccounting": "Accounting Ad Expenses",
+    "sourceEstimated": "Estimated Budget (Not Synced)",
+    "subtitleImported": "Delivered COD revenue vs real campaign costs imported into ad_campaign_spends.",
+    "subtitleFallback": "Delivered COD revenue vs recorded advertising expenses.",
+    "detailsLink": "Campaign breakdown"
+  },
+  "AdminPixelConfig": {
+    "pixelIdLabel": "Facebook (Meta) Pixel ID",
+    "pixelIdPlaceholder": "Ex: 904723299078048",
+    "pixelIdHelpPrefix": "You can find this ID in your",
+    "eventsManagerLink": "Meta Events Manager",
+    "capiTokenLabel": "Conversions API Token (CAPI)",
+    "capiTokenHelp": "Dedicated server-side Purchase CAPI token generated in Pixel Settings > Conversions API.",
+    "legacyFallbackNote": "No dedicated CAPI token saved: using fallback token configured in settings.",
+    "saveButton": "Save",
+    "savingButton": "Saving...",
+    "testButton": "Test Pixel & CAPI",
+    "testingButton": "Testing...",
+    "saveSuccess": "Configuration saved successfully!",
+    "saveError": "Error while saving settings.",
+    "testNetworkError": "Network error while testing CAPI."
   }
 }

@@ -18,7 +18,14 @@ export default async function PixelConfigPage() {
         redirect('/login')
     }
 
-    const pixelId = await getSetting('facebook_pixel_id') || ''
+    const [pixelIdRaw, capiTokenRaw, legacyTokenRaw] = await Promise.all([
+        getSetting('facebook_pixel_id'),
+        getSetting('facebook_capi_access_token'),
+        getSetting('facebook_access_token'),
+    ])
+    const pixelId = pixelIdRaw || ''
+    const capiToken = capiTokenRaw || ''
+    const hasLegacyToken = Boolean(legacyTokenRaw?.trim())
 
     return (
         <div className="space-y-12">
@@ -45,7 +52,11 @@ export default async function PixelConfigPage() {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">ID de suivi et événements marketing</p>
                         </div>
                     </div>
-                    <PixelConfigForm initialPixelId={pixelId} />
+                    <PixelConfigForm
+                        initialPixelId={pixelId}
+                        initialCapiToken={capiToken}
+                        hasLegacyToken={hasLegacyToken}
+                    />
                 </div>
             </div>
         </div>

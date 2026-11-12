@@ -128,6 +128,14 @@ export function getCanonicalBaseUrl(): string {
     return base.replace(/\/+$/, '')
 }
 
+function toAsciiCanonicalUrl(rawUrl: string): string {
+    try {
+        return new URL(rawUrl).toString()
+    } catch {
+        return encodeURI(rawUrl).replace(/[^\x20-\x7E]/g, '')
+    }
+}
+
 /**
  * Generates an absolute canonical URL with all campaign and tracking parameters stripped.
  * If allowedParams is omitted, defaults to ['usedOnly'] on /books and [] on all other paths.
@@ -151,7 +159,8 @@ export function getCanonicalUrl(
     const cleanedParams = cleanSearchParams(searchParams, effectiveAllowed)
     const queryString = cleanedParams.toString()
 
-    return queryString ? `${baseUrl}${normalizedPath}?${queryString}` : `${baseUrl}${normalizedPath}`
+    const rawUrl = queryString ? `${baseUrl}${normalizedPath}?${queryString}` : `${baseUrl}${normalizedPath}`
+    return toAsciiCanonicalUrl(rawUrl)
 }
 
 /**
@@ -199,5 +208,6 @@ export function getCanonicalAlternates(
  * Builds RFC 5988 / RFC 6596 compliant Link header for canonical URLs.
  */
 export function buildCanonicalLinkHeader(canonicalUrl: string): string {
-    return `<${canonicalUrl}>; rel="canonical"`
+    // Encodage ASCII obligatoire pour éviter le crash ByteString dans Headers.set() sur les slugs arabes
+    return `<${toAsciiCanonicalUrl(canonicalUrl)}>; rel="canonical"`
 }

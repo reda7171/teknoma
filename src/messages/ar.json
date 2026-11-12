@@ -2545,6 +2545,7 @@
     "AdsTxtCheckTitle": "ملف ads.txt",
     "LegalPagesTitle": "الصفحات القانونية والسياسات",
     "RobotsTitle": "الزحف في Robots.txt",
+    "ContentQualityTitle": "جودة المحتوى التحريري والكتب",
     "ResubmitTip": "موقعك جاهز للمراجعة. توجه إلى لوحة تحكم أدسنس لطلب إعادة الفحص.",
     "EnableNow": "تفعيل أدسنس بنقرة واحدة"
   },
@@ -2589,5 +2590,29 @@
     "googleScriptHelp": "الصق هذا السكربت في Google Ads (الأدوات > السكربتات) لإرسال التكاليف يومياً بدون انتظار موافقة Developer Token.",
     "copyScript": "نسخ السكربت",
     "scriptCopied": "تم نسخ السكربت"
+  },
+  "AdminAdsRoasChart": {
+    "sourceImported": "تكاليف API مستوردة (Meta و Google)",
+    "sourceAccounting": "مصاريف إعلانات محاسبية",
+    "sourceEstimated": "ميزانية تقديرية (غير متزامنة)",
+    "subtitleImported": "المبيعات المسلمة فعلياً مقابل التكاليف الحقيقية المستوردة في قاعدة البيانات.",
+    "subtitleFallback": "المبيعات المسلمة فعلياً مقابل مصاريف الإعلانات المسجلة.",
+    "detailsLink": "تفاصيل الحملات"
+  },
+  "AdminPixelConfig": {
+    "pixelIdLabel": "معرف بكسل فيسبوك (Meta Pixel ID)",
+    "pixelIdPlaceholder": "مثال: 904723299078048",
+    "pixelIdHelpPrefix": "يمكنك العثور على هذا المعرف في",
+    "eventsManagerLink": "مدير أحداث Meta",
+    "capiTokenLabel": "رمز Conversions API (CAPI)",
+    "capiTokenHelp": "رمز مخصص لتتبع الطلبات من الخادم يتم إنشاؤه من إعدادات البكسل.",
+    "legacyFallbackNote": "لم يتم حفظ رمز CAPI مخصص: يستخدم النظام حالياً الرمز الاحتياطي.",
+    "saveButton": "حفظ",
+    "savingButton": "جاري الحفظ...",
+    "testButton": "اختبار Pixel و CAPI",
+    "testingButton": "جاري التحقق...",
+    "saveSuccess": "تم حفظ الإعدادات بنجاح!",
+    "saveError": "حدث خطأ أثناء الحفظ.",
+    "testNetworkError": "خطأ في الشبكة أثناء اختبار CAPI."
   }
 }

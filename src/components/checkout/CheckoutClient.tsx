@@ -469,7 +469,7 @@ export default function CheckoutClient({
             )
 
             if (result.success) {
-                // Suivi des conversions : Google Analytics 4 & Meta Pixel
+                // Suivi des conversions : Google Analytics 4 & Meta Pixel (dédupliqué avec CAPI via eventID)
                 trackPurchase({
                     id: result.orderId,
                     total: finalTotal,
@@ -482,17 +482,6 @@ export default function CheckoutClient({
                         price: Number(item.price),
                         quantity: item.quantity,
                         category: item.type,
-                    }))
-                })
-
-                // Facebook Pixel legacy event
-                fbPixelEvents.purchase({
-                    id: result.orderId,
-                    total: finalTotal,
-                    items: items.map(item => ({
-                        id: item.id,
-                        price: item.price,
-                        quantity: item.quantity
                     }))
                 })
 
