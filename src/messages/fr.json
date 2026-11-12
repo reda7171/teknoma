@@ -2545,6 +2545,7 @@
     "AdsTxtCheckTitle": "Fichier ads.txt",
     "LegalPagesTitle": "Pages Légales & Règlement",
     "RobotsTitle": "Exploration Robots.txt",
+    "ContentQualityTitle": "Qualité Éditoriale & Catalogue",
     "ResubmitTip": "Votre site est prêt pour validation. Rendez-vous sur votre console Google AdSense pour demander un examen.",
     "EnableNow": "Activer AdSense en 1 clic"
   },
@@ -2589,5 +2590,29 @@
     "googleScriptHelp": "Collez ce script dans Google Ads (Outils > Scripts > Planification quotidienne) pour envoyer vos coûts automatiquement sans Developer Token approuvé.",
     "copyScript": "Copier le script",
     "scriptCopied": "Script copié"
+  },
+  "AdminAdsRoasChart": {
+    "sourceImported": "Coûts API Importés (Meta & Google)",
+    "sourceAccounting": "Dépenses Comptables Saisies",
+    "sourceEstimated": "Budget Estimatif (Non Synchronisé)",
+    "subtitleImported": "Recettes réelles encaissées vs coûts importés dans ad_campaign_spends.",
+    "subtitleFallback": "Recettes réelles encaissées vs dépenses publicitaires enregistrées.",
+    "detailsLink": "Détail par campagne"
+  },
+  "AdminPixelConfig": {
+    "pixelIdLabel": "ID du Pixel Facebook (Meta)",
+    "pixelIdPlaceholder": "Ex: 904723299078048",
+    "pixelIdHelpPrefix": "Vous pouvez trouver cet ID dans votre",
+    "eventsManagerLink": "Gestionnaire d'événements Meta",
+    "capiTokenLabel": "Token Conversions API (CAPI)",
+    "capiTokenHelp": "Token dédié au suivi serveur des achats (CAPI) généré dans Paramètres du Pixel > Conversions API.",
+    "legacyFallbackNote": "Aucun token CAPI dédié saisi : le système utilise actuellement le token fallback configuré ailleurs.",
+    "saveButton": "Enregistrer",
+    "savingButton": "Enregistrement...",
+    "testButton": "Tester Pixel & CAPI",
+    "testingButton": "Vérification...",
+    "saveSuccess": "Configuration enregistrée avec succès !",
+    "saveError": "Erreur lors de l'enregistrement.",
+    "testNetworkError": "Erreur réseau lors du test CAPI."
   }
 }

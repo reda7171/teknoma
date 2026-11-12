@@ -81,6 +81,33 @@ async function main() {
     const privateFile={headers:new Headers(),url:'https://example.invalid/uploads/%73chool-lists/private.pdf',nextUrl:new URL('https://example.invalid/uploads/%73chool-lists/private.pdf')};
     assert.equal(context.exports.default(privateFile).headers.get('location'),'https://example.invalid/api/admin/school-lists/files/private.pdf');
   });
+  await test('middleware handles non-ASCII Arabic slugs without Link header ByteString errors', async () => {
+    const filename = path.join(root, 'src/middleware.ts'), source = fs.readFileSync(filename, 'utf8');
+    const ast = ts.createSourceFile(filename, source, ts.ScriptTarget.Latest, true);
+    const fn = ast.statements.find(s => ts.isFunctionDeclaration(s) && s.name?.text === 'middleware');
+    const canonical = load('src/lib/seo/canonical.ts');
+    const context = {
+      exports: {}, Buffer, URL, crypto: require('node:crypto').webcrypto, Uint8Array, process,
+      BLOCKED_SCRAPERS: [],
+      NextResponse: { next: () => new Response(null), redirect: url => new Response(null, { status: 307, headers: { location: String(url) } }) },
+      contentSecurityPolicy: load('src/lib/content-security-policy.ts').contentSecurityPolicy,
+      intlMiddleware: () => new Response(),
+      getCanonicalUrl: canonical.getCanonicalUrl,
+      buildCanonicalLinkHeader: canonical.buildCanonicalLinkHeader,
+    };
+    vm.runInNewContext(ts.transpileModule(fn.getText(ast), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText, context);
+    for (const encodedPath of [
+      '/fr/books/d8ec428a-1812-400d-a5ee-d4ca831e78b6-%D8%B7%D8%BA%D9%88%D8%AA-%D8%B1%D9%88%D8%A7%D9%8A%D8%A9-%D8%A7%D9%84%D8%BA%D9%85%D9%88%D8%B6?fbclid=test&usedOnly=1',
+      '/ar/packs/pack-123-%D9%83%D8%AA%D8%A8-%D8%AA%D8%B7%D9%88%D9%8A%D8%B1-%D8%A7%D9%84%D8%B0%D8%A7%D8%AA',
+    ]) {
+      const req = { headers: new Headers(), nextUrl: new URL('https://example.invalid' + encodedPath) };
+      const response = context.exports.default(req);
+      const linkHeader = response.headers.get('link') || '';
+      assert.ok(linkHeader.includes('rel="canonical"'));
+      assert.ok(/^[\x20-\x7E]+$/.test(linkHeader));
+      assert.ok(!linkHeader.includes('fbclid'));
+    }
+  });
   await test('sessions reject changed passwords, purpose confusion, expiry and tampering', () => {
     const token = session.createSessionToken('user1','hash1','admin',1000);
     assert.equal(session.verifySessionToken(token,'hash1','admin',5000,2000),true);

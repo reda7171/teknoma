@@ -16,7 +16,8 @@ export default function AdSense({ publisherId, isEnabled }: AdSenseProps) {
         if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
             return null
         }
-        if ((window as any).adsbygoogle) {
+        const adsbygoogleWin = window as Window & { adsbygoogle?: unknown[] }
+        if (adsbygoogleWin.adsbygoogle || document.getElementById('google-adsense')) {
             return null
         }
     }

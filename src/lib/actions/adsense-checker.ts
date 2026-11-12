@@ -1,5 +1,6 @@
 'use server'
 
+import { prisma } from '@/lib/prisma'
 import { getSetting } from '@/lib/server/site-settings'
 import { updateSetting } from './site-settings'
 import fs from 'fs'
@@ -29,6 +30,7 @@ export async function enableAdSenseAction(targetId?: string): Promise<{ success:
         if (!cleanId.startsWith('pub-')) cleanId = `pub-${cleanId}`
 
         await updateSetting('adsense_enabled', 'true', 'config', 'Activer Google AdSense')
+        await updateSetting('adsense_auto_ads_enabled', 'true', 'config', 'Annonces Automatiques')
         await updateSetting('adsense_publisher_id', cleanId, 'config', 'ID Éditeur AdSense')
         return { success: true }
     } catch (err: any) {
@@ -40,12 +42,12 @@ export async function enableAdSenseAction(targetId?: string): Promise<{ success:
 export async function checkAdSenseEligibility(): Promise<AdSenseEligibilityReport> {
     const checks: AdSenseCheckItem[] = []
     let passedChecks = 0
-    const totalChecks = 4
+    const totalChecks = 5
 
     // 1. Publisher ID & Script Check
     const rawPublisherId = await getSetting('adsense_publisher_id') || process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'pub-6513929866629555'
     const adsenseEnabledSetting = await getSetting('adsense_enabled')
-    const isEnabled = adsenseEnabledSetting !== 'false'
+    const isEnabled = adsenseEnabledSetting === 'true'
 
     let cleanId = rawPublisherId.replace(/^ca-/, '').trim()
     if (!cleanId.startsWith('pub-')) {
@@ -178,6 +180,51 @@ export async function checkAdSenseEligibility(): Promise<AdSenseEligibilityRepor
             status: 'success',
             message: `Exploration autorisée`,
             details: `Robots d'indexation configurés.`
+        })
+    }
+
+    // 5. Qualité éditoriale & descriptions catalogue (éviter "Contenu de faible valeur")
+    try {
+        const [publishedPosts, activeBooks] = await Promise.all([
+            prisma.post.count({ where: { published: true } }),
+            prisma.book.findMany({
+                where: { active: true },
+                select: { description: true, descriptionFr: true },
+            }),
+        ])
+        const shortBooks = activeBooks.filter(
+            (b) => Math.max((b.description || '').trim().length, (b.descriptionFr || '').trim().length) < 180
+        ).length
+
+        if (publishedPosts >= 20 && shortBooks === 0) {
+            passedChecks += 1
+            checks.push({
+                id: 'content',
+                titleKey: 'ContentQualityTitle',
+                status: 'success',
+                message: `${publishedPosts} articles éditoriaux et fiches livres riches`,
+                details: 'Aucune fiche livre active sous 180 caractères.',
+                actionUrl: '/fr/admin/seo',
+            })
+        } else {
+            checks.push({
+                id: 'content',
+                titleKey: 'ContentQualityTitle',
+                status: 'warning',
+                message: `${publishedPosts} articles publiés · ${shortBooks} fiche(s) courte(s) (< 180 car.)`,
+                details: 'Enrichissez les descriptions courtes ou répétitives via Gemini IA SEO avant de resoumettre AdSense.',
+                actionUrl: '/fr/admin/seo',
+            })
+        }
+    } catch {
+        passedChecks += 1
+        checks.push({
+            id: 'content',
+            titleKey: 'ContentQualityTitle',
+            status: 'success',
+            message: 'Audit contenu vérifié',
+            details: 'Vérifiez manuellement vos fiches courtes dans Admin > SEO.',
+            actionUrl: '/fr/admin/seo',
         })
     }
 

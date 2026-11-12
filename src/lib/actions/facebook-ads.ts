@@ -138,6 +138,42 @@ export async function testFacebookMarketingToken(overrideToken?: string, overrid
     }
 }
 
+/** Vérifie la validité du Pixel ID et du token Meta Conversions API (CAPI) sans envoyer d'événement fictif. */
+export async function testMetaPixelCapi(overridePixelId?: string, overrideToken?: string) {
+    await verifyAdmin()
+    const { getSetting } = await import('@/lib/server/site-settings')
+    const [dbPixelId, dbCapiToken, dbLegacyToken] = await Promise.all([
+        getSetting('facebook_pixel_id'),
+        getSetting('facebook_capi_access_token'),
+        getSetting('facebook_access_token'),
+    ])
+    const pixelId = (overridePixelId ?? dbPixelId ?? process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID ?? '').trim()
+    const token = (overrideToken ?? dbCapiToken ?? dbLegacyToken ?? process.env.FACEBOOK_ACCESS_TOKEN ?? '').trim()
+
+    if (!pixelId) {
+        return { success: false, error: 'ID du Pixel Meta manquant.' }
+    }
+    if (!token) {
+        return { success: false, error: 'Token Conversions API (CAPI) manquant.' }
+    }
+
+    try {
+        const res = await fetch(
+            `${FB_API_BASE}/${encodeURIComponent(pixelId)}?fields=id,name&access_token=${encodeURIComponent(token)}`
+        )
+        const json = await res.json()
+        if (json.error) {
+            return classifyMetaError('Vérification Pixel & CAPI', json.error)
+        }
+        return {
+            success: true,
+            message: `Pixel "${json.name || json.id}" (${json.id}) vérifié et token CAPI actif.`,
+        }
+    } catch {
+        return { success: false, error: 'Impossible de joindre graph.facebook.com.' }
+    }
+}
+
 export async function launchFacebookAd(params: LaunchAdParams): Promise<FacebookAdResult> {
     try {
         await verifyAdmin()

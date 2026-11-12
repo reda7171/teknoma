@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { generateBookUrl } from '@/lib/i18n-utils'
 import { isFeatureEnabled } from '@/lib/server/site-settings'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 const locales = ['fr', 'ar', 'en']
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://riwaya.store'
@@ -11,11 +11,10 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const sellerEnabled = await isFeatureEnabled('feature_seller').catch(() => true)
 
-    // 1. Pages statiques
+    // 1. Pages statiques (uniquement des URLs canoniques sans paramètres de requête)
     const staticPages = [
         { path: '', priority: 1.0, freq: 'daily' as const },
         { path: '/books', priority: 0.9, freq: 'daily' as const },
-        { path: '/books?usedOnly=true', priority: 0.85, freq: 'daily' as const },
         { path: '/packs', priority: 0.9, freq: 'daily' as const },
         { path: '/jeux-societe', priority: 0.85, freq: 'daily' as const },
         { path: '/mon-enfant', priority: 0.85, freq: 'daily' as const },
@@ -25,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { path: '/contact', priority: 0.7, freq: 'monthly' as const },
         { path: '/guides', priority: 0.8, freq: 'weekly' as const },
         { path: '/authors', priority: 0.75, freq: 'weekly' as const },
-        { path: '/privacy', priority: 0.3, freq: 'yearly' as const },
+        { path: '/privacy-policy', priority: 0.3, freq: 'yearly' as const },
         { path: '/terms', priority: 0.3, freq: 'yearly' as const },
         { path: '/tracking', priority: 0.5, freq: 'weekly' as const },
         { path: '/livraison', priority: 0.6, freq: 'monthly' as const },
