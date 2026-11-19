@@ -49,10 +49,8 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         setMounted(true)
     }, [])
 
-    if (!mounted) return null
-
-    const totalPrice = getTotalPrice()
-    const totalItems = getTotalItems()
+    const totalPrice = mounted ? getTotalPrice() : 0
+    const totalItems = mounted ? getTotalItems() : 0
 
     const handleRemove = async (item: any) => {
         removeItem(item.id)
@@ -97,7 +95,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
     const finalTotal = Math.max(0, totalPrice - promo3for4Discount)
 
     useEffect(() => {
-        if (isOpen && items.length > 0) {
+        if (mounted && isOpen && items.length > 0) {
             ga4TrackViewCart({
                 items: items.map(item => ({
                     id: item.id,
@@ -109,7 +107,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                 value: finalTotal
             })
         }
-    }, [isOpen])
+    }, [isOpen, mounted, items, finalTotal])
 
 
     const handleCheckoutClick = (e?: React.MouseEvent) => {
@@ -151,6 +149,8 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
             onClose()
         }
     }
+
+    if (!mounted) return null
 
     return (
         <>
