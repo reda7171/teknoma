@@ -40,19 +40,15 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         }
     }, [pathname, onClose])
 
-    // Swipe to close refs (pas de re-render à 60fps pour préserver l'INP)
-    const touchStartXRef = useRef<number | null>(null)
-    const touchStartYRef = useRef<number | null>(null)
+    const drawerRef = useRef<HTMLDivElement>(null)
 
     // Éviter les problèmes d'hydratation avec localStorage
     useEffect(() => {
         setMounted(true)
     }, [])
 
-    if (!mounted) return null
-
-    const totalPrice = getTotalPrice()
-    const totalItems = getTotalItems()
+    const totalPrice = mounted ? getTotalPrice() : 0
+    const totalItems = mounted ? getTotalItems() : 0
 
     const handleRemove = async (item: any) => {
         removeItem(item.id)
@@ -97,7 +93,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
     const finalTotal = Math.max(0, totalPrice - promo3for4Discount)
 
     useEffect(() => {
-        if (isOpen && items.length > 0) {
+        if (mounted && isOpen && items.length > 0) {
             ga4TrackViewCart({
                 items: items.map(item => ({
                     id: item.id,
@@ -109,7 +105,7 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                 value: finalTotal
             })
         }
-    }, [isOpen])
+    }, [isOpen, mounted, items, finalTotal])
 
 
     const handleCheckoutClick = (e?: React.MouseEvent) => {
@@ -124,33 +120,51 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         router.push('/checkout')
     }
 
-    // Swipe handlers natifs avec touch-pan-y pour éviter les blocages INP
-    const minSwipeDistance = 50 
+    // Balayage tactile natif et passif (évite tout blocage du thread principal / optimise l'INP)
+    useEffect(() => {
+        if (!isOpen) return
+        const drawerEl = drawerRef.current
+        if (!drawerEl) return
 
-    const onTouchStartEvent = (e: React.TouchEvent) => {
-        touchStartXRef.current = e.targetTouches[0]?.clientX ?? null
-        touchStartYRef.current = e.targetTouches[0]?.clientY ?? null
-    }
+        let startX: number | null = null
+        let startY: number | null = null
+        const minSwipeDistance = 60
 
-    const onTouchEndEvent = (e: React.TouchEvent) => {
-        if (touchStartXRef.current === null || touchStartYRef.current === null) return
-        const endX = e.changedTouches[0]?.clientX
-        const endY = e.changedTouches[0]?.clientY
-        if (typeof endX !== 'number' || typeof endY !== 'number') return
-
-        const deltaX = endX - touchStartXRef.current
-        const deltaY = endY - touchStartYRef.current
-        touchStartXRef.current = null
-        touchStartYRef.current = null
-
-        // Ne rien faire si le geste est principalement vertical
-        if (Math.abs(deltaY) > Math.abs(deltaX)) return
-
-        const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-        if ((!isRTL && deltaX > minSwipeDistance) || (isRTL && deltaX < -minSwipeDistance)) {
-            onClose()
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length > 1) return
+            startX = e.touches[0].clientX
+            startY = e.touches[0].clientY
         }
-    }
+
+        const onTouchEnd = (e: TouchEvent) => {
+            if (startX === null || startY === null) return
+            const touch = e.changedTouches[0]
+            if (!touch) return
+
+            const deltaX = touch.clientX - startX
+            const deltaY = touch.clientY - startY
+            startX = null
+            startY = null
+
+            // Ignorer si le geste est principalement vertical pour laisser défiler la liste
+            if (Math.abs(deltaY) > Math.abs(deltaX)) return
+
+            const isRTL = document.documentElement.dir === 'rtl'
+            if ((!isRTL && deltaX > minSwipeDistance) || (isRTL && deltaX < -minSwipeDistance)) {
+                onClose()
+            }
+        }
+
+        drawerEl.addEventListener('touchstart', onTouchStart, { passive: true })
+        drawerEl.addEventListener('touchend', onTouchEnd, { passive: true })
+
+        return () => {
+            drawerEl.removeEventListener('touchstart', onTouchStart)
+            drawerEl.removeEventListener('touchend', onTouchEnd)
+        }
+    }, [isOpen, onClose])
+
+    if (!mounted) return null
 
     return (
         <>
@@ -166,12 +180,15 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
 
             {/* Drawer */}
             <div
-                onTouchStart={onTouchStartEvent}
-                onTouchEnd={onTouchEndEvent}
-                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full h-[100dvh] w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[180] transform transition-transform duration-500 ease-in-out touch-pan-y ${isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
+                ref={drawerRef}
+                className={`fixed top-0 right-0 rtl:left-0 rtl:right-auto h-full h-[100dvh] w-full sm:w-[520px] bg-white shadow-[0_0_100px_rgba(0,0,0,0.1)] z-[180] transform transition-transform duration-500 ease-in-out touch-pan-y overscroll-y-contain ${isOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full rtl:-translate-x-full pointer-events-none'
                     }`}
             >
                 <div className="flex flex-col h-full">
+                    {/* Indicateur visuel tactile mobile */}
+                    <div className="sm:hidden pt-2 pb-1 flex justify-center items-center" aria-hidden="true">
+                        <div className="w-10 h-1 bg-gray-200 rounded-full" />
+                    </div>
                     {/* Header - Style Pixio */}
                     <div className="flex items-center justify-between p-4 sm:p-8 border-b border-gray-50">
                         <div className="flex items-center gap-4">
@@ -356,7 +373,6 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
                     {/* Footer - Style Pixio Summary */}
                     {items.length > 0 && (
                         <div 
-                            onTouchStart={(e) => e.stopPropagation()}
                             className="p-4 sm:p-8 bg-white border-t border-gray-50 space-y-4 pb-safe sm:pb-8"
                         >
                             {/* Summary */}
