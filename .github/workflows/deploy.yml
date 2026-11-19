@@ -65,7 +65,7 @@ jobs:
         uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: './.lighthouserc.json'
-          uploadArtifacts: true
+          uploadArtifacts: false
           temporaryPublicStorage: true
         env:
           DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
