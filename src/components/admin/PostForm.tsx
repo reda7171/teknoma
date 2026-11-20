@@ -1,17 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createPost, updatePost } from '@/lib/actions/blog'
 import { uploadPostImage } from '@/lib/actions/upload'
 import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ExternalLink, Star } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import Link from 'next/link'
-import { Book as BookIcon, Search, X, Wand2, Copy, Check } from 'lucide-react'
+import { Book as BookIcon, Search, X, Wand2, Copy, Check, Filter } from 'lucide-react'
 import { getAdminSelectableBooks } from '@/lib/actions/books'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import { getUsers } from '@/lib/actions/users'
-import { useEffect } from 'react'
 import PostSectionEditor from './post-form/PostSectionEditor'
 import { useUIStore } from '@/store/ui'
 
@@ -49,7 +48,35 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const [allBooks, setAllBooks] = useState<any[]>([])
     const [isLoadingBooks, setIsLoadingBooks] = useState(true)
     const [bookSearch, setBookSearch] = useState('')
+    const [bookCategory, setBookCategory] = useState<string>('ALL')
     const [selectedBookIds, setSelectedBookIds] = useState<string[]>(post?.books?.map((b: any) => b.id) || [])
+
+    // Catégories uniques avec décompte pour le menu déroulant
+    const categoryOptions = useMemo(() => {
+        const counts: Record<string, number> = {}
+        for (const b of allBooks) {
+            const cat = (b.category && b.category.trim()) || 'Non catégorisé'
+            counts[cat] = (counts[cat] || 0) + 1
+        }
+        return Object.entries(counts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'fr'))
+    }, [allBooks])
+
+    // Filtrage combiné recherche texte multi-termes + catégorie sélectionnée
+    const filteredBooks = useMemo(() => {
+        const searchTerms = bookSearch.toLowerCase().trim().split(/\s+/).filter(Boolean)
+        return allBooks.filter(b => {
+            if (selectedBookIds.includes(b.id)) return false
+            if (bookCategory !== 'ALL') {
+                const cat = (b.category && b.category.trim()) || 'Non catégorisé'
+                if (cat !== bookCategory) return false
+            }
+            if (searchTerms.length === 0) return true
+            const searchable = `${b.title || ''} ${b.titleFr || ''} ${b.titleEn || ''} ${b.author || ''} ${b.isbn || ''} ${b.category || ''}`.toLowerCase()
+            return searchTerms.every(term => searchable.includes(term))
+        })
+    }, [allBooks, selectedBookIds, bookCategory, bookSearch])
 
     const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false)
 
@@ -640,24 +667,64 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                         </div>
 
                         <div className="space-y-3">
-                            {/* Search */}
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                <input
-                                    type="text"
-                                    value={bookSearch}
-                                    onChange={(e) => setBookSearch(e.target.value)}
-                                    placeholder="Rechercher par titre, auteur, ISBN..."
-                                    className="w-full pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none transition-all"
-                                />
-                                {bookSearch && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setBookSearch('')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            {/* Search and Category Filter */}
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={bookSearch}
+                                        onChange={(e) => setBookSearch(e.target.value)}
+                                        placeholder="Rechercher par titre, auteur, ISBN..."
+                                        className="w-full pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none transition-all"
+                                    />
+                                    {bookSearch && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setBookSearch('')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="relative">
+                                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                    <select
+                                        value={bookCategory}
+                                        onChange={(e) => setBookCategory(e.target.value)}
+                                        className="w-full pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 focus:ring-2 focus:ring-black outline-none transition-all appearance-none cursor-pointer"
                                     >
-                                        <X className="w-4 h-4" />
-                                    </button>
+                                        <option value="ALL">Toutes les catégories / collections ({allBooks.length})</option>
+                                        {categoryOptions.map(cat => (
+                                            <option key={cat.name} value={cat.name}>
+                                                {cat.name} ({cat.count})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">
+                                        ▼
+                                    </div>
+                                </div>
+
+                                {(bookCategory !== 'ALL' || bookSearch) && (
+                                    <div className="flex items-center justify-between px-1 text-[11px] text-gray-500">
+                                        <span className="font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                                            {filteredBooks.length} livre{filteredBooks.length > 1 ? 's' : ''} trouvé{filteredBooks.length > 1 ? 's' : ''}
+                                            {bookCategory !== 'ALL' && ` dans "${bookCategory}"`}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setBookCategory('ALL')
+                                                setBookSearch('')
+                                            }}
+                                            className="text-gray-400 hover:text-gray-700 font-semibold underline underline-offset-2 transition-colors"
+                                        >
+                                            Réinitialiser
+                                        </button>
+                                    </div>
                                 )}
                             </div>
 
@@ -699,24 +766,12 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                         <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
                                         Chargement du catalogue complet...
                                     </div>
-                                ) : (() => {
-                                    const searchTerms = bookSearch.toLowerCase().trim().split(/\s+/).filter(Boolean)
-                                    const filtered = allBooks.filter(b => {
-                                        if (selectedBookIds.includes(b.id)) return false
-                                        if (searchTerms.length === 0) return true
-                                        const searchable = `${b.title || ''} ${b.titleFr || ''} ${b.titleEn || ''} ${b.author || ''} ${b.isbn || ''} ${b.category || ''}`.toLowerCase()
-                                        return searchTerms.every(term => searchable.includes(term))
-                                    })
-
-                                    if (filtered.length === 0) {
-                                        return (
-                                            <div className="p-6 text-center text-gray-400 text-xs">
-                                                Aucun livre ne correspond à votre recherche.
-                                            </div>
-                                        )
-                                    }
-
-                                    return filtered.map(book => {
+                                ) : filteredBooks.length === 0 ? (
+                                    <div className="p-6 text-center text-gray-400 text-xs">
+                                        Aucun livre ne correspond à votre recherche.
+                                    </div>
+                                ) : (
+                                    filteredBooks.map(book => {
                                         const titleDisplay = (language === 'fr' && book.titleFr)
                                             ? book.titleFr
                                             : (language === 'en' && book.titleEn)
@@ -746,19 +801,27 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                     <div className="truncate font-bold text-gray-900 group-hover:text-emerald-700">{titleDisplay}</div>
-                                                    <div className="truncate text-[11px] text-gray-400 flex items-center gap-2">
+                                                    <div className="truncate text-[11px] text-gray-400 flex items-center gap-2 mt-0.5">
                                                         <span>{book.author}</span>
+                                                        {book.category && (
+                                                            <>
+                                                                <span className="text-gray-300">•</span>
+                                                                <span className="inline-block px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium truncate max-w-[120px]">
+                                                                    {book.category}
+                                                                </span>
+                                                            </>
+                                                        )}
                                                         {book.price && <span className="text-gray-300">•</span>}
                                                         {book.price && <span className="font-semibold text-gray-600">{book.price} MAD</span>}
                                                     </div>
                                                 </div>
-                                                <span className="text-[10px] text-emerald-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <span className="text-[10px] text-emerald-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                                                     + Lier
                                                 </span>
                                             </button>
                                         )
                                     })
-                                })()}
+                                )}
                             </div>
                         </div>
                     </div>
