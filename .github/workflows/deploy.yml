@@ -160,27 +160,6 @@ jobs:
               (crontab -l 2>/dev/null | grep -q "abandoned-cart-reminder") || (crontab -l 2>/dev/null; echo "*/15 * * * * curl -s 'https://riwaya.store/api/cron/abandoned-cart-reminder?key=une_cle_secrete_pour_cron_2026' > /dev/null 2>&1") | crontab -
             fi
 
-            # ─── Retrait et nettoyage de la page 502 de Nginx ─────────────
-            NGINX_CONF="/etc/nginx/sites-available/riwayama"
-            if [ -f "$NGINX_CONF" ]; then
-              echo "Nettoyage de Nginx (suppression interception page 502)..."
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i '/error_page 502/d' "$NGINX_CONF" || true
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i '/502_custom.html/d' "$NGINX_CONF" || true
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i '/502.html/d' "$NGINX_CONF" || true
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S rm -f /var/www/errors/502*.html /var/www/errors/502_custom.html || true
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S nginx -t && echo "${{ secrets.VPS_PASSWORD }}" | sudo -S systemctl reload nginx || true
-            fi
-            # ──────────────────────────────────────────────────────────────
-
-            # ─── Fail2ban : ban 2h et fenetre 2h au lieu de 15min ─────────
-            if [ -f "scripts/configure-fail2ban.sh" ]; then
-              echo "Configuration Fail2ban (ban 2h / findtime 2h)..."
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i 's/\r$//' scripts/configure-fail2ban.sh || true
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/configure-fail2ban.sh
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S ./scripts/configure-fail2ban.sh || true
-            fi
-            # ──────────────────────────────────────────────────────────────
-
             # Authentification GHCR sur le VPS
             echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
 
