@@ -6,6 +6,7 @@ export interface WhatsAppNotificationPayload {
     fullName: string
     phone: string
     status: 'SHIPPED' | 'DELIVERED' | 'CONFIRMED' | 'CANCELLED' | 'RETURNED'
+    total?: number | null
     trackingID?: string | null
     shippingCompanyName?: string | null
     locale?: string
@@ -47,7 +48,8 @@ export function getWhatsAppStatusMessage(payload: WhatsAppNotificationPayload): 
     }
 
     if (status === 'CONFIRMED') {
-        return `Salam ${fullName} !\n\nVotre commande Riwaya #${shortId} est confirmée et en cours de préparation dans notre dépôt 📦.\n\nSuivez l'état d'avancement de votre commande en direct : ${trackingLink}\n\nMerci de votre confiance ! 📚✨`
+        const amountNotice = payload.total ? `\n💰 Montant à régler à la livraison : ${payload.total} MAD` : ''
+        return `Salam ${fullName} !\n\nVotre commande Riwaya #${shortId} est confirmée et en cours de préparation dans notre dépôt 📦.${amountNotice}\n\nSuivez l'état d'avancement de votre commande en direct : ${trackingLink}\n\nMerci de votre confiance ! 📚✨`
     }
 
     return `Salam ${fullName} !\n\nLe statut de votre commande Riwaya #${shortId} a été mis à jour : ${status}.\n\nAccédez au suivi en direct : ${trackingLink}\n\nMerci de votre confiance ! 📚`
@@ -140,7 +142,8 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
             ? '✅ *Message WhatsApp transmis via Webhook*'
             : '⚠️ *Passerelle WAHA indisponible - Cliquer ci-dessous pour envoyer manuellement :*'
 
-        const telegramText = `📱 *Notification WhatsApp Client*\n\n${statusLabel}\n🆔 \`#${orderId.slice(0, 8)}\`\n👤 ${fullName}\n📞 \`+${cleanPhone}\`${trackingID ? `\n🏷️ Suivi : \`${trackingID}\`` : ''}\n\n${deliveryNotice}`
+        const totalLine = payload.total ? `\n💰 *Total:* ${payload.total} MAD` : ''
+        const telegramText = `📱 *Notification WhatsApp Client*\n\n${statusLabel}\n🆔 \`#${orderId.slice(0, 8)}\`\n👤 ${fullName}\n📞 \`+${cleanPhone}\`${totalLine}${trackingID ? `\n🏷️ Suivi : \`${trackingID}\`` : ''}\n\n${deliveryNotice}`
 
         const keyboard = {
             inline_keyboard: [
