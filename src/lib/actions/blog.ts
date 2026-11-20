@@ -488,9 +488,33 @@ export async function getPostById(id: string) {
 
 /**
  * Récupère les articles parlant d'un livre spécifique
+ * Priorise la langue demandée, avec repli automatique sur toutes les langues disponibles
+ * afin de valoriser l'intégralité du contenu éditorial.
  */
 export async function getPostsByBookId(bookId: string, language?: string) {
-    return prisma.post.findMany({
+    const postSelect = {
+        id: true,
+        title: true,
+        slug: true,
+        category: true,
+        excerpt: true,
+        coverImage: true,
+        publishedAt: true,
+        totalReadTime: true,
+        authorName: true,
+        tags: true,
+        language: true,
+        author: {
+            select: {
+                id: true,
+                fullName: true,
+                image: true
+            }
+        }
+    }
+
+    // 1. Recherche prioritaire dans la langue locale
+    let posts = await prisma.post.findMany({
         where: {
             published: true,
             ...(language ? { language } : {}),
@@ -499,16 +523,24 @@ export async function getPostsByBookId(bookId: string, language?: string) {
             }
         },
         orderBy: { publishedAt: 'desc' },
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            category: true,
-            excerpt: true,
-            coverImage: true,
-            publishedAt: true
-        }
+        select: postSelect
     })
+
+    // 2. Si aucun article dans la langue locale, récupérer les articles associés quelle que soit la langue
+    if (posts.length === 0 && language) {
+        posts = await prisma.post.findMany({
+            where: {
+                published: true,
+                books: {
+                    some: { id: bookId }
+                }
+            },
+            orderBy: { publishedAt: 'desc' },
+            select: postSelect
+        })
+    }
+
+    return posts
 }
 
 /**
