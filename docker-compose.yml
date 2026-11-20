@@ -56,13 +56,55 @@ services:
       retries: 5
       start_period: 5s
 
-  # Application - Next.js
+  # Application - Next.js (Slot A - Principal)
   app:
     image: ghcr.io/reda7171/riwaya-app:latest
     container_name: riwaya_app
     restart: always
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - .env
+    environment:
+      - WHATSAPP_GATEWAY_URL=http://whatsapp:3000
+      - DATABASE_URL=mysql://${DB_USER:-riwaya_user}:${DB_PASSWORD:-riwaya_pass}@db:3306/${DB_NAME:-riwaya_db}?connect_timeout=30&pool_timeout=30&connection_limit=25
+      - KEEP_ALIVE_TIMEOUT=75000
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - UV_THREADPOOL_SIZE=64
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3072M
+        reservations:
+          cpus: '0.5'
+          memory: 1024M
+    cpu_shares: 1024
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - riwaya_network
+    volumes:
+      - ./public/uploads:/app/public/uploads
+      - ./backups:/app/backups
+      - ./data/private-school-lists:/app/data/private-school-lists
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/fr || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Application - Next.js (Slot B - Zero-Downtime Rolling)
+  app_backup:
+    image: ghcr.io/reda7171/riwaya-app:latest
+    container_name: riwaya_app_backup
+    restart: always
+    ports:
+      - "127.0.0.1:3002:3000"
     env_file:
       - .env
     environment:
