@@ -96,7 +96,7 @@
     "@types/web-push": "^3.6.4",
     "cheerio": "^1.2.0",
     "critters": "^0.0.23",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "16.1.6",
     "puppeteer": "^25.8.0",
     "tailwindcss": "^4",
