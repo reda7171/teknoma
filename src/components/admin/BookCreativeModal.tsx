@@ -24,7 +24,7 @@ interface BookCreativeModalProps {
 
 export default function BookCreativeModal({ isOpen, onClose, book, format = 'post', onAutoCapture, initialLogoVariant }: BookCreativeModalProps) {
     const posterRef = useRef<HTMLDivElement>(null)
-    const posterRefTekno Store = useRef<HTMLDivElement>(null)
+    const posterRefTekno = useRef<HTMLDivElement>(null)
     const posterRefJumia = useRef<HTMLDivElement>(null)
     const [previewTab, setPreviewTab] = useState<'both' | 'tekno' | 'jumia'>('both')
     const [fullscreenVariant, setFullscreenVariant] = useState<'tekno' | 'jumia' | null>(null)
@@ -373,7 +373,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     }
 
     const captureCurrentPoster = async (): Promise<string> => {
-        const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefTekno Store.current || posterRef.current)) || posterRef.current
+        const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefTekno.current || posterRef.current)) || posterRef.current
         return capturePosterNode(target)
     }
 
@@ -390,7 +390,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const handleDownload = async () => {
         try {
             setIsGenerating(true)
-            const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefTekno Store.current || posterRef.current)) || posterRef.current
+            const target = (logoVariant === 'jumia' ? (posterRefJumia.current || posterRef.current) : (posterRefTekno.current || posterRef.current)) || posterRef.current
             const finalDataUrl = await capturePosterNode(target)
             downloadDataUrl(finalDataUrl, logoVariant === 'jumia' ? 'Jumia' : 'Tekno Store')
         } catch (error: any) {
@@ -402,10 +402,10 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
         }
     }
 
-    const handleDownloadTekno Store = async () => {
+    const handleDownloadTekno = async () => {
         try {
             setIsGenerating(true)
-            const target = posterRefTekno Store.current || posterRef.current
+            const target = posterRefTekno.current || posterRef.current
             const url = await capturePosterNode(target)
             downloadDataUrl(url, 'Tekno Store')
         } catch (err: any) {
@@ -431,11 +431,11 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
     const handleDownloadBoth = async () => {
         try {
             setIsGenerating(true)
-            const targetTekno Store = posterRefTekno Store.current || posterRef.current
+            const targetTekno = posterRefTekno.current || posterRef.current
             const targetJumia = posterRefJumia.current || posterRef.current
 
-            if (targetTekno Store) {
-                const teknoUrl = await capturePosterNode(targetTekno Store)
+            if (targetTekno) {
+                const teknoUrl = await capturePosterNode(targetTekno)
                 downloadDataUrl(teknoUrl, 'Tekno Store')
                 await new Promise(resolve => setTimeout(resolve, 600))
             }
@@ -1171,7 +1171,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={handleDownloadTekno Store}
+                                            onClick={handleDownloadTekno}
                                             disabled={isGenerating}
                                             className="px-3 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all flex items-center gap-1"
                                         >
@@ -1185,7 +1185,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     onClick={(e) => handleCardClick('tekno', e)}
                                     title="Cliquer pour prévisualiser en plein écran"
                                 >
-                                    {renderPoster('tekno', posterRefTekno Store, true)}
+                                    {renderPoster('tekno', posterRefTekno, true)}
                                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 pointer-events-auto">
                                         <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
                                         <span>Plein écran</span>
@@ -1256,7 +1256,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={handleDownloadTekno Store}
+                                        onClick={handleDownloadTekno}
                                         disabled={isGenerating}
                                         className="px-3 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all flex items-center gap-1"
                                     >
@@ -1270,7 +1270,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                                 onClick={(e) => handleCardClick('tekno', e)}
                                 title="Cliquer pour prévisualiser en plein écran"
                             >
-                                {renderPoster('tekno', posterRefTekno Store, true)}
+                                {renderPoster('tekno', posterRefTekno, true)}
                                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 hover:bg-black text-white px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md shadow-lg flex items-center gap-1.5 pointer-events-auto">
                                     <ZoomIn className="w-3.5 h-3.5 text-amber-300" />
                                     <span>Plein écran</span>
@@ -1873,7 +1873,7 @@ export default function BookCreativeModal({ isOpen, onClose, book, format = 'pos
                             <button
                                 type="button"
                                 onClick={() => {
-                                    if (fullscreenVariant === 'tekno') handleDownloadTekno Store()
+                                    if (fullscreenVariant === 'tekno') handleDownloadTekno()
                                     else handleDownloadJumia()
                                 }}
                                 disabled={isGenerating}

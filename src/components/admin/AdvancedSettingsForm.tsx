@@ -41,7 +41,7 @@ const FEATURES = [
     {
         key: 'feature_packs',
         label: 'Vente de Packs',
-        description: 'Active la gestion et la vente de packs et lots d'appareils et accessoires high-tech.',
+        description: "Active la gestion et la vente de packs et lots d'appareils et accessoires high-tech.",
         icon: Package,
         color: 'text-blue-500'
     },
