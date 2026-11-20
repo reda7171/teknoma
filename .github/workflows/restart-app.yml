@@ -18,14 +18,15 @@ jobs:
           command_timeout: 10m
           script: |
             cd /var/www/riwayama
-            echo "Nettoyage radical des conteneurs app..."
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker rm -f 6c16caadb77f_riwaya_app riwaya_app 2>/dev/null || true
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sh -c 'docker rm -f $(docker ps -a -q --filter "name=app") 2>/dev/null || true'
-            echo "Relance propre via docker compose..."
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps --force-recreate app
-            echo "Attente du démarrage (8s)..."
-            sleep 8
+            echo "Relance sécurisée de l'application Riwaya..."
+            if [ -f "scripts/deploy-zero-downtime.sh" ]; then
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i 's/\r$//' scripts/deploy-zero-downtime.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/deploy-zero-downtime.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S ./scripts/deploy-zero-downtime.sh
+            else
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps app
+            fi
             echo "Vérification statut du conteneur..."
             echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker ps --filter "name=riwaya_app"
             echo "Test HTTP local..."
-            curl -I http://127.0.0.1:3000 || true
+            curl -I http://127.0.0.1:3000/fr || true
