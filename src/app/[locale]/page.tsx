@@ -19,6 +19,7 @@ import {
   HardDrive,
   Truck,
   ShieldCheck,
+  Sparkles,
   HeartHandshake,
   Star,
   CheckCircle2,
