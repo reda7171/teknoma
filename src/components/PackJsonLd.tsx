@@ -1,0 +1,184 @@
+import React from 'react';
+import { getSchemaAvailability, isProductInStock } from '@/lib/product-availability';
+
+interface PackJsonLdProps {
+  pack: {
+    id: string;
+    name: string;
+    price: number;
+    description?: string | null;
+    image?: string | null;
+    createdAt?: Date | string;
+    active?: boolean;
+    books?: Array<{ title: string; author: string; stock?: number; active?: boolean }>;
+  };
+  locale: string;
+  baseUrl?: string;
+}
+
+export function PackJsonLd({ pack, locale, baseUrl = 'https://tekno.ma' }: PackJsonLdProps) {
+  const packUrl = `${baseUrl}/${locale}/packs/${pack.id}`;
+  const validFrom = pack.createdAt
+    ? new Date(pack.createdAt).toISOString().split('T')[0]
+    : '2025-01-01';
+  const packInStock = pack.active !== false
+    && Boolean(pack.books?.length)
+    && pack.books!.every(book => isProductInStock(book));
+
+  // Description auto si absente
+  const description = pack.description ||
+    (locale === 'ar'
+      ? `باقة ${pack.name} تحتوي على ${pack.books?.length || 'عدة'} كتب من مكتبة Tekno Store. الدفع عند الاستلام، توصيل في المغرب.`
+      : locale === 'en'
+        ? `Pack ${pack.name} includes ${pack.books?.length || 'several'} books from Tekno Store bookstore. Cash on delivery, shipping across Morocco.`
+        : `Le pack ${pack.name} contient ${pack.books?.length || 'plusieurs'} livres de la librairie Tekno Store. Paiement à la livraison, livraison partout au Maroc.`
+    );
+
+  // FAQ dynamique sur le pack
+  const faqQuestions = [
+    {
+      "@type": "Question",
+      "name": locale === 'ar'
+        ? `ما هي الكتب المتضمنة في باقة ${pack.name}؟`
+        : locale === 'en'
+          ? `What books are included in the ${pack.name} pack?`
+          : `Quels livres sont inclus dans le pack ${pack.name} ?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": pack.books && pack.books.length > 0
+          ? pack.books.map(b => `${b.title} (${b.author})`).join(', ')
+          : description
+      }
+    },
+    {
+      "@type": "Question",
+      "name": locale === 'ar'
+        ? `ما هو سعر باقة ${pack.name}؟`
+        : locale === 'en'
+          ? `What is the price of the ${pack.name} pack?`
+          : `Quel est le prix du pack ${pack.name} ?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": locale === 'ar'
+          ? `سعر باقة ${pack.name} هو ${pack.price} درهم مغربي. الدفع عند الاستلام.`
+          : locale === 'en'
+            ? `The ${pack.name} pack costs ${pack.price} درهم. Payment on delivery.`
+            : `Le pack ${pack.name} est à ${pack.price} درهم. Paiement à la livraison.`
+      }
+    },
+    {
+      "@type": "Question",
+      "name": locale === 'ar'
+        ? `هل يمكنني طلب باقة ${pack.name} مع الدفع عند التسليم؟`
+        : locale === 'en'
+          ? `Can I order the ${pack.name} pack with cash on delivery?`
+          : `Puis-je commander le pack ${pack.name} avec paiement à la livraison ?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": locale === 'ar'
+          ? "نعم، نقبل الدفع عند الاستلام لجميع الطلبات في المغرب."
+          : locale === 'en'
+            ? "Yes, we accept cash on delivery for all orders in Morocco."
+            : "Oui, nous acceptons le paiement à la livraison pour toutes les commandes au Maroc."
+      }
+    }
+  ];
+
+  const schema = [
+    // Product schema pour le pack
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": pack.name,
+      "description": description,
+      "url": packUrl,
+      "sku": pack.id,
+      ...(pack.image ? { "image": pack.image } : {}),
+      "brand": {
+        "@type": "Brand",
+        "name": "Tekno Store"
+      },
+      "category": {
+        "@type": "CategoryCode",
+        "inCodeSet": "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt",
+        "codeValue": "784"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": pack.price,
+        "priceCurrency": "MAD",
+        "validFrom": validFrom,
+        "availability": getSchemaAvailability({ stock: packInStock ? 1 : 0, active: pack.active }),
+        "url": packUrl,
+        "seller": {
+          "@type": "Organization",
+          "name": "Tekno Store"
+        },
+        "deliveryLeadTime": {
+          "@type": "QuantitativeValue",
+          "minValue": 1,
+          "maxValue": 4,
+          "unitCode": "DAY"
+        },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "MA",
+          "returnPolicyCountry": "MA",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 3,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn",
+          "refundType": "https://schema.org/FullRefund",
+          "merchantReturnLink": `${baseUrl}/${locale}/returns`
+        },
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingRate": {
+            "@type": "MonetaryAmount",
+            "value": 35,
+            "currency": "MAD"
+          },
+          "shippingDestination": {
+            "@type": "DefinedRegion",
+            "addressCountry": "MA"
+          },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 1,
+              "unitCode": "DAY"
+            },
+            "transitTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 1,
+              "maxValue": 3,
+              "unitCode": "DAY"
+            }
+          }
+        }
+      },
+      // Contenu du pack comme ItemList
+      ...(pack.books && pack.books.length > 0 ? {
+        "isRelatedTo": pack.books.map(b => ({
+          "@type": "Thing",
+          "name": b.title
+        }))
+      } : {})
+    },
+    // FAQPage pour répondre aux questions AEO
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqQuestions
+    }
+  ];
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}

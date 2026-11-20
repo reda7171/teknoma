@@ -1,0 +1,148 @@
+'use server'
+
+import { writeFile, mkdir } from 'fs/promises'
+import path from 'path'
+import { randomUUID } from 'crypto'
+import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
+import { getCommunityUser } from './community-auth'
+import { revalidatePath } from 'next/cache'
+
+const ProfileSchema = z.object({
+    fullName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
+    city: z.string().min(2, 'La ville est requise'),
+    address: z.string().optional().nullable(),
+    neighborhood: z.string().optional().nullable(),
+    image: z.string().optional().nullable(),
+    bio: z.string().optional().nullable(),
+    instagram: z.string().optional().nullable(),
+    facebook: z.string().optional().nullable(),
+    twitter: z.string().optional().nullable(),
+    password: z.string().optional().refine(val => !val || val.length >= 6, {
+        message: 'Le mot de passe doit contenir au moins 6 caractères'
+    }),
+    confirmPassword: z.string().optional()
+}).refine(data => !data.password || data.password === data.confirmPassword, {
+    message: 'Les mots de passe ne correspondent pas',
+    path: ['confirmPassword']
+})
+
+export async function updateProfile(formData: FormData) {
+    const user = await getCommunityUser()
+    if (!user) return { success: false, error: 'Non authentifié' }
+
+    const imageEntry = formData.get('image')
+    let imageUrl: string | undefined
+
+    // Handle File Upload
+    if (imageEntry instanceof File) {
+        if (imageEntry.size > 0) {
+            try {
+                const file = imageEntry
+                const bytes = await file.arrayBuffer()
+                const buffer = Buffer.from(bytes)
+
+                // Simple validation
+                if (file.size > 5 * 1024 * 1024) {
+                    return { success: false, error: 'L\'image est trop volumineuse (max 5MB)' }
+                }
+
+                const mimeType = file.type
+                if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(mimeType)) {
+                    return { success: false, error: 'Format d\'image non supporté' }
+                }
+
+                const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profiles')
+                await mkdir(uploadDir, { recursive: true })
+
+                // --- OPTIMISATION SHARP ---
+                const sharp = (await import('sharp')).default
+                const processedBuffer = await sharp(buffer)
+                    .resize(400, 400, { fit: 'cover' }) // Format carré pour profil
+                    .jpeg({ quality: 85, mozjpeg: true })
+                    .toBuffer()
+
+                const fileName = `${randomUUID()}.jpg`
+                const filePath = path.join(uploadDir, fileName)
+
+                await writeFile(filePath, processedBuffer)
+                imageUrl = `/uploads/profiles/${fileName}`
+            } catch (err) {
+                console.error('Upload Error:', err)
+                return { success: false, error: 'Erreur lors du téléchargement de l\'image' }
+            }
+        }
+    } else if (typeof imageEntry === 'string' && imageEntry.length > 0) {
+        imageUrl = imageEntry
+    }
+
+    const data = {
+        fullName: formData.get('fullName'),
+        city: formData.get('city'),
+        address: formData.get('address'),
+        neighborhood: formData.get('neighborhood'),
+        image: imageUrl, // Use the processed URL or undefined to keep existing
+        bio: formData.get('bio'),
+        instagram: formData.get('instagram'),
+        facebook: formData.get('facebook'),
+        twitter: formData.get('twitter'),
+        password: formData.get('password') || undefined,
+        confirmPassword: formData.get('confirmPassword') || undefined,
+    }
+
+    const validated = ProfileSchema.safeParse(data)
+
+    if (!validated.success) {
+        const firstError = validated.error.issues[0]?.message || 'Données invalides'
+        return { success: false, error: firstError }
+    }
+
+    try {
+        const updateData: any = {
+            fullName: validated.data.fullName,
+            city: validated.data.city,
+            address: validated.data.address,
+            neighborhood: validated.data.neighborhood,
+            image: validated.data.image,
+            bio: validated.data.bio,
+            instagram: validated.data.instagram,
+            facebook: validated.data.facebook,
+            twitter: validated.data.twitter,
+        }
+
+        if (validated.data.password) {
+            const bcrypt = (await import('bcryptjs')).default
+            updateData.password = await bcrypt.hash(validated.data.password, 10)
+        }
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: updateData,
+        })
+
+        revalidatePath('/community')
+        return { success: true }
+    } catch (error) {
+        return { success: false, error: 'Une erreur est survenue lors de la mise à jour' }
+    }
+}
+
+export async function updateUserCity(city: string) {
+    const user = await getCommunityUser()
+    if (!user) return { success: false, error: 'Non authentifié' }
+
+    if (!city || city.trim().length < 2) {
+        return { success: false, error: 'Ville invalide' }
+    }
+
+    try {
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { city: city.trim() }
+        })
+        revalidatePath('/community')
+        return { success: true, city: city.trim() }
+    } catch (error) {
+        return { success: false, error: 'Erreur technique' }
+    }
+}

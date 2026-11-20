@@ -1,0 +1,225 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { addExchangeBook } from '@/lib/actions/community-books'
+import { uploadBookImage } from '@/lib/actions/upload'
+import { Link } from '@/i18n/routing'
+import { ArrowLeft, BookOpen, User, Tag, FileText, Loader2, Search } from 'lucide-react'
+import MultiImageUpload from '@/components/community/MultiImageUpload'
+import AutocompleteInput from '@/components/community/AutocompleteInput'
+import BookSearchModal, { SelectedBookData } from '@/components/community/BookSearchModal'
+
+export default function AddBookForm({ isEligible = true }: { isEligible?: boolean }) {
+    const t = useTranslations('Community.BookForm')
+    const tcmn = useTranslations('Common')
+    const router = useRouter()
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [selectedImages, setSelectedImages] = useState<File[]>([])
+    
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [title, setTitle] = useState('')
+    const [author, setAuthor] = useState('')
+    const [isbn, setIsbn] = useState('')
+    const [description, setDescription] = useState('')
+    const [coverUrl, setCoverUrl] = useState<string | null>(null)
+
+    const handleBookSelect = (data: SelectedBookData) => {
+        setTitle(data.title)
+        setAuthor(data.author)
+        if (data.isbn) setIsbn(data.isbn)
+        if (data.description) setDescription(data.description)
+        if (data.cover) setCoverUrl(data.cover)
+    }
+
+    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        setLoading(true)
+        setError(null)
+
+        try {
+            const formData = new FormData(e.currentTarget)
+
+            // Upload des images
+            let imageUrls: string[] = []
+            if (selectedImages.length > 0) {
+                const uploadPromises = selectedImages.map(file => {
+                    const imageFormData = new FormData()
+                    imageFormData.append('image', file)
+                    return uploadBookImage(imageFormData)
+                })
+
+                const results = await Promise.all(uploadPromises)
+                
+                const failed = results.find(r => !r.success)
+                if (failed) {
+                    setError(failed.error || tcmn('Errors.ImageUploadError'))
+                    setLoading(false)
+                    return
+                }
+
+                imageUrls = results.map(r => r.imageUrl as string)
+            } else if (coverUrl) {
+                imageUrls = [coverUrl]
+            }
+
+            if (imageUrls.length > 0) {
+                formData.set('image', JSON.stringify(imageUrls))
+            }
+
+            const res = await addExchangeBook(formData)
+
+            if (res.success) {
+                router.push('/community')
+                router.refresh()
+            } else {
+                setError(res.error)
+                setLoading(false)
+            }
+        } catch (err) {
+            setError(tcmn('Errors.UnexpectedError'))
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className="w-full max-w-2xl bg-white rounded-[2.5rem] p-10 shadow-xl shadow-black/5 border border-gray-100 relative">
+            <Link aria-label="Action ArrowLeft" href="/community" className="absolute top-10 left-10 p-2 hover:bg-gray-100 rounded-full transition-colors hidden md:block">
+                <ArrowLeft className="w-5 h-5 text-black" />
+            </Link>
+
+            <div className="text-center mb-10">
+                <h1 className="text-3xl font-black text-black tracking-tighter mb-2">{t('FormTitle')}</h1>
+                <p className="text-gray-500 font-medium mb-6">Gagnez du temps en recherchant votre livre :</p>
+                
+                <button
+                    type="button"
+                    onClick={() => setIsSearchOpen(true)}
+                    disabled={!isEligible}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#f39c12]/10 text-[#f39c12] hover:bg-[#f39c12]/20 font-bold rounded-xl transition-colors"
+                >
+                    <Search className="w-5 h-5" />
+                    Rechercher via Google Books
+                </button>
+
+                {!isEligible && (
+                    <p className="text-red-500 font-bold text-sm bg-red-50 p-4 rounded-xl border border-red-100 mt-4">
+                        {t('EligibilityError')}
+                    </p>
+                )}
+            </div>
+
+            <form onSubmit={onSubmit} className="space-y-6">
+                <fieldset disabled={!isEligible} className="space-y-6">
+                    {/* Image Upload */}
+                    <MultiImageUpload
+                        onImagesSelect={setSelectedImages}
+                        maxImages={5}
+                    />
+
+                    {/* Title */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Title')}</label>
+                        <AutocompleteInput
+                            name="title"
+                            suggestionType="title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            required
+                            className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                            placeholder={`${t('Title')}...`}
+                            icon={<BookOpen className="w-5 h-5 text-gray-300" />}
+                        />
+                    </div>
+
+                    {/* Author */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Author')}</label>
+                        <AutocompleteInput
+                            name="author"
+                            suggestionType="author"
+                            value={author}
+                            onChange={(e) => setAuthor(e.target.value)}
+                            required
+                            className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                            placeholder={`${t('Author')}...`}
+                            icon={<User className="w-5 h-5 text-gray-300" />}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Condition */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Condition')}</label>
+                            <div className="relative">
+                                <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                                <select aria-label="Sélection condition"
+                                    name="condition"
+                                    required
+                                    className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black appearance-none"
+                                >
+                                    <option value="NEW">{t('Conditions.NEW')}</option>
+                                    <option value="GOOD">{t('Conditions.GOOD')}</option>
+                                    <option value="USED">{t('Conditions.USED')}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* ISBN */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Isbn')}</label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-gray-300">#</span>
+                                <input
+                                    name="isbn"
+                                    value={isbn}
+                                    onChange={(e) => setIsbn(e.target.value)}
+                                    className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                                    placeholder="978-..."
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">{t('Description')}</label>
+                        <div className="relative">
+                            <FileText className="absolute left-4 top-6 w-5 h-5 text-gray-300" />
+                            <textarea
+                                name="description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                rows={4}
+                                className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black resize-none"
+                                placeholder={`${t('Description')}...`}
+                            />
+                        </div>
+                    </div>
+                </fieldset>
+
+                {error && (
+                    <div className="p-4 bg-red-50 text-red-500 rounded-xl text-sm font-bold text-center border border-red-100">
+                        {error}
+                    </div>
+                )}
+
+                <button
+                    type="submit"
+                    disabled={loading || !isEligible}
+                    className="w-full bg-black text-white font-black py-5 rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+                >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : t('Submit')}
+                </button>
+            </form>
+
+            <BookSearchModal 
+                isOpen={isSearchOpen} 
+                onClose={() => setIsSearchOpen(false)} 
+                onSelect={handleBookSelect} 
+            />
+        </div>
+    )
+}

@@ -1,0 +1,112 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+import { useState, useEffect } from 'react'
+import { login } from '@/lib/actions/community-auth'
+import { Link, useRouter } from '@/i18n/routing'
+import { Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import OAuthButtons from './OAuthButtons'
+import { useUIStore } from '@/store/ui'
+
+interface LoginFormProps {
+    googleEnabled?: boolean;
+    facebookEnabled?: boolean;
+}
+
+export default function LoginForm({ googleEnabled = true, facebookEnabled = true }: LoginFormProps) {
+    const t = useTranslations('Community')
+    const tcmn = useTranslations('Common')
+    const router = useRouter()
+    const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const { openAuthModal } = useUIStore()
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            openAuthModal()
+        }, 30000)
+        return () => clearTimeout(timer)
+    }, [openAuthModal])
+
+    async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        setLoading(true)
+        setError(null)
+
+        const formData = new FormData(e.currentTarget)
+        const res = await login(formData)
+
+        if (res.success) {
+            router.push('/community')
+            router.refresh()
+        } else {
+            setError(res.error || tcmn('Errors.UnexpectedError'))
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className="w-full max-w-md">
+            <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-black/5 border border-gray-100">
+                <div className="mb-8">
+                    <OAuthButtons googleEnabled={googleEnabled} facebookEnabled={facebookEnabled} />
+                </div>
+
+                <form onSubmit={onSubmit} className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Email')}</label>
+                        <input
+                            name="email"
+                            type="email"
+                            required
+                            className="w-full px-6 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                            placeholder="hello@example.com"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-400 ltr:ml-1 rtl:mr-1">{t('Password')}</label>
+                        <div className="relative">
+                            <input
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                required
+                                className="w-full ltr:pl-6 ltr:pr-12 rtl:pr-6 rtl:pl-12 py-4 bg-pixio-cream/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors p-2 rounded-full hover:bg-black/5"
+                            >
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div className="p-4 bg-red-50 text-red-500 rounded-xl text-sm font-bold text-center">
+                            {error}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-black text-white font-black py-5 rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 uppercase tracking-widest text-xs rtl:text-sm rtl:tracking-normal"
+                    >
+                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : t('LoginButton')}
+                        {!loading && <ArrowRight className="w-4 h-4 rtl:rotate-180" />}
+                    </button>
+                </form>
+
+                <div className="mt-8 text-center">
+                    <p className="text-xs rtl:text-sm font-bold text-gray-400">
+                        {t('NoAccount')} <Link href="/community/register" className="text-black underline decoration-2 underline-offset-4 hover:text-gray-600 transition-colors">{t('RegisterButton')}</Link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
+}

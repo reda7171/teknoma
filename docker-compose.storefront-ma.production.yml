@@ -1,0 +1,26 @@
+services:
+  storefront-ma-production:
+    build:
+      context: .
+      dockerfile: Dockerfile.storefront-ma
+      args:
+        NEXT_PUBLIC_SITE_URL: https://petsunivers.ma
+        PETSUNIVERS_MA_INDEXABLE: "false"
+    image: petsunivers-storefront-ma:production
+    container_name: petsunivers_storefront_ma_production
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3002:3001"
+    environment:
+      PORT: 3001
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_SITE_URL: https://petsunivers.ma
+      PETSUNIVERS_BACKEND_URL: http://petsunivers_app:3000
+      PETSUNIVERS_MA_INDEXABLE: "false"
+    networks:
+      - petsunivers_network
+
+networks:
+  petsunivers_network:
+    external: true
+    name: petsunivers_petsunivers_network

@@ -1,0 +1,56 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+
+interface ScrollRevealProps extends React.HTMLAttributes<HTMLDivElement> {
+    children: React.ReactNode
+    className?: string
+    animation?: 'animate-reveal-up' | 'animate-reveal-right' | 'animate-reveal-left'
+    delay?: number
+}
+
+export default function ScrollReveal({
+    children,
+    className = "",
+    animation = "animate-reveal-up",
+    delay = 0,
+    ...props
+}: ScrollRevealProps) {
+    const [isVisible, setIsVisible] = useState(false)
+    const elementRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true)
+                }
+            },
+            {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            }
+        )
+
+        if (elementRef.current) {
+            observer.observe(elementRef.current)
+        }
+
+        return () => observer.disconnect()
+    }, [])
+
+    return (
+        <div
+            ref={elementRef}
+            className={`${className} ${!isVisible ? 'reveal-hidden' : animation}`}
+            style={{
+                animationDelay: `${delay}ms`,
+                animationFillMode: 'forwards',
+                ...props.style
+            }}
+            {...props}
+        >
+            {children}
+        </div>
+    )
+}

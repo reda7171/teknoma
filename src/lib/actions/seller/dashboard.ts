@@ -1,0 +1,114 @@
+'use server'
+
+import { prisma } from '@/lib/prisma'
+import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
+import { revalidatePath } from 'next/cache'
+import { autoClassifyBook } from '@/lib/utils/auto-classifier'
+
+/**
+ * Récupère les stats du dashboard vendeur
+ */
+export async function getSellerDashboardData() {
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
+    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+
+    const [booksCount, ordersCount, recentOrders] = await Promise.all([
+        prisma.book.count({ where: { sellerId: userId } }),
+        prisma.order.count({ where: { sellerId: userId } }),
+        prisma.order.findMany({
+            where: { sellerId: userId },
+            take: 5,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                items: {
+                    include: {
+                        book: { select: { title: true } }
+                    }
+                }
+            }
+        })
+    ])
+
+    // Calcul du CA
+    const orders = await prisma.order.findMany({
+        where: { sellerId: userId, status: 'DELIVERED' },
+        select: { total: true }
+    })
+    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0)
+
+    return {
+        booksCount,
+        ordersCount,
+        recentOrders,
+        totalRevenue
+    }
+}
+
+/**
+ * Récupère les livres du vendeur
+ */
+export async function getSellerBooks() {
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
+    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+
+    return prisma.book.findMany({
+        where: { sellerId: userId },
+        orderBy: { createdAt: 'desc' }
+    })
+}
+
+/**
+ * Récupère les commandes du vendeur
+ */
+export async function getSellerOrders() {
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
+    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+
+    return prisma.order.findMany({
+        where: { sellerId: userId },
+        orderBy: { createdAt: 'desc' },
+        include: {
+            items: {
+                include: {
+                    book: { select: { title: true, image: true, price: true } }
+                }
+            }
+        }
+    })
+}
+
+/**
+ * Créer un livre ( Marketplace )
+ */
+export async function createSellerBook(data: any) {
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
+    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+
+    const classification = autoClassifyBook({
+        title: data.title,
+        author: data.author,
+        description: data.description,
+        language: data.language,
+        category: data.category,
+        subCategory: data.subCategory
+    })
+
+    const book = await prisma.book.create({
+        data: {
+            ...data,
+            category: classification.category,
+            subCategory: classification.subCategory,
+            sellerId: userId,
+            active: false,
+            status: 'PENDING'
+        }
+    })
+
+    revalidatePath('/seller/books')
+    return { success: true, book }
+}
+

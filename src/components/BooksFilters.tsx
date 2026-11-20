@@ -1,0 +1,620 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+
+function SearchInput({ 
+    currentSearch, 
+    onChange, 
+    isCondensed = false, 
+    placeholder 
+}: { 
+    currentSearch: string, 
+    onChange: (search: string) => void, 
+    isCondensed?: boolean, 
+    placeholder: string 
+}) {
+    const [value, setValue] = useState(currentSearch)
+
+    useEffect(() => {
+        setValue(currentSearch)
+    }, [currentSearch])
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        onChange(value)
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault()
+            onChange(value)
+        }
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className={`relative ${isCondensed ? 'flex-1' : ''}`}>
+            <Search className={`absolute ${isCondensed ? 'left-3' : 'left-4 rtl:right-4 rtl:left-auto'} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10`} />
+            <input
+                type="search"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={() => onChange(value)}
+                placeholder={placeholder}
+                className={isCondensed 
+                    ? "w-full pl-10 rtl:pr-10 rtl:pl-4 pr-4 py-2.5 bg-gray-50 border-none rounded-xl text-base md:text-xs font-bold text-gray-900 focus:ring-0 outline-none" 
+                    : "w-full pl-12 rtl:pr-12 rtl:pl-6 pr-6 py-4 bg-[#F8F9FA] focus:bg-white border-2 border-transparent focus:border-black rounded-2xl outline-none font-bold text-base md:text-sm text-gray-800 transition-all"
+                }
+            />
+        </form>
+    )
+}
+import { Filter, SlidersHorizontal, Globe, User, X, ChevronDown, Search } from 'lucide-react'
+import { Link, usePathname, useRouter } from '@/i18n/routing'
+import { useTranslations } from 'next-intl'
+
+interface BooksFiltersProps {
+    params: {
+        category?: string
+        subCategory?: string
+        search?: string
+        language?: string
+        inStock?: string
+        usedOnly?: string
+        isUsed?: string
+        newArrivals?: string
+        author?: string
+    }
+    categoryTree: Record<string, string[]>
+    categoryCounts: Record<string, { total: number, subs: Record<string, number> }>
+    authors: string[]
+    languages: { code: string; label: string }[]
+    totalCount: number
+}
+
+export default function BooksFilters({ params, categoryTree, categoryCounts, authors, languages, totalCount }: BooksFiltersProps) {
+    const isUsed = params.isUsed === 'true' || params.usedOnly === 'true'
+    const t = useTranslations('BooksPage')
+    const tCats = useTranslations('Categories')
+    const tCommon = useTranslations('Common')
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [isAllCatsRevealed, setIsAllCatsRevealed] = useState(false)
+    const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
+        const initial: Record<string, boolean> = {};
+        if (params.category) {
+            initial[params.category] = true;
+        }
+        return initial;
+    });
+
+    const toggleCategory = (category: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
+    }
+    const router = useRouter()
+
+    const handleSearchChange = (value: string) => {
+        const newParams = new URLSearchParams()
+        if (value) newParams.set('search', value)
+        if (params.category) newParams.set('category', params.category)
+        if (params.language) newParams.set('language', params.language)
+        if (params.inStock) newParams.set('inStock', params.inStock)
+        if (isUsed) newParams.set('isUsed', 'true')
+        router.push(`/books?${newParams.toString()}`)
+    }
+
+
+    const [openSections, setOpenSections] = useState({
+        langs: true,
+        cats: true
+    })
+
+    const toggleSection = (section: 'langs' | 'cats') => {
+        setOpenSections(prev => ({ ...prev, [section]: !prev[section] }))
+    }
+
+    const resetFilters = () => {
+        router.push('/books')
+        setIsMobileMenuOpen(false)
+    }
+
+    // Couleurs par code de langue pour les badges
+    const langBadgeStyle: Record<string, string> = {
+        ar: 'bg-emerald-800 text-white',
+        fr: 'bg-blue-800 text-white',
+        en: 'bg-amber-900 text-white',
+    }
+
+    const FilterContent = ({ isMobile = false }) => (
+        <div className={`space-y-3 ${isMobile ? 'pb-20' : ''}`}>
+            {!isMobile && (
+                <div className="flex items-center gap-4 mb-2 pb-2 border-b border-gray-100">
+                    <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-black text-white rounded-2xl flex items-center justify-center shadow-lg shadow-black/20">
+                        <SlidersHorizontal className="w-5 h-5 text-gray-100" />
+                    </div>
+                    <div>
+                        <h2 className="text-sm rtl:text-lg rtl:tracking-normal font-black uppercase tracking-widest text-gray-900">{t('Filters')}</h2>
+                        <p className="text-[10px] rtl:text-sm rtl:tracking-normal text-gray-600 font-bold tracking-widest uppercase mt-1">
+                            {tCommon('RefineSearch')}
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Search — affiché en premier sur mobile */}
+            {isMobile && (
+                <div className="mb-2">
+                    <label className="flex items-center gap-2 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500 mb-4 ml-1">
+                        <Search className="w-3 h-3" />
+                        {tCommon('Search') || 'Rechercher'}
+                    </label>
+                    <SearchInput
+                        currentSearch={params.search || ''}
+                        onChange={handleSearchChange}
+                        placeholder={tCommon('SearchPlaceholder') || "Titre, auteur, description..."}
+                    />
+                </div>
+            )}
+
+            {/* LANGUE — filtre prioritaire */}
+
+            <div>
+                <button 
+                    onClick={() => toggleSection('langs')}
+                    className="w-full text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-700 mb-4 flex items-center justify-between group"
+                >
+                    <div className="flex items-center gap-3">
+                        <Globe className="w-3 h-3" />
+                        {t('Languages')}
+                    </div>
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openSections.langs ? 'rotate-180' : ''}`} />
+                </button>
+                {openSections.langs && (
+                    <div className="flex flex-wrap gap-2 mb-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <Link
+                            href={`/books?${new URLSearchParams({
+                                ...(params.category ? { category: params.category } : {}),
+                                ...(params.search ? { search: params.search } : {}),
+                                ...(params.inStock ? { inStock: params.inStock } : {}),
+                                ...(isUsed ? { isUsed: 'true' } : {}),
+                            }).toString()}`}
+                            scroll={false}
+                            className={`px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${
+                                !params.language
+                                ? 'bg-black text-white shadow-lg'
+                                : 'bg-[#F8F9FA] text-gray-700 hover:text-black'
+                            }`}
+                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                        >
+                            {t('AllLanguages')}
+                        </Link>
+                        {languages.map((lang) => (
+                            <Link
+                                key={lang.code}
+                                href={`/books?${new URLSearchParams({
+                                    ...(params.category ? { category: params.category } : {}),
+                                    ...(params.search ? { search: params.search } : {}),
+                                    ...(params.inStock ? { inStock: params.inStock } : {}),
+                                    ...(isUsed ? { isUsed: 'true' } : {}),
+                                    language: lang.code
+                                }).toString()}`}
+                                scroll={false}
+                                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${
+                                    params.language === lang.code
+                                        ? (langBadgeStyle[lang.code] || 'bg-black text-white') + ' shadow-lg'
+                                        : 'bg-[#F8F9FA] text-gray-700 hover:text-black'
+                                }`}
+                                onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                            >
+                                <span className={`inline-block text-[8px] font-black px-1.5 py-0.5 rounded ${
+                                    params.language === lang.code
+                                        ? 'bg-white/20'
+                                        : langBadgeStyle[lang.code] || 'bg-black text-white'
+                                }`}>
+                                    {lang.code.toUpperCase()}
+                                </span>
+                                {lang.label}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* General Search */}
+            <div>
+                <label className="flex items-center gap-2 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500 mb-4 ml-1">
+                    <Search className="w-3 h-3" />
+                    {tCommon('Search') || 'Rechercher'}
+                </label>
+                <SearchInput 
+                    currentSearch={params.search || ''}
+                    onChange={handleSearchChange}
+                    placeholder={tCommon('SearchPlaceholder') || "Titre, auteur, description..."}
+                />
+            </div>
+
+            {/* Quick Filters */}
+            <div className="mb-6 space-y-2">
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        onClick={() => {
+                            const newParams = new URLSearchParams()
+                            if (params.search) newParams.set('search', params.search)
+                            if (params.category) newParams.set('category', params.category)
+                            if (params.language) newParams.set('language', params.language)
+                            if (isUsed) newParams.set('isUsed', 'true')
+                            if (params.newArrivals) newParams.set('newArrivals', params.newArrivals)
+                            newParams.set('inStock', params.inStock === 'false' ? 'true' : 'false')
+                            router.push(`/books?${newParams.toString()}`)
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                            params.inStock === undefined || params.inStock === 'true'
+                            ? 'bg-black text-white border-black shadow-md' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tCommon('Available')}
+                    </button>
+                    
+                    <button
+                        onClick={() => {
+                            const newParams = new URLSearchParams()
+                            if (params.search) newParams.set('search', params.search)
+                            if (params.category) newParams.set('category', params.category)
+                            if (params.language) newParams.set('language', params.language)
+                            if (params.inStock) newParams.set('inStock', params.inStock)
+                            if (params.newArrivals) newParams.set('newArrivals', params.newArrivals)
+                            if (!isUsed) newParams.set('isUsed', 'true')
+                            router.push(`/books?${newParams.toString()}`)
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                            isUsed
+                            ? 'bg-amber-100 text-amber-700 border-amber-200 shadow-md' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                        }`}
+                    >
+                        {tCommon('UsedBook') || "Livre d'occasion"}
+                    </button>
+                    
+                    <button
+                        onClick={() => {
+                            const newParams = new URLSearchParams()
+                            if (params.search) newParams.set('search', params.search)
+                            if (params.category) newParams.set('category', params.category)
+                            if (params.language) newParams.set('language', params.language)
+                            if (params.inStock) newParams.set('inStock', params.inStock)
+                            if (isUsed) newParams.set('isUsed', 'true')
+                            newParams.set('newArrivals', (params as any).newArrivals === 'true' ? 'false' : 'true')
+                            router.push(`/books?${newParams.toString()}`)
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border flex items-center gap-1 ${
+                            (params as any).newArrivals === 'true'
+                            ? 'bg-emerald-100 text-emerald-700 border-emerald-200 shadow-md' 
+                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                        }`}
+                    >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {tCommon('NewArrival')}
+                    </button>
+                </div>
+            </div>
+
+            {/* Categories */}
+
+            <div>
+                <button 
+                    onClick={() => toggleSection('cats')}
+                    className="w-full text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-700 mb-6 flex items-center justify-between group"
+                >
+                    <div className="flex items-center gap-3">
+                        <Filter className="w-3 h-3" />
+                        {t('Categories')}
+                    </div>
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openSections.cats ? 'rotate-180' : ''}`} />
+                </button>
+                {openSections.cats && (
+                    <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <Link
+                            href={`/books?${new URLSearchParams({
+                                ...(params.language ? { language: params.language } : {}),
+                                ...(params.search ? { search: params.search } : {}),
+                                ...(params.author ? { author: params.author } : {}),
+                                ...(params.inStock ? { inStock: params.inStock } : {}),
+                                ...(isUsed ? { isUsed: 'true' } : {}),
+                            }).toString()}`}
+                            scroll={false}
+                            className={`px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${!params.category
+                                ? 'bg-black text-white shadow-lg'
+                                : 'bg-[#F8F9FA] text-gray-700 hover:text-black lg:hover:bg-pixio-cream/50'
+                                }`}
+                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                        >
+                            {tCats('All')}
+                        </Link>
+                        {Object.entries(categoryTree).slice(0, isAllCatsRevealed ? Object.keys(categoryTree).length : 3).map(([category, subcategories]) => {
+                            const isExpanded = expandedCategories[category];
+                            const isSelected = params.category === category;
+                            const countInfo = categoryCounts?.[category];
+                            
+                            return (
+                                <div key={category} className="flex flex-col gap-1">
+                                    <div className="flex items-center gap-2">
+                                        <Link
+                                            href={`/books?${new URLSearchParams({
+                                                category: category,
+                                                ...(params.language ? { language: params.language } : {}),
+                                                ...(params.search ? { search: params.search } : {}),
+                                                ...(params.author ? { author: params.author } : {}),
+                                                ...(params.inStock ? { inStock: params.inStock } : {}),
+                                                ...(isUsed ? { isUsed: 'true' } : {})
+                                            }).toString()}`}
+                                            scroll={false}
+                                            className={`flex-1 flex justify-between items-center px-4 py-3 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest transition-all ${isSelected && !params.subCategory
+                                                ? 'bg-black text-white shadow-lg'
+                                                : 'bg-[#F8F9FA] text-gray-700 hover:text-black lg:hover:bg-pixio-cream/50'
+                                                }`}
+                                            onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                        >
+                                            <span>{tCats.has(category as any) ? tCats(category as any) : category}</span>
+                                            {countInfo && (
+                                                <span className={`text-[9px] px-2 py-0.5 rounded-full ${isSelected && !params.subCategory ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-800 font-bold'}`}>
+                                                    {countInfo.total}
+                                                </span>
+                                            )}
+                                        </Link>
+                                        
+                                        {subcategories && subcategories.length > 0 && (
+                                            <button
+                                                onClick={(e) => toggleCategory(category, e)}
+                                                className="p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                                                aria-label={`${tCats.has(category as any) ? tCats(category as any) : category} - ${isExpanded ? 'Réduire' : 'Développer'}`}
+                                            >
+                                                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {isExpanded && subcategories && subcategories.length > 0 && (
+                                        <div className="flex flex-col gap-1 pl-4 mt-1 border-l-2 border-gray-100 ml-4 mb-2">
+                                            {subcategories.map(sub => {
+                                                const isSubSelected = params.category === category && params.subCategory === sub;
+                                                const subCount = countInfo?.subs?.[sub];
+                                                
+                                                return (
+                                                    <Link
+                                                        key={sub}
+                                                        href={`/books?${new URLSearchParams({
+                                                            category: category,
+                                                            subCategory: sub,
+                                                            ...(params.language ? { language: params.language } : {}),
+                                                            ...(params.search ? { search: params.search } : {}),
+                                                            ...(params.author ? { author: params.author } : {}),
+                                                            ...(params.inStock ? { inStock: params.inStock } : {})
+                                                        }).toString()}`}
+                                                        scroll={false}
+                                                        className={`flex justify-between items-center px-4 py-2.5 rounded-xl text-[9px] rtl:text-xs rtl:tracking-normal font-bold uppercase tracking-widest transition-all ${isSubSelected
+                                                            ? 'bg-gray-800 text-white shadow-md'
+                                                            : 'bg-transparent text-gray-500 hover:bg-gray-50 hover:text-black'
+                                                            }`}
+                                                        onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                                                    >
+                                                        <span>{sub}</span>
+                                                        {subCount !== undefined && (
+                                                            <span className={`text-[8px] px-2 py-0.5 rounded-full ${isSubSelected ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                                                {subCount}
+                                                            </span>
+                                                        )}
+                                                    </Link>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
+                        {Object.keys(categoryTree).length > 3 && (
+                            <button
+                                onClick={() => setIsAllCatsRevealed(!isAllCatsRevealed)}
+                                className="px-4 py-3 text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-700 hover:text-black transition-colors"
+                            >
+                                {isAllCatsRevealed ? tCommon('ShowLess') : tCommon('ShowMore')}
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Active Filters */}
+            {(params.category || params.subCategory || params.search || params.language || params.inStock || isUsed || (params as any).newArrivals) && (
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest text-gray-500">{t('Active')}</span>
+                        <button
+                            onClick={resetFilters}
+                            className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-[9px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-widest hover:bg-red-100 transition-all"
+                        >
+                            {t('Reset')}
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+
+    return (
+        <>
+            {/* Desktop Sidebar */}
+            <aside className="hidden lg:block lg:w-80 flex-shrink-0">
+                <div className="bg-white rounded-3xl p-8 sticky top-28 shadow-xl shadow-gray-200/40 border border-gray-100 transition-all hover:shadow-2xl">
+                    <FilterContent />
+                </div>
+            </aside>
+
+            {/* Mobile Sticky Top Bar */}
+            <div className="lg:hidden sticky top-[64px] z-40 bg-[#FDFBF7] -mx-4 px-4 pb-4 pt-4">
+                <div className="bg-white border border-gray-100 shadow-lg shadow-black/5 rounded-2xl px-4 py-3">
+                    <div className="max-w-7xl mx-auto flex items-center gap-2">
+                        {/* General Search (Condensed) */}
+                        <SearchInput 
+                            currentSearch={params.search || ''}
+                            onChange={handleSearchChange}
+                            placeholder={tCommon('Search') || "Rechercher..."}
+                            isCondensed={true}
+                        />
+
+                        {/* Filter Button */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest transition-all ${
+                                params.category || params.language || params.author || params.inStock 
+                                ? 'bg-black text-white shadow-lg' 
+                                : 'bg-gray-100 text-gray-900'
+                            }`}
+                            aria-label={t('Filters')}
+                        >
+                            <SlidersHorizontal className="w-4 h-4" />
+                            <span className="hidden sm:inline">{t('Filters')}</span>
+                            {(params.category || params.subCategory || params.language || params.author || params.inStock || isUsed || (params as any).newArrivals) && (
+                                <span className="w-2 h-2 rounded-full bg-red-500" />
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Active Chips Horizontal Scroll */}
+                    {(params.category || params.subCategory || params.language || params.search || params.author || params.inStock || isUsed || (params as any).newArrivals) && (
+                        <div className="flex gap-2 overflow-x-auto py-2 no-scrollbar">
+                            {params.category && (
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
+                                    {tCats.has(params.category as any) ? tCats(params.category as any) : params.category}
+                                    <Link 
+                                        href={`/books?${new URLSearchParams({
+                                            ...(params.language ? { language: params.language } : {}),
+                                            ...(params.search ? { search: params.search } : {}),
+                                            ...(params.author ? { author: params.author } : {}),
+                                            ...(params.inStock ? { inStock: params.inStock } : {})
+                                        }).toString()}`} 
+                                        scroll={false}
+                                        className="opacity-50"
+                                    >×</Link>
+                                </div>
+                            )}
+                            {params.language && (
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
+                                    {languages.find(l => l.code === params.language)?.label || params.language}
+                                    <Link 
+                                        href={`/books?${new URLSearchParams({
+                                            ...(params.category ? { category: params.category } : {}),
+                                            ...(params.search ? { search: params.search } : {}),
+                                            ...(params.author ? { author: params.author } : {}),
+                                            ...(params.inStock ? { inStock: params.inStock } : {})
+                                        }).toString()}`} 
+                                        scroll={false}
+                                        className="opacity-50"
+                                    >×</Link>
+                                </div>
+                            )}
+                            {params.author && (
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
+                                    {params.author}
+                                    <Link 
+                                        href={`/books?${new URLSearchParams({
+                                            ...(params.category ? { category: params.category } : {}),
+                                            ...(params.language ? { language: params.language } : {}),
+                                            ...(params.search ? { search: params.search } : {}),
+                                            ...(params.inStock ? { inStock: params.inStock } : {})
+                                        }).toString()}`} 
+                                        scroll={false}
+                                        className="opacity-50"
+                                    >×</Link>
+                                </div>
+                            )}
+                            {(params.inStock === undefined || params.inStock === 'true') && (
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-black text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
+                                    {tCommon('Available')}
+                                    <Link 
+                                        href={`/books?${new URLSearchParams({
+                                            ...(params.category ? { category: params.category } : {}),
+                                            ...(params.search ? { search: params.search } : {}),
+                                            ...(params.language ? { language: params.language } : {}),
+                                            ...(params.author ? { author: params.author } : {}),
+                                            ...(params.usedOnly ? { usedOnly: params.usedOnly } : {}),
+                                            ...(params.newArrivals ? { newArrivals: params.newArrivals } : {}),
+                                            inStock: 'false'
+                                        }).toString()}`} 
+                                        scroll={false}
+                                        className="opacity-50"
+                                    >×</Link>
+                                </div>
+                            )}
+                            {isUsed && (
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-amber-600 text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
+                                    {tCommon('UsedBook') || "Livre d'occasion"}
+                                    <Link 
+                                        href={`/books?${new URLSearchParams({
+                                            ...(params.category ? { category: params.category } : {}),
+                                            ...(params.search ? { search: params.search } : {}),
+                                            ...(params.language ? { language: params.language } : {}),
+                                            ...(params.author ? { author: params.author } : {}),
+                                            ...(params.inStock ? { inStock: params.inStock } : {}),
+                                            ...(params.newArrivals ? { newArrivals: params.newArrivals } : {})
+                                        }).toString()}`} 
+                                        scroll={false}
+                                        className="opacity-50"
+                                    >×</Link>
+                                </div>
+                            )}
+                            {params.newArrivals === 'true' && (
+                                <div className="flex-shrink-0 px-3 py-1.5 bg-emerald-600 text-white rounded-full text-[9px] rtl:text-xs rtl:tracking-normal font-black uppercase tracking-widest flex items-center gap-2">
+                                    {tCommon('NewArrival')}
+                                    <Link 
+                                        href={`/books?${new URLSearchParams({
+                                            ...(params.category ? { category: params.category } : {}),
+                                            ...(params.search ? { search: params.search } : {}),
+                                            ...(params.language ? { language: params.language } : {}),
+                                            ...(params.author ? { author: params.author } : {}),
+                                            ...(params.inStock ? { inStock: params.inStock } : {}),
+                                            ...(params.usedOnly ? { usedOnly: params.usedOnly } : {})
+                                        }).toString()}`} 
+                                        scroll={false}
+                                        className="opacity-50"
+                                    >×</Link>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Mobile Drawer (Modal) */}
+            {isMobileMenuOpen && (
+            <div className="fixed inset-0 z-[170] lg:hidden flex items-end sm:items-center justify-center p-4 pb-[5.5rem] sm:pb-4">
+                <div 
+                    className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+                <div className="relative w-full max-w-sm max-h-[80vh] bg-white rounded-3xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
+                    <button 
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        aria-label={tCommon('Close') || 'Fermer'}
+                        className="absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                    >
+                        <X className="w-5 h-5 text-gray-700" />
+                    </button>
+                    <div className="flex-1 overflow-y-auto p-5 pt-10 no-scrollbar">
+                        <FilterContent isMobile />
+                    </div>
+                    <div className="p-5 border-t border-gray-100 bg-gray-50/50 shrink-0 rounded-b-3xl">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="w-full py-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-black/10 active:scale-95 transition-all"
+                        >
+                            {tCommon('ViewResults', { count: totalCount })}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            )}
+        </>
+    )
+}

@@ -1,0 +1,75 @@
+'use client'
+
+import React from 'react'
+import { Link } from '@/i18n/routing'
+import { ChevronRight, Home } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
+interface BreadcrumbItem {
+    label: string
+    href?: string
+}
+
+interface BreadcrumbsProps {
+    items: BreadcrumbItem[]
+}
+
+export default function Breadcrumbs({ items }: BreadcrumbsProps) {
+    const t = useTranslations('Navigation')
+
+    return (
+        <nav aria-label="Breadcrumb" className="mb-6">
+            <ol className="flex flex-wrap items-center gap-2 text-xs rtl:text-sm font-medium text-gray-500">
+                <li className="flex items-center">
+                    <Link href="/" className="hover:text-black transition-colors flex items-center gap-1">
+                        <Home className="w-3 h-3" />
+                        <span>{t('Home')}</span>
+                    </Link>
+                </li>
+
+                {items.map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                        <ChevronRight className="w-3 h-3 text-gray-400 shrink-0 rtl:rotate-180" />
+                        {item.href ? (
+                            <Link
+                                href={item.href as any}
+                                className="hover:text-black transition-colors"
+                            >
+                                {item.label}
+                            </Link>
+                        ) : (
+                            <span className="text-black font-bold break-words line-clamp-2 max-w-[200px] sm:max-w-xs" aria-current="page">
+                                {item.label}
+                            </span>
+                        )}
+                    </li>
+                ))}
+            </ol>
+
+            {/* JSON-LD for Breadcrumbs */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'BreadcrumbList',
+                        'itemListElement': [
+                            {
+                                '@type': 'ListItem',
+                                'position': 1,
+                                'name': t('Home'),
+                                'item': process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
+                            },
+                            ...items.map((item, index) => ({
+                                '@type': 'ListItem',
+                                'position': index + 2,
+                                'name': item.label,
+                                'item': item.href ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'}${item.href}` : undefined
+                            }))
+                        ]
+                    })
+                }}
+            />
+        </nav>
+    )
+}

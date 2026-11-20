@@ -1,0 +1,476 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Shared PetsUnivers storefront controls. */
+.pet-button { display: inline-flex; align-items: center; justify-content: center; gap: .75rem; border-radius: 999px; background: #17351d; color: #fffdf8; padding: .95rem 1.5rem; font-size: .875rem; font-weight: 700; transition: background .2s, transform .2s; }
+.pet-button:hover { background: #284b2c; transform: translateY(-1px); }
+.pet-field { display: flex; flex-direction: column; gap: .6rem; color: #17351d; font-size: .875rem; font-weight: 600; }
+.pet-field input, .pet-field select, .pet-field textarea { width: 100%; min-width: 0; border: 1px solid #17351d33; border-radius: .8rem; background: #fffdf8; padding: .85rem 1rem; font-weight: 400; color: #17351d; }
+.pets-store :is(a, button, input, select, textarea, summary):focus-visible, .pet-header :is(a, button, input):focus-visible, .pet-footer a:focus-visible { outline: 3px solid #a07738; outline-offset: 4px; }
+.pets-store [id] { scroll-margin-top: 2rem; }
+@media (prefers-reduced-motion: reduce) { .pet-button { transition: none; } .pet-button:hover { transform: none; } }
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #111111;
+  --pixio-beige: #F0E3CE;
+  --pixio-cream: #F7F0DF;
+  --pixio-pink: #FDE2E4;
+  --pixio-yellow: #DBC38D;
+}
+
+.font-cairo-var {
+  font-family: var(--font-cairo), sans-serif;
+}
+
+/* Force explicit sizes for blog headings */
+.prose h2 {
+  font-size: 1.875rem !important; /* text-3xl */
+  line-height: 2.25rem !important;
+}
+.prose h3 {
+  font-size: 1.5rem !important; /* text-2xl */
+  line-height: 2rem !important;
+}
+[dir="rtl"] .prose h2 {
+  font-size: 2rem !important; /* 32px */
+}
+[dir="rtl"] .prose h3 {
+  font-size: 1.625rem !important; /* 26px */
+}
+@media (min-width: 768px) {
+  .prose h2 {
+    font-size: 2.25rem !important; /* text-4xl */
+    line-height: 2.5rem !important;
+  }
+  .prose h3 {
+    font-size: 1.875rem !important; /* text-3xl */
+    line-height: 2.25rem !important;
+  }
+  [dir="rtl"] .prose h2 {
+    font-size: 2.625rem !important; /* 42px */
+  }
+  [dir="rtl"] .prose h3 {
+    font-size: 2.125rem !important; /* 34px */
+  }
+}
+@media (min-width: 1024px) {
+  .prose h2 {
+    font-size: 3rem !important; /* text-5xl */
+    line-height: 1 !important;
+  }
+}
+
+/* Amélioration de la lisibilité FR/EN sur mobile */
+.prose p,
+.prose li,
+.prose a,
+.prose blockquote,
+.prose strong {
+  font-size: 1.05rem !important;
+  line-height: 1.75 !important;
+}
+
+@media (min-width: 768px) {
+  .prose p,
+  .prose li,
+  .prose a,
+  .prose blockquote,
+  .prose strong {
+    font-size: 1.125rem !important;
+  }
+}
+
+/* Agrandissement spécifique du texte arabe (RTL) pour une meilleure lisibilité */
+[dir="rtl"] .prose p,
+[dir="rtl"] .prose li,
+[dir="rtl"] .prose a,
+[dir="rtl"] .prose blockquote,
+[dir="rtl"] .prose strong {
+  font-size: 1.15rem !important;
+  line-height: 1.8 !important;
+}
+
+@keyframes whatsapp-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-12px) scale(1.05); }
+  50% { transform: translateY(-6px) scale(1.02); }
+  70% { transform: translateY(-12px) scale(1.05); }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes bounce-light {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-bounce-light {
+  animation: bounce-light 2s infinite ease-in-out;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-rtl {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(50%); }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+[dir="rtl"] .animate-marquee {
+  animation: marquee-rtl 40s linear infinite;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-pixio-beige: var(--pixio-beige);
+  --color-pixio-cream: var(--pixio-cream);
+  --color-pixio-pink: var(--pixio-pink);
+  --color-pixio-yellow: var(--pixio-yellow);
+  --radius-pixio: 2rem;
+  --radius-pixio-sm: 1rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+/*
+ * Le footer est le dernier bloc visuel des pages publiques. Sur Safari/Chrome
+ * mobile, la zone située après le contenu peut révéler le fond blanc du
+ * document (notamment avec la barre de navigation fixe). Utiliser le même
+ * fond que le footer évite cette bande sans affecter l'admin ou le checkout.
+ */
+html:has(#main-footer),
+body:has(#main-footer) {
+  background-color: #000;
+}
+
+.font-tajawal {
+  font-family: var(--font-tajawal), system-ui, sans-serif;
+}
+
+/* Animation cloche notification */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /* Prevent font scaling in landscape on iOS */
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+/* Touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    /* Remove gray tap highlight on iOS */
+  }
+}
+
+/* Safe Area Insets for notched phones */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Hide scrollbar for clean horizontal scrolling on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* POS Grid Responsiveness */
+@media (max-width: 1024px) {
+  .responsive-pos-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (min-width: 768px) and (max-width: 1024px) {
+  .responsive-pos-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Premium Animations */
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes revealRight {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes revealLeft {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-reveal-left {
+  animation: revealLeft 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes float-alt {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(-1deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes pulse-yellow {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-reveal-up {
+  animation: revealUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-reveal-right {
+  animation: revealRight 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-alt 8s ease-in-out infinite;
+}
+
+.pulse-yellow-glow {
+  animation: pulse-yellow 2s ease-in-out infinite;
+}
+
+.reveal-hidden {
+  opacity: 0;
+}
+
+/* ================================================================
+   Animations — Page Clé USB (globals pour éviter divergences SSR)
+================================================================ */
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+@keyframes floatRight {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(15px); }
+}
+@keyframes spin-slow-anim {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-80px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideInRight {
+  from { transform: translateX(80px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(255,107,107,0.5); }
+  100% { box-shadow: 0 0 0 20px rgba(255,107,107,0); }
+}
+@keyframes fadeInBtn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.float-1 { animation: floatUp 4s ease-in-out infinite; }
+.float-2 { animation: floatUp 5s ease-in-out infinite 0.5s; }
+.float-3 { animation: floatUp 6s ease-in-out infinite 1s; }
+.float-r { animation: floatRight 3s ease-in-out infinite; }
+.spin-slow { animation: spin-slow-anim 12s linear infinite; }
+.wiggle { animation: wiggle 2s ease-in-out infinite; }
+.slide-left { animation: slideInLeft 0.8s ease forwards; }
+.slide-right { animation: slideInRight 0.8s ease forwards; }
+.pulse-cta { animation: pulse-ring 2s infinite; }
+.back-top-btn { animation: fadeInBtn 0.3s ease forwards; }
+
+@keyframes cart-vibrate-periodic {
+  0%, 92% { transform: rotate(0deg) scale(1); }
+  93% { transform: rotate(-10deg) scale(1.1); }
+  95% { transform: rotate(10deg) scale(1.1); }
+  97% { transform: rotate(-10deg) scale(1.1); }
+  99% { transform: rotate(10deg) scale(1.1); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+.animate-cart-vibrate {
+  animation: cart-vibrate-periodic 6s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+  transform-origin: center;
+}
+
+/* Modal Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.mt-20 {
+    margin-top: calc(var(--spacing) * -8);
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* === Styles article blog (déplacés depuis JSX pour compatibilité Turbopack) === */
+#article-content p { margin-bottom: 2rem !important; margin-top: 1rem !important; }
+#article-content h2 { margin-top: 4rem !important; margin-bottom: 1.5rem !important; }
+#article-content h3 { margin-top: 3rem !important; margin-bottom: 1rem !important; }
+#article-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; border: 1px solid #e5e7eb; font-size: 0.95em; }
+#article-content th,
+#article-content td { border: 1px solid #e5e7eb; padding: 1rem; text-align: left; }
+#article-content th { background-color: #f9fafb; font-weight: 700; color: #111827; }
+[dir="rtl"] #article-content th,
+[dir="rtl"] #article-content td { text-align: right; }
+
+#article-content blockquote { position: relative; padding: 2.5rem 3rem; margin: 3rem 0; background: linear-gradient(to right, #f8fafc, #ffffff); border-left: 5px solid #0f172a; border-radius: 0 1.5rem 1.5rem 0; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); overflow: hidden; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; }
+#article-content blockquote::before { content: "\201C"; position: absolute; top: -1rem; left: 1rem; font-size: 8rem; color: #e2e8f0; font-family: Georgia, serif; line-height: 1; opacity: 0.4; pointer-events: none; }
+[dir="rtl"] #article-content blockquote { border-left: 1px solid #f1f5f9; border-right: 5px solid #0f172a; border-radius: 1.5rem 0 0 1.5rem; background: linear-gradient(to left, #f8fafc, #ffffff); }
+[dir="rtl"] #article-content blockquote::before { left: auto; right: 1rem; content: "\201D"; }
+#article-content blockquote p { margin: 0 !important; position: relative; z-index: 1; font-size: 1.25rem !important; font-style: italic; color: #334155; line-height: 1.8 !important; font-weight: 500; }
+#article-content blockquote p:last-child:not(:first-child) { font-size: 1.05rem !important; font-style: normal; font-weight: 700; color: #64748b; margin-top: 1.5rem !important; display: block; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Empêcher le zoom automatique d'iOS sur les champs de texte */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* La page d'accueil est longue : différer peinture et layout des sections hors écran. */
+.home-page > section:not(:first-of-type) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 760px;
+}
+
+@media screen and (max-width: 768px) {
+  .home-page > section:not(:first-of-type) {
+    contain-intrinsic-size: auto 980px;
+  }
+}

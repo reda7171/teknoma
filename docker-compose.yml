@@ -1,0 +1,178 @@
+services:
+  # Database - MySQL 8
+  db:
+    image: mysql:8.0
+    container_name: petsunivers_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_NAME:-petsunivers_db}
+      MYSQL_USER: ${DB_USER:-petsunivers_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-petsunivers_pass}
+    command: --default-authentication-plugin=mysql_native_password --innodb-buffer-pool-size=512M --innodb-log-buffer-size=16M --max-connections=150 --table-open-cache=2000 --thread-cache-size=16 --skip-name-resolve
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1536M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    cpu_shares: 1024
+    ports:
+      - "3906:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - petsunivers_network
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD || exit 1" ]
+      interval: 10s
+      timeout: 20s
+      retries: 10
+
+  # Cache & n8n queue - Redis
+  redis:
+    image: redis:alpine
+    container_name: petsunivers_redis
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    cpu_shares: 512
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - petsunivers_network
+
+  # Application - Next.js
+  app:
+    image: ghcr.io/reda7171/petsunivers-app:latest
+    container_name: petsunivers_app
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - WHATSAPP_GATEWAY_URL=http://whatsapp:3000
+      - DATABASE_URL=mysql://${DB_USER:-petsunivers_user}:${DB_PASSWORD:-petsunivers_pass}@db:3306/${DB_NAME:-petsunivers_db}?connect_timeout=30&pool_timeout=30&connection_limit=25
+      - KEEP_ALIVE_TIMEOUT=75000
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - UV_THREADPOOL_SIZE=64
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3072M
+        reservations:
+          cpus: '0.5'
+          memory: 1024M
+    cpu_shares: 1024
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - petsunivers_network
+    volumes:
+      - ./public/uploads:/app/public/uploads
+      - ./backups:/app/backups
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/fr || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # n8n - Automation
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: petsunivers_n8n
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 768M
+    cpu_shares: 256
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_SECURE_COOKIE=false
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678/}
+      - GENERIC_TIMEZONE=Africa/Casablanca
+      - TZ=Africa/Casablanca
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - petsunivers_network
+
+  # phpMyAdmin - Database Manager
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: petsunivers_phpmyadmin
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    cpu_shares: 128
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USER:-petsunivers_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-petsunivers_pass}
+    ports:
+      - "9901:80"
+    depends_on:
+      - db
+    networks:
+      - petsunivers_network
+
+  # WhatsApp Gateway - Connexion QR gratuite (WAHA / Baileys)
+  whatsapp:
+    image: devlikeapro/waha
+    container_name: petsunivers_whatsapp
+    restart: always
+    shm_size: '1gb'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    cpu_shares: 256
+    ports:
+      - "3001:3000"
+    environment:
+      - WHATSAPP_DEFAULT_ENGINE=NOWEB
+      - WHATSAPP_START_SESSION=default
+      - WAHA_ZIPPER=ZIPPER
+      - WAHA_PRINT_QR=true
+      - WAHA_DASHBOARD_ENABLED=true
+      - WAHA_DASHBOARD_USERNAME=${WAHA_USER:-admin}
+      - WAHA_DASHBOARD_PASSWORD=${WAHA_PASS:-admin123}
+      - WAHA_API_KEY=${WAHA_API_KEY:-petsunivers_waha_api_key_2026}
+    volumes:
+      - waha_data:/app/.sessions
+    networks:
+      - petsunivers_network
+
+volumes:
+  mysql_data:
+  n8n_data:
+  redis_data:
+  waha_data:
+
+networks:
+  petsunivers_network:
+    driver: bridge

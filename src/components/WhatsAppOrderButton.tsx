@@ -1,0 +1,81 @@
+'use client'
+
+import { useTranslations, useLocale } from 'next-intl'
+import { notifyWhatsAppOrderClick } from '@/lib/actions/cart-notify'
+
+interface Props {
+    title: string
+    price: number
+    phone?: string
+    type?: 'book' | 'pack' | 'accessory'
+    replacedBooks?: Record<string, { id: string, title: string }>
+    className?: string
+    disabled?: boolean // stock épuisé
+}
+
+export default function WhatsAppOrderButton({ title, price, phone, type = 'book', replacedBooks, className = '', disabled = false }: Props) {
+    const tCommon = useTranslations('Common')
+    const locale = useLocale()
+    const phoneNumber = (phone || '212702220575').replace(/[\s+\-()]/g, '')
+
+    let replacedInfo = ''
+    if (replacedBooks && Object.keys(replacedBooks).length > 0) {
+        replacedInfo = '\n(Pack personnalisé: ' + Object.values(replacedBooks).map(b => b.title).join(', ') + ')'
+    }
+
+    const messages = {
+        fr: {
+            pack: `Bonjour, je veux ce pack : "${title}"${replacedInfo} ... combien le prix avec la livraison ?`,
+            accessory: `Bonjour, je veux cet accessoire : "${title}" ... combien le prix avec la livraison ?`,
+            book: `Bonjour, je veux ce livre : "${title}" ... combien le prix avec la livraison ?`
+        },
+        ar: {
+            pack: `Salam, brit had lpack : "${title}"${replacedInfo} ... chhal taman m3a tawssil ?`,
+            accessory: `Salam, brit had l'accessoire : "${title}" ... chhal taman m3a tawssil ?`,
+            book: `Salam, brit had lktab : "${title}" ... chhal taman m3a tawssil ?`
+        },
+        en: {
+            pack: `Hello, I want this pack: "${title}"${replacedInfo} ... how much is the price with delivery?`,
+            accessory: `Hello, I want this accessory: "${title}" ... how much is the price with delivery?`,
+            book: `Hello, I want this book: "${title}" ... how much is the price with delivery?`
+        }
+    }
+
+    const currentMessages = messages[locale as keyof typeof messages] || messages.fr
+    const message = currentMessages[type]
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+
+    // Version désactivée (stock épuisé) — grisée, non cliquable
+    if (disabled) {
+        return (
+            <span
+                aria-disabled="true"
+                className={`flex items-center justify-center gap-2 sm:gap-3 w-full py-3 px-3 sm:py-5 sm:px-8 rounded-full font-black text-[11px] sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.2em] bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 ${className}`}
+            >
+                <svg viewBox="0 0 32 32" className="w-5 h-5 fill-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 2C8.268 2 2 8.268 2 16c0 2.674.742 5.18 2.03 7.32L2 30l6.88-2.004A13.94 13.94 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.6a11.55 11.55 0 01-5.896-1.61l-.424-.252-4.088 1.19 1.22-3.976-.276-.436A11.56 11.56 0 014.4 16C4.4 9.594 9.594 4.4 16 4.4S27.6 9.594 27.6 16 22.406 27.6 16 27.6zm6.32-8.68c-.346-.174-2.05-1.012-2.368-1.128-.316-.116-.546-.174-.776.174-.23.348-.892 1.128-1.094 1.36-.202.23-.402.26-.748.086-.346-.174-1.46-.538-2.782-1.716-1.028-.916-1.722-2.048-1.924-2.394-.202-.348-.022-.536.152-.708.156-.156.346-.406.52-.61.172-.202.23-.348.346-.578.116-.23.058-.432-.028-.608-.086-.174-.776-1.876-1.064-2.568-.28-.676-.562-.584-.776-.594-.2-.01-.432-.012-.664-.012-.23 0-.604.086-.92.432-.316.346-1.208 1.182-1.208 2.882 0 1.7 1.238 3.344 1.41 3.574.172.23 2.436 3.72 5.9 5.216.826.356 1.47.568 1.972.728.828.264 1.582.226 2.178.138.664-.1 2.05-.838 2.34-1.648.29-.81.29-1.506.202-1.648-.086-.144-.316-.23-.662-.404z"/>
+                </svg>
+                {tCommon('OrderViaWhatsApp')}
+            </span>
+        )
+    }
+
+    const handleClick = () => {
+        notifyWhatsAppOrderClick(title, price, type, message, phoneNumber).catch(console.error)
+    }
+
+    return (
+        <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleClick}
+            className={`flex items-center justify-center gap-2 sm:gap-3 w-full py-3 px-3 sm:py-5 sm:px-8 rounded-full font-black text-[11px] sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.2em] bg-[#075E54] text-white shadow-lg shadow-[#075E54]/25 hover:bg-[#128C7E] hover:shadow-[#075E54]/40 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 ${className}`}
+        >
+            <svg viewBox="0 0 32 32" className="w-5 h-5 fill-white flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 2C8.268 2 2 8.268 2 16c0 2.674.742 5.18 2.03 7.32L2 30l6.88-2.004A13.94 13.94 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.6a11.55 11.55 0 01-5.896-1.61l-.424-.252-4.088 1.19 1.22-3.976-.276-.436A11.56 11.56 0 014.4 16C4.4 9.594 9.594 4.4 16 4.4S27.6 9.594 27.6 16 22.406 27.6 16 27.6zm6.32-8.68c-.346-.174-2.05-1.012-2.368-1.128-.316-.116-.546-.174-.776.174-.23.348-.892 1.128-1.094 1.36-.202.23-.402.26-.748.086-.346-.174-1.46-.538-2.782-1.716-1.028-.916-1.722-2.048-1.924-2.394-.202-.348-.022-.536.152-.708.156-.156.346-.406.52-.61.172-.202.23-.348.346-.578.116-.23.058-.432-.028-.608-.086-.174-.776-1.876-1.064-2.568-.28-.676-.562-.584-.776-.594-.2-.01-.432-.012-.664-.012-.23 0-.604.086-.92.432-.316.346-1.208 1.182-1.208 2.882 0 1.7 1.238 3.344 1.41 3.574.172.23 2.436 3.72 5.9 5.216.826.356 1.47.568 1.972.728.828.264 1.582.226 2.178.138.664-.1 2.05-.838 2.34-1.648.29-.81.29-1.506.202-1.648-.086-.144-.316-.23-.662-.404z"/>
+            </svg>
+            {tCommon('OrderViaWhatsApp')}
+        </a>
+    )
+}

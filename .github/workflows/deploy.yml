@@ -1,0 +1,171 @@
+name: Deploy PetsUnivers to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: reda7171/petsunivers-app
+
+jobs:
+  lighthouse-audit:
+    name: Lighthouse A11y & Contrast Check
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: petsunivers_db
+          MYSQL_USER: petsunivers_user
+          MYSQL_PASSWORD: petsunivers_pass
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Setup Database Schema
+        run: npx prisma db push --accept-data-loss
+        env:
+          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+          NEXT_TELEMETRY_DISABLED: 1
+          NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+
+      - name: Run Lighthouse CI Audit
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: './.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+
+  build-and-push-image:
+    needs: lighthouse-audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: SonarQube Scan
+        if: ${{ vars.ENABLE_SONAR == 'true' }}
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            DEPLOYMENT_VERSION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    if: ${{ vars.ENABLE_VPS_DEPLOY == 'true' }}
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 2222
+          command_timeout: 60m
+          script: |
+            # Aller dans le dossier
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/www/petsunivers
+            cd /var/www/petsunivers
+
+            # Initialisation robuste de Git si absente
+            if [ ! -d ".git" ]; then
+              echo "Initialisation du depot Git..."
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git init
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git remote add origin https://github.com/reda7171/petsunivers.git
+            fi
+
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/reda7171/petsunivers.git
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git config --global --add safe.directory /var/www/petsunivers
+
+            # Synchronisation
+            echo "Recuperation du code..."
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git fetch origin ${{ github.ref_name }}
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git checkout -f ${{ github.ref_name }}
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git reset --hard origin/${{ github.ref_name }}
+
+            # Permissions et Cron
+            if [ -d "scripts" ]; then
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/backup-db.sh
+              (crontab -l 2>/dev/null | grep -q "backup-db.sh") || (crontab -l 2>/dev/null; echo "0 3 * * * /var/www/petsunivers/scripts/backup-db.sh >> /var/www/petsunivers/backups/backup.log 2>&1") | crontab -
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/vps-clean-cache.sh
+              (crontab -l 2>/dev/null | grep -q "vps-clean-cache.sh") || (crontab -l 2>/dev/null; echo "0 4 * * * /var/www/petsunivers/scripts/vps-clean-cache.sh >> /var/www/petsunivers/backups/cache-clean.log 2>&1") | crontab -
+              (crontab -l 2>/dev/null | grep -q "vps-status") || (crontab -l 2>/dev/null; echo "*/10 * * * * curl -s 'https://petsunivers.ma/api/cron/vps-status?alert_only=true' > /dev/null 2>&1") | crontab -
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/jumia-status-cron.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/log/petsunivers
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S touch /var/log/petsunivers/jumia-status-cron.log
+              (crontab -l 2>/dev/null | grep -q "jumia-status-cron.sh") || (crontab -l 2>/dev/null; echo "*/10 * * * * flock -n /tmp/petsunivers-jumia-status.lock /var/www/petsunivers/scripts/jumia-status-cron.sh >> /var/log/petsunivers/jumia-status-cron.log 2>&1") | crontab -
+              (crontab -l 2>/dev/null | grep -q "abandoned-cart-reminder") || (crontab -l 2>/dev/null; echo "*/15 * * * * curl -s 'https://petsunivers.ma/api/cron/abandoned-cart-reminder?key=une_cle_secrete_pour_cron_2026' > /dev/null 2>&1") | crontab -
+            fi
+
+            # ─── Retrait et nettoyage de la page 502 de Nginx ─────────────
+            # Authentification GHCR sur le VPS
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+            # Pull de la nouvelle image pre-compilee AVANT le redemarrage
+            echo "Telechargement de la nouvelle image Docker..."
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+            # Rechargement direct du service
+            echo "Rechargement du service..."
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps app || echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker-compose up -d --no-deps app
+
+            # Rechargement et contrôle du conteneur WhatsApp (WAHA)
+            echo "Rechargement de la passerelle WhatsApp (WAHA)..."
+            if [ -f "scripts/restart-waha.sh" ]; then
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/restart-waha.sh
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S ./scripts/restart-waha.sh || true
+            else
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d whatsapp || echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker-compose up -d whatsapp || true
+            fi

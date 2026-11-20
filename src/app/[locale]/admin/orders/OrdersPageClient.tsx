@@ -1,0 +1,179 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+import OrderFilters from './OrderFilters'
+import OrdersTableClient from './OrdersTableClient'
+import ImportOrdersButton from '@/components/admin/ImportOrdersButton'
+import ExportOrdersButton from '@/components/admin/ExportOrdersButton'
+import BulkSyncDeliveryButton from '@/components/admin/BulkSyncDeliveryButton'
+import ScanRetourButton from '@/components/admin/ScanRetourButton'
+import AdminOrdersEvolutionChart from '@/components/admin/AdminOrdersEvolutionChart'
+import NotificationCenterButton from '@/components/admin/NotificationCenterButton'
+import ReturnRemindersBanner from '@/components/admin/ReturnRemindersBanner'
+
+interface OrdersPageClientProps {
+    orders: any[]
+    locale: string
+    statusColors: any
+    statusLabels: any
+    currentStatus?: string
+    stats: {
+        totalArticles: number
+        totalRevenue: number
+        totalNetProfit: number
+    }
+    shippingCompanies: any[]
+    activePaymentMethods: Record<string, boolean>
+    deliveryInvoices: any[]
+    abandonedCarts?: any[]
+}
+
+export default function OrdersPageClient({
+    orders,
+    locale,
+    statusColors,
+    statusLabels,
+    currentStatus,
+    stats,
+    shippingCompanies,
+    activePaymentMethods,
+    deliveryInvoices,
+    abandonedCarts = []
+}: OrdersPageClientProps) {
+    const [searchTerm, setSearchTerm] = useState('')
+    const [shippingFilter, setShippingFilter] = useState('')
+    const [paymentFilter, setPaymentFilter] = useState('')
+    const [cityFilter, setCityFilter] = useState('')
+    const [productTitleFilter, setProductTitleFilter] = useState('')
+    const [salesChannelFilter, setSalesChannelFilter] = useState('')
+    const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+    const selectedOrders = useMemo(() => {
+        return orders.filter(o => selectedIds.includes(o.id))
+    }, [orders, selectedIds])
+
+    const uniqueCities = useMemo(() => {
+        const cities = orders.map(o => o.city?.trim()).filter(Boolean)
+        return Array.from(new Set(cities)).sort()
+    }, [orders])
+    const uniqueProductTitles = useMemo(() => {
+        const titles = new Set<string>()
+        orders.forEach(o => {
+            o.items?.forEach((item: any) => {
+                if (item.book?.title) titles.add(item.book.title)
+                if (item.pack?.name) titles.add(item.pack.name)
+                if (item.extraProduct?.name) titles.add(item.extraProduct.name)
+            })
+        })
+        return Array.from(titles).sort((a, b) => a.localeCompare(b))
+    }, [orders])
+
+    const evolutionData = useMemo(() => {
+        const evolutionMap: Record<string, { date: string, count: number, revenue: number }> = {}
+        
+        orders.forEach(order => {
+            if (order.status !== 'CANCELLED' && order.status !== 'RETURNED') {
+                const date = new Date(order.createdAt)
+                const dateStr = date.toISOString().split('T')[0]
+                if (!evolutionMap[dateStr]) {
+                    evolutionMap[dateStr] = { date: dateStr, count: 0, revenue: 0 }
+                }
+                evolutionMap[dateStr].count++
+                evolutionMap[dateStr].revenue += order.total
+            }
+        })
+
+        return Object.values(evolutionMap)
+    }, [orders])
+
+    // Combine orders and abandoned carts for the Notification Center
+    const combinedForNotifications = useMemo(() => {
+        return [...orders, ...abandonedCarts]
+    }, [orders, abandonedCarts])
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">Gestion des Commandes</h1>
+                <div className="flex flex-wrap items-center gap-3">
+                    <NotificationCenterButton orders={combinedForNotifications} statusLabels={statusLabels} />
+                    <ScanRetourButton className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-900 transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95" />
+                    <BulkSyncDeliveryButton />
+                    <ImportOrdersButton />
+                    <ExportOrdersButton orders={selectedOrders} totalSelected={selectedIds.length} />
+                </div>
+            </div>
+
+            {/* Rappels des retours > 7 jours */}
+            <ReturnRemindersBanner locale={locale} />
+
+            {/* Statistiques (Cartes) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Articles (Ventes)</p>
+                    <p className="text-2xl font-black text-gray-900 mt-2">{stats.totalArticles}</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total (CA)</p>
+                    <p className="text-2xl font-black text-blue-600 mt-2">{stats.totalRevenue.toFixed(2)} درهم</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Marge Nette (Est.)</p>
+                    <p className={`text-2xl font-black mt-2 ${stats.totalNetProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {stats.totalNetProfit > 0 ? '+' : ''}{stats.totalNetProfit.toFixed(2)} درهم
+                    </p>
+                </div>
+            </div>
+
+            {/* Evolution Chart */}
+            <AdminOrdersEvolutionChart data={evolutionData} />
+
+            <div className="flex flex-col gap-8">
+                {/* Search & Filters */}
+                <OrderFilters 
+                    locale={locale}
+                    statusLabels={statusLabels}
+                    currentStatus={currentStatus}
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    shippingFilter={shippingFilter}
+                    onShippingFilterChange={setShippingFilter}
+                    paymentFilter={paymentFilter}
+                    onPaymentFilterChange={setPaymentFilter}
+                    cityFilter={cityFilter}
+                    onCityFilterChange={setCityFilter}
+                    totalCount={orders.length}
+                    shippingCompanies={shippingCompanies}
+                    activePaymentMethods={activePaymentMethods}
+                    cities={uniqueCities as string[]}
+                    productTitleFilter={productTitleFilter}
+                    onProductTitleFilterChange={setProductTitleFilter}
+                    productTitles={uniqueProductTitles}
+                    salesChannelFilter={salesChannelFilter}
+                    onSalesChannelFilterChange={setSalesChannelFilter}
+                />
+
+                {/* Table Content */}
+                <div className="w-full">
+                    <OrdersTableClient
+                        orders={orders}
+                        locale={locale}
+                        statusColors={statusColors}
+                        statusLabels={statusLabels}
+                        searchTerm={searchTerm}
+                        shippingFilter={shippingFilter}
+                        paymentFilter={paymentFilter}
+                        cityFilter={cityFilter}
+                        productTitleFilter={productTitleFilter}
+                        salesChannelFilter={salesChannelFilter}
+                        deliveryInvoices={deliveryInvoices}
+                        selectedIds={selectedIds}
+                        onSelectionChange={setSelectedIds}
+                    />
+                </div>
+            </div>
+        </div>
+    )
+}
