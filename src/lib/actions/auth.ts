@@ -89,7 +89,12 @@ export async function login(formData: FormData): Promise<LoginResult> {
 
         const isProd = process.env.NODE_ENV === 'production'
         
-        if (user.role !== 'INFLUENCER' && user.role !== 'SELLER') {
+        const telegram2faSetting = await prisma.siteSettings.findUnique({
+            where: { key: 'telegram_admin_2fa' }
+        })
+        const requireTelegramApproval = telegram2faSetting?.value === 'true'
+
+        if (requireTelegramApproval && user.role !== 'INFLUENCER' && user.role !== 'SELLER') {
             // Créer une requête d'approbation
             const request = await prisma.adminAuthRequest.create({
                 data: {
