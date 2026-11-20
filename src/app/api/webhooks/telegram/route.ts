@@ -460,7 +460,7 @@ export async function POST(req: Request) {
                             const updatedText = `✅ <b>Commande #${shortId} EXPÉDIÉE</b>\n\n` +
                                 `👤 ${escapeHtml(order.fullName)}\n` +
                                 `📍 ${escapeHtml(order.city)}\n` +
-                                `💰 ${order.total.toFixed(2)} درهم\n\n` +
+                                `💰 <b>Montant du colis :</b> ${order.total.toFixed(2)} MAD\n\n` +
                                 `🚀 <b>WithYou Tracking :</b> <code>${order.trackingID}</code>\n` +
                                 `📌 <b>Statut :</b> Confirmée`
                             await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
