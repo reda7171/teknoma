@@ -42,7 +42,7 @@
     "dotenv": "^17.2.3",
     "exceljs": "^4.4.0",
     "exiftool-vendored": "^39.4.0",
-    "framer-motion": "^13.4.0",
+    "framer-motion": "^14.14.0",
     "fuse.js": "^7.1.0",
     "google-auth-library": "^11.0.2",
     "hostinger-mail-api-sdk": "^1.19.2",
