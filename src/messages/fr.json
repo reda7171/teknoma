@@ -799,7 +799,14 @@
     "NoBooksFound": "Aucun livre trouvé",
     "NoBooksDesc": "Cet auteur n'a pas encore de livres publiés sur notre plateforme.",
     "SellerRating": "Note du vendeur",
-    "Views": "{count} vues"
+    "Views": "{count} vues",
+    "SummaryTabSynopsis": "Résumé",
+    "SummaryTabKeyTakeaways": "Sommaire & Citations",
+    "SummaryTabBusyReaders": "Pour les lecteurs pressés",
+    "SummaryKeyIdeasTitle": "3 Idées Forces de l'Ouvrage",
+    "SummaryKeyQuoteTitle": "Citation Marquante",
+    "SummaryReadFullArticle": "Lire la chronique complète",
+    "SummaryExtractedFrom": "Extrait de notre critique"
   },
   "Cart": {
     "Title": "Votre Panier",

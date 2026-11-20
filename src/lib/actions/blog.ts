@@ -504,6 +504,7 @@ export async function getPostsByBookId(bookId: string, language?: string) {
         authorName: true,
         tags: true,
         language: true,
+        content: true,
         author: {
             select: {
                 id: true,

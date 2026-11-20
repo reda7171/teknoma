@@ -25,6 +25,8 @@ import { getSetting } from '@/lib/server/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
 import { getPostsByBookId } from '@/lib/actions/blog'
 import EditorialArticlesSection from '@/components/books/EditorialArticlesSection'
+import BookSummaryTabs from '@/components/books/BookSummaryTabs'
+import { extractBookInsights } from '@/lib/blog-insights'
 import Image from 'next/image'
 import { Calendar, User as UserIcon, ArrowUpRight, FileText } from 'lucide-react'
 import BookSubNav from '@/components/BookSubNav'
@@ -376,6 +378,19 @@ export default async function BookDetailPage({
                 ? [shortDescription]
                 : [shortDescription, longDescription].filter(Boolean)
         : [shortDescription].filter(Boolean)
+
+    const primaryEditorialPost = relatedPosts && relatedPosts.length > 0 ? relatedPosts[0] : null
+    const editorialInsights = extractBookInsights({
+        post: primaryEditorialPost,
+        book: {
+            id: book.id,
+            title: displayTitle,
+            author: book.author,
+            category: book.category,
+            description: shortDescription || longDescription,
+        },
+        locale
+    })
 
     const jsonLd: any[] = [];
 
@@ -882,19 +897,22 @@ export default async function BookDetailPage({
 
                             {/* Tabs Layout */}
                             <div className="flex flex-col gap-6 md:gap-12 pt-4 md:pt-12 mt-4 md:mt-0 border-t border-gray-100">
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-4">
-                                        <Package className="w-4 h-4 text-black" />
-                                        <h2 className="text-[10px] rtl:text-sm rtl:tracking-normal font-black uppercase tracking-[0.3em] text-black">{tBook('Abstract')}</h2>
-                                    </div>
-                                    <div className="text-sm font-bold text-gray-500 uppercase tracking-widest leading-loose bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 italic space-y-4">
-                                        {summaryParagraphs.map((paragraph, index) => (
-                                            <p key={`${book.id}-summary-${index}`} className={index > 0 ? 'text-gray-600 font-medium normal-case tracking-normal mt-4' : undefined}>
-                                                {paragraph}
-                                            </p>
-                                        ))}
-                                    </div>
-                                </div>
+                                <BookSummaryTabs
+                                    bookId={book.id}
+                                    summaryParagraphs={summaryParagraphs}
+                                    insights={editorialInsights}
+                                    locale={locale}
+                                    labels={{
+                                        synopsisTab: tBook('SummaryTabSynopsis'),
+                                        insightsTab: tBook('SummaryTabKeyTakeaways'),
+                                        busyReadersBadge: tBook('SummaryTabBusyReaders'),
+                                        keyIdeasTitle: tBook('SummaryKeyIdeasTitle'),
+                                        keyQuoteTitle: tBook('SummaryKeyQuoteTitle'),
+                                        readFullArticle: tBook('SummaryReadFullArticle'),
+                                        editorialAnalysisSource: tBook('SummaryExtractedFrom'),
+                                        by: tCommon('By') || 'Par',
+                                    }}
+                                />
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     <div className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm space-y-8">
