@@ -68,8 +68,10 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
     let finalMessage = ''
     if (items.length > 0) {
         const baseMsg = messages[locale] || messages.fr
-        const booksList = items.map(item => `- ${item.title} (x${item.quantity})`).join('\n')
-        finalMessage = baseMsg.replace('{books}', booksList)
+        const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        const booksList = items.map(item => `- ${item.title} (x${item.quantity} • ${item.price} MAD)`).join('\n')
+        const totalNotice = locale === 'ar' ? `\n(المجموع المقدر للكتب : ${total} درهم)` : `\n(Sous-total estimé : ${total} MAD)`
+        finalMessage = baseMsg.replace('{books}', `${booksList}${totalNotice}`)
     } else {
         const emptyMessages: Record<string, string> = {
             fr: 'Bonjour Riwaya, je souhaite découvrir votre bibliothèque et en savoir plus sur vos livres.',

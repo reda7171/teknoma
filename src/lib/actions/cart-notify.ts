@@ -294,16 +294,25 @@ export async function notifyWhatsAppOrderClick(title: string, price: number, typ
 
         const cleanTitle = (title || 'Produit').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const cleanMessage = (message || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const formattedPrice = price && price > 0 ? `${price.toFixed(2)} MAD` : '0.00 MAD'
 
         const text = `📱 <b>Commande WhatsApp Initiée</b>${adminTag}\n\n` +
             `📖 <b>Produit :</b> ${cleanTitle}\n` +
             `🏷️ <b>Type :</b> ${type}\n` +
-            `💰 <b>Prix :</b> ${price ? price.toFixed(2) : '0.00'} درهم\n` +
-            (phone ? `📞 <b>Contact WhatsApp :</b> +${phone}\n` : '') +
+            `💰 <b>Prix affiché :</b> <b>${formattedPrice}</b>\n` +
+            (phone ? `📞 <b>Destinataire :</b> +${phone}\n` : '') +
             `💬 <b>Message pré-rempli :</b>\n<i>${cleanMessage}</i>\n\n` +
             `🌐 <b>IP :</b> ${ip || 'Inconnue'}`
 
-        await sendTelegramMessage(text).catch(() => null)
+        const replyMarkup = phone ? {
+            inline_keyboard: [
+                [
+                    { text: '💬 Ouvrir WhatsApp', url: `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message || '')}` }
+                ]
+            ]
+        } : undefined
+
+        await sendTelegramMessage(text, undefined, undefined, replyMarkup).catch(() => null)
         return { success: true }
     } catch (error) {
         console.error('Erreur notifyWhatsAppOrderClick:', error)
