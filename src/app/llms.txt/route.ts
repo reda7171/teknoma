@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-const defaultLlmsText = "# PetsUnivers\n\nAnimalerie en ligne au Maroc : alimentation, accessoires, hygiène et soins pour chats, chiens et petits animaux.\n\n- Accueil : https://petsunivers.ma/fr\n- Boutique : https://petsunivers.ma/fr/products\n- Services : https://petsunivers.ma/fr/services\n- Contact : https://petsunivers.ma/fr/contact\n"
+const defaultLlmsText = "# Tekno Store\n\nBoutique High-Tech en ligne au Maroc : smartphones, ordinateurs portables, Mac et accessoires technologiques.\n\n- Accueil : https://tekno.ma/fr\n- Boutique : https://tekno.ma/fr/products\n- Services : https://tekno.ma/fr/services\n- Contact : https://tekno.ma/fr/contact\n"
 
 export async function GET() {
     try {
@@ -53,12 +53,12 @@ export async function GET() {
         categories.forEach(c => {
             const catName = c.name;
             // On encode pour l'URL
-            dynamicLinks += `- [${catName}](https://petsunivers.ma/fr/products?category=${encodeURIComponent(catName)})\n`
+            dynamicLinks += `- [${catName}](https://tekno.ma/fr/products?category=${encodeURIComponent(catName)})\n`
         })
 
         dynamicLinks += `\n### Nouveautés & Bestsellers\n`
         topBooks.forEach(b => {
-            dynamicLinks += `- [${b.title.replace(/\[|\]/g, '')}](https://petsunivers.ma/fr/products/${b.id})\n`
+            dynamicLinks += `- [${b.title.replace(/\[|\]/g, '')}](https://tekno.ma/fr/products/${b.id})\n`
         })
 
         const finalContent = content + dynamicLinks;

@@ -38,9 +38,9 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
 
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(assets.map(a => [a.id, {
-            alt: a.altText || `${a.name} | PetsUnivers Promotion`,
-            title: a.imageTitle || `Offre spéciale ${a.name} sur PetsUnivers`,
-            keywords: `${a.name}, marketing, promotion, offre, petsunivers, livre`
+            alt: a.altText || `${a.name} | Tekno Store Promotion`,
+            title: a.imageTitle || `Offre spéciale ${a.name} sur Tekno Store`,
+            keywords: `${a.name}, marketing, promotion, offre, tekno, livre`
         }]))
     )
     const [message, setMessage] = useState('')
@@ -334,13 +334,13 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
     function autoGenerateAll() {
         const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
 
-        const frKeywords = "marketing, offre spéciale, promotion livres, petsunivers promo, remise livre, livraison gratuite maroc";
+        const frKeywords = "marketing, offre spéciale, promotion livres, tekno promo, remise livre, livraison gratuite maroc";
 
         assets.forEach(a => {
             updated[a.id] = {
-                alt: `${a.name} - ${a.type} | Promotion PetsUnivers Maroc`,
-                title: `Offre spéciale ${a.name} sur PetsUnivers`,
-                keywords: `${a.name}, marketing, promotion, offre, petsunivers, livre, ${frKeywords}`
+                alt: `${a.name} - ${a.type} | Promotion Tekno Store Maroc`,
+                title: `Offre spéciale ${a.name} sur Tekno Store`,
+                keywords: `${a.name}, marketing, promotion, offre, tekno, livre, ${frKeywords}`
             }
         })
         setEdits(updated)
@@ -461,7 +461,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                             {/* Image */}
                             <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                 <img
-                                    src={asset.url?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.petsunivers.ma${asset.url}` : asset.url || '/placeholder.jpg'}
+                                    src={asset.url?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://tekno.ma${asset.url}` : asset.url || '/placeholder.jpg'}
                                     alt={edits[asset.id]?.alt || asset.name}
                                     title={edits[asset.id]?.title || asset.name}
                                     className="w-full h-full object-cover"
@@ -485,7 +485,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                                         value={edits[asset.id]?.alt || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [asset.id]: { ...prev[asset.id], alt: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none bg-white"
-                                        placeholder={`${asset.name} | Promotion PetsUnivers`}
+                                        placeholder={`${asset.name} | Promotion Tekno Store`}
                                     />
                                 </div>
 
@@ -510,7 +510,7 @@ export default function MarketingImageInjectorMetaForm({ assets }: MarketingImag
                                         value={edits[asset.id]?.keywords || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [asset.id]: { ...prev[asset.id], keywords: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none bg-white"
-                                        placeholder={`Marketing, Promo, PetsUnivers, ...`}
+                                        placeholder={`Marketing, Promo, Tekno Store, ...`}
                                     />
                                 </div>
                             </div>

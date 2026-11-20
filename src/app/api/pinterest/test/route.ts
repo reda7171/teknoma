@@ -97,14 +97,14 @@ export async function POST(req: NextRequest) {
             const imgUrl = sampleBook?.image?.startsWith('http')
                 ? sampleBook.image
                 : sampleBook?.image
-                    ? `https://petsunivers.ma${sampleBook.image}`
-                    : 'https://petsunivers.ma/logo.png';
+                    ? `https://tekno.ma${sampleBook.image}`
+                    : 'https://tekno.ma/logo.png';
 
             const pinPayload = {
                 board_id: boardId,
-                title: sampleBook ? `[Test PetsUnivers] ${sampleBook.title.substring(0, 75)}` : '[Test PetsUnivers] Boutique Littéraire',
-                description: sampleBook?.description?.substring(0, 450) || 'Découvrez nos collections de livres et packs littéraires au Maroc sur PetsUnivers.',
-                link: sampleBook ? `https://petsunivers.ma/fr/books/${sampleBook.id}` : 'https://petsunivers.ma',
+                title: sampleBook ? `[Test Tekno Store] ${sampleBook.title.substring(0, 75)}` : '[Test Tekno Store] Boutique Littéraire',
+                description: sampleBook?.description?.substring(0, 450) || 'Découvrez nos collections de livres et packs littéraires au Maroc sur Tekno Store.',
+                link: sampleBook ? `https://tekno.ma/fr/books/${sampleBook.id}` : 'https://tekno.ma',
                 media_source: {
                     source_type: 'image_url',
                     url: imgUrl

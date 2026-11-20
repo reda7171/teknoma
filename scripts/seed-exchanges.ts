@@ -14,7 +14,7 @@ async function main() {
   // Create 2 test users if they don't exist
   const users = []
   for (let i = 1; i <= 2; i++) {
-    const email = `exchanger${i}@petsunivers.ma`
+    const email = `exchanger${i}@tekno.ma`
     let user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
       user = await prisma.user.create({
@@ -36,7 +36,7 @@ async function main() {
   // Add more test users to populate different cities on the map
   const mapUsers = []
   for (let i = 1; i <= 8; i++) {
-    const email = `mapuser${i}@petsunivers.ma`
+    const email = `mapuser${i}@tekno.ma`
     let user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
       user = await prisma.user.create({

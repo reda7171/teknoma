@@ -40,9 +40,9 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
 
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(posts.map(p => [p.id, {
-            alt: p.altText || `${p.title} - ${p.authorName || 'PetsUnivers'} | Blog PetsUnivers`,
-            title: p.imageTitle || `Lire l'article ${p.title} sur le blog PetsUnivers`,
-            keywords: `${p.title}, ${p.authorName || 'PetsUnivers'}, blog, article, petsunivers${p.category ? `, ${p.category}` : ''}`
+            alt: p.altText || `${p.title} - ${p.authorName || 'Tekno Store'} | Blog Tekno Store`,
+            title: p.imageTitle || `Lire l'article ${p.title} sur le blog Tekno Store`,
+            keywords: `${p.title}, ${p.authorName || 'Tekno Store'}, blog, article, tekno${p.category ? `, ${p.category}` : ''}`
         }]))
     )
     const [message, setMessage] = useState('')
@@ -336,9 +336,9 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
     function autoGenerateAll() {
         const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
 
-        const frKeywords = "blog lecture, articles sur les livres, conseils lecture, petsunivers blog, actualité littéraire maroc, chroniques littéraires";
-        const arKeywords = "مدونة القراءة, مقالات عن الكتب, نصائح للقراءة, مدونة PetsUnivers, أخبار الأدب المغرب, مراجعات الكتب";
-        const enKeywords = "reading blog, book articles, reading tips, petsunivers blog, literary news morocco, book reviews";
+        const frKeywords = "blog lecture, articles sur les livres, conseils lecture, tekno blog, actualité littéraire maroc, chroniques littéraires";
+        const arKeywords = "مدونة القراءة, مقالات عن الكتب, نصائح للقراءة, مدونة Tekno Store, أخبار الأدب المغرب, مراجعات الكتب";
+        const enKeywords = "reading blog, book articles, reading tips, tekno blog, literary news morocco, book reviews";
 
         posts.forEach(p => {
             let baseKeywords = "";
@@ -347,9 +347,9 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
             else baseKeywords = frKeywords; // Default to French if 'fr' or undefined
 
             updated[p.id] = {
-                alt: `${p.title} - ${p.authorName || 'PetsUnivers'}${p.category ? ` | ${p.category}` : ''} | Blog PetsUnivers`,
-                title: `Lire "${p.title}" sur le blog de PetsUnivers`,
-                keywords: `${p.title}, ${p.authorName || 'PetsUnivers'}, blog, article, petsunivers${p.category ? `, ${p.category}` : ''}, ${baseKeywords}`
+                alt: `${p.title} - ${p.authorName || 'Tekno Store'}${p.category ? ` | ${p.category}` : ''} | Blog Tekno Store`,
+                title: `Lire "${p.title}" sur le blog de Tekno Store`,
+                keywords: `${p.title}, ${p.authorName || 'Tekno Store'}, blog, article, tekno${p.category ? `, ${p.category}` : ''}, ${baseKeywords}`
             }
         })
         setEdits(updated)
@@ -470,7 +470,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                             {/* Image */}
                             <div className="w-24 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0">
                                 <img
-                                    src={post.coverImage?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.petsunivers.ma${post.coverImage}` : post.coverImage || '/placeholder.jpg'}
+                                    src={post.coverImage?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://tekno.ma${post.coverImage}` : post.coverImage || '/placeholder.jpg'}
                                     alt={edits[post.id]?.alt || post.title}
                                     title={edits[post.id]?.title || post.title}
                                     className="w-full h-full object-cover"
@@ -482,7 +482,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                             <div className="flex-1 space-y-3">
                                 <div>
                                     <p className="text-xs font-black text-gray-600 uppercase tracking-widest mb-0.5">{post.title}</p>
-                                    <p className="text-xs text-gray-400">{post.authorName || 'PetsUnivers'}</p>
+                                    <p className="text-xs text-gray-400">{post.authorName || 'Tekno Store'}</p>
                                 </div>
 
                                 <div>
@@ -494,7 +494,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                         value={edits[post.id]?.alt || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [post.id]: { ...prev[post.id], alt: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 outline-none bg-white"
-                                        placeholder={`${post.title} | Blog PetsUnivers`}
+                                        placeholder={`${post.title} | Blog Tekno Store`}
                                     />
                                 </div>
 
@@ -519,7 +519,7 @@ export default function BlogImageInjectorMetaForm({ posts }: BlogImageInjectorMe
                                         value={edits[post.id]?.keywords || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [post.id]: { ...prev[post.id], keywords: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 outline-none bg-white"
-                                        placeholder={`Blog, PetsUnivers, ...`}
+                                        placeholder={`Blog, Tekno Store, ...`}
                                     />
                                 </div>
                             </div>

@@ -111,7 +111,7 @@ export function printReceipt(data: ReceiptData) {
         </head>
         <body>
             <div class="header">
-                <h1>PetsUnivers</h1>
+                <h1>Tekno Store</h1>
                 <p>La passion de lire</p>
                 <div class="divider"></div>
                 <p>Ticket de caisse</p>
@@ -154,12 +154,12 @@ export function printReceipt(data: ReceiptData) {
 
             <!-- QR Code -->
             <div class="qr-container">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://petsunivers.ma/order/' + data.orderId)}" alt="QR Code" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://tekno.ma/order/' + data.orderId)}" alt="QR Code" />
             </div>
 
             <div class="footer">
                 <p>Merci de votre visite !</p>
-                <p>www.petsunivers.ma</p>
+                <p>tekno.ma</p>
             </div>
 
             <script>

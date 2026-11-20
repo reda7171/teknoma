@@ -254,7 +254,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'template_livres_petsunivers.csv'
+        a.download = 'template_livres_tekno.csv'
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -690,7 +690,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                         {/* Footer de validation */}
                         <div className="p-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-500 flex items-center justify-between">
                             <span>
-                                Vérification préalable réussie. Les images externes seront servies au format WebP/AVIF via le CDN PetsUnivers.
+                                Vérification préalable réussie. Les images externes seront servies au format WebP/AVIF via le CDN Tekno Store.
                             </span>
                             <span className="font-semibold text-gray-700">
                                 5 lignes vérifiées

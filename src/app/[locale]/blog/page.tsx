@@ -21,24 +21,24 @@ export async function generateMetadata({
     const t = await getTranslations({ locale, namespace: 'Blog' })
 
     return {
-        title: `${t('Title')} | PetsUnivers`,
+        title: `${t('Title')} | Tekno Store`,
         description: t('Subtitle'),
         openGraph: {
-            title: `${t('Title')} | PetsUnivers`,
+            title: `${t('Title')} | Tekno Store`,
             description: t('Subtitle'),
             type: 'website',
-            url: `https://petsunivers.ma/${locale}/blog`,
+            url: `https://tekno.ma/${locale}/blog`,
             images: [
                 {
-                    url: 'https://petsunivers.ma/images/og-blog.png',
+                    url: 'https://tekno.ma/images/og-blog.png',
                     width: 1200,
                     height: 630,
-                    alt: 'Blog PetsUnivers'
+                    alt: 'Blog Tekno Store'
                 }
             ]
         },
         alternates: {
-            canonical: `https://petsunivers.ma/${locale}/blog`
+            canonical: `https://tekno.ma/${locale}/blog`
         }
     }
 }
@@ -74,9 +74,9 @@ export default async function BlogPage({
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "Blog",
-                        "name": `${t('Title')} | PetsUnivers`,
+                        "name": `${t('Title')} | Tekno Store`,
                         "description": t('Subtitle'),
-                        "url": `https://petsunivers.ma/${locale}/blog`
+                        "url": `https://tekno.ma/${locale}/blog`
                     })
                 }}
             />
@@ -137,7 +137,7 @@ export default async function BlogPage({
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                            <span className="text-gray-300 font-black text-4xl opacity-20">PetsUnivers</span>
+                                            <span className="text-gray-300 font-black text-4xl opacity-20">Tekno Store</span>
                                         </div>
                                     )}
                                     <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors" />
@@ -166,7 +166,7 @@ export default async function BlogPage({
                                                 <User className="w-3 h-3" />
                                                 <span>
                                                     {(() => {
-                                                        let name = post.authorName || post.author?.fullName || (locale === 'ar' ? 'فريق PetsUnivers' : locale === 'en' ? 'PetsUnivers Team' : 'Équipe PetsUnivers');
+                                                        let name = post.authorName || post.author?.fullName || (locale === 'ar' ? 'فريق Tekno Store' : locale === 'en' ? 'Tekno Store Team' : 'Équipe Tekno Store');
                                                         if (name.toLowerCase() === 'admin') {
                                                             name = locale === 'ar' ? 'مشرف' : locale === 'en' ? 'Moderator' : 'Modérateur';
                                                         }

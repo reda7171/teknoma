@@ -10,7 +10,7 @@ import MarketingImageInjectorMetaForm from './MarketingImageInjectorMetaForm'
 import { Search, Image as ImageIcon, Zap, Code } from 'lucide-react'
 
 export const metadata = {
-    title: 'SEO Expert | Admin PetsUnivers',
+    title: 'SEO Expert | Admin Tekno Store',
 }
 
 export default async function SeoConfigPage({
@@ -64,7 +64,7 @@ export default async function SeoConfigPage({
 
     return (
         <div className="space-y-12">
-            {/* Header section style PetsUnivers */}
+            {/* Header section style Tekno Store */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">

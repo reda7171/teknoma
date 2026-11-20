@@ -97,7 +97,7 @@ export default function ImmersivePdfReader({ pdfUrl, title, onClose }: Immersive
             // Check for saved bookmark
             let initialPage = 0
             try {
-                const saved = localStorage.getItem(`petsunivers-bookmark-${title}`)
+                const saved = localStorage.getItem(`tekno-bookmark-${title}`)
                 if (saved) {
                     const parsed = parseInt(saved, 10)
                     if (!isNaN(parsed)) {
@@ -181,7 +181,7 @@ export default function ImmersivePdfReader({ pdfUrl, title, onClose }: Immersive
 
         // Auto-save bookmark
         try {
-            localStorage.setItem(`petsunivers-bookmark-${title}`, newPage.toString())
+            localStorage.setItem(`tekno-bookmark-${title}`, newPage.toString())
         } catch (err) {}
 
         // Lazy render next/prev pages
@@ -210,7 +210,7 @@ export default function ImmersivePdfReader({ pdfUrl, title, onClose }: Immersive
                     <div className="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-black font-black italic">R</div>
                     <div>
                         <h2 className="text-white font-black text-sm tracking-tight leading-none">{title}</h2>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">PetsUnivers Immersive Reader</p>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Tekno Store Immersive Reader</p>
                     </div>
                 </div>
 
@@ -218,7 +218,7 @@ export default function ImmersivePdfReader({ pdfUrl, title, onClose }: Immersive
                     <button
                         onClick={() => {
                             try {
-                                localStorage.setItem(`petsunivers-bookmark-${title}`, currentPage.toString())
+                                localStorage.setItem(`tekno-bookmark-${title}`, currentPage.toString())
                                 alert('Signet mémorisé avec succès !')
                             } catch(e) {}
                         }}

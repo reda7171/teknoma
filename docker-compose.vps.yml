@@ -1,14 +1,14 @@
-name: petsunivers
+name: tekno
 
 services:
   db:
     image: mysql:8.0
-    container_name: petsunivers_db
+    container_name: tekno_db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD required}
-      MYSQL_DATABASE: petsunivers_db
-      MYSQL_USER: petsunivers_user
+      MYSQL_DATABASE: tekno_db
+      MYSQL_USER: tekno_user
       MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
     command: --innodb-buffer-pool-size=128M --max-connections=60
     mem_limit: 768m
@@ -22,7 +22,7 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: petsunivers_redis
+    container_name: tekno_redis
     restart: unless-stopped
     command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
     mem_limit: 128m
@@ -30,12 +30,12 @@ services:
       - redis_data:/data
 
   app:
-    image: ghcr.io/reda7171/petsunivers-app:latest
-    container_name: petsunivers_app
+    image: ghcr.io/reda7171/tekno-app:latest
+    container_name: tekno_app
     restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_URL: mysql://petsunivers_user:${DB_PASSWORD:?DB_PASSWORD required}@db:3306/petsunivers_db?connect_timeout=15&pool_timeout=15&connection_limit=10
+      DATABASE_URL: mysql://tekno_user:${DB_PASSWORD:?DB_PASSWORD required}@db:3306/tekno_db?connect_timeout=15&pool_timeout=15&connection_limit=10
       NODE_OPTIONS: --max-old-space-size=1024
       REDIS_URL: redis://redis:6379
     ports:

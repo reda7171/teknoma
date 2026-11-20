@@ -83,14 +83,14 @@ export async function GET() {
         const coupons = allCoupons.filter(c => !c.expiresAt || c.expiresAt >= now)
 
         // Utiliser directement l'URL de production pour éviter les problèmes de compilation locale
-        const baseUrl = 'https://www.petsunivers.ma'
+        const baseUrl = 'https://tekno.ma'
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`
         xml += `<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">\n`
         xml += `  <channel>\n`
-        xml += `    <title>PetsUnivers</title>\n`
+        xml += `    <title>Tekno Store</title>\n`
         xml += `    <link>${baseUrl}</link>\n`
-        xml += `    <description>PetsUnivers Bookstore - The best books available.</description>\n`
+        xml += `    <description>Tekno Store Bookstore - The best books available.</description>\n`
 
         for (const book of books) {
             const merchantTitle = normalizeMerchantTitle(book.title, book.language)
@@ -112,7 +112,7 @@ export async function GET() {
             xml += `      <g:condition>${condition}</g:condition>\n`
             xml += `      <g:availability>${availability}</g:availability>\n`
             xml += `      <g:price>${Number(book.price).toFixed(2)} MAD</g:price>\n`
-            xml += `      <g:brand>${escapeXml(book.author || 'PetsUnivers')}</g:brand>\n`
+            xml += `      <g:brand>${escapeXml(book.author || 'Tekno Store')}</g:brand>\n`
 
             const cleanIsbn = book.isbn ? book.isbn.replace(/\D/g, '') : '';
             if (cleanIsbn && [8, 10, 12, 13, 14].includes(cleanIsbn.length)) {
@@ -183,7 +183,7 @@ export async function GET() {
             if (salePrice !== null) {
                 xml += `      <g:sale_price>${salePrice.toFixed(2)} MAD</g:sale_price>\n`
             }
-            xml += `      <g:brand>PetsUnivers</g:brand>\n`
+            xml += `      <g:brand>Tekno Store</g:brand>\n`
             xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
             xml += `      <g:is_bundle>yes</g:is_bundle>\n`
             xml += `      <g:google_product_category>784</g:google_product_category>\n`

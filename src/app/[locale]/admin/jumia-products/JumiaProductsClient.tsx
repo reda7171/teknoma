@@ -24,7 +24,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
     const categories = Array.from(new Set(products.map((p: any) => p.category?.name || p.primaryCategory?.name).filter(Boolean))) as string[]
 
     const handleSyncStock = async () => {
-        if (!confirm("Voulez-vous synchroniser le stock de PetsUnivers vers Jumia pour tous les produits (basé sur le nom du produit) ?")) return;
+        if (!confirm("Voulez-vous synchroniser le stock de Tekno Store vers Jumia pour tous les produits (basé sur le nom du produit) ?")) return;
 
         setSyncing(true)
         try {

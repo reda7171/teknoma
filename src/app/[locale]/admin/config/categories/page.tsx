@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const t = await getTranslations('Admin')
     return {
-        title: `Configuration Catégories | Admin | PetsUnivers`
+        title: `Configuration Catégories | Admin | Tekno Store`
     }
 }
 

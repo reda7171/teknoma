@@ -33,13 +33,13 @@ export interface OrderInvoiceData {
     }>;
 }
 
-const DEFAULT_PETSUNIVERS_LOGO = "/logo-petsunivers.png";
+const DEFAULT_TEKNO_LOGO = "/logo.png";
 
 export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'fr', customPhone?: string, customLogo?: string): string {
     const isAr = locale === 'ar';
     const isEn = locale === 'en';
     const phone = customPhone || "";
-    const logoSrc = customLogo || DEFAULT_PETSUNIVERS_LOGO;
+    const logoSrc = customLogo || DEFAULT_TEKNO_LOGO;
 
     const invoiceNum = order.invoiceNumber || `FAC-${order.id.slice(0, 8).toUpperCase()}`;
     const orderDate = new Date(order.invoiceDate || order.createdAt).toLocaleDateString(
@@ -78,8 +78,8 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             remainingBalance: "RESTE À PAYER (LIVRAISON) :",
             paidStatus: "Facture soldée",
             unpaidStatus: "Paiement à la livraison (COD)",
-            footer1: "PetsUnivers — Animalerie en ligne au Maroc.",
-            footer2: `Pour toute question : contact@petsunivers.ma | ${phone}`,
+            footer1: "Tekno Store — High-Tech, Smartphones, PC, Mac & Accessoires au Maroc.",
+            footer2: `Pour toute question : Contact.tekno.ma@gmail.com | ${phone}`,
             printBtn: "Imprimer / Enregistrer en PDF",
             closeBtn: "Fermer"
         },
@@ -103,8 +103,8 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             remainingBalance: "المبلغ المتبقي (عند الاستلام) :",
             paidStatus: "مدفوعة بالكامل",
             unpaidStatus: "الدفع عند الاستلام (COD)",
-            footer1: "PetsUnivers — متجر مستلزمات الحيوانات الأليفة بالمغرب.",
-            footer2: `لأي استفسار : contact@petsunivers.ma | ${phone}`,
+            footer1: "Tekno Store — متجر مستلزمات الحيوانات الأليفة بالمغرب.",
+            footer2: `لأي استفسار : Contact.tekno.ma@gmail.com | ${phone}`,
             printBtn: "طباعة / حفظ بصيغة PDF",
             closeBtn: "إغلاق"
         },
@@ -128,8 +128,8 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             remainingBalance: "REMAINING BALANCE (COD):",
             paidStatus: "Paid in Full",
             unpaidStatus: "Cash on Delivery (COD)",
-            footer1: "PetsUnivers — Online pet shop in Morocco.",
-            footer2: `Support: contact@petsunivers.ma | ${phone}`,
+            footer1: "Tekno Store — Online pet shop in Morocco.",
+            footer2: `Support: Contact.tekno.ma@gmail.com | ${phone}`,
             printBtn: "Print / Save as PDF",
             closeBtn: "Close"
         }
@@ -360,13 +360,13 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
                     <tr>
                         <td style="vertical-align: middle;">
                             <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
-                                <img src="${logoSrc}" alt="PetsUnivers Logo" style="height: 44px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
+                                <img src="${logoSrc}" alt="Tekno Store Logo" style="height: 44px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
                                 <div style="display: inline-block; vertical-align: middle;">
-                                    <div class="company-title" style="margin: 0; line-height: 1.1;">PetsUnivers BOOKS</div>
+                                    <div class="company-title" style="margin: 0; line-height: 1.1;">Tekno Store BOOKS</div>
                                     <div class="company-sub" style="margin-top: 2px;">Librairie & Édition • Maroc</div>
                                 </div>
                             </div>
-                            <div class="company-sub">contact@petsunivers.ma | ${escapeHtml(phone)}</div>
+                            <div class="company-sub">Contact.tekno.ma@gmail.com | ${escapeHtml(phone)}</div>
                         </td>
                         <td class="invoice-tag" style="vertical-align: middle;">
                             <div class="invoice-badge">${labels.title}</div>
@@ -380,10 +380,10 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
                     <tr>
                         <td style="border-${isAr ? 'left' : 'right'}: 1px solid #e2e8f0;">
                             <div class="section-header">${labels.seller}</div>
-                            <div class="party-name">PetsUnivers SARL</div>
+                            <div class="party-name">Tekno Store SARL</div>
                             <div class="party-info">Casablanca, Maroc</div>
                             <div class="party-info">ICE : 002589632000045</div>
-                            <div class="party-info">Web : https://petsunivers.ma</div>
+                            <div class="party-info">Web : https://tekno.ma</div>
                         </td>
                         <td>
                             <div class="section-header">${labels.customer}</div>

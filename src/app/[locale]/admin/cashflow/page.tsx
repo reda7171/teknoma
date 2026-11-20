@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Wallet, Clock, AlertTriangle, ArrowUpRight, A
 import CashflowAddButton from '@/components/admin/CashflowAddButton'
 import { DeleteExpenseButton } from '@/components/admin/CashflowActions'
 
-export const metadata = { title: 'Cashflow | Admin PetsUnivers' }
+export const metadata = { title: 'Cashflow | Admin Tekno Store' }
 
 const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
     BOOKS_PURCHASE: { label: 'Achat livres', color: 'bg-blue-100 text-blue-700' },

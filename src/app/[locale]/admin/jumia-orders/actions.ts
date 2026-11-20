@@ -44,7 +44,7 @@ export async function syncAllJumiaStock() {
             return { error: "Aucun produit trouvé sur Jumia" }
         }
 
-        // 2. Fetch all PetsUnivers Books and Packs
+        // 2. Fetch all Tekno Store Books and Packs
         const books = await prisma.book.findMany({ select: { id: true, title: true, stock: true } })
 
         // On récupère aussi les packs si jamais il y a des packs sur Jumia, bien qu'ils n'aient pas de stock propre direct (ils pourraient avoir isFreeDelivery ou autre)
@@ -73,7 +73,7 @@ export async function syncAllJumiaStock() {
         }
 
         if (updates.length === 0) {
-            return { error: "Aucun produit Jumia n'a pu être associé à un livre PetsUnivers (vérifiez que le nom du produit Jumia correspond exactement au titre du livre sur PetsUnivers)." }
+            return { error: "Aucun produit Jumia n'a pu être associé à un livre Tekno Store (vérifiez que le nom du produit Jumia correspond exactement au titre du livre sur Tekno Store)." }
         }
 
         // 4. Send updates to Jumia (chunk by 50)
@@ -481,7 +481,7 @@ export async function packJumiaOrderFull(orderId: string) {
             throw new Error(`Aucun fournisseur d'expédition trouvé pour ces articles.`)
         }
 
-        // 3. PetsUnivers dépose ses colis au hub Rabat Océan. Ne jamais prendre le
+        // 3. Tekno Store dépose ses colis au hub Rabat Océan. Ne jamais prendre le
         // premier fournisseur de la liste : Jumia peut renvoyer Inezgane avant
         // Rabat, ce qui prépare alors la commande pour le mauvais point dépôt.
         const normalizeProviderName = (value: unknown) => String(value || '')

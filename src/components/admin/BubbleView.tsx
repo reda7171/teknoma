@@ -245,7 +245,7 @@ export default function BubbleView({ stats, onClose }: BubbleViewProps) {
 
             {/* Label titre */}
             <div className="absolute top-6 left-6 z-10" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', padding: '10px 20px' }}>
-                <span className="text-white font-black text-[10px] uppercase tracking-[0.3em] opacity-60">PetsUnivers</span>
+                <span className="text-white font-black text-[10px] uppercase tracking-[0.3em] opacity-60">Tekno Store</span>
                 <span className="text-white font-black text-[10px] uppercase tracking-[0.3em] ml-2">Dashboard Live</span>
             </div>
         </div>

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { getEditorialArticles } from '@/data/journal'
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://petsunivers.ma').replace(/\/$/, '')
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tekno.ma').replace(/\/$/, '')
 const locales = ['fr', 'ar', 'en'] as const
 
 type CatalogResponse = {
@@ -24,7 +24,7 @@ function languageAlternates(path = '') {
 }
 
 async function getBookIds(): Promise<string[]> {
-  const apiBaseUrl = process.env.PETSUNIVERS_BACKEND_URL
+  const apiBaseUrl = process.env.TEKNO_BACKEND_URL
   if (!apiBaseUrl) return []
 
   const ids = new Set<string>()

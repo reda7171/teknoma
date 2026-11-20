@@ -26,7 +26,7 @@ export default async function InfluencerDashboard() {
                             Bonjour, <span className="text-indigo-600">{user.fullName}</span> 👋
                         </h1>
                         <p className="text-gray-500 font-medium mt-2 italic">
-                            Voici vos performances d'affiliation actuelles sur PetsUnivers.
+                            Voici vos performances d'affiliation actuelles sur Tekno Store.
                         </p>
                     </div>
                 </div>

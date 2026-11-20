@@ -10,7 +10,7 @@ import {
     AgentPresenceItem,
 } from '@/lib/actions/whatsapp-presence'
 
-const WHATSAPP_PROMPT_STORAGE_KEY = 'petsunivers-admin-whatsapp-prompt-last-shown'
+const WHATSAPP_PROMPT_STORAGE_KEY = 'tekno-admin-whatsapp-prompt-last-shown'
 const WHATSAPP_PROMPT_INTERVAL_MS = 6 * 60 * 60 * 1000
 
 export default function WhatsAppAvailabilityPopup() {

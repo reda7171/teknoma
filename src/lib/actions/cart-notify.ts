@@ -183,7 +183,7 @@ export async function notifyWhatsAppClick(message: string, assignedAgentName?: s
         }
         const assignedLine = agentDisplay
             ? `\n👤 <b>Admin en charge :</b> ${agentDisplay}`
-            : '\n👤 <b>Admin en charge :</b> Standard PetsUnivers'
+            : '\n👤 <b>Admin en charge :</b> Standard Tekno Store'
 
         const cleanMessage = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const { getSetting } = await import('@/lib/actions/site-settings')

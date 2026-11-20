@@ -35,7 +35,7 @@ export async function GET(
 
         // Récupérer dynamiquement les numéros des agents WhatsApp et le logo du site
         let formattedAgentsPhone = "07 02 22 05 75 / 06 66 03 81 29";
-        let siteLogo = "/uploads/books/0dded6c73e7283c1-PETSUNIVERS__1_.png";
+        let siteLogo = "/uploads/books/0dded6c73e7283c1-TEKNO__1_.png";
         try {
             const settings = await prisma.siteSettings.findMany({
                 where: { key: { in: ['whatsapp_agents', 'site_logo'] } }

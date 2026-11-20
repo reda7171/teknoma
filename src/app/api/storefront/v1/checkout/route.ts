@@ -29,12 +29,12 @@ export async function POST(request: Request) {
             if (book.stock < item.quantity) throw new Error('stock_insufficient')
             return { ...item, type: 'BOOK' as const, price: book.price }
         })
-        const result = await createOrder({ ...input, items, paymentMethod: 'COD', discount: 0 }, SalesChannel.PETSUNIVERS_MA)
+        const result = await createOrder({ ...input, items, paymentMethod: 'COD', discount: 0 }, SalesChannel.TEKNO_MA)
         return NextResponse.json(result, { status: result.success ? 201 : 400, headers: { 'Cache-Control': 'no-store' } })
     } catch (error) {
         if (error instanceof z.ZodError) return NextResponse.json({ success: false, error: 'Informations de commande invalides.' }, { status: 400 })
         if (error instanceof Error && error.message === 'stock_insufficient') return NextResponse.json({ success: false, error: 'Stock insuffisant pour un des livres.' }, { status: 409 })
-        console.error('petsunivers.ma checkout error:', error)
+        console.error('tekno.ma checkout error:', error)
         return NextResponse.json({ success: false, error: 'Commande indisponible pour le moment.' }, { status: 503 })
     }
 }

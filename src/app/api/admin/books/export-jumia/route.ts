@@ -146,7 +146,7 @@ export async function POST(req: Request) {
                     case 'MainImage':
                         val = book.image
                         if (val && !val.startsWith('http')) {
-                            val = `${process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'}${val.startsWith('/') ? '' : '/'}${val}`
+                            val = `${process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'}${val.startsWith('/') ? '' : '/'}${val}`
                         }
                         break
                 }

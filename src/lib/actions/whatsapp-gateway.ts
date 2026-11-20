@@ -9,7 +9,7 @@ import QRCode from 'qrcode'
 const CANDIDATE_URLS = [
     process.env.WHATSAPP_GATEWAY_URL,
     'http://whatsapp:3000',
-    'http://petsunivers_whatsapp:3000',
+    'http://tekno_whatsapp:3000',
     'http://167.86.108.246:3001',
     'http://127.0.0.1:3001',
     'http://localhost:3001',
@@ -46,7 +46,7 @@ function getWahaHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
         'Accept': 'application/json, image/png, */*',
     }
-    const apiKey = process.env.WAHA_API_KEY || process.env.WHATSAPP_API_KEY || 'petsunivers_waha_api_key_2026'
+    const apiKey = process.env.WAHA_API_KEY || process.env.WHATSAPP_API_KEY || 'tekno_waha_api_key_2026'
     if (apiKey) {
         headers['X-Api-Key'] = apiKey
     }
@@ -284,7 +284,7 @@ export async function getWhatsAppGatewayStatus(): Promise<WhatsAppGatewayStatusR
                 qr: null,
                 user: {
                     id: session.me?.id || 'whatsapp-connected',
-                    name: session.me?.pushName || 'PetsUnivers WhatsApp',
+                    name: session.me?.pushName || 'Tekno Store WhatsApp',
                     phone: phone ? `+${phone}` : 'Connecté'
                 }
             }

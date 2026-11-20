@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         if (client.config.mode === 'sandbox') {
             const order = await client.request<PaypalOrder>('/v2/checkout/orders', {
                 requestId: crypto.randomUUID(),
-                body: { intent: 'CAPTURE', purchase_units: [{ amount: { currency_code: 'USD', value: (amountUsd / 100).toFixed(2) }, description: 'Diagnostic Sandbox PetsUnivers - aucun débit' }] },
+                body: { intent: 'CAPTURE', purchase_units: [{ amount: { currency_code: 'USD', value: (amountUsd / 100).toFixed(2) }, description: 'Diagnostic Sandbox Tekno Store - aucun débit' }] },
             })
             sandboxOrderCreated = order.status === 'CREATED' && !!order.links?.some(link => link.rel === 'approve' || link.rel === 'payer-action')
             if (!sandboxOrderCreated) throw new Error('La création de paiement Sandbox a échoué')

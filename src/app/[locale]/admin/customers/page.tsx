@@ -163,7 +163,7 @@ async function getCustomers(): Promise<CustomerItem[]> {
         readersMap.set(key, {
             id: u.id,
             userId: u.id,
-            fullName: u.fullName || u.email?.split('@')[0] || 'Lecteur PetsUnivers',
+            fullName: u.fullName || u.email?.split('@')[0] || 'Lecteur Tekno Store',
             phone: u.phone || '',
             email: u.email || '',
             city: u.city || '',
@@ -322,7 +322,7 @@ export default async function AdminCustomersPage() {
 
     return (
         <div className="space-y-12">
-            {/* Header section style PetsUnivers */}
+            {/* Header section style Tekno Store */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tighter mb-2">

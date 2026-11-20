@@ -40,12 +40,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const fallbackApiUrl = `${siteUrl}/api/blog/${post.id}/image`
     const imageUrl = post.coverImage ? getOgImageUrl(post.coverImage, siteUrl, fallbackApiUrl) : null
 
-    const baseKeywords = ["PetsUnivers", "petsunivers", "book", "الكاتب", "authors", "كتب"]
+    const baseKeywords = ["Tekno Store", "tekno", "book", "الكاتب", "authors", "كتب"]
     const tags = post.tags ? post.tags.split(',').map(t => t.trim()).filter(Boolean) : []
     const keywords = [...tags, ...baseKeywords]
 
     return {
-        title: `${post.title} | Blog PetsUnivers`,
+        title: `${post.title} | Blog Tekno Store`,
         description: post.excerpt || post.title,
         keywords: keywords,
         openGraph: {
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             url: canonicalUrl,
             type: 'article',
             publishedTime: post.publishedAt?.toISOString(),
-            authors: post.author?.fullName ? [post.author.fullName] : ['PetsUnivers'],
+            authors: post.author?.fullName ? [post.author.fullName] : ['Tekno Store'],
             images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630, alt: post.title }] : [],
         },
         twitter: {
@@ -74,7 +74,7 @@ function estimateReadingTime(content: string): number {
 }
 
 function getDisplayAuthor(name: string | null | undefined, locale: string): string {
-    let author = name || (locale === 'ar' ? 'فريق PetsUnivers' : locale === 'en' ? 'PetsUnivers Team' : 'Équipe PetsUnivers');
+    let author = name || (locale === 'ar' ? 'فريق Tekno Store' : locale === 'en' ? 'Tekno Store Team' : 'Équipe Tekno Store');
     if (author.toLowerCase() === 'admin') {
         return locale === 'ar' ? 'مشرف' : locale === 'en' ? 'Moderator' : 'Modérateur';
     }
@@ -114,7 +114,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     let contentHtml = processedContent.toString()
 
     if (process.env.NODE_ENV === 'development') {
-        contentHtml = contentHtml.replace(/src="\/uploads\//g, 'src="https://petsunivers.ma/uploads/')
+        contentHtml = contentHtml.replace(/src="\/uploads\//g, 'src="https://tekno.ma/uploads/')
     }
 
     // Mettre en gras le premier groupe de mots avant deux-points dans les listes
@@ -190,7 +190,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             })
         }
     }
-    const siteUrl = getBaseUrl() || 'https://petsunivers.ma'
+    const siteUrl = getBaseUrl() || 'https://tekno.ma'
     const canonicalArticleUrl = `${siteUrl}/${locale}/blog/${post.slug}`
     const fullCoverImageUrl = post.coverImage
         ? (post.coverImage.startsWith('http') ? post.coverImage : `${siteUrl}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`)
@@ -246,13 +246,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 ...(post.author?.bio ? { "description": post.author.bio } : {}),
                                 "worksFor": {
                                     "@type": "Organization",
-                                    "name": "PetsUnivers",
+                                    "name": "Tekno Store",
                                     "url": siteUrl
                                 }
                             },
                             "publisher": {
                                 "@type": "Organization",
-                                "name": "PetsUnivers",
+                                "name": "Tekno Store",
                                 "url": siteUrl,
                                 "logo": {
                                     "@type": "ImageObject",
@@ -268,7 +268,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             "about": {
                                 "@type": "Thing",
                                 "name": post.category || "Littérature",
-                                "description": "Article publié par PetsUnivers, la 1ère plateforme de livres au Maroc."
+                                "description": "Article publié par Tekno Store, la 1ère plateforme de livres au Maroc."
                             },
                             "inLanguage": locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-MA' : 'fr-MA',
                             "wordCount": post.content ? post.content.trim().split(/\s+/).length : 0,
@@ -280,7 +280,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             },
                             "isPartOf": {
                                 "@type": "Blog",
-                                "name": "Blog PetsUnivers",
+                                "name": "Blog Tekno Store",
                                 "url": `${siteUrl}/${locale}/blog`
                             }
                         },
@@ -332,10 +332,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     "acceptedAnswer": {
                                         "@type": "Answer",
                                         "text": locale === 'ar'
-                                            ? `كتب هذا المقال ${displayAuthor}. يمكنك قراءة المزيد من مقالاتنا على مدونة PetsUnivers.`
+                                            ? `كتب هذا المقال ${displayAuthor}. يمكنك قراءة المزيد من مقالاتنا على مدونة Tekno Store.`
                                             : locale === 'en'
-                                                ? `This article was written by ${displayAuthor}. You can read more articles on the PetsUnivers blog.`
-                                                : `Cet article a été rédigé par ${displayAuthor}. Vous pouvez lire plus d'articles sur le blog PetsUnivers.`
+                                                ? `This article was written by ${displayAuthor}. You can read more articles on the Tekno Store blog.`
+                                                : `Cet article a été rédigé par ${displayAuthor}. Vous pouvez lire plus d'articles sur le blog Tekno Store.`
                                     }
                                 },
                                 {
@@ -356,10 +356,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                     "acceptedAnswer": {
                                         "@type": "Answer",
                                         "text": locale === 'ar'
-                                            ? `يمكنك العثور على جميع الكتب الموصى بها في مكتبة PetsUnivers الإلكترونية على petsunivers.ma. الدفع عند الاستلام، توصيل سريع في المغرب.`
+                                            ? `يمكنك العثور على جميع الكتب الموصى بها في مكتبة Tekno Store الإلكترونية على tekno.ma. الدفع عند الاستلام، توصيل سريع في المغرب.`
                                             : locale === 'en'
-                                                ? `You can find all recommended books at the PetsUnivers online bookstore on petsunivers.ma. Cash on delivery, fast shipping in Morocco.`
-                                                : `Vous trouverez tous les livres recommandés sur la librairie en ligne PetsUnivers sur petsunivers.ma. Paiement à la livraison, livraison rapide au Maroc.`
+                                                ? `You can find all recommended books at the Tekno Store online bookstore on tekno.ma. Cash on delivery, fast shipping in Morocco.`
+                                                : `Vous trouverez tous les livres recommandés sur la librairie en ligne Tekno Store sur tekno.ma. Paiement à la livraison, livraison rapide au Maroc.`
                                     }
                                 }
                             ]
@@ -1066,7 +1066,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center">
-                                                <span className="text-gray-200 font-black text-2xl">PetsUnivers</span>
+                                                <span className="text-gray-200 font-black text-2xl">Tekno Store</span>
                                             </div>
                                         )}
                                         {related.category && (
@@ -1145,7 +1145,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 {locale === 'ar' ? `من هو كاتب هذا المقال؟` : locale === 'en' ? `Who is the author of this article?` : `Qui est l'auteur de cet article ?`}
                             </h3>
                             <p className="text-slate-600 leading-relaxed font-medium">
-                                {locale === 'ar' ? `كاتب هذا المقال هو ${post.author?.fullName || 'PetsUnivers'}.` : locale === 'en' ? `This article was written by ${post.author?.fullName || 'PetsUnivers'}.` : `Cet article a été écrit par ${post.author?.fullName || 'PetsUnivers'}.`}
+                                {locale === 'ar' ? `كاتب هذا المقال هو ${post.author?.fullName || 'Tekno Store'}.` : locale === 'en' ? `This article was written by ${post.author?.fullName || 'Tekno Store'}.` : `Cet article a été écrit par ${post.author?.fullName || 'Tekno Store'}.`}
                             </p>
                         </div>
                     </div>

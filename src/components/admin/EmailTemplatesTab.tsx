@@ -69,7 +69,7 @@ export default function EmailTemplatesTab() {
             subject: '',
             body: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
   <div style="text-align: center; padding: 20px;">
-    <img src="https://petsunivers.ma/logo.png" alt="PetsUnivers Logo" style="max-height: 60px;" />
+    <img src="https://tekno.ma/logo.png" alt="Tekno Store Logo" style="max-height: 60px;" />
   </div>
 
   <div style="padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
@@ -86,10 +86,10 @@ export default function EmailTemplatesTab() {
   </div>
 
   <div style="padding: 20px; text-align: center; font-size: 12px; color: #666; margin-top: 20px; border-top: 1px solid #eee;">
-    <p><strong>L'équipe PetsUnivers</strong></p>
+    <p><strong>L'équipe Tekno Store</strong></p>
     <p>Livraison partout au Maroc 🚚</p>
     <p>Paiement à la livraison 💵</p>
-    <p><a href="https://petsunivers.ma" style="color: #666;">www.petsunivers.ma</a></p>
+    <p><a href="https://tekno.ma" style="color: #666;">tekno.ma</a></p>
   </div>
 </div>`,
             description: ''
@@ -439,7 +439,7 @@ export default function EmailTemplatesTab() {
                                     type="text"
                                     value={currentTemplate.subject || ''}
                                     onChange={e => setCurrentTemplate({ ...currentTemplate, subject: e.target.value })}
-                                    placeholder="ex: Confirmation de votre commande PetsUnivers #{{order_id}}"
+                                    placeholder="ex: Confirmation de votre commande Tekno Store #{{order_id}}"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black/5 outline-none font-medium text-sm"
                                     required
                                 />
@@ -530,7 +530,7 @@ export default function EmailTemplatesTab() {
                                     type="email"
                                     value={testEmail}
                                     onChange={(e) => setTestEmail(e.target.value)}
-                                    placeholder="admin@petsunivers.ma ou client@gmail.com"
+                                    placeholder="Contact.tekno.ma@gmail.com ou client@gmail.com"
                                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-black/5"
                                     required
                                     autoFocus

@@ -224,7 +224,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_instagram || ''}
                             onChange={(e) => handleChange('social_instagram', e.target.value)}
-                            placeholder="https://instagram.com/petsunivers.book"
+                            placeholder="https://instagram.com/tekno.book"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -237,7 +237,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_facebook || ''}
                             onChange={(e) => handleChange('social_facebook', e.target.value)}
-                            placeholder="https://facebook.com/petsunivers.book"
+                            placeholder="https://facebook.com/tekno.book"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -250,7 +250,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_twitter || ''}
                             onChange={(e) => handleChange('social_twitter', e.target.value)}
-                            placeholder="https://twitter.com/petsunivers"
+                            placeholder="https://twitter.com/tekno"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -263,7 +263,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_linkedin || ''}
                             onChange={(e) => handleChange('social_linkedin', e.target.value)}
-                            placeholder="https://linkedin.com/company/petsunivers"
+                            placeholder="https://linkedin.com/company/tekno"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -276,7 +276,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_youtube || ''}
                             onChange={(e) => handleChange('social_youtube', e.target.value)}
-                            placeholder="https://youtube.com/@petsunivers"
+                            placeholder="https://youtube.com/@tekno"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -289,7 +289,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_threads || ''}
                             onChange={(e) => handleChange('social_threads', e.target.value)}
-                            placeholder="https://threads.net/@petsunivers"
+                            placeholder="https://threads.net/@tekno"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -302,7 +302,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="url"
                             value={settings.social_pinterest || ''}
                             onChange={(e) => handleChange('social_pinterest', e.target.value)}
-                            placeholder="https://pinterest.com/petsunivers"
+                            placeholder="https://pinterest.com/tekno"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>
@@ -352,7 +352,7 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                             type="email"
                             value={settings.contact_email || ''}
                             onChange={(e) => handleChange('contact_email', e.target.value)}
-                            placeholder="contact@petsunivers.ma"
+                            placeholder="Contact.tekno.ma@gmail.com"
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors"
                         />
                     </div>

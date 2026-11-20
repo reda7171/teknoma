@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
                     const uploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives')
                     await mkdir(uploadDir, { recursive: true })
                     await writeFile(path.default.join(uploadDir, fileName), buffer)
-                    const pubUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.petsunivers.ma'
+                    const pubUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                     resolvedCustomImageUrl = `${pubUrl}/api/uploads/creatives/${fileName}`
                 }
             } catch (e) {
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
 
         const isVideo = imageUrl && (imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm'));
 
-        const title = body.packName || body.title || (item ? (itemType === 'BOOK' ? item.title : item.name) : 'PetsUnivers');
+        const title = body.packName || body.title || (item ? (itemType === 'BOOK' ? item.title : item.name) : 'Tekno Store');
         const price = body.price || item?.price || 0;
 
         const jumiaSku = body.sellerSku || (item as any)?.sellerSku || '';
@@ -177,19 +177,19 @@ export async function POST(req: NextRequest) {
             ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(jumiaSku)}`
             : (item?.title ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(item.title)}` : '');
 
-        const storeDomain = domain === 'petsunivers.ma'
-            ? 'https://petsunivers.ma'
-            : (domain === 'petsunivers.ma'
-                ? 'https://petsunivers.ma'
+        const storeDomain = domain === 'tekno.ma'
+            ? 'https://tekno.ma'
+            : (domain === 'tekno.ma'
+                ? 'https://tekno.ma'
                 : (domain === 'jumia.ma'
                     ? (jumiaLink || 'https://www.jumia.ma')
-                    : (baseUrl.includes('localhost') ? 'https://petsunivers.ma' : baseUrl)));
+                    : (baseUrl.includes('localhost') ? 'https://tekno.ma' : baseUrl)));
 
         // Texte à publier avec lien intégré
         let finalCaption = body.customCaption || (itemType === 'BOOK' ? (item?.description || title) : (item?.description ? `${title}\n\n${item.description}` : title));
 
-        if (finalCaption === 'PetsUnivers' || !finalCaption) {
-            finalCaption = `📚 Découvrez notre sélection de livres sur PetsUnivers !\n\n🔗 ${domain === 'jumia.ma' ? jumiaLink : storeDomain}`;
+        if (finalCaption === 'Tekno Store' || !finalCaption) {
+            finalCaption = `📚 Découvrez notre sélection de livres sur Tekno Store !\n\n🔗 ${domain === 'jumia.ma' ? jumiaLink : storeDomain}`;
         } else if (!finalCaption.includes('http')) {
             if (domain === 'jumia.ma') {
                 finalCaption += `\n\n🛒 Commander sur Jumia : ${jumiaLink}`;
@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
                 }
             }
         } else if (domain && domain !== 'jumia.ma') {
-            finalCaption = finalCaption.replace(/https?:\/\/(www\.)?petsunivers\.(store|ma)/gi, storeDomain);
+            finalCaption = finalCaption.replace(/https?:\/\/(www\.)?tekno\.(store|ma)/gi, storeDomain);
         }
 
         // Construire le payload envoyé à n8n
@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
             itemId: item?.id || 'marketing',
             itemType,
             title: title,
-            author: itemType === 'BOOK' ? item?.author : 'PetsUnivers',
+            author: itemType === 'BOOK' ? item?.author : 'Tekno Store',
             price: price,
             category: itemType === 'BOOK' ? item?.category : 'Promotion',
             language: itemType === 'BOOK' ? item?.language : 'fr',
@@ -221,13 +221,13 @@ export async function POST(req: NextRequest) {
             packUrl: itemType === 'PACK' ? `${storeDomain}/fr/packs` : '',
             itemUrl: domain === 'jumia.ma' ? (jumiaLink || '') : (item ? (itemType === 'BOOK' ? `${storeDomain}/fr/books/${item.id}` : `${storeDomain}/fr/packs`) : storeDomain),
             jumiaUrl: jumiaLink || '',
-            domain: domain || (storeDomain.includes('petsunivers.ma') ? 'petsunivers.ma' : (domain === 'jumia.ma' ? 'jumia.ma' : 'petsunivers.ma')),
+            domain: domain || (storeDomain.includes('tekno.ma') ? 'tekno.ma' : (domain === 'jumia.ma' ? 'jumia.ma' : 'tekno.ma')),
             caption: finalCaption,
             description: body.customCaption || item?.description || '',
             longDescription: item?.longDescription || '',
             format,
             scheduleAt: scheduleAt || '',
-            source: 'petsunivers-admin',
+            source: 'tekno-admin',
             facebook_access_token: facebookAccessToken,
             instagram_account_id: instagramAccountId,
             threads_account_id: threadsAccountId,

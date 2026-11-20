@@ -1,10 +1,10 @@
 #!/bin/sh
 set -eu
 
-CONTAINER_NAME="${PETSUNIVERS_DB_CONTAINER:-petsunivers_db}"
-BACKUP_DIR="${PETSUNIVERS_BACKUP_DIR:-/var/www/petsunivers/backups}"
+CONTAINER_NAME="${TEKNO_DB_CONTAINER:-tekno_db}"
+BACKUP_DIR="${TEKNO_BACKUP_DIR:-/var/www/tekno/backups}"
 DATE="$(date +'%Y-%m-%d_%H-%M-%S')"
-FILENAME="backup_petsunivers_db_${DATE}.sql"
+FILENAME="backup_tekno_db_${DATE}.sql"
 TEMP_FILE="${BACKUP_DIR}/.${FILENAME}.part"
 FINAL_FILE="${BACKUP_DIR}/${FILENAME}"
 

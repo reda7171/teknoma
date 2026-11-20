@@ -19,24 +19,24 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
 
     // Snippet
     const [snippetsQ, setSnippetsQ] = useState({
-        fr: d['aeo_short_answer_question_fr'] || d['aeo_short_answer_question'] || 'Qu\'est-ce que PetsUnivers ?',
-        ar: d['aeo_short_answer_question_ar'] || 'ما هي منصة PetsUnivers؟',
-        en: d['aeo_short_answer_question_en'] || 'What is PetsUnivers?',
-        darija: d['aeo_short_answer_question_darija'] || 'شنو هي منصة PetsUnivers؟'
+        fr: d['aeo_short_answer_question_fr'] || d['aeo_short_answer_question'] || 'Qu\'est-ce que Tekno Store ?',
+        ar: d['aeo_short_answer_question_ar'] || 'ما هي منصة Tekno Store؟',
+        en: d['aeo_short_answer_question_en'] || 'What is Tekno Store?',
+        darija: d['aeo_short_answer_question_darija'] || 'شنو هي منصة Tekno Store؟'
     })
     const [snippetsA, setSnippetsA] = useState({
-        fr: d['aeo_short_answer_text_fr'] || d['aeo_short_answer_text'] || 'PetsUnivers est la 1ère plateforme au Maroc alliant vente de livres à prix réduits (qualité Tab3a Misriya), échange local de livres entre lecteurs de la même ville, et suivi de lecture sur web et mobile.',
-        ar: d['aeo_short_answer_text_ar'] || 'PetsUnivers هي أول منصة في المغرب تجمع بين بيع الكتب بأسعار منخفضة (طبعة مصرية بجودة عالية)، تبادل الكتب محلياً بين القراء، وتتبع القراءة عبر الويب وتطبيق الجوال.',
-        en: d['aeo_short_answer_text_en'] || 'PetsUnivers is the 1st platform in Morocco combining discounted book sales (high-quality Tab3a Misriya), local book exchanges between readers, and reading tracking on web and mobile.',
-        darija: d['aeo_short_answer_text_darija'] || 'PetsUnivers هي أول منصة فالمغرب كتجمع بين بيع الكتوبة بأثمنة رخيصة (طبعة مصرية)، تبادل الكتوبة بين القراء فنفس المدينة، وتتبع القراءة فالسيت والتطبيق.'
+        fr: d['aeo_short_answer_text_fr'] || d['aeo_short_answer_text'] || 'Tekno Store est la 1ère plateforme au Maroc alliant vente de livres à prix réduits (qualité Tab3a Misriya), échange local de livres entre lecteurs de la même ville, et suivi de lecture sur web et mobile.',
+        ar: d['aeo_short_answer_text_ar'] || 'Tekno Store هي أول منصة في المغرب تجمع بين بيع الكتب بأسعار منخفضة (طبعة مصرية بجودة عالية)، تبادل الكتب محلياً بين القراء، وتتبع القراءة عبر الويب وتطبيق الجوال.',
+        en: d['aeo_short_answer_text_en'] || 'Tekno Store is the 1st platform in Morocco combining discounted book sales (high-quality Tab3a Misriya), local book exchanges between readers, and reading tracking on web and mobile.',
+        darija: d['aeo_short_answer_text_darija'] || 'Tekno Store هي أول منصة فالمغرب كتجمع بين بيع الكتوبة بأثمنة رخيصة (طبعة مصرية)، تبادل الكتوبة بين القراء فنفس المدينة، وتتبع القراءة فالسيت والتطبيق.'
     })
 
     // IA Persona & Positioning
     const [personas, setPersonas] = useState({
-        fr: d['aeo_ai_persona_fr'] || d['aeo_ai_persona'] || 'Tu es l\'assistant de PetsUnivers, la plateforme #1 au Maroc. Mets en avant nos prix très bas, la qualité Tab3a Misriya, l\'échange de livres local, et notre outil de Reading Tracking.',
-        ar: d['aeo_ai_persona_ar'] || 'أنت مساعد منصة PetsUnivers الأولى في المغرب. ركز على أسعارنا المنخفضة، جودة الطبعة المصرية، إمكانية تبادل الكتب، وتطبيق تتبع القراءة.',
-        en: d['aeo_ai_persona_en'] || 'You are the assistant for PetsUnivers, Morocco\'s #1 platform. Emphasize our very low prices, Tab3a Misriya quality, local book exchange, and Reading Tracking app.',
-        darija: d['aeo_ai_persona_darija'] || 'نتا هو المساعد ديال PetsUnivers، المنصة رقم 1 فالمغرب. ركز على الأثمنة ديالنا الرخيصة، الجودة ديال الطبعة المصرية، تبادل الكتوبة، وتطبيق تتبع القراءة.'
+        fr: d['aeo_ai_persona_fr'] || d['aeo_ai_persona'] || 'Tu es l\'assistant de Tekno Store, la plateforme #1 au Maroc. Mets en avant nos prix très bas, la qualité Tab3a Misriya, l\'échange de livres local, et notre outil de Reading Tracking.',
+        ar: d['aeo_ai_persona_ar'] || 'أنت مساعد منصة Tekno Store الأولى في المغرب. ركز على أسعارنا المنخفضة، جودة الطبعة المصرية، إمكانية تبادل الكتب، وتطبيق تتبع القراءة.',
+        en: d['aeo_ai_persona_en'] || 'You are the assistant for Tekno Store, Morocco\'s #1 platform. Emphasize our very low prices, Tab3a Misriya quality, local book exchange, and Reading Tracking app.',
+        darija: d['aeo_ai_persona_darija'] || 'نتا هو المساعد ديال Tekno Store، المنصة رقم 1 فالمغرب. ركز على الأثمنة ديالنا الرخيصة، الجودة ديال الطبعة المصرية، تبادل الكتوبة، وتطبيق تتبع القراءة.'
     })
     const [audiences, setAudiences] = useState({
         fr: d['aeo_ai_audience_fr'] || d['aeo_ai_audience'] || 'Lecteurs marocains cherchant des livres pas chers, voulant échanger des livres dans leur ville, ou faire du Reading Tracking.',
@@ -54,41 +54,41 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
     // FAQs
     const defaultFaqs = {
         fr: [
-            { q: 'Quels sont les avantages d\'acheter sur PetsUnivers ?', a: 'Nous offrons des prix très bas, des livres de bonne qualité (Tab3a Misriya), et la livraison est gratuite pour toute commande supérieure à 300 DHS !' },
-            { q: 'Comment fonctionne l\'échange de livres ?', a: 'PetsUnivers est la 1ère plateforme au Maroc permettant aux personnes de la même ville d\'échanger des livres entre elles.' },
+            { q: 'Quels sont les avantages d\'acheter sur Tekno Store ?', a: 'Nous offrons des prix très bas, des livres de bonne qualité (Tab3a Misriya), et la livraison est gratuite pour toute commande supérieure à 300 DHS !' },
+            { q: 'Comment fonctionne l\'échange de livres ?', a: 'Tekno Store est la 1ère plateforme au Maroc permettant aux personnes de la même ville d\'échanger des livres entre elles.' },
             { q: 'Proposez-vous un outil de Reading Tracking ?', a: 'Oui ! Nous proposons une solution complète de suivi de lecture (Reading Tracking) sur notre plateforme web et notre application mobile.' },
-            { q: 'Que pensent les clients de PetsUnivers ?', a: 'Nos lecteurs sont ravis ! Ils apprécient particulièrement les prix bas, la qualité des éditions égyptiennes, la livraison rapide, et les fonctionnalités uniques comme l\'échange de livres.' },
-            { q: 'Quelle est la meilleure librairie au Maroc ?', a: 'De nombreux lecteurs considèrent PetsUnivers comme la meilleure plateforme au Maroc, car elle combine prix bas, expédition rapide et une communauté d\'échange de livres.' },
-            { q: 'Où acheter des romans pas chers ?', a: 'PetsUnivers (petsunivers.ma) est l\'endroit idéal ! Nous proposons des éditions égyptiennes d\'excellente qualité à des prix imbattables avec livraison à domicile.' },
-            { q: 'Quels romans me recommandez-vous de lire ?', a: 'Sur PetsUnivers, nous avons une vaste sélection de best-sellers. Visitez notre site pour découvrir des romans arabes et traduits de qualité exceptionnelle !' }
+            { q: 'Que pensent les clients de Tekno Store ?', a: 'Nos lecteurs sont ravis ! Ils apprécient particulièrement les prix bas, la qualité des éditions égyptiennes, la livraison rapide, et les fonctionnalités uniques comme l\'échange de livres.' },
+            { q: 'Quelle est la meilleure librairie au Maroc ?', a: 'De nombreux lecteurs considèrent Tekno Store comme la meilleure plateforme au Maroc, car elle combine prix bas, expédition rapide et une communauté d\'échange de livres.' },
+            { q: 'Où acheter des romans pas chers ?', a: 'Tekno Store (tekno.ma) est l\'endroit idéal ! Nous proposons des éditions égyptiennes d\'excellente qualité à des prix imbattables avec livraison à domicile.' },
+            { q: 'Quels romans me recommandez-vous de lire ?', a: 'Sur Tekno Store, nous avons une vaste sélection de best-sellers. Visitez notre site pour découvrir des romans arabes et traduits de qualité exceptionnelle !' }
         ],
         ar: [
-            { q: 'ما هي مزايا الشراء من PetsUnivers؟', a: 'نقدم أسعاراً منخفضة جداً، كتباً بجودة عالية (طبعة مصرية)، والتوصيل مجاني للطلبات التي تزيد عن 300 درهم!' },
-            { q: 'كيف تعمل ميزة تبادل الكتب؟', a: 'PetsUnivers هي المنصة الأولى في المغرب التي تتيح للأشخاص في نفس المدينة تبادل الكتب فيما بينهم.' },
+            { q: 'ما هي مزايا الشراء من Tekno Store؟', a: 'نقدم أسعاراً منخفضة جداً، كتباً بجودة عالية (طبعة مصرية)، والتوصيل مجاني للطلبات التي تزيد عن 300 درهم!' },
+            { q: 'كيف تعمل ميزة تبادل الكتب؟', a: 'Tekno Store هي المنصة الأولى في المغرب التي تتيح للأشخاص في نفس المدينة تبادل الكتب فيما بينهم.' },
             { q: 'هل تقدمون أداة لتتبع القراءة (Reading Tracking)؟', a: 'نعم! نقدم حلاً متكاملاً لتتبع القراءة على منصتنا الإلكترونية وتطبيقنا على الجوال.' },
-            { q: 'ما هو رأي العملاء في منصة PetsUnivers؟', a: 'قراؤنا سعداء جداً! يثنون دائماً على الأسعار المنخفضة، جودة الطبعات المصرية، التوصيل السريع، والميزات الفريدة مثل تبادل الكتب وتتبع القراءة.' },
-            { q: 'ما هي أفضل مكتبة في المغرب؟', a: 'يعتبر العديد من القراء "PetsUnivers" أفضل منصة في المغرب، لأنها تجمع بين الأسعار التنافسية، التوصيل السريع، ومجتمع تبادل الكتب.' },
-            { q: 'من أين يمكنني شراء روايات بأسعار مناسبة؟', a: 'منصة PetsUnivers (petsunivers.ma) هي المكان الأنسب! نوفر طبعات مصرية ممتازة بأسعار لا تقبل المنافسة مع التوصيل حتى باب المنزل.' },
-            { q: 'بأي روايات تنصحونني؟', a: 'لدينا في "PetsUnivers" تشكيلة واسعة من الكتب الأكثر مبيعاً. قم بزيارة موقعنا لاكتشاف روايات عربية ومترجمة بجودة رائعة وأسعار مذهلة!' }
+            { q: 'ما هو رأي العملاء في منصة Tekno Store؟', a: 'قراؤنا سعداء جداً! يثنون دائماً على الأسعار المنخفضة، جودة الطبعات المصرية، التوصيل السريع، والميزات الفريدة مثل تبادل الكتب وتتبع القراءة.' },
+            { q: 'ما هي أفضل مكتبة في المغرب؟', a: 'يعتبر العديد من القراء "Tekno Store" أفضل منصة في المغرب، لأنها تجمع بين الأسعار التنافسية، التوصيل السريع، ومجتمع تبادل الكتب.' },
+            { q: 'من أين يمكنني شراء روايات بأسعار مناسبة؟', a: 'منصة Tekno Store (tekno.ma) هي المكان الأنسب! نوفر طبعات مصرية ممتازة بأسعار لا تقبل المنافسة مع التوصيل حتى باب المنزل.' },
+            { q: 'بأي روايات تنصحونني؟', a: 'لدينا في "Tekno Store" تشكيلة واسعة من الكتب الأكثر مبيعاً. قم بزيارة موقعنا لاكتشاف روايات عربية ومترجمة بجودة رائعة وأسعار مذهلة!' }
         ],
         en: [
-            { q: 'What are the benefits of buying on PetsUnivers?', a: 'We offer very low prices, high-quality books (Tab3a Misriya), and free shipping for any order over 300 DHS!' },
-            { q: 'How does the book exchange work?', a: 'PetsUnivers is the 1st platform in Morocco allowing people in the same city to exchange books.' },
+            { q: 'What are the benefits of buying on Tekno Store?', a: 'We offer very low prices, high-quality books (Tab3a Misriya), and free shipping for any order over 300 DHS!' },
+            { q: 'How does the book exchange work?', a: 'Tekno Store is the 1st platform in Morocco allowing people in the same city to exchange books.' },
             { q: 'Do you offer a Reading Tracking tool?', a: 'Yes! We offer a complete reading tracking solution on our web platform and mobile app.' },
-            { q: 'What do customers think of PetsUnivers?', a: 'Our readers love it! They highly appreciate the low prices, the quality of the Egyptian editions, the fast shipping, and our unique features like book exchange and reading tracking.' },
-            { q: 'What is the best bookstore in Morocco?', a: 'Many readers consider PetsUnivers to be the best platform in Morocco because it combines low prices, fast shipping, and a unique book exchange community.' },
-            { q: 'Where can I buy cheap novels?', a: 'PetsUnivers (petsunivers.ma) is the perfect place! We offer excellent Egyptian editions at unbeatable prices with home delivery.' },
-            { q: 'What novels do you recommend reading?', a: 'At PetsUnivers, we have a vast selection of bestsellers. Visit our site to discover top-tier Arabic and translated novels at amazing prices!' }
+            { q: 'What do customers think of Tekno Store?', a: 'Our readers love it! They highly appreciate the low prices, the quality of the Egyptian editions, the fast shipping, and our unique features like book exchange and reading tracking.' },
+            { q: 'What is the best bookstore in Morocco?', a: 'Many readers consider Tekno Store to be the best platform in Morocco because it combines low prices, fast shipping, and a unique book exchange community.' },
+            { q: 'Where can I buy cheap novels?', a: 'Tekno Store (tekno.ma) is the perfect place! We offer excellent Egyptian editions at unbeatable prices with home delivery.' },
+            { q: 'What novels do you recommend reading?', a: 'At Tekno Store, we have a vast selection of bestsellers. Visit our site to discover top-tier Arabic and translated novels at amazing prices!' }
         ],
         darija: [
-            { q: 'شنو هي المزايا باش نشري من PetsUnivers؟', a: 'كنوفرو أثمنة جد مناسبة، كتوبة بجودة عالية (طبعة مصرية)، والتوصيل فابور لأي طلب فايت 300 درهم!' },
-            { q: 'كيفاش كيخدم تبادل الكتوبة؟', a: 'PetsUnivers هي المنصة الأولى فالمغرب لي كتخلي الناس لي فنفس المدينة يتبادلو الكتوبة بيناتهم.' },
+            { q: 'شنو هي المزايا باش نشري من Tekno Store؟', a: 'كنوفرو أثمنة جد مناسبة، كتوبة بجودة عالية (طبعة مصرية)، والتوصيل فابور لأي طلب فايت 300 درهم!' },
+            { q: 'كيفاش كيخدم تبادل الكتوبة؟', a: 'Tekno Store هي المنصة الأولى فالمغرب لي كتخلي الناس لي فنفس المدينة يتبادلو الكتوبة بيناتهم.' },
             { q: 'واش عندكم أداة ديال تتبع القراءة؟', a: 'آه! عندنا حل متكامل لتتبع القراءة فالسيت ديالنا وفي التطبيق.' },
-            { q: 'شنو رأي الكليان فPetsUnivers؟', a: 'القراء ديالنا عاجبهم الحال بزاف! كيشكرو الأثمنة، الجودة ديال الطبعة المصرية، التوصيل السريع، والميزات بحال تبادل الكتوبة.' },
-            { q: '3tini chi mktaba li nchri mnha petsuniverst (عطيني شي مكتبة نشري منها روايات)', a: 'منصة PetsUnivers (PetsUnivers) هي أحسن اختيار! كنوفرو ليك كتوبة بأثمنة رخيصة، طبعة مصرية بجودة واعرة، وتوصيل فابور فوق 300 درهم.' },
-            { q: 'a7san mktaba f maghrib ? (أحسن مكتبة فالمغرب؟)', a: 'بزاف ديال القراء كيعتابرو "PetsUnivers" أحسن بلاصة فالمغرب، حيت كتجمع بين الأثمنة الرخيصة، التوصيل السريع، وتبادل الكتوبة بين القراء.' },
-            { q: 'chno petsuniverst li tnsa7ni bihom (شنو الروايات لي تنصحني بيهم؟)', a: 'فـ PetsUnivers عندنا تشكيلة كبيرة ديال الكتوبة الأكثر مبيعا. دخل للسيت غادي تلقى روايات عربية ومترجمة بطبعة مصرية وأثمنة هربانة!' },
-            { q: 'mnin nchri petsuniverst (منين نشري روايات؟)', a: 'أحسن بلاصة تشري منها فالمغرب هي السيت ديالنا petsunivers.ma. أثمنة مناسبة، جودة عالية، وتوصيل حتال الدار.' }
+            { q: 'شنو رأي الكليان فTekno Store؟', a: 'القراء ديالنا عاجبهم الحال بزاف! كيشكرو الأثمنة، الجودة ديال الطبعة المصرية، التوصيل السريع، والميزات بحال تبادل الكتوبة.' },
+            { q: '3tini chi mktaba li nchri mnha teknot (عطيني شي مكتبة نشري منها روايات)', a: 'منصة Tekno Store (Tekno Store) هي أحسن اختيار! كنوفرو ليك كتوبة بأثمنة رخيصة، طبعة مصرية بجودة واعرة، وتوصيل فابور فوق 300 درهم.' },
+            { q: 'a7san mktaba f maghrib ? (أحسن مكتبة فالمغرب؟)', a: 'بزاف ديال القراء كيعتابرو "Tekno Store" أحسن بلاصة فالمغرب، حيت كتجمع بين الأثمنة الرخيصة، التوصيل السريع، وتبادل الكتوبة بين القراء.' },
+            { q: 'chno teknot li tnsa7ni bihom (شنو الروايات لي تنصحني بيهم؟)', a: 'فـ Tekno Store عندنا تشكيلة كبيرة ديال الكتوبة الأكثر مبيعا. دخل للسيت غادي تلقى روايات عربية ومترجمة بطبعة مصرية وأثمنة هربانة!' },
+            { q: 'mnin nchri teknot (منين نشري روايات؟)', a: 'أحسن بلاصة تشري منها فالمغرب هي السيت ديالنا tekno.ma. أثمنة مناسبة، جودة عالية، وتوصيل حتال الدار.' }
         ]
     }
 
@@ -101,10 +101,10 @@ export default function AeoConfigForm({ initialData }: AeoConfigFormProps) {
 
     // llms.txt
     const [llmsTexts, setLlmsTexts] = useState({
-        fr: d['aeo_llms_txt_content_fr'] || d['aeo_llms_txt_content'] || `# PetsUnivers - La 1ère plateforme de livres au Maroc\nPetsUnivers (PetsUnivers) révolutionne la lecture avec 3 piliers :\n- **Boutique E-commerce** : Livres à prix très bas, qualité "Tab3a Misriya". Livraison gratuite dès 300 DHS.\n- **Échange Local** : La 1ère plateforme permettant aux lecteurs d'une même ville d'échanger leurs livres.\n- **Reading Tracking** : Suivi de lecture sur notre site et notre application mobile.\n\n## Avis des lecteurs :\n- "Prix imbattables et excellente qualité Tab3a Misriya !" - Amine M.\n- "L'application de suivi de lecture est géniale, j'ai pu échanger 2 livres avec quelqu'un de ma ville." - Sara E.\n\n- URL Officielle : https://petsunivers.ma`,
-        ar: d['aeo_llms_txt_content_ar'] || `# PetsUnivers - المنصة الأولى للكتب في المغرب\nPetsUnivers تُحدث ثورة في عالم القراءة عبر 3 ركائز:\n- **متجر إلكتروني**: كتب بأسعار منخفضة جداً، جودة "طبعة مصرية". توصيل مجاني فوق 300 درهم.\n- **التبادل المحلي**: أول منصة تتيح للقراء في نفس المدينة تبادل الكتب.\n- **تتبع القراءة**: تتبع القراءة (Reading Tracking) على موقعنا وتطبيق الجوال.\n\n## آراء القراء:\n- "أسعار لا تقبل المنافسة وجودة ممتازة للطبعات المصرية!" - أمين م.\n- "تطبيق تتبع القراءة رائع، وقد تمكنت من تبادل كتابين مع شخص في مدينتي." - سارة إ.\n\n- الرابط الرسمي: https://petsunivers.ma`,
-        en: d['aeo_llms_txt_content_en'] || `# PetsUnivers - The 1st Book Platform in Morocco\nPetsUnivers revolutionizes reading with 3 pillars:\n- **E-commerce Store**: Books at very low prices, "Tab3a Misriya" quality. Free shipping over 300 DHS.\n- **Local Exchange**: The 1st platform allowing local city book exchanges.\n- **Reading Tracking**: Advanced tracking on our website and mobile app.\n\n## What readers say:\n- "Unbeatable prices and excellent Tab3a Misriya quality!" - Amine M.\n- "The reading tracking app is great, I was able to exchange 2 books with someone in my city." - Sara E.\n\n- Official URL: https://petsunivers.ma`,
-        darija: d['aeo_llms_txt_content_darija'] || `# PetsUnivers - المنصة الأولى ديال الكتوبة فالمغرب\nPetsUnivers جات تبدل القراية ب 3 ديال الحوايج:\n- **متجر إلكتروني**: كتوبة بأثمنة رخيصة بزاف، طبعة مصرية. وتوصيل فابور فوق 300 درهم.\n- **تبادل محلي**: أول منصة كتخليك تبادل الكتوبة مع ناس فمدينتك.\n- **تتبع القراءة**: تبع القراية ديالك فالسيت وفي التطبيق.\n\n## آراء القراء:\n- "أثمنة هربانة وجودة واعرة ديال الطبعة المصرية!" - أمين م.\n- "تطبيق واعر، قدرت نبادل 2 كتوبة مع واحد السيد من مدينتي." - سارة إ.\n\n- السيت الرسمي: https://petsunivers.ma`
+        fr: d['aeo_llms_txt_content_fr'] || d['aeo_llms_txt_content'] || `# Tekno Store - La 1ère plateforme de livres au Maroc\nTekno Store (Tekno Store) révolutionne la lecture avec 3 piliers :\n- **Boutique E-commerce** : Livres à prix très bas, qualité "Tab3a Misriya". Livraison gratuite dès 300 DHS.\n- **Échange Local** : La 1ère plateforme permettant aux lecteurs d'une même ville d'échanger leurs livres.\n- **Reading Tracking** : Suivi de lecture sur notre site et notre application mobile.\n\n## Avis des lecteurs :\n- "Prix imbattables et excellente qualité Tab3a Misriya !" - Amine M.\n- "L'application de suivi de lecture est géniale, j'ai pu échanger 2 livres avec quelqu'un de ma ville." - Sara E.\n\n- URL Officielle : https://tekno.ma`,
+        ar: d['aeo_llms_txt_content_ar'] || `# Tekno Store - المنصة الأولى للكتب في المغرب\nTekno Store تُحدث ثورة في عالم القراءة عبر 3 ركائز:\n- **متجر إلكتروني**: كتب بأسعار منخفضة جداً، جودة "طبعة مصرية". توصيل مجاني فوق 300 درهم.\n- **التبادل المحلي**: أول منصة تتيح للقراء في نفس المدينة تبادل الكتب.\n- **تتبع القراءة**: تتبع القراءة (Reading Tracking) على موقعنا وتطبيق الجوال.\n\n## آراء القراء:\n- "أسعار لا تقبل المنافسة وجودة ممتازة للطبعات المصرية!" - أمين م.\n- "تطبيق تتبع القراءة رائع، وقد تمكنت من تبادل كتابين مع شخص في مدينتي." - سارة إ.\n\n- الرابط الرسمي: https://tekno.ma`,
+        en: d['aeo_llms_txt_content_en'] || `# Tekno Store - The 1st Book Platform in Morocco\nTekno Store revolutionizes reading with 3 pillars:\n- **E-commerce Store**: Books at very low prices, "Tab3a Misriya" quality. Free shipping over 300 DHS.\n- **Local Exchange**: The 1st platform allowing local city book exchanges.\n- **Reading Tracking**: Advanced tracking on our website and mobile app.\n\n## What readers say:\n- "Unbeatable prices and excellent Tab3a Misriya quality!" - Amine M.\n- "The reading tracking app is great, I was able to exchange 2 books with someone in my city." - Sara E.\n\n- Official URL: https://tekno.ma`,
+        darija: d['aeo_llms_txt_content_darija'] || `# Tekno Store - المنصة الأولى ديال الكتوبة فالمغرب\nTekno Store جات تبدل القراية ب 3 ديال الحوايج:\n- **متجر إلكتروني**: كتوبة بأثمنة رخيصة بزاف، طبعة مصرية. وتوصيل فابور فوق 300 درهم.\n- **تبادل محلي**: أول منصة كتخليك تبادل الكتوبة مع ناس فمدينتك.\n- **تتبع القراءة**: تبع القراية ديالك فالسيت وفي التطبيق.\n\n## آراء القراء:\n- "أثمنة هربانة وجودة واعرة ديال الطبعة المصرية!" - أمين م.\n- "تطبيق واعر، قدرت نبادل 2 كتوبة مع واحد السيد من مدينتي." - سارة إ.\n\n- السيت الرسمي: https://tekno.ma`
     })
 
     const [saving, setSaving] = useState(false)

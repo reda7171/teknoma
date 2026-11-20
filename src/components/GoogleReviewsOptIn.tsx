@@ -107,7 +107,7 @@ export default function GoogleReviewsOptIn({ orderId, email, estimatedDeliveryDa
 
                             <h3 className="text-2xl font-black text-black mb-2 tracking-tight">Votre avis compte !</h3>
                             <p className="text-gray-500 text-sm mb-8 font-medium">
-                                Voulez-vous évaluer votre expérience d'achat sur PetsUnivers ? Entrez votre email pour recevoir notre questionnaire Google Avis.
+                                Voulez-vous évaluer votre expérience d'achat sur Tekno Store ? Entrez votre email pour recevoir notre questionnaire Google Avis.
                             </p>
 
                             <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">

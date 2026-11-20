@@ -194,7 +194,7 @@ export default function BookDescriptionModal({ isOpen, onClose, book, format = '
                 newWindow.document.write(`
                     <html lang="fr">
                         <head>
-                            <title>Aperçu Description - PetsUnivers</title>
+                            <title>Aperçu Description - Tekno Store</title>
                             <style>
                                 body { margin: 0; display: flex; align-items: center; justify-content: center; background: #1a1a2e; min-height: 100vh; font-family: sans-serif; }
                                 img { max-width: 90%; max-height: 90vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }

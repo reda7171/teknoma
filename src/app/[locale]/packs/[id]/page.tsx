@@ -32,7 +32,7 @@ export async function generateMetadata({
 
     if (!pack) {
         return {
-            title: 'Pack introuvable | PetsUnivers',
+            title: 'Pack introuvable | Tekno Store',
         }
     }
 
@@ -63,10 +63,10 @@ export async function generateMetadata({
     ]
 
     const ogTitle = locale === 'ar'
-        ? `باقة "${displayName}" — ${displayPrice} درهم ${hasDiscount ? `(وفر ${savingsPercent}%)` : ''} | مكتبة PetsUnivers`
+        ? `باقة "${displayName}" — ${displayPrice} درهم ${hasDiscount ? `(وفر ${savingsPercent}%)` : ''} | مكتبة Tekno Store`
         : locale === 'en'
-            ? `Pack "${displayName}" — ${displayPrice} MAD ${hasDiscount ? `(Save ${savingsPercent}%)` : ''} | PetsUnivers`
-            : `Pack "${displayName}" — ${displayPrice} DH ${hasDiscount ? `(Économisez ${savingsPercent}%)` : ''} | PetsUnivers`
+            ? `Pack "${displayName}" — ${displayPrice} MAD ${hasDiscount ? `(Save ${savingsPercent}%)` : ''} | Tekno Store`
+            : `Pack "${displayName}" — ${displayPrice} DH ${hasDiscount ? `(Économisez ${savingsPercent}%)` : ''} | Tekno Store`
 
     const ogDescription = displayDescription || (locale === 'ar'
         ? `⚡ السعر: ${displayPrice} درهم مغربي ${hasDiscount ? `عوض ${totalOriginalPrice} درهم` : ''}. باقة من ${pack.books.length} كتب مختارة مع الدفع عند الاستلام والتوصيل السريع بالمغرب.`
@@ -80,10 +80,10 @@ export async function generateMetadata({
         || process.env.FACEBOOK_CLIENT_ID
 
     return {
-        title: `${displayName} - Pack de ${pack.books.length} Livres | PetsUnivers`,
+        title: `${displayName} - Pack de ${pack.books.length} Livres | Tekno Store`,
         description: displayDescription || (locale === 'ar'
-            ? `اشتري باقة "${displayName}" على PetsUnivers. ${pack.books.length} كتب مختارة : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `وفر ${savingsPercent}%. ` : ''}السعر: ${displayPrice} درهم. توصيل سريع بالمغرب.`
-            : `Achetez le pack "${displayName}" sur PetsUnivers. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} DH). ` : ''}Prix: ${displayPrice} DH. Livraison rapide au Maroc.`),
+            ? `اشتري باقة "${displayName}" على Tekno Store. ${pack.books.length} كتب مختارة : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `وفر ${savingsPercent}%. ` : ''}السعر: ${displayPrice} درهم. توصيل سريع بالمغرب.`
+            : `Achetez le pack "${displayName}" sur Tekno Store. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} DH). ` : ''}Prix: ${displayPrice} DH. Livraison rapide au Maroc.`),
         keywords,
         openGraph: {
             title: ogTitle,
@@ -175,11 +175,11 @@ export default async function PackDetailPage({
             '@type': 'Product',
             name: displayName,
             sku: pack.id,
-            description: displayDescription || `Pack de ${pack.books.length} livres sélectionné par PetsUnivers.`,
+            description: displayDescription || `Pack de ${pack.books.length} livres sélectionné par Tekno Store.`,
             image: packImageUrl,
             brand: {
                 '@type': 'Brand',
-                name: 'PetsUnivers',
+                name: 'Tekno Store',
             },
             aggregateRating: {
                 '@type': 'AggregateRating',

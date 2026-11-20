@@ -125,7 +125,7 @@ export const useCartStore = create<CartStore>()(
             },
         }),
         {
-            name: 'petsunivers-cart-storage', // Nom de la clé dans localStorage
+            name: 'tekno-cart-storage', // Nom de la clé dans localStorage
             storage: createJSONStorage(() => localStorage),
             version: 2,
             migrate: (persistedState) => {

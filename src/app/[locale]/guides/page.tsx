@@ -22,7 +22,7 @@ export default function BuyingGuidesPage() {
         },
         {
             title: "Échanger ou Acheter neuf ?",
-            desc: "Tout comprendre sur le système d'échange PetsUnivers et comment optimiser votre budget lecture.",
+            desc: "Tout comprendre sur le système d'échange Tekno Store et comment optimiser votre budget lecture.",
             icon: Users,
             color: "bg-pixio-yellow",
             image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=800&auto=format&fit=crop"

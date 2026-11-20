@@ -343,7 +343,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                 )}
 
                 <div className="mt-4 p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-sm text-indigo-800">
-                    <strong>Documentation Stripe :</strong> Pour recevoir les confirmations de paiement en temps réel, veuillez ajouter l'URL de Webhook <code>https://petsunivers.ma/api/webhooks/stripe</code> dans votre tableau de bord Stripe. N'oubliez pas d'ajouter la clé secrète du Webhook dans votre fichier <code>.env</code> (<code>STRIPE_WEBHOOK_SECRET</code>).
+                    <strong>Documentation Stripe :</strong> Pour recevoir les confirmations de paiement en temps réel, veuillez ajouter l'URL de Webhook <code>https://tekno.ma/api/webhooks/stripe</code> dans votre tableau de bord Stripe. N'oubliez pas d'ajouter la clé secrète du Webhook dans votre fichier <code>.env</code> (<code>STRIPE_WEBHOOK_SECRET</code>).
                 </div>
             </div>
 
@@ -412,7 +412,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                 )}
 
                 <div className="mt-4 p-4 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-800">
-                    <strong>Documentation CMI :</strong> Le système génère automatiquement l'empreinte SHA-512 pour sécuriser vos paiements. Si CMI vous demande de leur fournir une "Callback URL", donnez-leur : <code>https://petsunivers.ma/api/webhooks/cmi</code>.
+                    <strong>Documentation CMI :</strong> Le système génère automatiquement l'empreinte SHA-512 pour sécuriser vos paiements. Si CMI vous demande de leur fournir une "Callback URL", donnez-leur : <code>https://tekno.ma/api/webhooks/cmi</code>.
                 </div>
             </div>
 

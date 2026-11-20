@@ -398,7 +398,7 @@ export default function DatabasePage() {
                                     <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                                 </div>
-                                <span className="ml-4 text-xs font-mono text-gray-400">console_sql - root@petsunivers</span>
+                                <span className="ml-4 text-xs font-mono text-gray-400">console_sql - root@tekno</span>
                             </div>
                             <button
                                 onClick={executeQuery}

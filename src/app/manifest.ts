@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'PetsUnivers ? Animalerie au Maroc',
-        short_name: 'PetsUnivers',
-        description: 'Alimentation, accessoires et soins pour chats, chiens et petits animaux.',
+        name: 'Tekno Store — High-Tech, Smartphones, PC & Mac au Maroc',
+        short_name: 'Tekno Store',
+        description: 'Vente de smartphones, PC portables, Mac et accessoires technologiques au Maroc avec paiement à la livraison.',
         start_url: '/',
         display: 'standalone',
         background_color: '#f7f0df',
@@ -15,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
         dir: 'auto',
         icons: [
             {
-                src: '/petsunivers-icon.svg',
+                src: '/logo.png',
                 sizes: 'any',
                 type: 'image/svg+xml',
             },

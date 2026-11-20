@@ -511,7 +511,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                         ville: fullOrder.city,
                         telephone: fullOrder.phone,
                         articles: articlesList,
-                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.petsunivers.ma'}/track/${fullOrder.id}`
+                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'}/track/${fullOrder.id}`
                     }).then(() => {}).catch(console.error)
                 }
 

@@ -123,7 +123,7 @@ export async function getAutomatedEmailRules(): Promise<AutomatedEmailRule[]> {
             key: 'order_delivered',
             label: 'Commande Livrée / Avis Client',
             description: 'Envoyé dès la réception de la commande pour remercier et inviter à noter.',
-            defaultTemplateName: 'Bienvenue sur PetsUnivers'
+            defaultTemplateName: 'Bienvenue sur Tekno Store'
         },
         {
             key: 'abandoned_cart',
@@ -220,8 +220,8 @@ export async function sendTestEmailTemplate(templateId: string, recipientEmail: 
             adresse: '15 Boulevard Hassan II',
             ville: 'Casablanca',
             telephone: '0612345678',
-            coupon_code: 'PETSUNIVERS10',
-            tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.petsunivers.ma'}/track/RW-78901`,
+            coupon_code: 'TEKNO10',
+            tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'}/track/RW-78901`,
             articles: '<ul style="margin:0;padding-left:20px;"><li>1x أرض زيكولا (85 درهم)</li><li>1x فن اللامبالاة (100 درهم)</li></ul>'
         }
 
@@ -236,7 +236,7 @@ export async function sendTestEmailTemplate(templateId: string, recipientEmail: 
 
         const { transporter } = await import('@/lib/email')
         await transporter.sendMail({
-            from: '"PetsUnivers" <contact@petsunivers.ma>',
+            from: '"Tekno Store" <Contact.tekno.ma@gmail.com>',
             to: recipientEmail,
             subject: `[TEST] ${subject}`,
             html: body
@@ -279,7 +279,7 @@ export async function sendTriggerEmail(triggerKey: string, recipientEmail?: stri
             const fallbackNames: Record<string, string> = {
                 order_created: 'CONFIRMATION_COMMANDE',
                 order_shipped: 'COMMANDE_EXPEDIEE',
-                order_delivered: 'Bienvenue sur PetsUnivers',
+                order_delivered: 'Bienvenue sur Tekno Store',
                 abandoned_cart: 'Panier Abandonné',
                 coupon_gift: 'CODE_COUPON'
             }
@@ -308,7 +308,7 @@ export async function sendTriggerEmail(triggerKey: string, recipientEmail?: stri
                 orderBy: { createdAt: 'desc' },
                 select: { code: true }
             })
-            resolvedCouponCode = activeCoupon?.code || 'PETSUNIVERS10'
+            resolvedCouponCode = activeCoupon?.code || 'TEKNO10'
         }
 
         data.client_nom = resolvedClientNom
@@ -333,7 +333,7 @@ export async function sendTriggerEmail(triggerKey: string, recipientEmail?: stri
 
         const { transporter } = await import('@/lib/email')
         await transporter.sendMail({
-            from: '"PetsUnivers" <contact@petsunivers.ma>',
+            from: '"Tekno Store" <Contact.tekno.ma@gmail.com>',
             to: recipientEmail,
             subject,
             html: body

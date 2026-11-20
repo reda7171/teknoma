@@ -319,7 +319,7 @@ export default function JumiaOrdersClient() {
                 </head>
                 <body>
                     <div class="header">
-                        <div class="logo">PetsUnivers x JUMIA</div>
+                        <div class="logo">Tekno Store x JUMIA</div>
                         <div class="invoice-title">Facture</div>
                     </div>
 
@@ -368,7 +368,7 @@ export default function JumiaOrdersClient() {
                     </table>
 
                     <div class="footer">
-                        Merci de votre confiance. Cette facture a été générée automatiquement depuis le système PetsUnivers.
+                        Merci de votre confiance. Cette facture a été générée automatiquement depuis le système Tekno Store.
                     </div>
                     <script>
                         window.onload = function() { window.print(); }

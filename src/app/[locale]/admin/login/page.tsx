@@ -171,7 +171,7 @@ export default function LoginPage() {
 
                 {/* Footer */}
                 <p className="text-center text-sm text-gray-600 mt-6">
-                    © 2026 PetsUnivers. Tous droits réservés.
+                    © 2026 Tekno Store. Tous droits réservés.
                 </p>
             </div>
         </div>

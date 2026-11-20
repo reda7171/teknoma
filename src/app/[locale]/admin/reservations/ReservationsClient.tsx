@@ -36,12 +36,12 @@ function isValidWhatsAppPhone(phone: string) {
 
 function buildReservationMessage(reservation: Reservation, language: WhatsAppLanguage, bookUrl: string) {
     if (language === 'ar') {
-        return `مرحبًا، الكتاب «${reservation.book.title}» الذي حجزته على PetsUnivers أصبح متوفرًا الآن. يمكنك الاطلاع عليه وطلبه من هنا:\n${bookUrl}`
+        return `مرحبًا، الكتاب «${reservation.book.title}» الذي حجزته على Tekno Store أصبح متوفرًا الآن. يمكنك الاطلاع عليه وطلبه من هنا:\n${bookUrl}`
     }
     if (language === 'darija') {
-        return `سلام، الكتاب «${reservation.book.title}» اللي حجزتي فـ PetsUnivers ولى متوفر دابا. تقدر تشوفو وتطلبو من هنا:\n${bookUrl}`
+        return `سلام، الكتاب «${reservation.book.title}» اللي حجزتي فـ Tekno Store ولى متوفر دابا. تقدر تشوفو وتطلبو من هنا:\n${bookUrl}`
     }
-    return `Bonjour, le livre « ${reservation.book.title} » que vous avez réservé sur PetsUnivers est maintenant disponible. Vous pouvez le consulter et le commander ici :\n${bookUrl}`
+    return `Bonjour, le livre « ${reservation.book.title} » que vous avez réservé sur Tekno Store est maintenant disponible. Vous pouvez le consulter et le commander ici :\n${bookUrl}`
 }
 
 export default function ReservationsClient({ initialReservations }: { initialReservations: Reservation[] }) {
@@ -128,7 +128,7 @@ export default function ReservationsClient({ initialReservations }: { initialRes
         const productLocale = bulkWhatsAppLanguage === 'fr' ? 'fr' : 'ar'
         validReservations.forEach(reservation => {
             const recipient = normalizeWhatsAppRecipient(reservation.whatsapp)
-            const bookUrl = `https://petsunivers.ma/${productLocale}/books/${reservation.bookId}`
+            const bookUrl = `https://tekno.ma/${productLocale}/books/${reservation.bookId}`
             const message = buildReservationMessage(reservation, bulkWhatsAppLanguage, bookUrl)
             window.open(`https://wa.me/${recipient}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
         })
@@ -439,7 +439,7 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                                                 <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
                                                     <div className="py-1">
                                                         <a
-                                                            href={`https://wa.me/${normalizeWhatsAppRecipient(res.whatsapp)}?text=${encodeURIComponent(buildReservationMessage(res, 'fr', `https://petsunivers.ma/fr/books/${res.bookId}`))}`}
+                                                            href={`https://wa.me/${normalizeWhatsAppRecipient(res.whatsapp)}?text=${encodeURIComponent(buildReservationMessage(res, 'fr', `https://tekno.ma/fr/books/${res.bookId}`))}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="block px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
@@ -448,7 +448,7 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                                                             🇫🇷 Français
                                                         </a>
                                                         <a
-                                                            href={`https://wa.me/${normalizeWhatsAppRecipient(res.whatsapp)}?text=${encodeURIComponent(buildReservationMessage(res, 'darija', `https://petsunivers.ma/ar/books/${res.bookId}`))}`}
+                                                            href={`https://wa.me/${normalizeWhatsAppRecipient(res.whatsapp)}?text=${encodeURIComponent(buildReservationMessage(res, 'darija', `https://tekno.ma/ar/books/${res.bookId}`))}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="block px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
@@ -457,7 +457,7 @@ export default function ReservationsClient({ initialReservations }: { initialRes
                                                             🇲🇦 Darija
                                                         </a>
                                                         <a
-                                                            href={`https://wa.me/${normalizeWhatsAppRecipient(res.whatsapp)}?text=${encodeURIComponent(buildReservationMessage(res, 'ar', `https://petsunivers.ma/ar/books/${res.bookId}`))}`}
+                                                            href={`https://wa.me/${normalizeWhatsAppRecipient(res.whatsapp)}?text=${encodeURIComponent(buildReservationMessage(res, 'ar', `https://tekno.ma/ar/books/${res.bookId}`))}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="block px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"

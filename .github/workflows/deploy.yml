@@ -1,4 +1,4 @@
-name: Deploy PetsUnivers to VPS
+name: Deploy Tekno Store to VPS
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: reda7171/petsunivers-app
+  IMAGE_NAME: reda7171/tekno-app
 
 jobs:
   lighthouse-audit:
@@ -20,9 +20,9 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: petsunivers_db
-          MYSQL_USER: petsunivers_user
-          MYSQL_PASSWORD: petsunivers_pass
+          MYSQL_DATABASE: tekno_db
+          MYSQL_USER: tekno_user
+          MYSQL_PASSWORD: tekno_pass
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
@@ -43,12 +43,12 @@ jobs:
       - name: Setup Database Schema
         run: npx prisma db push --accept-data-loss
         env:
-          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+          DATABASE_URL: "mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db"
 
       - name: Build Next.js
         run: npm run build
         env:
-          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+          DATABASE_URL: "mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db"
           NEXT_TELEMETRY_DISABLED: 1
           NEXT_PUBLIC_APP_URL: "http://localhost:3000"
 
@@ -59,7 +59,7 @@ jobs:
           uploadArtifacts: false
           temporaryPublicStorage: true
         env:
-          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+          DATABASE_URL: "mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db"
 
   build-and-push-image:
     needs: lighthouse-audit
@@ -116,18 +116,18 @@ jobs:
           command_timeout: 60m
           script: |
             # Aller dans le dossier
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/www/petsunivers
-            cd /var/www/petsunivers
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/www/tekno
+            cd /var/www/tekno
 
             # Initialisation robuste de Git si absente
             if [ ! -d ".git" ]; then
               echo "Initialisation du depot Git..."
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git init
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git remote add origin https://github.com/reda7171/petsunivers.git
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git remote add origin https://github.com/reda7171/tekno.git
             fi
 
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/reda7171/petsunivers.git
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git config --global --add safe.directory /var/www/petsunivers
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/reda7171/tekno.git
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S git config --global --add safe.directory /var/www/tekno
 
             # Synchronisation
             echo "Recuperation du code..."
@@ -138,15 +138,15 @@ jobs:
             # Permissions et Cron
             if [ -d "scripts" ]; then
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/backup-db.sh
-              (crontab -l 2>/dev/null | grep -q "backup-db.sh") || (crontab -l 2>/dev/null; echo "0 3 * * * /var/www/petsunivers/scripts/backup-db.sh >> /var/www/petsunivers/backups/backup.log 2>&1") | crontab -
+              (crontab -l 2>/dev/null | grep -q "backup-db.sh") || (crontab -l 2>/dev/null; echo "0 3 * * * /var/www/tekno/scripts/backup-db.sh >> /var/www/tekno/backups/backup.log 2>&1") | crontab -
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/vps-clean-cache.sh
-              (crontab -l 2>/dev/null | grep -q "vps-clean-cache.sh") || (crontab -l 2>/dev/null; echo "0 4 * * * /var/www/petsunivers/scripts/vps-clean-cache.sh >> /var/www/petsunivers/backups/cache-clean.log 2>&1") | crontab -
-              (crontab -l 2>/dev/null | grep -q "vps-status") || (crontab -l 2>/dev/null; echo "*/10 * * * * curl -s 'https://petsunivers.ma/api/cron/vps-status?alert_only=true' > /dev/null 2>&1") | crontab -
+              (crontab -l 2>/dev/null | grep -q "vps-clean-cache.sh") || (crontab -l 2>/dev/null; echo "0 4 * * * /var/www/tekno/scripts/vps-clean-cache.sh >> /var/www/tekno/backups/cache-clean.log 2>&1") | crontab -
+              (crontab -l 2>/dev/null | grep -q "vps-status") || (crontab -l 2>/dev/null; echo "*/10 * * * * curl -s 'https://tekno.ma/api/cron/vps-status?alert_only=true' > /dev/null 2>&1") | crontab -
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/jumia-status-cron.sh
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/log/petsunivers
-              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S touch /var/log/petsunivers/jumia-status-cron.log
-              (crontab -l 2>/dev/null | grep -q "jumia-status-cron.sh") || (crontab -l 2>/dev/null; echo "*/10 * * * * flock -n /tmp/petsunivers-jumia-status.lock /var/www/petsunivers/scripts/jumia-status-cron.sh >> /var/log/petsunivers/jumia-status-cron.log 2>&1") | crontab -
-              (crontab -l 2>/dev/null | grep -q "abandoned-cart-reminder") || (crontab -l 2>/dev/null; echo "*/15 * * * * curl -s 'https://petsunivers.ma/api/cron/abandoned-cart-reminder?key=une_cle_secrete_pour_cron_2026' > /dev/null 2>&1") | crontab -
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S mkdir -p /var/log/tekno
+              echo "${{ secrets.VPS_PASSWORD }}" | sudo -S touch /var/log/tekno/jumia-status-cron.log
+              (crontab -l 2>/dev/null | grep -q "jumia-status-cron.sh") || (crontab -l 2>/dev/null; echo "*/10 * * * * flock -n /tmp/tekno-jumia-status.lock /var/www/tekno/scripts/jumia-status-cron.sh >> /var/log/tekno/jumia-status-cron.log 2>&1") | crontab -
+              (crontab -l 2>/dev/null | grep -q "abandoned-cart-reminder") || (crontab -l 2>/dev/null; echo "*/15 * * * * curl -s 'https://tekno.ma/api/cron/abandoned-cart-reminder?key=une_cle_secrete_pour_cron_2026' > /dev/null 2>&1") | crontab -
             fi
 
             # ─── Retrait et nettoyage de la page 502 de Nginx ─────────────

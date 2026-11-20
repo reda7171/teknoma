@@ -138,13 +138,13 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                 {/* Vertical Social Sidebar */}
                 <div className="absolute ltr:right-4 sm:ltr:-right-16 rtl:left-4 sm:rtl:-left-16 top-32 z-10 hidden xl:flex">
                     <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-full py-6 px-3 flex flex-col gap-6 shadow-2xl">
-                        {socials.instagram && <a href={socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Instagram" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Instagram className="w-5 h-5" /></a>}
-                        {socials.linkedin && <a href={socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur LinkedIn" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Linkedin className="w-5 h-5" /></a>}
-                        {socials.facebook && <a href={socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Facebook" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Facebook className="w-5 h-5" /></a>}
-                        {socials.twitter && <a href={socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Twitter" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Twitter className="w-5 h-5" /></a>}
-                        {socials.youtube && <a href={socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur YouTube" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Youtube className="w-5 h-5" /></a>}
-                        {socials.threads && <a href={socials.threads} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Threads" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><AtSign className="w-5 h-5" /></a>}
-                        {socials.pinterest && <a href={socials.pinterest} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Pinterest" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><PinterestIcon className="w-5 h-5" /></a>}
+                        {socials.instagram && <a href={socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Instagram" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Instagram className="w-5 h-5" /></a>}
+                        {socials.linkedin && <a href={socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur LinkedIn" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Linkedin className="w-5 h-5" /></a>}
+                        {socials.facebook && <a href={socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Facebook" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Facebook className="w-5 h-5" /></a>}
+                        {socials.twitter && <a href={socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Twitter" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Twitter className="w-5 h-5" /></a>}
+                        {socials.youtube && <a href={socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur YouTube" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><Youtube className="w-5 h-5" /></a>}
+                        {socials.threads && <a href={socials.threads} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Threads" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><AtSign className="w-5 h-5" /></a>}
+                        {socials.pinterest && <a href={socials.pinterest} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Pinterest" className="text-gray-400 hover:text-white transition-colors hover:scale-110 active:scale-90"><PinterestIcon className="w-5 h-5" /></a>}
                     </div>
                 </div>
 
@@ -154,7 +154,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                             {siteLogo ? (
                                 <Image
                                     src={siteLogo}
-                                    alt="PetsUnivers Logo"
+                                    alt="Tekno Store Logo"
                                     width={96}
                                     height={32}
                                     sizes="96px"
@@ -167,7 +167,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                         <BookOpen className="w-5 h-5 text-black" />
                                     </div>
                                     <span className="text-2xl font-black text-white tracking-tighter">
-                                        PetsUnivers<span className="text-[#10b981]">.</span>
+                                        Tekno Store<span className="text-[#10b981]">.</span>
                                     </span>
                                 </>
                             )}
@@ -216,7 +216,7 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
                                 </li>
                             )}
                             <li suppressHydrationWarning>
-                                <Link href="/join-us" title="Rejoindre l'équipe PetsUnivers" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
+                                <Link href="/join-us" title="Rejoindre l'équipe Tekno Store" className="text-gray-300 hover:text-white transition-colors text-sm rtl:text-base rtl:tracking-normal font-bold tracking-tight" suppressHydrationWarning>
                                     {tJoinUs('heroTitle1')} {tJoinUs('heroTitle2')}
                                 </Link>
                             </li>
@@ -246,17 +246,17 @@ export default function FooterClient({ features = {}, siteLogo = null, socials =
 
                 {/* Mobile Socials */}
                 <div className="flex xl:hidden gap-6 mb-6 sm:mb-12 justify-center">
-                    {socials.instagram && <a href={socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Instagram" className="text-gray-400 hover:text-white transition-colors"><Instagram className="w-5 h-5" /></a>}
-                    {socials.linkedin && <a href={socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur LinkedIn" className="text-gray-400 hover:text-white transition-colors"><Linkedin className="w-5 h-5" /></a>}
-                    {socials.facebook && <a href={socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Facebook" className="text-gray-400 hover:text-white transition-colors"><Facebook className="w-5 h-5" /></a>}
-                    {socials.twitter && <a href={socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Twitter" className="text-gray-400 hover:text-white transition-colors"><Twitter className="w-5 h-5" /></a>}
-                    {socials.youtube && <a href={socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur YouTube" className="text-gray-400 hover:text-white transition-colors"><Youtube className="w-5 h-5" /></a>}
-                    {socials.threads && <a href={socials.threads} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Threads" className="text-gray-400 hover:text-white transition-colors"><AtSign className="w-5 h-5" /></a>}
-                    {socials.pinterest && <a href={socials.pinterest} target="_blank" rel="noopener noreferrer" aria-label="PetsUnivers sur Pinterest" className="text-gray-400 hover:text-white transition-colors"><PinterestIcon className="w-5 h-5" /></a>}
+                    {socials.instagram && <a href={socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Instagram" className="text-gray-400 hover:text-white transition-colors"><Instagram className="w-5 h-5" /></a>}
+                    {socials.linkedin && <a href={socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur LinkedIn" className="text-gray-400 hover:text-white transition-colors"><Linkedin className="w-5 h-5" /></a>}
+                    {socials.facebook && <a href={socials.facebook} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Facebook" className="text-gray-400 hover:text-white transition-colors"><Facebook className="w-5 h-5" /></a>}
+                    {socials.twitter && <a href={socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Twitter" className="text-gray-400 hover:text-white transition-colors"><Twitter className="w-5 h-5" /></a>}
+                    {socials.youtube && <a href={socials.youtube} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur YouTube" className="text-gray-400 hover:text-white transition-colors"><Youtube className="w-5 h-5" /></a>}
+                    {socials.threads && <a href={socials.threads} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Threads" className="text-gray-400 hover:text-white transition-colors"><AtSign className="w-5 h-5" /></a>}
+                    {socials.pinterest && <a href={socials.pinterest} target="_blank" rel="noopener noreferrer" aria-label="Tekno Store sur Pinterest" className="text-gray-400 hover:text-white transition-colors"><PinterestIcon className="w-5 h-5" /></a>}
                 </div>
 
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] rtl:text-base font-black uppercase tracking-widest rtl:tracking-normal text-gray-300 relative">
-                    <p>© 2026 PetsUnivers. {t('Rights')}</p>
+                    <p>© 2026 Tekno Store. {t('Rights')}</p>
 
                     <div className="md:absolute md:left-1/2 md:-translate-x-1/2 text-center">
                         <p className="hover:text-white transition-colors cursor-default">

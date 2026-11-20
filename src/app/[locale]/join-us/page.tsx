@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     return {
-        title: locale === 'ar' ? 'إلتحق بفريق العمل | PetsUnivers' : locale === 'en' ? 'Join the Team | PetsUnivers' : "Rejoignez l'équipe | PetsUnivers",
+        title: locale === 'ar' ? 'إلتحق بفريق العمل | Tekno Store' : locale === 'en' ? 'Join the Team | Tekno Store' : "Rejoignez l'équipe | Tekno Store",
         description: locale === 'ar' ? 'إلتحق بفريق العمل. ابعث لنا تدوينتك التجريبية الآن.' : locale === 'en' ? 'Join the team. Send us your sample post now.' : "Rejoignez l'équipe. Envoyez-nous votre article d'essai maintenant.",
     }
 }

@@ -15,7 +15,7 @@ const SECTIONS = [
     bg: 'bg-blue-50',
     fields: [
       { key: 'hero_badge', label: 'Badge (petite étiquette)', type: 'text', placeholder: 'Livraison 24-48h au Maroc' },
-      { key: 'hero_title_part1', label: 'Titre — Partie 1', type: 'text', placeholder: 'PetsUnivers' },
+      { key: 'hero_title_part1', label: 'Titre — Partie 1', type: 'text', placeholder: 'Tekno Store' },
       { key: 'hero_title_part2', label: 'Titre — Partie 2 (gris)', type: 'text', placeholder: 'Librairie.' },
       { key: 'hero_description', label: 'Description', type: 'textarea', placeholder: 'Découvrez notre sélection...' },
       { key: 'hero_btn_shop', label: 'Bouton Explorer', type: 'text', placeholder: 'Explorer la librairie' },

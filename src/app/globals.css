@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* Shared PetsUnivers storefront controls. */
+/* Shared Tekno Store storefront controls. */
 .pet-button { display: inline-flex; align-items: center; justify-content: center; gap: .75rem; border-radius: 999px; background: #17351d; color: #fffdf8; padding: .95rem 1.5rem; font-size: .875rem; font-weight: 700; transition: background .2s, transform .2s; }
 .pet-button:hover { background: #284b2c; transform: translateY(-1px); }
 .pet-field { display: flex; flex-direction: column; gap: .6rem; color: #17351d; font-size: .875rem; font-weight: 600; }

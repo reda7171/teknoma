@@ -54,7 +54,7 @@ export async function createExchangeRequest(formData: FormData): Promise<Exchang
         // 3. Vérifier l'éligibilité (Au moins une commande effectuée)
         const isEligible = await checkExchangeEligibility(user)
         if (!isEligible) {
-            return { success: false, error: "Vous devez avoir effectué au moins une commande sur PetsUnivers pour accéder au système d'échange." }
+            return { success: false, error: "Vous devez avoir effectué au moins une commande sur Tekno Store pour accéder au système d'échange." }
         }
 
         // 2. Vérifier le livre offert (si échange direct)

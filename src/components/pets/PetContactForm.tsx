@@ -11,7 +11,7 @@ export default function PetContactForm({ locale, email, subject = '' }: { locale
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const body = [String(data.get('message') || ''), '', t.name + ': ' + data.get('name'), t.email + ': ' + data.get('email'), ...(data.get('order') ? [t.order + ': ' + data.get('order')] : [])].join('\n')
-    window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent('PetsUnivers — ' + data.get('topic')) + '&body=' + encodeURIComponent(body)
+    window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent('Tekno Store — ' + data.get('topic')) + '&body=' + encodeURIComponent(body)
     setPrepared(true)
   }}>
     <h2 className="font-serif text-2xl sm:text-3xl">{t.formTitle}</h2>

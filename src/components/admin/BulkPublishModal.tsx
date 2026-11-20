@@ -28,7 +28,7 @@ interface BulkPublishModalProps {
 }
 
 type PublishStatus = 'pending' | 'running' | 'success' | 'error'
-type TargetDomain = 'petsunivers.ma' | 'petsunivers.ma' | 'jumia.ma'
+type TargetDomain = 'tekno.ma' | 'tekno.ma' | 'jumia.ma'
 
 interface BookStatus {
     bookId: string
@@ -39,9 +39,9 @@ interface BookStatus {
 export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublishModalProps) {
     const [platform, setPlatform] = useState<'facebook' | 'instagram' | 'tiktok' | 'threads' | 'pinterest' | 'both' | 'all'>('all')
     const [format, setFormat] = useState<'post' | 'story' | 'video' | 'short'>('post')
-    const [defaultDomain, setDefaultDomain] = useState<TargetDomain>('petsunivers.ma')
+    const [defaultDomain, setDefaultDomain] = useState<TargetDomain>('tekno.ma')
     const [bookDomains, setBookDomains] = useState<Record<string, TargetDomain>>({})
-    const [logoChoice, setLogoChoice] = useState<'petsunivers' | 'jumia'>('petsunivers')
+    const [logoChoice, setLogoChoice] = useState<'tekno' | 'jumia'>('tekno')
     const [includeStoreLink, setIncludeStoreLink] = useState(true)
     const [includeJumiaLink, setIncludeJumiaLink] = useState(true)
     const [publishingMode, setPublishingMode] = useState<'now' | 'scheduled'>('scheduled')
@@ -140,7 +140,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
             if (showJumia) {
                 text += `🛒 متوفر أيضاً على جوميا :\n${jumiaUrl}\n\n`
             }
-            text += `💰 الثمن : ${price} درهم (عوض ${oldPrice} درهم)\n🚚 الدفع عند الاستلام + التوصيل متاح لكافة المدن المغربية!\n\n#PetsUnivers #كتب #المغرب #قراءة`
+            text += `💰 الثمن : ${price} درهم (عوض ${oldPrice} درهم)\n🚚 الدفع عند الاستلام + التوصيل متاح لكافة المدن المغربية!\n\n#Tekno Store #كتب #المغرب #قراءة`
             return text
         }
 
@@ -152,7 +152,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
             if (showJumia) {
                 text += `🛒 Available on Jumia:\n${jumiaUrl}\n\n`
             }
-            text += `💰 Price: ${price} MAD (was ${oldPrice} MAD)\n🚚 Cash on delivery available everywhere in Morocco!\n\n#petsunivers #books #reading #morocco`
+            text += `💰 Price: ${price} MAD (was ${oldPrice} MAD)\n🚚 Cash on delivery available everywhere in Morocco!\n\n#tekno #books #reading #morocco`
             return text
         }
 
@@ -164,7 +164,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
         if (showJumia) {
             text += `🛒 Commander sur Jumia :\n${jumiaUrl}\n\n`
         }
-        text += `💰 Prix : ${price} DH (au lieu de ${oldPrice} DH)\n🚚 Paiement à la livraison + Livraison rapide partout au Maroc !\n\n#petsunivers #livre #lecture #maroc`
+        text += `💰 Prix : ${price} DH (au lieu de ${oldPrice} DH)\n🚚 Paiement à la livraison + Livraison rapide partout au Maroc !\n\n#tekno #livre #lecture #maroc`
         return text
     }
 
@@ -453,18 +453,18 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                     <span className="text-[9px] sm:text-[10px] text-gray-400 font-bold">Modifiable par livre etape 2</span>
                                 </div>
                                 <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                                    {(['petsunivers.ma', 'petsunivers.ma', 'jumia.ma'] as const).map(d => (
+                                    {(['tekno.ma', 'tekno.ma', 'jumia.ma'] as const).map(d => (
                                         <button
                                             key={d}
                                             type="button"
                                             onClick={() => handleSetAllDomains(d)}
                                             className={`py-2 px-2 sm:px-3 rounded-xl text-[10px] sm:text-xs font-black tracking-wide border transition-all flex items-center justify-center gap-1.5 ${
                                                 defaultDomain === d
-                                                    ? (d === 'petsunivers.ma' ? 'bg-blue-600 text-white border-blue-600' : (d === 'petsunivers.ma' ? 'bg-teal-600 text-white border-teal-600' : 'bg-[#F68B1E] text-white border-[#F68B1E]'))
+                                                    ? (d === 'tekno.ma' ? 'bg-blue-600 text-white border-blue-600' : (d === 'tekno.ma' ? 'bg-teal-600 text-white border-teal-600' : 'bg-[#F68B1E] text-white border-[#F68B1E]'))
                                                     : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                                             }`}
                                         >
-                                            <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${defaultDomain === d ? 'bg-white' : (d === 'petsunivers.ma' ? 'bg-blue-500' : (d === 'petsunivers.ma' ? 'bg-teal-500' : 'bg-[#F68B1E]'))}`} />
+                                            <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${defaultDomain === d ? 'bg-white' : (d === 'tekno.ma' ? 'bg-blue-500' : (d === 'tekno.ma' ? 'bg-teal-500' : 'bg-[#F68B1E]'))}`} />
                                             <span className="truncate">{d}</span>
                                         </button>
                                     ))}
@@ -475,7 +475,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                             <div>
                                 <label className="block text-[10px] sm:text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 sm:mb-2">Logo du visuel</label>
                                 <div className="grid grid-cols-2 gap-2">
-                                    {(['petsunivers', 'jumia'] as const).map(l => (
+                                    {(['tekno', 'jumia'] as const).map(l => (
                                         <button
                                             key={l}
                                             type="button"
@@ -487,7 +487,7 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                             }`}
                                         >
                                             <span className={`w-2 h-2 rounded-full ${logoChoice === l ? 'bg-white' : (l === 'jumia' ? 'bg-[#F68B1E]' : 'bg-amber-400')}`} />
-                                            {l === 'petsunivers' ? 'PetsUnivers' : 'Jumia'}
+                                            {l === 'tekno' ? 'Tekno Store' : 'Jumia'}
                                         </button>
                                     ))}
                                 </div>
@@ -651,10 +651,10 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                         <div className="mt-2 pt-2 border-t border-gray-200/60 flex items-center justify-between gap-2 flex-wrap">
                                             <span className="text-[10px] text-gray-400 font-bold">Lien produit :</span>
                                             <div className="flex items-center bg-gray-200/80 p-0.5 rounded-lg border border-gray-200">
-                                                {(['petsunivers.ma', 'petsunivers.ma', 'jumia.ma'] as const).map(d => (
+                                                {(['tekno.ma', 'tekno.ma', 'jumia.ma'] as const).map(d => (
                                                     <button key={d} type="button" disabled={isRunning}
                                                         onClick={(e) => { e.stopPropagation(); setBookDomain(book.id, d) }}
-                                                        className={`px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black transition-all ${getBookDomain(book.id) === d ? (d === 'petsunivers.ma' ? 'bg-blue-600 text-white' : (d === 'petsunivers.ma' ? 'bg-teal-600 text-white' : 'bg-[#F68B1E] text-white')) : 'text-gray-600 hover:text-black'}`}
+                                                        className={`px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black transition-all ${getBookDomain(book.id) === d ? (d === 'tekno.ma' ? 'bg-blue-600 text-white' : (d === 'tekno.ma' ? 'bg-teal-600 text-white' : 'bg-[#F68B1E] text-white')) : 'text-gray-600 hover:text-black'}`}
                                                     >{d}</button>
                                                 ))}
                                             </div>
@@ -812,9 +812,9 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                     <div className="flex items-center justify-between mb-2">
                                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Domaine cible</p>
                                         <div className="flex bg-gray-100 rounded-lg p-0.5 gap-1">
-                                            {(['petsunivers.ma', 'petsunivers.ma', 'jumia.ma'] as const).map(d => (
+                                            {(['tekno.ma', 'tekno.ma', 'jumia.ma'] as const).map(d => (
                                                 <button key={d} type="button" onClick={() => setBookDomain(book.id, d)}
-                                                    className={`px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black transition-all ${getBookDomain(book.id) === d ? (d === 'petsunivers.ma' ? 'bg-blue-600 text-white' : (d === 'petsunivers.ma' ? 'bg-teal-600 text-white' : 'bg-[#F68B1E] text-white')) : 'text-gray-500 hover:bg-gray-200'}`}
+                                                    className={`px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black transition-all ${getBookDomain(book.id) === d ? (d === 'tekno.ma' ? 'bg-blue-600 text-white' : (d === 'tekno.ma' ? 'bg-teal-600 text-white' : 'bg-[#F68B1E] text-white')) : 'text-gray-500 hover:bg-gray-200'}`}
                                                 >{d}</button>
                                             ))}
                                         </div>
@@ -859,11 +859,11 @@ export default function BulkPublishModal({ books, isOpen, onClose }: BulkPublish
                                         <div className="flex items-center gap-2">
                                             <div>
                                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 text-right">Logo</p>
-                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${logoChoice === 'jumia' ? 'bg-orange-50 text-[#F68B1E] border border-orange-200' : 'bg-gray-100 text-gray-800 border border-gray-200'}`}>{logoChoice === 'jumia' ? 'Jumia' : 'PetsUnivers'}</span>
+                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${logoChoice === 'jumia' ? 'bg-orange-50 text-[#F68B1E] border border-orange-200' : 'bg-gray-100 text-gray-800 border border-gray-200'}`}>{logoChoice === 'jumia' ? 'Jumia' : 'Tekno Store'}</span>
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 text-right">Domaine</p>
-                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${getBookDomain(book.id) === 'petsunivers.ma' ? 'bg-blue-50 text-blue-700 border border-blue-200' : (getBookDomain(book.id) === 'petsunivers.ma' ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'bg-orange-50 text-orange-700 border border-orange-200')}`}>{getBookDomain(book.id)}</span>
+                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${getBookDomain(book.id) === 'tekno.ma' ? 'bg-blue-50 text-blue-700 border border-blue-200' : (getBookDomain(book.id) === 'tekno.ma' ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'bg-orange-50 text-orange-700 border border-orange-200')}`}>{getBookDomain(book.id)}</span>
                                             </div>
                                         </div>
                                     </div>

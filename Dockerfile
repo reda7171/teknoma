@@ -25,7 +25,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Dummy DATABASE_URL for build time (Prisma requirement)
 # If your build needs to fetch real data from DB, this might still fail.
-ENV DATABASE_URL="mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3906/petsunivers_db"
+ENV DATABASE_URL="mysql://tekno_user:tekno_pass@127.0.0.1:3906/tekno_db"
 
 # Generate Prisma Client
 RUN npx prisma generate

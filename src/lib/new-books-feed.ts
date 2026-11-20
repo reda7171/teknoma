@@ -54,7 +54,7 @@ export async function buildNewBooksRss(): Promise<string> {
       <link>${escapeXml(url)}</link>
       <guid isPermaLink="true">${escapeXml(url)}</guid>
       <pubDate>${book.createdAt.toUTCString()}</pubDate>
-      <dc:creator>${escapeXml(book.author || 'PetsUnivers')}</dc:creator>
+      <dc:creator>${escapeXml(book.author || 'Tekno Store')}</dc:creator>
       <category>${escapeXml(book.category || 'Livres')}</category>
       <description>${escapeXml(`${description} — ${book.price} MAD`)}</description>
       <media:content url="${escapeXml(image)}" medium="image" />
@@ -64,9 +64,9 @@ export async function buildNewBooksRss(): Promise<string> {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
-    <title>PetsUnivers — Nouveaux livres</title>
+    <title>Tekno Store — Nouveaux livres</title>
     <link>${baseUrl}/fr/books</link>
-    <description>Les derniers livres ajoutés à la librairie PetsUnivers au Maroc.</description>
+    <description>Les derniers livres ajoutés à la librairie Tekno Store au Maroc.</description>
     <language>fr-MA</language>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
     <atom:link href="${baseUrl}/nouveautes.xml" rel="self" type="application/rss+xml" />
@@ -90,7 +90,7 @@ export async function buildNewBooksAtom(): Promise<string> {
     <id>${escapeXml(url)}</id>
     <published>${book.createdAt.toISOString()}</published>
     <updated>${book.updatedAt.toISOString()}</updated>
-    <author><name>${escapeXml(book.author || 'PetsUnivers')}</name></author>
+    <author><name>${escapeXml(book.author || 'Tekno Store')}</name></author>
     <category term="${escapeXml(book.category || 'Livres')}" />
     <summary>${escapeXml(`${summary} — ${book.price} MAD`)}</summary>
   </entry>`
@@ -98,8 +98,8 @@ export async function buildNewBooksAtom(): Promise<string> {
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>PetsUnivers — Nouveaux livres</title>
-  <subtitle>Les derniers livres ajoutés à la librairie PetsUnivers au Maroc.</subtitle>
+  <title>Tekno Store — Nouveaux livres</title>
+  <subtitle>Les derniers livres ajoutés à la librairie Tekno Store au Maroc.</subtitle>
   <link href="${baseUrl}/nouveautes.atom" rel="self" type="application/atom+xml" />
   <link href="${baseUrl}/fr/books" rel="alternate" />
   <id>${baseUrl}/nouveautes.atom</id>

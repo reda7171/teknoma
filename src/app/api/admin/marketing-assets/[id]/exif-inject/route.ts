@@ -30,8 +30,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             Keywords: kwArray,
             Rating: 5,
             RatingPercent: 99,
-            Copyright: 'PetsUnivers',
-            Software: 'PetsUnivers',
+            Copyright: 'Tekno Store',
+            Software: 'Tekno Store',
         }
 
         // Image locale
@@ -47,14 +47,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         }
 
         // Image distante — télécharger → temp → EXIF → supprimer temp
-        const imageUrl = asset.url.startsWith('http') ? asset.url : `https://petsunivers.ma${asset.url}`
+        const imageUrl = asset.url.startsWith('http') ? asset.url : `https://tekno.ma${asset.url}`
         const response = await fetch(imageUrl)
         if (!response.ok) {
             return NextResponse.json({ success: false, error: `Image distante inaccessible (${response.status})` }, { status: 400 })
         }
 
         const ext = imageUrl.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
-        tempFilePath = path.join(os.tmpdir(), `petsunivers-exif-asset-${id}.${ext}`)
+        tempFilePath = path.join(os.tmpdir(), `tekno-exif-asset-${id}.${ext}`)
         fs.writeFileSync(tempFilePath, Buffer.from(await response.arrayBuffer()))
 
         await exiftool.write(tempFilePath, exifData)

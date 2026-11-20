@@ -41,9 +41,9 @@ export async function POST(
         try {
             await stat(absolutePath)
         } catch {
-            // Logique de secours : si le fichier n'existe pas, on tente de le télécharger depuis petsunivers.ma
+            // Logique de secours : si le fichier n'existe pas, on tente de le télécharger depuis tekno.ma
             try {
-                const remoteUrl = `https://petsunivers.ma${imageUrl}`;
+                const remoteUrl = `https://tekno.ma${imageUrl}`;
                 const response = await fetch(remoteUrl);
                 if (!response.ok) throw new Error('Introuvable sur le serveur distant');
 
@@ -57,9 +57,9 @@ export async function POST(
                 }
 
                 fs.writeFileSync(absolutePath, buffer);
-                void(`[Auto-Recovery] Image téléchargée depuis petsunivers.ma: ${imageUrl}`);
+                void(`[Auto-Recovery] Image téléchargée depuis tekno.ma: ${imageUrl}`);
             } catch (dlError) {
-                return NextResponse.json({ success: false, error: 'Fichier introuvable localement et sur petsunivers.ma' }, { status: 404 })
+                return NextResponse.json({ success: false, error: 'Fichier introuvable localement et sur tekno.ma' }, { status: 404 })
             }
         }
 

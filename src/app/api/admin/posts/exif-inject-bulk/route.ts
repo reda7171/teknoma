@@ -29,11 +29,11 @@ export async function POST(req: Request) {
                         XPKeywords: kwArray.join(';'),
                         Keywords: kwArray,
                         Subject: kwArray,
-                        XPAuthor: post.authorName || 'PetsUnivers',
-                        Artist: post.authorName || 'PetsUnivers',
-                        Creator: post.authorName || 'PetsUnivers',
-                        XPComment: 'Blog PetsUnivers',
-                        Description: 'Blog PetsUnivers',
+                        XPAuthor: post.authorName || 'Tekno Store',
+                        Artist: post.authorName || 'Tekno Store',
+                        Creator: post.authorName || 'Tekno Store',
+                        XPComment: 'Blog Tekno Store',
+                        Description: 'Blog Tekno Store',
                     })
 
                     const backupPath = filePath + '_original'

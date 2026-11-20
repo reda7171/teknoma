@@ -19,12 +19,12 @@ export default function CookieConsent() {
   useEffect(()=>{
     const show=()=>setVisible(!isAdmin)
     setVisible(!localStorage.getItem('cookie-consent')&&!isAdmin)
-    window.addEventListener('petsunivers-open-consent',show)
-    return()=>window.removeEventListener('petsunivers-open-consent',show)
+    window.addEventListener('tekno-open-consent',show)
+    return()=>window.removeEventListener('tekno-open-consent',show)
   },[isAdmin])
   function choose(value:'accepted'|'declined') {
     localStorage.setItem('cookie-consent',value)
-    window.dispatchEvent(new Event('petsunivers-consent-change'))
+    window.dispatchEvent(new Event('tekno-consent-change'))
     setVisible(false)
   }
   if(!visible)return null

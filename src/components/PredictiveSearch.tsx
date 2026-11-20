@@ -66,7 +66,7 @@ export default function PredictiveSearch() {
 
     // Charger l'historique et les catégories au montage
     useEffect(() => {
-        const savedHistory = localStorage.getItem('petsunivers_search_history')
+        const savedHistory = localStorage.getItem('tekno_search_history')
         if (savedHistory) {
             setHistory(JSON.parse(savedHistory))
         }
@@ -141,7 +141,7 @@ export default function PredictiveSearch() {
 
     // Limite : 2 recherches par couverture max par session
     const COVER_SEARCH_LIMIT = 2
-    const COVER_SEARCH_KEY = 'petsunivers_cover_search_count'
+    const COVER_SEARCH_KEY = 'tekno_cover_search_count'
 
     const getCoverSearchCount = (): number => {
         try {
@@ -208,13 +208,13 @@ export default function PredictiveSearch() {
         ].slice(0, 5) // Garder les 5 dernières recherches
 
         setHistory(newHistory)
-        localStorage.setItem('petsunivers_search_history', JSON.stringify(newHistory))
+        localStorage.setItem('tekno_search_history', JSON.stringify(newHistory))
     }
 
     const clearHistory = (e: React.MouseEvent) => {
         e.stopPropagation()
         setHistory([])
-        localStorage.removeItem('petsunivers_search_history')
+        localStorage.removeItem('tekno_search_history')
     }
 
     useEffect(() => {

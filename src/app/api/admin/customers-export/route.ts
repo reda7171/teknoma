@@ -85,7 +85,7 @@ export async function GET(request: Request) {
             if (customer.nbr_cmd > 1) {
                 message = `Salam ${customer.first_name} cv, rak mn lklyan lwfyin dyalna (dwzti ${customer.nbr_cmd} commandes). Lidalika bghina ngolo lik ila 3awdti commanditi 3ndna ghadi nkhaliw lik ktab fabour, wakha yt7ssb lik f la caisse 7na ghadi no9ssoh.`;
             } else {
-                message = `Salam ${customer.first_name} cv, knti khditi 3ndna ${customer.nbr_article} books mn petsunivers.ma. Lidalika bghina ngolo lik ila 3awdti commanditi 3ndna ghadi nkhaliw lik ktab fabour, wakha yt7ssb lik f la caisse 7na ghadi no9ssoh.`;
+                message = `Salam ${customer.first_name} cv, knti khditi 3ndna ${customer.nbr_article} books mn tekno.ma. Lidalika bghina ngolo lik ila 3awdti commanditi 3ndna ghadi nkhaliw lik ktab fabour, wakha yt7ssb lik f la caisse 7na ghadi no9ssoh.`;
             }
 
             return {

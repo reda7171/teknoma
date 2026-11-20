@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     clientKey = clientKey.trim();
 
     // Toujours utiliser l'URL de production — TikTok vérifie l'URI exacte enregistrée
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.petsunivers.ma'}/api/tiktok/callback`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'}/api/tiktok/callback`;
     const scope = 'user.info.profile,user.info.stats,video.list,video.upload';
 
     // Generate random state for CSRF protection

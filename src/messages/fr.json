@@ -298,7 +298,7 @@
   },
   "AboutPage": {
     "OurStory": "Notre Histoire",
-    "HeroDesc": "Plus qu'une animalerie, une destination pour les esprits curieux et les amoureux du savoir.",
+    "HeroDesc": "La destination de référence au Maroc pour les smartphones, ordinateurs, Mac et accessoires.",
     "OurMission": "Notre Mission",
     "MissionDesc": "Depuis notre création, nous nous efforçons de rendre la lecture accessible à tous au Maroc. Nous croyons fermement que chaque produit a le pouvoir de transformer une vie, d'élargir les horizons et de stimuler l'imagination. Notre objectif est de créer un pont entre les marques et les lecteurs, en offrant une sélection diversifiée d'œuvres qui répondent à toutes les curiosités. Avec Tekno Store, la culture s'invite chez vous, où que vous soyez, pour nourrir votre esprit au quotidien.",
     "PassionTitle": "Passion",
@@ -332,9 +332,9 @@
     "SeeAll": "Tout voir",
     "hero": {
       "Badge": "Livraison gratuite dès 300 MAD + Paiement à la livraison partout au Maroc",
-      "TitlePart1": "Animalerie en ligne N°1 au Maroc",
+      "TitlePart1": "High-Tech & Électronique N°1 au Maroc",
       "TitlePart2": "Packs de produits à partir de 100 DH",
-      "Description": "Découvrez notre sélection pour animaux et faites des économies avec nos packs exclusifs.",
+      "Description": "Découvrez notre sélection High-Tech et faites des économies avec nos packs exclusifs.",
       "ShopLibrary": "La Boutique",
       "OurBundles": "Voir les Packs les plus vendus",
       "GoogleLogin": "Continuer avec Google",
@@ -355,7 +355,7 @@
     "SearchSection": {
       "Badge": "Recherche",
       "TitlePart1": "Trouvez le meilleur",
-      "TitlePart2": "pour votre animal.",
+      "TitlePart2": "pour votre équipement tech.",
       "Description": "Utilisez notre recherche avancée pour filtrer par produit, marque ou catégorie.",
       "Placeholder": "Rechercher un produit, une marque, un besoin...",
       "MoreFilters": "Plus de filtres",
@@ -432,7 +432,7 @@
     },
     "AEOSnippet": {
       "Question": "Où acheter des produits en ligne au Maroc ?",
-      "Answer": "Tekno Store est une animalerie en ligne marocaine permettant de commander des produits et romans avec livraison au Maroc."
+      "Answer": "Tekno Store est une boutique en ligne spécialisée dans les smartphones, ordinateurs portables, Mac et accessoires au Maroc avec livraison rapide et paiement COD."
     },
     "CTA": {
       "TitlePart1": "Prêt à choyer votre",
@@ -931,7 +931,7 @@
     "Développement personel": "Développement personnel",
     "Cuisine & Cookbooks": "Cuisine",
     "Loisirs, voyage et sport": "Loisirs, voyage et sport",
-    "Nature & Animaux": "Nature & Animaux",
+    "Nature & Animaux": "High-Tech & Gadgets",
     "Scolaire et Pédagogie": "Scolaire et Pédagogie",
     "Parascolaire": "Parascolaire",
     "Activités Montessori": "Activités Montessori",
@@ -1609,7 +1609,7 @@
   },
   "PWAInstallPrompt": {
     "title": "Installer Tekno Store",
-    "description": "Accédez à la animalerie rapidement depuis votre écran d'accueil.",
+    "description": "Accédez à Tekno Store rapidement depuis votre écran d'accueil.",
     "install": "Installer",
     "later": "Plus tard"
   },
@@ -1636,7 +1636,7 @@
     "fileLimits": "PDF, DOCX ou TXT (Max 10MB)",
     "sending": "Envoi en cours...",
     "send": "Envoyer ma liste",
-    "seoText": "Tekno Store est votre animalerie en ligne au Maroc. Nous proposons un large choix de produits (romans, mangas, beaux-arts, produits pour enfants, développement personnel et anglais) ainsi que toutes les fournitures scolaires (cartables, trousses, indispensables de la rentrée). Déposez votre liste scolaire en ligne et profitez d'une livraison rapide à domicile partout au Maroc (Casablanca, Rabat, Tanger, etc.). Tous nos produits sont 100% authentiques avec possibilité de paiement cash à la livraison ou par carte bancaire sécurisée."
+    "seoText": "Tekno Store est votre boutique High-Tech en ligne au Maroc. Nous proposons un large choix de smartphones (Apple iPhone, Samsung Galaxy, Xiaomi), de PC portables (PC gamer, ultrabooks bureautique), de produits Apple (MacBook, iPad) et d'accessoires connectés. Profitez d'une livraison rapide et soignée à domicile partout au Maroc (Casablanca, Rabat, Marrakech, Tanger, etc.) avec paiement en espèces à la livraison (Cash On Delivery) et garantie constructeur."
   },
   "JoinUs": {
     "heroTag": "Opportunité",
@@ -1857,8 +1857,8 @@
     "FormDescription": "Remplissez le formulaire ci-dessous pour que notre équipe valide votre compte et lance votre boutique."
   },
   "DevenirVendeurForm": {
-    "StoreNameLabel": "Nom de la boutique / Animalerie *",
-    "StoreNamePlaceholder": "Ex: Animalerie des Oliviers",
+    "StoreNameLabel": "Nom de la boutique / Marque *",
+    "StoreNamePlaceholder": "Ex: Tekno Store Maarif",
     "ManagerNameLabel": "Nom du gérant *",
     "ManagerNamePlaceholder": "Votre prénom et nom",
     "EmailLabel": "Adresse Email *",

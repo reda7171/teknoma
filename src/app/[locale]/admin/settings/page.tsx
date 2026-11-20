@@ -8,7 +8,7 @@ import GeminiCacheManager from '@/components/admin/GeminiCacheManager'
 import { Settings, Zap, Mail, Sparkles } from 'lucide-react'
 
 export const metadata = {
-    title: 'Paramètres du Site | Admin PetsUnivers',
+    title: 'Paramètres du Site | Admin Tekno Store',
     description: 'Configuration des paramètres du site'
 }
 

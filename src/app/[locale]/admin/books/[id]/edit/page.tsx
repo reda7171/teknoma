@@ -553,7 +553,7 @@ Author: ${auth}
 
 CRITICAL INSTRUCTION FOR TITLES:
 For title_fr and title_en, DO NOT translate the Arabic title literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
-Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat petsuniverst basatin arabistan" (NOT "Série de romans...").
+Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat teknot basatin arabistan" (NOT "Série de romans...").
 
 Please provide the following information in JSON format (so I can easily copy-paste or read it):
 {

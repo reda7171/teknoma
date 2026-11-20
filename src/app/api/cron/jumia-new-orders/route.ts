@@ -179,21 +179,21 @@ export async function GET(req: Request) {
                                 const packStock = pack?.books.length
                                     ? Math.min(...pack.books.map(packBook => packBook.book.stock))
                                     : undefined
-                                const petsuniversStock = book?.stock ?? extraProduct?.stock ?? packStock ?? 'Produit non lié'
+                                const teknoStock = book?.stock ?? extraProduct?.stock ?? packStock ?? 'Produit non lié'
 
-                                if (typeof petsuniversStock === 'number') {
-                                    syncTargets.push({ sellerSku: String(sellerSku), stock: petsuniversStock })
+                                if (typeof teknoStock === 'number') {
+                                    syncTargets.push({ sellerSku: String(sellerSku), stock: teknoStock })
                                 }
 
                                 itemsText += `📊 <b>Stock Jumia:</b> ${escapeHtml(String(jumiaStock))}\n`
-                                if (typeof petsuniversStock === 'number') {
-                                    itemsText += `🏪 <b>Stock PetsUnivers avant:</b> ${petsuniversStock + Number(quantity)}\n`
-                                    itemsText += `🏪 <b>Stock PetsUnivers après:</b> ${petsuniversStock}\n\n`
+                                if (typeof teknoStock === 'number') {
+                                    itemsText += `🏪 <b>Stock Tekno Store avant:</b> ${teknoStock + Number(quantity)}\n`
+                                    itemsText += `🏪 <b>Stock Tekno Store après:</b> ${teknoStock}\n\n`
                                 } else {
-                                    itemsText += `🏪 <b>Stock PetsUnivers:</b> ${escapeHtml(String(petsuniversStock))}\n\n`
+                                    itemsText += `🏪 <b>Stock Tekno Store:</b> ${escapeHtml(String(teknoStock))}\n\n`
                                 }
                             } catch (stockError) {
-                                console.error("Erreur récupération stocks Jumia/PetsUnivers", stockError)
+                                console.error("Erreur récupération stocks Jumia/Tekno Store", stockError)
                                 itemsText += `📊 <b>Stocks:</b> information indisponible\n\n`
                             }
                         } else {
@@ -206,7 +206,7 @@ export async function GET(req: Request) {
             }
 
             const customerName = `${order.shippingAddress?.firstName || order.CustomerFirstName || ''} ${order.shippingAddress?.lastName || order.CustomerLastName || ''}`.trim() || 'Client Jumia'
-            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${escapeHtml(orderId.toString())}</b>\n📅 Date: ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}\n👤 Client: <b>${escapeHtml(customerName)}</b>\n📝 Statut: <b>${escapeHtml(order.status || order.Status || 'N/A')}</b>\n💰 Total: <b>${formatAmount(amount)} درهم</b>${itemsText}\n🔄 <b>Voulez-vous synchroniser le stock PetsUnivers vers Jumia ?</b>`
+            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${escapeHtml(orderId.toString())}</b>\n📅 Date: ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}\n👤 Client: <b>${escapeHtml(customerName)}</b>\n📝 Statut: <b>${escapeHtml(order.status || order.Status || 'N/A')}</b>\n💰 Total: <b>${formatAmount(amount)} درهم</b>${itemsText}\n🔄 <b>Voulez-vous synchroniser le stock Tekno Store vers Jumia ?</b>`
             const syncButtonLabel = syncTargets.length === 1
                 ? `✅ Oui, mettre à ${syncTargets[0].stock}`
                 : '✅ Oui, synchroniser ces articles'

@@ -48,7 +48,7 @@ async function main() {
     }
 
     const prompt = `
-Tu es un expert SEO et copywriter pour la librairie en ligne marocaine petsunivers.ma.
+Tu es un expert SEO et copywriter pour la librairie en ligne marocaine tekno.ma.
 Rédige une courte description commerciale pour le livre suivant.
 Titre: "${book.title}"
 Auteur: "${book.author}"

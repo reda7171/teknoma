@@ -134,7 +134,7 @@ export default function AdminLayout({
             href: `/${lang}/admin/books`,
             icon: BookOpen,
             children: [
-                { name: 'Produits animaliers', href: `/${lang}/admin/books`, icon: BookOpen },
+                { name: 'Produits High-Tech', href: `/${lang}/admin/books`, icon: BookOpen },
                 { name: 'Catalogue Jumia', href: `/${lang}/admin/jumia-products`, icon: ShoppingBag },
                 { name: 'Packs & Lots', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },
                 { name: 'Entrepôts', href: `/${lang}/admin/warehouses`, icon: Package },
@@ -355,7 +355,7 @@ export default function AdminLayout({
             <div className={`flex items-center ${isCollapsed ? 'justify-center flex-col py-4 gap-4' : 'justify-between px-5 md:px-8'} h-16 md:h-20 shrink-0`}>
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center shrink-0">
-                        <span className="text-white text-lg font-black italic">R</span>
+                        <span className="text-white text-lg font-black italic">T</span>
                     </div>
                     {!isCollapsed && <h1 className="text-lg font-black text-slate-900 tracking-tight">Tekno Store<span className="text-blue-600">.</span></h1>}
                 </div>

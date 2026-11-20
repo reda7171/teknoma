@@ -47,7 +47,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                         skipFonts: false,
                     })
                     const link = document.createElement('a')
-                    link.download = `petsunivers-challenge-${user?.fullName || 'reader'}.png`
+                    link.download = `tekno-challenge-${user?.fullName || 'reader'}.png`
                     link.href = dataUrl
                     link.click()
                 } catch (err) {
@@ -100,7 +100,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                                         <span className="text-white font-black text-xl italic">R</span>
                                     </div>
                                     <div>
-                                        <h2 className="font-black text-lg leading-tight">PetsUnivers</h2>
+                                        <h2 className="font-black text-lg leading-tight">Tekno Store</h2>
                                         <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400">Community</p>
                                     </div>
                                 </div>
@@ -173,10 +173,10 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                             <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                                 <div>
                                     <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Challenge</div>
-                                    <div className="text-xl font-black text-emerald-600 tracking-tighter">#PetsUniversChallenge</div>
+                                    <div className="text-xl font-black text-emerald-600 tracking-tighter">#Tekno StoreChallenge</div>
                                 </div>
                                 <div className="bg-black text-white px-5 py-2.5 rounded-2xl font-black text-sm">
-                                    petsunivers.ma
+                                    tekno.ma
                                 </div>
                             </div>
                         </div>

@@ -11,10 +11,10 @@ const nextConfig: NextConfig = {
     deviceSizes: [360, 480, 640, 750, 828, 1080, 1200, 1440],
     imageSizes: [32, 48, 64, 96, 128, 192, 256, 384],
     remotePatterns: [
-      { protocol: 'https', hostname: 'petsunivers.ma', pathname: '/uploads/**' },
-      { protocol: 'https', hostname: 'www.petsunivers.ma', pathname: '/uploads/**' },
-      { protocol: 'https', hostname: 'petsunivers.ma', pathname: '/api/books/**' },
-      { protocol: 'https', hostname: 'www.petsunivers.ma', pathname: '/api/books/**' },
+      { protocol: 'https', hostname: 'tekno.ma', pathname: '/uploads/**' },
+      { protocol: 'https', hostname: 'tekno.ma', pathname: '/uploads/**' },
+      { protocol: 'https', hostname: 'tekno.ma', pathname: '/api/books/**' },
+      { protocol: 'https', hostname: 'tekno.ma', pathname: '/api/books/**' },
     ],
   },
 }

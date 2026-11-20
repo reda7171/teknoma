@@ -164,7 +164,7 @@ export default function N8nPublishModal({ isOpen, onClose, book, format }: N8nPu
             if (newWindow) {
                 newWindow.document.write(`
                     <html lang="fr">
-                        <head><title>Aperçu n8n - PetsUnivers</title></head>
+                        <head><title>Aperçu n8n - Tekno Store</title></head>
                         <body style="margin:0;display:flex;align-items:center;justify-content:center;background:#000;min-height:100vh;">
                             <img src="${dataUrl}" style="max-width:95%;max-height:95vh;border-radius:12px;box-shadow:0 0 50px rgba(255,255,255,0.1);" />
                         </body>

@@ -185,7 +185,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                         <span className="hidden sm:inline">{t.backToStore}</span>
                         <span className="sm:hidden text-sm">Retour</span>
                     </Link>
-                    <img src="/logo.png" alt="PetsUnivers" className="h-12 sm:h-16 w-auto object-contain" />
+                    <img src="/logo.png" alt="Tekno Store" className="h-12 sm:h-16 w-auto object-contain" />
                 </div>
 
                 <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100/60 p-6 sm:p-10 relative overflow-hidden backdrop-blur-xl">
@@ -430,7 +430,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                 <div className="text-center pb-8">
                     <p className="text-sm text-gray-500">
                         {t.needHelp}{' '}
-                        <a href="mailto:contact@petsunivers.ma" className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+                        <a href="mailto:Contact.tekno.ma@gmail.com" className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
                             {t.contactUs}
                         </a>
                     </p>

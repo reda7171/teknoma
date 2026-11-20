@@ -88,8 +88,8 @@ export async function POST(req: NextRequest) {
 
         const rawBase = process.env.NEXT_PUBLIC_APP_URL || ''
         const appBaseUrl = rawBase.includes('127.0.0.1') || rawBase.includes('localhost')
-            ? 'https://petsunivers.ma'
-            : (rawBase || 'https://petsunivers.ma')
+            ? 'https://tekno.ma'
+            : (rawBase || 'https://tekno.ma')
 
         let absoluteImage = mediaUrl || ''
         if (absoluteImage && !absoluteImage.startsWith('http')) {
@@ -102,16 +102,16 @@ export async function POST(req: NextRequest) {
             batch: platforms.map((platform: string) => ({
                 itemId: post.id,
                 itemType: 'OTHER',
-                title: 'PetsUnivers',
+                title: 'Tekno Store',
                 image: absoluteImage,
                 isVideo,
                 isPack: false,
-                caption: content || 'PetsUnivers Post',
+                caption: content || 'Tekno Store Post',
                 description: content || '',
                 format: 'post',
                 platform: platform,
                 scheduleAt: '',
-                source: 'petsunivers-admin',
+                source: 'tekno-admin',
                 postId: post.id,
                 facebook_access_token: facebookAccessToken,
                 instagram_account_id: instagramAccountId,

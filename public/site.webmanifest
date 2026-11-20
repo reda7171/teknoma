@@ -1,7 +1,7 @@
 {
-  "name": "PetsUnivers — Animalerie",
-  "short_name": "PetsUnivers",
-  "description": "Alimentation, accessoires et soins pour chats, chiens et petits animaux.",
+  "name": "Tekno Store — Smartphones, PC & Mac",
+  "short_name": "Tekno Store",
+  "description": "Boutique high-tech au Maroc : smartphones neufs, ordinateurs portables, Mac et accessoires avec paiement à la livraison.",
   "start_url": "/fr",
   "scope": "/",
   "display": "standalone",
@@ -10,46 +10,30 @@
     "standalone",
     "minimal-ui"
   ],
-  "background_color": "#f7f0df",
-  "theme_color": "#17351d",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait-primary",
   "lang": "fr-MA",
   "dir": "auto",
-  "id": "petsunivers-ma-pwa",
+  "id": "tekno-store-pwa",
   "icons": [
     {
-      "src": "/android-chrome-192x192.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/android-chrome-512x512.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/android-chrome-512x512.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "screenshots": [],
-  "shortcuts": [
-    {
-      "name": "Boutique",
-      "url": "/fr/products"
-    },
-    {
-      "name": "Services",
-      "url": "/fr/services"
-    }
-  ],
-  "categories": [
-    "shopping",
-    "lifestyle"
-  ],
-  "prefer_related_applications": false
+  ]
 }

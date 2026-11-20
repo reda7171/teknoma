@@ -129,7 +129,7 @@ export async function GET(req: NextRequest) {
         }
 
         // 5. Envoyer le message
-        const text = `📊 <b>Résumé Journalier - PetsUnivers</b>\n\n` +
+        const text = `📊 <b>Résumé Journalier - Tekno Store</b>\n\n` +
             `📅 <b>Date:</b> ${startOfDay.toLocaleDateString('fr-FR')}\n` +
             `📦 <b>Commandes:</b> ${orders.length}\n` +
             `💰 <b>CA Brut:</b> ${totalRevenue.toFixed(2)} درهم\n` +

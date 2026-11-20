@@ -26,7 +26,7 @@ const slugKeywordsMap: Record<string, string[]> = {
   'romantic-novels': ['romantic novels morocco', 'best romance books', 'love story books', 'romantic arabic novels'],
   'livre-maroc': ['livre maroc', 'acheter livre maroc', 'librairie maroc', 'livre en ligne maroc', 'meilleure librairie maroc'],
   'librairie-en-ligne-maroc': ['librairie en ligne maroc', 'acheter livre en ligne', 'commande livre maroc', 'livraison livre maroc'],
-  'petsuniverst-arabia': ['روايات عربية', 'كتب عربية', 'مكتبة عربية أونلاين', 'شراء روايات', 'أفضل الكتب العربية'],
+  'teknot-arabia': ['روايات عربية', 'كتب عربية', 'مكتبة عربية أونلاين', 'شراء روايات', 'أفضل الكتب العربية'],
   'kotob-tatwir-adat': ['كتب تطوير الذات', 'كتاب العادات الذرية', 'كتاب فن اللامبالاة', 'كتب الإنتاجية', 'كتاب معجزة الصباح'],
   'kotob-mal-istithmar': ['كتب المال', 'كتاب سيكولوجية المال', 'كتاب الأب الغني', 'كتب الاستثمار', 'كتب الأعمال'],
 }
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ seoSlug: 
   const extraKeywords = slugKeywordsMap[seoSlug] || []
   const baseUrl = getBaseUrl()
   const pageUrl = `${baseUrl}/${locale}/collection/${seoSlug}`
-  const cleanTitle = data.title.replace(/\s*[|–-]\s*PetsUnivers(?:\s+Store)?\s*$/i, '').trim()
+  const cleanTitle = data.title.replace(/\s*[|–-]\s*Tekno Store(?:\s+Store)?\s*$/i, '').trim()
   const keywordTerms = [data.keyword, data.searchQuery, ...extraKeywords]
     .flatMap(value => value ? value.split(/[,،]/) : [])
     .map(value => value.trim())
@@ -55,27 +55,27 @@ export async function generateMetadata({ params }: { params: Promise<{ seoSlug: 
   const ogLocale = locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA'
 
   return {
-    title: { absolute: `${cleanTitle} | PetsUnivers` },
+    title: { absolute: `${cleanTitle} | Tekno Store` },
     description: data.description,
     keywords: [
       ...new Set(keywordTerms),
-      'maroc', 'livraison', 'paiement à la livraison', 'petsunivers store', 'librairie maroc'
+      'maroc', 'livraison', 'paiement à la livraison', 'tekno store', 'librairie maroc'
     ],
     robots: data.isActive
       ? { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large' } }
       : { index: false, follow: false },
     openGraph: {
-      title: `${cleanTitle} | PetsUnivers`,
+      title: `${cleanTitle} | Tekno Store`,
       description: data.description,
       type: 'website',
-      siteName: 'PetsUnivers Store',
+      siteName: 'Tekno Store Store',
       url: pageUrl,
       locale: ogLocale,
       images: [{ url: ogImage, alt: data.h1 }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${cleanTitle} | PetsUnivers`,
+      title: `${cleanTitle} | Tekno Store`,
       description: data.description,
       images: [ogImage],
     },
@@ -134,7 +134,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
     if (locale === 'ar') {
       faqList = [
         {
-          q: `كيف يمكنني طلب كتب ${data.title} عبر متجر PetsUnivers؟`,
+          q: `كيف يمكنني طلب كتب ${data.title} عبر متجر Tekno Store؟`,
           a: "يمكنك اختيار الكتب أو الباقات وإضافتها إلى السلة، ثم تأكيد الطلب بكتابة رقم هاتفك وعنوانك. الدفع يتم نقداً عند الاستلام (COD) بعد استلام طلبيتك وفحصها."
         },
         {
@@ -143,18 +143,18 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "هل الكتب المعروضة أصلية وجديدة وبجودة ممتازة؟",
-          a: "نعم، جميع كتب وروايات متجر PetsUnivers جديدة 100%، بجودة طباعة وتغليف عالية لضمان تجربة قراءة ممتعة تدوم طويلاً."
+          a: "نعم، جميع كتب وروايات متجر Tekno Store جديدة 100%، بجودة طباعة وتغليف عالية لضمان تجربة قراءة ممتعة تدوم طويلاً."
         },
         {
           q: "هل يمكنني فحص الطرد قبل الدفع عند الاستلام؟",
-          a: "نعم بكل تأكيد، يتيح لك متجر PetsUnivers فحص محتوى الطرد والتأكد من سلامته قبل تسليم المبلغ لموزع التوصيل لضمان راحة بالك التامة."
+          a: "نعم بكل تأكيد، يتيح لك متجر Tekno Store فحص محتوى الطرد والتأكد من سلامته قبل تسليم المبلغ لموزع التوصيل لضمان راحة بالك التامة."
         },
         {
           q: "هل التوصيل مجاني عند شراء الكتب؟",
           a: "نوفر التوصيل المجاني على الباقات الترويجية المختارة أو عند وصول مجموع سلتكم إلى السقف المؤهل. رسوم الشحن تظهر بوضوح وبكل شفافية قبل تأكيد الطلب."
         },
         {
-          q: "ما هي شروط الاستبدال والاسترجاع (ضمان PetsUnivers)؟",
+          q: "ما هي شروط الاستبدال والاسترجاع (ضمان Tekno Store)؟",
           a: "نوفر ضمان 'راضٍ أو مسترجع خلال 7 أيام'. في حال وجود أي عيب مصنعي أو تلف أثناء الشحن، يتكفل فريقنا باستبدال نسختكم فوراً أو إرجاع ثمنها دون تعقيد."
         },
         {
@@ -169,7 +169,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
     } else if (locale === 'en') {
       faqList = [
         {
-          q: `How can I order ${data.title} books on PetsUnivers?`,
+          q: `How can I order ${data.title} books on Tekno Store?`,
           a: "Simply browse our collection, add your favorite books or packs to the cart, and confirm your order by entering your name, phone number, and address. Payment is made by Cash on Delivery (COD) upon receiving and inspecting your package."
         },
         {
@@ -178,7 +178,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "Are the books new, original, and authentic?",
-          a: "Yes, 100% of the books available on PetsUnivers are brand new, genuine editions with premium print quality and protective packaging."
+          a: "Yes, 100% of the books available on Tekno Store are brand new, genuine editions with premium print quality and protective packaging."
         },
         {
           q: "Can I inspect the parcel before paying the courier?",
@@ -190,7 +190,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "What is your return and exchange policy?",
-          a: "Every order is protected by our PetsUnivers 7-day money-back guarantee. If you encounter any print defects or shipping issues, we immediately replace or refund your purchase."
+          a: "Every order is protected by our Tekno Store 7-day money-back guarantee. If you encounter any print defects or shipping issues, we immediately replace or refund your purchase."
         },
         {
           q: "Do you offer bundle deals and discounts for this collection?",
@@ -204,7 +204,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
     } else {
       faqList = [
         {
-          q: `Comment commander des livres ${data.title} sur PetsUnivers ?`,
+          q: `Comment commander des livres ${data.title} sur Tekno Store ?`,
           a: "Sélectionnez vos livres préférés ou packs, ajoutez-les au panier et validez votre commande en renseignant votre numéro de téléphone et adresse. Le paiement s'effectue en espèces à la livraison (Cash on Delivery) après réception de votre colis."
         },
         {
@@ -225,7 +225,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         },
         {
           q: "Quelle est votre politique de retour ou d'échange ?",
-          a: "Vous bénéficiez de la garantie PetsUnivers 'Satisfait ou remboursé sous 7 jours'. En cas de défaut de fabrication ou de dommage durant le transport, nous échangeons l'ouvrage ou vous remboursons sans tracas."
+          a: "Vous bénéficiez de la garantie Tekno Store 'Satisfait ou remboursé sous 7 jours'. En cas de défaut de fabrication ou de dommage durant le transport, nous échangeons l'ouvrage ou vous remboursons sans tracas."
         },
         {
           q: "Proposez-vous des packs et des réductions sur plusieurs livres ?",
@@ -306,7 +306,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
           sku: book.id,
           brand: {
             '@type': 'Brand',
-            name: 'PetsUnivers'
+            name: 'Tekno Store'
           },
           ...(book.isbn ? { isbn: book.isbn } : {}),
           offers: {
@@ -317,7 +317,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
             itemCondition: 'https://schema.org/NewCondition',
             seller: {
               '@type': 'Organization',
-              name: 'PetsUnivers'
+              name: 'Tekno Store'
             },
             hasMerchantReturnPolicy: {
               '@type': 'MerchantReturnPolicy',
@@ -407,7 +407,7 @@ export default async function SeoLandingPage({ params }: { params: Promise<{ seo
         <div className="max-w-5xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-bold tracking-widest uppercase mb-6">
             <BookOpen className="w-4 h-4 text-pixio-yellow" />
-            <span>Spécialité PetsUnivers</span>
+            <span>Spécialité Tekno Store</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
             {data.h1}

@@ -2,7 +2,7 @@ import { getSetting } from '@/lib/actions/site-settings'
 import PaymentMethodsForm from './PaymentMethodsForm'
 
 export const metadata = {
-  title: 'Modes de Paiement | Admin PetsUnivers',
+  title: 'Modes de Paiement | Admin Tekno Store',
 }
 
 export default async function PaymentMethodsPage() {

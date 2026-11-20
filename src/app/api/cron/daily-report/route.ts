@@ -88,7 +88,7 @@ export async function GET(req: Request) {
         } catch {}
 
         const dateStr = yesterday.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
-        const msg = `☀️ <b>Rapport Quotidien PetsUnivers</b>\n📅 ${dateStr}\n\n` +
+        const msg = `☀️ <b>Rapport Quotidien Tekno Store</b>\n📅 ${dateStr}\n\n` +
             `🌐 <b>Site Web</b>\n📦 Commandes: <b>${totalYesterday}</b>\n💰 CA Brut: <b>${caBrut.toFixed(2)} درهم</b>\n🚚 Frais Livraison: <b>-${totalDeliveryFees.toFixed(2)} درهم</b>\n💵 CA Net: <b>${caNet.toFixed(2)} درهم</b>` +
             (statusLines ? `\n\n📊 <b>Détail :</b>\n${statusLines}` : '') +
             jumiaSection

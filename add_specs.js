@@ -13,7 +13,7 @@ const updateNamespace = (file) => {
     BookmarkDim: '12 x 3 cm',
     Standard: file.includes('fr') ? 'Standard' : file.includes('ar') ? 'قياسي' : 'Standard',
     USBCapacity: '64 Go',
-    PetsUniversWarranty: file.includes('fr') ? 'Garantie qualité PetsUnivers' : file.includes('ar') ? 'ضمان جودة PetsUnivers' : 'PetsUnivers quality guarantee'
+    Tekno StoreWarranty: file.includes('fr') ? 'Garantie qualité Tekno Store' : file.includes('ar') ? 'ضمان جودة Tekno Store' : 'Tekno Store quality guarantee'
   };
 
   fs.writeFileSync(file, JSON.stringify(data, null, 2));

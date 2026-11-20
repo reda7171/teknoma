@@ -1,7 +1,7 @@
 import { getPromoLeads } from '@/lib/actions/promo-leads'
 import { PromoLeadsClient } from '@/components/admin/PromoLeadsClient'
 
-export const metadata = { title: 'Leads Paniers & Promos | Admin PetsUnivers' }
+export const metadata = { title: 'Leads Paniers & Promos | Admin Tekno Store' }
 
 export default async function PromoLeadsPage() {
   const result = await getPromoLeads({ page: 1, limit: 100 })

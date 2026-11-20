@@ -44,13 +44,13 @@ export async function POST(req: Request) {
                     Keywords: kwArray,
                     Rating: 5,
                     RatingPercent: 99,
-                    XPAuthor: `${book.author} | PetsUnivers`,
-                    Artist: `${book.author} | PetsUnivers`,
-                    Creator: `${book.author} | PetsUnivers`,
-                    XPComment: `Acheter ${book.title} de ${book.author} sur la librairie PetsUnivers Maroc`,
-                    Description: `Acheter ${book.title} de ${book.author} sur la librairie PetsUnivers Maroc`,
-                    Copyright: 'PetsUnivers',
-                    Software: 'PetsUnivers',
+                    XPAuthor: `${book.author} | Tekno Store`,
+                    Artist: `${book.author} | Tekno Store`,
+                    Creator: `${book.author} | Tekno Store`,
+                    XPComment: `Acheter ${book.title} de ${book.author} sur la librairie Tekno Store Maroc`,
+                    Description: `Acheter ${book.title} de ${book.author} sur la librairie Tekno Store Maroc`,
+                    Copyright: 'Tekno Store',
+                    Software: 'Tekno Store',
                 })
 
                 // Exiftool creates an _original backup file. Delete it.
