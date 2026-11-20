@@ -680,12 +680,64 @@ export async function fetchAllAuthors() {
 }
 
 /**
+ * Récupérer tous les livres pour les sélecteurs d'administration (articles de blog, packs, promotions)
+ * Version optimisée et légère pour garantir le chargement de l'intégralité du catalogue.
+ */
+export async function getAdminSelectableBooks(options?: { search?: string; limit?: number }) {
+    await requireRole(["ADMIN", "MANAGER"])
+
+    try {
+        await verifyAdmin()
+        const limit = Math.max(1, Math.min(5000, Number(options?.limit) || 3000))
+        const search = options?.search?.trim()
+
+        const where: any = {}
+        if (search) {
+            where.OR = [
+                { title: { contains: search } },
+                { titleFr: { contains: search } },
+                { titleEn: { contains: search } },
+                { author: { contains: search } },
+                { isbn: { contains: search } },
+            ]
+        }
+
+        const books = await prisma.book.findMany({
+            where,
+            select: {
+                id: true,
+                title: true,
+                titleFr: true,
+                titleEn: true,
+                author: true,
+                price: true,
+                image: true,
+                stock: true,
+                active: true,
+                isbn: true,
+                category: true,
+            },
+            orderBy: [
+                { displayOrder: 'asc' },
+                { createdAt: 'desc' }
+            ],
+            take: limit,
+        })
+
+        return { success: true, data: books }
+    } catch (error) {
+        console.error('Erreur getAdminSelectableBooks:', error)
+        return { success: false, error: 'Impossible de charger la liste des livres', data: [] }
+    }
+}
+
+/**
  * Récupérer les livres avec pagination pour le client (Server Action)
  */
 export async function fetchBooks(filters: BookFilters) {
     try {
         if (filters?.includeInactive || filters?.active === false) await requireRole()
-        const books = await getBooksDb({ ...filters, limit: Math.max(1, Math.min(100, Number(filters?.limit) || 12)), page: Math.max(1, Number(filters?.page) || 1) })
+        const books = await getBooksDb({ ...filters, limit: Math.max(1, Math.min(5000, Number(filters?.limit) || 12)), page: Math.max(1, Number(filters?.page) || 1) })
         return { success: true, data: books }
     } catch (error) {
         console.error('Error fetching books:', error)

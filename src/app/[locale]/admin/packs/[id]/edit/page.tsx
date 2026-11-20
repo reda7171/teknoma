@@ -13,7 +13,7 @@ export default async function EditPackPage({ params }: { params: Promise<{ id: s
 
     const [packResult, books, whatsappPhone, allPacks] = await Promise.all([
         getPackById(id),
-        getBooks({ includeInactive: true, limit: 1000 }),
+        getBooks({ includeInactive: true, limit: 5000 }),
         getSetting('contact_whatsapp'),
         prisma.pack.findMany({
             select: { id: true, name: true },

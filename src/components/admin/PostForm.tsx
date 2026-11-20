@@ -8,7 +8,7 @@ import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ExternalLink, S
 import { generatePostContent } from '@/lib/actions/gemini'
 import Link from 'next/link'
 import { Book as BookIcon, Search, X, Wand2, Copy, Check } from 'lucide-react'
-import { fetchBooks } from '@/lib/actions/books'
+import { getAdminSelectableBooks } from '@/lib/actions/books'
 import MediaLibraryModal from '@/components/admin/MediaLibraryModal'
 import { getUsers } from '@/lib/actions/users'
 import { useEffect } from 'react'
@@ -47,6 +47,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const [authorId, setAuthorId] = useState(post?.authorId || '')
     const [adminUsers, setAdminUsers] = useState<any[]>([])
     const [allBooks, setAllBooks] = useState<any[]>([])
+    const [isLoadingBooks, setIsLoadingBooks] = useState(true)
     const [bookSearch, setBookSearch] = useState('')
     const [selectedBookIds, setSelectedBookIds] = useState<string[]>(post?.books?.map((b: any) => b.id) || [])
 
@@ -54,15 +55,20 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
 
     useEffect(() => {
         const loadData = async () => {
-            const [booksResult, usersResult] = await Promise.all([
-                fetchBooks({ limit: 1000, includeInactive: true }),
-                getUsers()
-            ])
-            if (booksResult.success) {
-                setAllBooks(booksResult.data)
-            }
-            if (usersResult.success && usersResult.data) {
-                setAdminUsers(usersResult.data)
+            setIsLoadingBooks(true)
+            try {
+                const [booksResult, usersResult] = await Promise.all([
+                    getAdminSelectableBooks({ limit: 5000 }),
+                    getUsers()
+                ])
+                if (booksResult.success && booksResult.data) {
+                    setAllBooks(booksResult.data)
+                }
+                if (usersResult.success && usersResult.data) {
+                    setAdminUsers(usersResult.data)
+                }
+            } finally {
+                setIsLoadingBooks(false)
             }
         }
         loadData()
@@ -623,8 +629,15 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
 
                     <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 space-y-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
-                        <h3 className="font-black text-gray-900 tracking-tight text-lg relative z-10">Livres liés</h3>
-                        <p className="text-[10px] text-gray-500 font-medium">L'article sera affiché sur la page de ces produits.</p>
+                        <div className="flex items-center justify-between relative z-10">
+                            <div>
+                                <h3 className="font-black text-gray-900 tracking-tight text-lg">Livres liés</h3>
+                                <p className="text-[10px] text-gray-500 font-medium">L'article sera affiché sur la page de ces produits.</p>
+                            </div>
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
+                                {isLoadingBooks ? 'Chargement...' : `${allBooks.length} livres`}
+                            </span>
+                        </div>
 
                         <div className="space-y-3">
                             {/* Search */}
@@ -634,69 +647,118 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                     type="text"
                                     value={bookSearch}
                                     onChange={(e) => setBookSearch(e.target.value)}
-                                    placeholder="Rechercher un livre..."
-                                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none transition-all"
+                                    placeholder="Rechercher par titre, auteur, ISBN..."
+                                    className="w-full pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none transition-all"
                                 />
+                                {bookSearch && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setBookSearch('')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                )}
                             </div>
 
                             {/* Selected Books */}
                             {selectedBookIds.length > 0 && (
-                                <div className="flex flex-wrap gap-2 py-2">
-                                    {selectedBookIds.map(id => {
-                                        const book = allBooks.find(b => b.id === id)
-                                        return (
-                                            <div key={id} className="flex items-center gap-2 px-2 py-1 bg-black text-white rounded text-[10px] font-bold">
-                                                <span className="truncate max-w-[120px]">{book?.title || 'Livre...'}</span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setSelectedBookIds(prev => prev.filter(bid => bid !== id))}
-                                                    className="hover:text-red-400"
-                                                >
-                                                    <X className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                        )
-                                    })}
+                                <div className="space-y-1">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                        Sélectionnés ({selectedBookIds.length})
+                                    </span>
+                                    <div className="flex flex-wrap gap-2 py-1">
+                                        {selectedBookIds.map(id => {
+                                            const book = allBooks.find(b => b.id === id)
+                                            const titleDisplay = (language === 'fr' && book?.titleFr) 
+                                                ? book.titleFr 
+                                                : (language === 'en' && book?.titleEn) 
+                                                    ? book.titleEn 
+                                                    : (book?.title || book?.titleFr || book?.titleEn || 'Livre lié')
+                                            return (
+                                                <div key={id} className="flex items-center gap-2 px-2.5 py-1 bg-black text-white rounded-lg text-[11px] font-bold shadow-sm">
+                                                    <span className="truncate max-w-[160px]">{titleDisplay}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setSelectedBookIds(prev => prev.filter(bid => bid !== id))}
+                                                        className="hover:text-red-400 p-0.5"
+                                                    >
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
                                 </div>
                             )}
 
                             {/* Book List */}
-                            <div className="max-h-60 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-100">
-                                {allBooks
-                                    .filter(b => {
-                                        if (selectedBookIds.includes(b.id)) return false;
-                                        if (!bookSearch.trim()) return true;
-                                        const searchTerms = bookSearch.toLowerCase().split(/\s+/).filter(Boolean);
-                                        return searchTerms.some(term => b.title.toLowerCase().includes(term));
+                            <div className="max-h-72 overflow-y-auto border border-gray-100 rounded-xl divide-y divide-gray-100 bg-white">
+                                {isLoadingBooks ? (
+                                    <div className="p-6 text-center text-gray-400 flex items-center justify-center gap-2 text-xs">
+                                        <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+                                        Chargement du catalogue complet...
+                                    </div>
+                                ) : (() => {
+                                    const searchTerms = bookSearch.toLowerCase().trim().split(/\s+/).filter(Boolean)
+                                    const filtered = allBooks.filter(b => {
+                                        if (selectedBookIds.includes(b.id)) return false
+                                        if (searchTerms.length === 0) return true
+                                        const searchable = `${b.title || ''} ${b.titleFr || ''} ${b.titleEn || ''} ${b.author || ''} ${b.isbn || ''} ${b.category || ''}`.toLowerCase()
+                                        return searchTerms.every(term => searchable.includes(term))
                                     })
-                                    .map(book => (
-                                        <button
-                                            key={book.id}
-                                            type="button"
-                                            onClick={() => setSelectedBookIds(prev => [...prev, book.id])}
-                                            className="w-full px-3 py-2 text-left hover:bg-gray-50 text-xs font-medium flex items-center gap-3 transition-colors"
-                                        >
-                                            <div className="w-8 h-10 bg-gray-100 rounded flex-shrink-0 overflow-hidden">
-                                                {book.image && (
-                                                    <img 
-                                                        src={
-                                                            book.image.startsWith('http') || book.image.startsWith('/') || book.image.startsWith('data:') 
-                                                                ? book.image 
-                                                                : book.image.startsWith('/9j/') ? `data:image/jpeg;base64,${book.image}` 
-                                                                : book.image.startsWith('iVBOR') ? `data:image/png;base64,${book.image}` 
-                                                                : `data:image/jpeg;base64,${book.image}`
-                                                        } 
-                                                        alt="" 
-                                                        className="w-full h-full object-cover" 
-                                                    />
-                                                )}
+
+                                    if (filtered.length === 0) {
+                                        return (
+                                            <div className="p-6 text-center text-gray-400 text-xs">
+                                                Aucun livre ne correspond à votre recherche.
                                             </div>
-                                            <div className="min-w-0">
-                                                <div className="truncate font-bold text-gray-900">{book.title}</div>
-                                                <div className="truncate text-gray-400">{book.author}</div>
-                                            </div>
-                                        </button>
-                                    ))}
+                                        )
+                                    }
+
+                                    return filtered.map(book => {
+                                        const titleDisplay = (language === 'fr' && book.titleFr)
+                                            ? book.titleFr
+                                            : (language === 'en' && book.titleEn)
+                                                ? book.titleEn
+                                                : (book.title || book.titleFr || book.titleEn || 'Sans titre')
+                                        return (
+                                            <button
+                                                key={book.id}
+                                                type="button"
+                                                onClick={() => setSelectedBookIds(prev => [...prev, book.id])}
+                                                className="w-full px-3 py-2 text-left hover:bg-emerald-50/50 text-xs font-medium flex items-center gap-3 transition-colors group"
+                                            >
+                                                <div className="w-9 h-12 bg-gray-100 rounded-md flex-shrink-0 overflow-hidden border border-gray-100">
+                                                    {book.image && (
+                                                        <img 
+                                                            src={
+                                                                book.image.startsWith('http') || book.image.startsWith('/') || book.image.startsWith('data:') 
+                                                                    ? book.image 
+                                                                    : book.image.startsWith('/9j/') ? `data:image/jpeg;base64,${book.image}` 
+                                                                    : book.image.startsWith('iVBOR') ? `data:image/png;base64,${book.image}` 
+                                                                    : `data:image/jpeg;base64,${book.image}`
+                                                            } 
+                                                            alt="" 
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="truncate font-bold text-gray-900 group-hover:text-emerald-700">{titleDisplay}</div>
+                                                    <div className="truncate text-[11px] text-gray-400 flex items-center gap-2">
+                                                        <span>{book.author}</span>
+                                                        {book.price && <span className="text-gray-300">•</span>}
+                                                        {book.price && <span className="font-semibold text-gray-600">{book.price} MAD</span>}
+                                                    </div>
+                                                </div>
+                                                <span className="text-[10px] text-emerald-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    + Lier
+                                                </span>
+                                            </button>
+                                        )
+                                    })
+                                })()}
                             </div>
                         </div>
                     </div>

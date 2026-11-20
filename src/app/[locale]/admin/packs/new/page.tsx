@@ -8,7 +8,7 @@ export default async function NewPackPage() {
     await requirePageRole(["ADMIN","MANAGER"])
 
     const [books, accessories, whatsappPhone] = await Promise.all([
-        getBooks({ includeInactive: true, limit: 1000 }),
+        getBooks({ includeInactive: true, limit: 5000 }),
         prisma.extraProduct.findMany({
             orderBy: [{ category: 'asc' }, { name: 'asc' }],
             select: {
