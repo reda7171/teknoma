@@ -369,7 +369,7 @@
       "GoogleLogin": "Sign in with Google",
       "GoogleBonus": "+10 DH Free",
       "CustomBundle": "Create my Custom Bundle (-30%)",
-      "SocialProof": "⭐ 4.9/5 by over 1,500 happy pet parents",
+      "SocialProof": "⭐ 4.9/5 by over 2,500 happy tech buyers in Morocco",
       "EditorsChoice": "Editor's Choice",
       "Select": "SELECT",
       "PinnedBook": "Pinned Product in Hero Center",
@@ -400,8 +400,8 @@
       "Submit": "Search"
     },
     "seo": {
-      "Title": "Tekno Store — Shop · Cats & Dogs",
-      "Description": "Food, accessories and care: discover everyday essentials for cats, dogs and little companions."
+      "Title": "Tekno Store — Smartphones, Laptops, Mac & Tech Accessories in Morocco",
+      "Description": "Discover authentic Apple, Samsung, Dell, Asus and certified accessories at best prices with cash on delivery across Morocco."
     },
     "Features": {
       "ShippingTitle": "Express Shipping",
@@ -1378,7 +1378,7 @@
     "Title": "Your Cart",
     "CollectionCount": "{count} Items",
     "EmptyTitle": "Your cart is empty",
-    "EmptyDesc": "Discover everyday essentials for your cats, dogs and little companions.",
+    "EmptyDesc": "Explore our curated smartphones, laptops, Mac and certified accessories in our shop.",
     "BrowseLibrary": "Explore the shop",
     "ViewBundles": "View Bundles",
     "BundleBadge": "BUNDLE",

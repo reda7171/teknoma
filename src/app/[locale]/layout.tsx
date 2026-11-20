@@ -99,7 +99,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     getTranslations({ locale, namespace: 'HomePage.seo' })
   ]);
 
-  const seoAuthor = seoAuthorRaw || 'PetsUnivers Team';
+  const seoAuthor = seoAuthorRaw || 'Tekno Store Team';
   const seoOgImage = seoOgImageRaw || '/og-image.jpg';
   const seoOgWidth = seoOgWidthRaw || '1200';
   const seoOgHeight = seoOgHeightRaw || '630';
@@ -108,11 +108,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const seoTwitterCard = seoTwitterCardRaw || 'summary_large_image';
   const seoTwitterImage = seoTwitterImageRaw || seoOgImage;
   const seoRobotsMeta = seoRobotsMetaRaw || 'index, follow';
-  const seoFavicon = seoFaviconRaw || '/petsunivers-icon.svg';
+  const seoFavicon = seoFaviconRaw || '/logo.png';
 
-  // On injecte "PetsUniverst" dans le titre par défaut pour un max d'impact SEO
-  const title = seoTitle || t('Title') || 'PetsUnivers — Animalerie au Maroc';
-  const description = seoDescription || t('Description') || 'Alimentation, accessoires et soins pour chats, chiens et petits animaux.';
+  const title = seoTitle || t('Title') || 'Tekno Store — Smartphones, PC, Mac & Accessoires au Maroc';
+  const description = seoDescription || t('Description') || 'Vente de smartphones neufs, PC portables, Mac, tablettes et accessoires high-tech avec livraison rapide et paiement à la livraison au Maroc.';
 
   const ogLocale = locale === 'ar' ? 'ar_MA' : locale === 'en' ? 'en_MA' : 'fr_MA';
 
@@ -138,15 +137,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       },
     },
     title: {
-      template: "%s | PetsUnivers",
+      template: "%s | Tekno Store",
       default: title,
     },
     description: description,
-    keywords: ['PetsUnivers', 'animalerie Maroc', 'chats', 'chiens', 'alimentation animale', 'accessoires animaux'],
+    keywords: ['Tekno Store', 'smartphone Maroc', 'iPhone Maroc', 'MacBook Maroc', 'PC portable Maroc', 'accessoires high-tech', 'Samsung Maroc'],
     authors: [{ name: seoAuthor, url: siteUrl }],
-    creator: "PetsUnivers",
-    publisher: "PetsUnivers",
-    applicationName: "PetsUnivers",
+    creator: "Tekno Store",
+    publisher: "Tekno Store",
+    applicationName: "Tekno Store",
     formatDetection: {
       email: false,
       address: false,
@@ -156,7 +155,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       title: title,
       description: description,
       url: siteUrl,
-      siteName: "PetsUnivers",
+      siteName: "Tekno Store",
       locale: ogLocale,
       alternateLocale: ["fr_MA", "ar_MA", "en_MA"].filter(l => l !== ogLocale),
       type: seoOgType as any || "website",
@@ -280,7 +279,7 @@ export default async function LocaleLayout({
     resolveActiveWhatsAppAgent()
   ]);
 
-  const siteUrl = siteUrlRaw || 'https://petsunivers.ma';
+  const siteUrl = siteUrlRaw || 'https://tekno.ma';
   const fbPixelId = fbPixelIdRaw || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
   const googleSearchConsoleId = googleSearchConsoleIdRaw || googleSearchConsoleIdFallback;
 
@@ -310,7 +309,7 @@ export default async function LocaleLayout({
         {/* Google Tag Manager (noscript) */}
         {/* End Google Tag Manager (noscript) */}
         <UtmTracker />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({'@context':'https://schema.org','@type':'PetStore',name:'PetsUnivers',url:siteUrl,description:'Animalerie : alimentation, accessoires et soins pour chats, chiens et petits animaux.',logo:siteUrl+'/petsunivers-brand.svg',email:PET_CONTACT_EMAIL}).replace(/</g,'\\u003c')}} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({'@context':'https://schema.org','@type':'ElectronicsStore',name:'Tekno Store',url:siteUrl,description:'Boutique high-tech au Maroc : smartphones neufs, PC portables, Mac et accessoires avec paiement à la livraison COD.',logo:siteUrl+'/logo.png',email:PET_CONTACT_EMAIL}).replace(/</g,'\\u003c')}} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <div id="site-shell">
             {children}

@@ -371,8 +371,8 @@
       "Submit": "Lancer la recherche"
     },
     "seo": {
-      "Title": "Tekno Store — Boutique · Chats & Chiens",
-      "Description": "Alimentation, accessoires et soins : retrouvez les essentiels pour vos chats, chiens et petits compagnons."
+      "Title": "Tekno Store — Smartphones, PC, Mac & Accessoires au Maroc",
+      "Description": "Découvrez les dernières innovations Apple, Samsung, Dell, Asus et accessoires certifiés au meilleur prix avec livraison partout au Maroc."
     },
     "Features": {
       "ShippingTitle": "Livraison Express",
@@ -1377,7 +1377,7 @@
     "Title": "Votre Panier",
     "CollectionCount": "{count} Articles",
     "EmptyTitle": "Votre panier est vide",
-    "EmptyDesc": "Retrouvez les essentiels pour vos chats, chiens et petits compagnons dans notre boutique.",
+    "EmptyDesc": "Découvrez notre sélection de smartphones, ordinateurs portables, Mac et accessoires technologiques dans notre boutique.",
     "BrowseLibrary": "Découvrir la boutique",
     "ViewBundles": "Voir les Packs",
     "BundleBadge": "PACK",

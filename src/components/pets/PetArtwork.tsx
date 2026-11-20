@@ -1,4 +1,4 @@
-﻿import Image from 'next/image'
+import Image from 'next/image'
 import { Smartphone, Laptop, Headphones, Watch, Sparkles, ShieldCheck } from 'lucide-react'
 
 export default function PetArtwork() {
