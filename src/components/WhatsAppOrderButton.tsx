@@ -23,21 +23,25 @@ export default function WhatsAppOrderButton({ title, price, phone, type = 'book'
         replacedInfo = '\n(Pack personnalisé: ' + Object.values(replacedBooks).map(b => b.title).join(', ') + ')'
     }
 
+    const priceTextFr = price > 0 ? ` (Prix : ${price} MAD)` : ''
+    const priceTextAr = price > 0 ? ` (الثمن : ${price} درهم)` : ''
+    const priceTextEn = price > 0 ? ` (Price: ${price} MAD)` : ''
+
     const messages = {
         fr: {
-            pack: `Bonjour, je veux ce pack : "${title}"${replacedInfo} ... combien le prix avec la livraison ?`,
-            accessory: `Bonjour, je veux cet accessoire : "${title}" ... combien le prix avec la livraison ?`,
-            book: `Bonjour, je veux ce livre : "${title}" ... combien le prix avec la livraison ?`
+            pack: `Bonjour, je veux ce pack : "${title}"${priceTextFr}${replacedInfo} ... combien le prix total avec la livraison ?`,
+            accessory: `Bonjour, je veux cet accessoire : "${title}"${priceTextFr} ... combien le prix total avec la livraison ?`,
+            book: `Bonjour, je veux ce livre : "${title}"${priceTextFr} ... combien le prix total avec la livraison ?`
         },
         ar: {
-            pack: `Salam, brit had lpack : "${title}"${replacedInfo} ... chhal taman m3a tawssil ?`,
-            accessory: `Salam, brit had l'accessoire : "${title}" ... chhal taman m3a tawssil ?`,
-            book: `Salam, brit had lktab : "${title}" ... chhal taman m3a tawssil ?`
+            pack: `Salam, brit had lpack : "${title}"${priceTextAr}${replacedInfo} ... chhal taman total m3a tawssil ?`,
+            accessory: `Salam, brit had l'accessoire : "${title}"${priceTextAr} ... chhal taman total m3a tawssil ?`,
+            book: `Salam, brit had lktab : "${title}"${priceTextAr} ... chhal taman total m3a tawssil ?`
         },
         en: {
-            pack: `Hello, I want this pack: "${title}"${replacedInfo} ... how much is the price with delivery?`,
-            accessory: `Hello, I want this accessory: "${title}" ... how much is the price with delivery?`,
-            book: `Hello, I want this book: "${title}" ... how much is the price with delivery?`
+            pack: `Hello, I want this pack: "${title}"${priceTextEn}${replacedInfo} ... how much is the total price with delivery?`,
+            accessory: `Hello, I want this accessory: "${title}"${priceTextEn} ... how much is the total price with delivery?`,
+            book: `Hello, I want this book: "${title}"${priceTextEn} ... how much is the total price with delivery?`
         }
     }
 
