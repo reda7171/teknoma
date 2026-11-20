@@ -96,7 +96,7 @@ export function PromoLeadsClient({ initialLeads, initialStats }: Props) {
                 <td style="mso-number-format:'\\@'; text-align: center;">#${l.id.slice(0, 8)}</td>
                 <td style="mso-number-format:'\\@'; font-weight: bold;">${l.phone || '-'}</td>
                 <td>${l.email || '-'}</td>
-                <td style="text-align: center; font-weight: bold;">${l.promoCode || 'PETSUNIVERS10'}</td>
+                <td style="text-align: center; font-weight: bold;">${l.promoCode || 'TEKNO10'}</td>
                 <td style="text-align: center;">${l.source || 'cart_popup'}</td>
                 <td style="text-align: center;">${l.contacted ? 'Contacté' : 'Non contacté'}</td>
                 <td style="text-align: center;">${new Date(l.createdAt).toLocaleDateString('fr-FR')}</td>
@@ -129,7 +129,7 @@ export function PromoLeadsClient({ initialLeads, initialStats }: Props) {
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.setAttribute('href', url)
-        link.setAttribute('download', `leads_panier_petsunivers_${new Date().toISOString().split('T')[0]}.xls`)
+        link.setAttribute('download', `leads_panier_tekno_${new Date().toISOString().split('T')[0]}.xls`)
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -146,7 +146,7 @@ export function PromoLeadsClient({ initialLeads, initialStats }: Props) {
             clean = '212' + clean
         }
         const text = encodeURIComponent(
-            'Bonjour ! Nous avons remarqué que vous vous intéressez à nos livres sur PetsUnivers. Voici votre code promo de -10% : PETSUNIVERS10. Avez-vous besoin d\'aide pour finaliser votre commande ?'
+            'Bonjour ! Nous avons remarqué que vous vous intéressez à nos livres sur Tekno Store. Voici votre code promo de -10% : TEKNO10. Avez-vous besoin d\'aide pour finaliser votre commande ?'
         )
         return `https://wa.me/${clean}?text=${text}`
     }
@@ -301,7 +301,7 @@ export function PromoLeadsClient({ initialLeads, initialStats }: Props) {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-black bg-emerald-50 text-emerald-800 border border-emerald-100">
-                                                {lead.promoCode || 'PETSUNIVERS10'}
+                                                {lead.promoCode || 'TEKNO10'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-xs font-bold text-gray-500">

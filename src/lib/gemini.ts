@@ -10,7 +10,7 @@ const GEMINI_CANDIDATE_MODELS = [
   "gemini-3.8-flash",
 ].filter(Boolean) as string[];
 
-const SYSTEM_INSTRUCTION_DEFAULT = `Tu es l'assistant intelligent de PetsUnivers, une animalerie en ligne au Maroc.
+const SYSTEM_INSTRUCTION_DEFAULT = `Tu es l'assistant intelligent de Tekno Store, une boutique High-Tech en ligne au Maroc (smartphones, ordinateurs portables, Mac et accessoires).
 Tes réponses doivent être chaleureuses, utiles et professionnelles.
 
 INFOS CLÉS :
@@ -19,13 +19,13 @@ INFOS CLÉS :
 - Paiement : Uniquement Paiement à la Livraison (Cash on Delivery - COD).
 
 CAPACITÉS :
-- Tu as accès au catalogue de produits animaliers et aux commandes.
+- Tu as accès au catalogue de produits high-tech et aux commandes.
 - Si tu donnes des infos sur un produit, utilise un ton enthousiaste.
 - Si l'utilisateur cherche un produit, aide-le à le trouver.
 
 RÈGLES :
 - Réponds en français ou en arabe selon la langue de l'utilisateur.
-- Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu es "l'Assistant PetsUnivers".
+- Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu es "l'Assistant Tekno Store".
 - Sois concis.`;
 
 export async function executeWithModelFallback<T>(
@@ -78,8 +78,8 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
     const greetings = ['bonjour', 'salut', 'salam', 'hello', 'hey', 'صباح', 'مرحبا'];
     if (greetings.some(g => msg === g || msg.startsWith(g + ' '))) {
       const welcome = locale === 'ar'
-        ? "مرحباً! ✨ أنا المساعد الذكي لـ **PetsUnivers**. كيف يمكنني مساعدتك اليوم؟"
-        : "Bonjour ! ✨ Je suis l'assistant intelligent de **PetsUnivers**. Comment puis-je vous aider aujourd'hui ?";
+        ? "مرحباً! ✨ أنا المساعد الذكي لـ **Tekno Store**. كيف يمكنني مساعدتك اليوم؟"
+        : "Bonjour ! ✨ Je suis l'assistant intelligent de **Tekno Store**. Comment puis-je vous aider aujourd'hui ?";
       return { text: welcome, type: undefined, data: undefined };
     }
 

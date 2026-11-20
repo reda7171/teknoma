@@ -22,7 +22,7 @@ const withPWA = withPWAInit({
         urlPattern: /\.(png|jpg|jpeg|svg|gif|webp|ico|avif)$/i,
         handler: 'CacheFirst',
         options: {
-          cacheName: 'petsunivers-images',
+          cacheName: 'tekno-images',
           expiration: {
             maxEntries: 200,
             maxAgeSeconds: 60 * 60 * 24 * 30, // 30 jours
@@ -39,7 +39,7 @@ const withPWA = withPWAInit({
           !url.pathname.split('/').includes('admin'),
         handler: 'NetworkOnly',
         options: {
-          cacheName: 'petsunivers-pages-network-only',
+          cacheName: 'tekno-pages-network-only',
         },
       },
     ],
@@ -81,7 +81,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'petsunivers.ma',
+        hostname: 'tekno.ma',
       },
       {
         protocol: 'http',

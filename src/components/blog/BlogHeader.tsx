@@ -113,7 +113,7 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                             {siteLogo ? (
                                 <Image
                                     src={siteLogo}
-                                    alt="PetsUnivers Logo"
+                                    alt="Tekno Store Logo"
                                     width={96}
                                     height={32}
                                     sizes="96px"
@@ -127,7 +127,7 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                                         <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-white" />
                                     </div>
                                     <span className="text-xl md:text-2xl font-black text-black tracking-tighter">
-                                        PetsUnivers<span className="text-[#10b981]">.</span>
+                                        Tekno Store<span className="text-[#10b981]">.</span>
                                     </span>
                                 </>
                             )}
@@ -181,7 +181,7 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                 }`}
             >
                 <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                    <span className="text-lg font-black tracking-tighter">PetsUnivers<span className="text-[#10b981]">.</span></span>
+                    <span className="text-lg font-black tracking-tighter">Tekno Store<span className="text-[#10b981]">.</span></span>
                     <div className="flex items-center gap-2">
                         <LanguageSwitcher />
                         <button

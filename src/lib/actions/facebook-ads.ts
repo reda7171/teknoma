@@ -50,7 +50,7 @@ export async function launchFacebookAd(params: LaunchAdParams) {
         // 1. Create Campaign
         const campaignObjective = params.objective || 'OUTCOME_TRAFFIC'
         const campaignPayload: any = {
-            name: `[PetsUnivers] ${params.name}`,
+            name: `[Tekno Store] ${params.name}`,
             objective: campaignObjective,
             status: 'PAUSED',
             special_ad_categories: [],
@@ -73,7 +73,7 @@ export async function launchFacebookAd(params: LaunchAdParams) {
         // 2. Upload Image (from URL)
         let finalImageUrl = params.imageUrl
         if (finalImageUrl.startsWith('/')) {
-            finalImageUrl = `https://petsunivers.ma${finalImageUrl}`
+            finalImageUrl = `https://tekno.ma${finalImageUrl}`
         }
 
         // Télécharger l'image pour l'envoyer en tant que fichier (bytes)

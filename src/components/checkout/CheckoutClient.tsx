@@ -168,7 +168,7 @@ export default function CheckoutClient({
         // Préremplissage automatique depuis le pop-up promo si le champ téléphone est vide
         if (!getValues('phone')) {
             try {
-                const promoPhone = localStorage.getItem('petsunivers_user_phone')
+                const promoPhone = localStorage.getItem('tekno_user_phone')
                 if (promoPhone) {
                     setValue('phone', promoPhone, { shouldValidate: true })
                 }
@@ -176,7 +176,7 @@ export default function CheckoutClient({
         }
         if (!getValues('email')) {
             try {
-                const promoEmail = localStorage.getItem('petsunivers_user_email')
+                const promoEmail = localStorage.getItem('tekno_user_email')
                 if (promoEmail) {
                     setValue('email', promoEmail, { shouldValidate: true })
                 }

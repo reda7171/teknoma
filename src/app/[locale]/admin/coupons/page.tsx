@@ -1,7 +1,7 @@
 import { getCoupons } from '@/lib/actions/coupons'
 import { CouponsClient } from '@/components/admin/CouponsClient'
 
-export const metadata = { title: 'Codes Promo | Admin PetsUnivers' }
+export const metadata = { title: 'Codes Promo | Admin Tekno Store' }
 
 export default async function CouponsPage() {
   const result = await getCoupons()

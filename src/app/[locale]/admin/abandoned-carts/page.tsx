@@ -30,7 +30,7 @@ export default async function AbandonedCartsPage() {
 
     return (
         <div className="space-y-12">
-            {/* Header section style PetsUnivers */}
+            {/* Header section style Tekno Store */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
@@ -115,7 +115,7 @@ export default async function AbandonedCartsPage() {
                         <div className="flex flex-col sm:flex-row lg:flex-col gap-4 shrink-0">
                             {cart.phone && (
                                 <a
-                                    href={`https://wa.me/${cart.phone.replace(/^0/, '212').replace(/\s+/g, '')}?text=Bonjour ${cart.fullName || ''}, nous avons remarqué que vous n'avez pas terminé votre commande sur PetsUnivers. Avez-vous besoin d'aide avec un livre ou le paiement à la livraison ?`}
+                                    href={`https://wa.me/${cart.phone.replace(/^0/, '212').replace(/\s+/g, '')}?text=Bonjour ${cart.fullName || ''}, nous avons remarqué que vous n'avez pas terminé votre commande sur Tekno Store. Avez-vous besoin d'aide avec un livre ou le paiement à la livraison ?`}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="flex items-center justify-center gap-3 bg-[#25D366] text-white px-8 py-5 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl shadow-[#25D366]/20 hover:scale-105 active:scale-95 transition-all text-[10px] w-full"
@@ -126,7 +126,7 @@ export default async function AbandonedCartsPage() {
                             )}
                             {cart.email && !cart.phone && (
                                 <a
-                                    href={`mailto:${cart.email}?subject=Votre panier PetsUnivers vous attend&body=Bonjour ${cart.fullName || ''}, ...`}
+                                    href={`mailto:${cart.email}?subject=Votre panier Tekno Store vous attend&body=Bonjour ${cart.fullName || ''}, ...`}
                                     className="flex items-center justify-center gap-3 bg-black text-white px-8 py-5 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl shadow-black/10 hover:scale-105 active:scale-95 transition-all text-[10px] w-full"
                                 >
                                     <Mail className="w-4 h-4" />

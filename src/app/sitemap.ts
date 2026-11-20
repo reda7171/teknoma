@@ -1,4 +1,4 @@
-﻿import type {MetadataRoute} from 'next'
+import type {MetadataRoute} from 'next'
 import {prisma} from '@/lib/prisma'
 import {PET_CATEGORIES} from '@/lib/pets'
 // Docker builds have no database connection. Query the catalogue at request time.

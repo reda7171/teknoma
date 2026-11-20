@@ -27,12 +27,13 @@ interface PetProductGridProps {
 }
 
 const TABS = [
-  { key: 'ALL', labelFr: 'Tous', labelEn: 'All', labelAr: 'الكل' },
-  { key: 'Chats', labelFr: 'Chats', labelEn: 'Cats', labelAr: 'القطط' },
-  { key: 'Chiens', labelFr: 'Chiens', labelEn: 'Dogs', labelAr: 'الكلاب' },
-  { key: 'Alimentation', labelFr: 'Alimentation', labelEn: 'Food', labelAr: 'التغذية' },
+  { key: 'ALL', labelFr: 'Tous les produits', labelEn: 'All Products', labelAr: 'الكل' },
+  { key: 'Smartphones', labelFr: 'Smartphones', labelEn: 'Smartphones', labelAr: 'الهواتف الذكية' },
+  { key: 'PC Portables', labelFr: 'PC Portables', labelEn: 'Laptops', labelAr: 'حواسيب محمولة' },
+  { key: 'Mac', labelFr: 'Mac & Apple', labelEn: 'Mac & Apple', labelAr: 'ماك وآبل' },
   { key: 'Accessoires', labelFr: 'Accessoires', labelEn: 'Accessories', labelAr: 'الإكسسوارات' },
-  { key: 'Hygiène et soins', labelFr: 'Soins & Hygiène', labelEn: 'Care', labelAr: 'العناية' }
+  { key: 'Audio', labelFr: 'Audio & Casques', labelEn: 'Audio', labelAr: 'صوتيات' },
+  { key: 'Stockage', labelFr: 'Stockage & SSD', labelEn: 'Storage', labelAr: 'وحدات تخزين' }
 ]
 
 export default function PetProductGrid({

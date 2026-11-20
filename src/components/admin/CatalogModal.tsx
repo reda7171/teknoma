@@ -22,7 +22,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
     const [warehouses, setWarehouses] = useState<any[]>([])
     const [config, setConfig] = useState({
         booksPerPage: 12,
-        title: 'Catalogue PetsUnivers',
+        title: 'Catalogue Tekno Store',
         subtitle: 'Découvrez notre collection',
         primaryColor: '#2563eb',
         backgroundColor: '#ffffff',
@@ -227,7 +227,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                     <div className="bg-slate-900 p-6 flex items-center justify-between text-white border-b border-slate-800 shadow-xl">
                         <div className="flex items-center gap-3">
                             <FileText className="w-6 h-6 text-blue-400" />
-                            <h2 className="text-xl font-black uppercase tracking-tight">Catalogue PetsUnivers</h2>
+                            <h2 className="text-xl font-black uppercase tracking-tight">Catalogue Tekno Store</h2>
                         </div>
                         <button aria-label="Fermer" onClick={handleClose} className="p-2 hover:bg-white/20 rounded-full transition-colors font-bold"><X className="w-6 h-6" /></button>
                     </div>
@@ -463,7 +463,7 @@ export default function CatalogModal({ isOpen: initialIsOpen, onClose, triggerEv
                             {config.selectedCategory !== 'all' ? `Collection : ${config.selectedCategory}` : config.subtitle}
                         </p>
                         <div className="w-20 h-1 bg-blue-600 mb-10"></div>
-                        <p className="text-sm font-bold text-gray-300 tracking-[0.5em] uppercase tracking-widest">PetsUnivers Catalogue</p>
+                        <p className="text-sm font-bold text-gray-300 tracking-[0.5em] uppercase tracking-widest">Tekno Store Catalogue</p>
                     </div>
                 </div>
 

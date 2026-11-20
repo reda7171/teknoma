@@ -457,7 +457,7 @@ export async function publishBooksToJumia(bookIds: string[], targetLang: 'all' |
                     name: "Bestselling Books"
                 },
                 images: book.image ? [{
-                    url: book.image.startsWith('/') ? `https://petsunivers.ma${book.image}` : book.image,
+                    url: book.image.startsWith('/') ? `https://tekno.ma${book.image}` : book.image,
                     primary: true
                 }] : [],
                 price: {
@@ -708,25 +708,25 @@ export async function publishPacksToJumia(packIds: string[], targetLang: 'all' |
                 : 0;
 
             // Vérification et fallback de l'image principale pour Jumia (évite le rejet 404 si image locale)
-            let primaryImageUrl = pack.image ? (pack.image.startsWith('/') ? `https://petsunivers.ma${pack.image}` : pack.image) : '';
+            let primaryImageUrl = pack.image ? (pack.image.startsWith('/') ? `https://tekno.ma${pack.image}` : pack.image) : '';
             if (primaryImageUrl) {
                 try {
                     const imgCheck = await fetch(primaryImageUrl, { method: 'HEAD' });
                     if (!imgCheck.ok) {
                         const firstBookImg = pack.books?.[0]?.book?.image;
                         if (firstBookImg) {
-                            primaryImageUrl = firstBookImg.startsWith('/') ? `https://petsunivers.ma${firstBookImg}` : firstBookImg;
+                            primaryImageUrl = firstBookImg.startsWith('/') ? `https://tekno.ma${firstBookImg}` : firstBookImg;
                         }
                     }
                 } catch {
                     const firstBookImg = pack.books?.[0]?.book?.image;
                     if (firstBookImg) {
-                        primaryImageUrl = firstBookImg.startsWith('/') ? `https://petsunivers.ma${firstBookImg}` : firstBookImg;
+                        primaryImageUrl = firstBookImg.startsWith('/') ? `https://tekno.ma${firstBookImg}` : firstBookImg;
                     }
                 }
             } else if (pack.books?.[0]?.book?.image) {
                 const firstBookImg = pack.books[0].book.image;
-                primaryImageUrl = firstBookImg.startsWith('/') ? `https://petsunivers.ma${firstBookImg}` : firstBookImg;
+                primaryImageUrl = firstBookImg.startsWith('/') ? `https://tekno.ma${firstBookImg}` : firstBookImg;
             }
 
             const payload: any = {
@@ -931,7 +931,7 @@ export async function publishAccessoriesToJumia(accessoryIds: string[]) {
                     name: "Stationery & Office"
                 },
                 images: primaryAccImg ? [{
-                    url: primaryAccImg.startsWith('/') ? `https://petsunivers.ma${primaryAccImg}` : primaryAccImg,
+                    url: primaryAccImg.startsWith('/') ? `https://tekno.ma${primaryAccImg}` : primaryAccImg,
                     primary: true
                 }] : [],
                 price: {

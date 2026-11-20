@@ -29,7 +29,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
     const [currentChunkIdx, setCurrentChunkIdx] = useState(0)
     const [statusText, setStatusText] = useState('')
     const [config, setConfig] = useState({
-        title: 'Collection PetsUnivers',
+        title: 'Collection Tekno Store',
         primaryColor: '#2563eb',
         backgroundColor: '#ffffff',
         textColor: '#111827',
@@ -191,7 +191,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
 
                 const link = document.createElement('a')
                 link.href = dataUrl
-                link.download = `petsunivers-catalog-p${i + 1}.png`
+                link.download = `tekno-catalog-p${i + 1}.png`
                 link.click()
                 successCount++
 
@@ -522,7 +522,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                     </div>
                                     {config.format === 'post' && (
                                         <div style={{ marginTop: 'auto', paddingTop: '40px', textAlign: 'center', width: '100%' }}>
-                                             <p style={{ fontSize: '40px', fontWeight: '950', color: config.textColor, opacity: 0.15, letterSpacing: '10px', textTransform: 'uppercase', margin: 0 }}>petsunivers.ma</p>
+                                             <p style={{ fontSize: '40px', fontWeight: '950', color: config.textColor, opacity: 0.15, letterSpacing: '10px', textTransform: 'uppercase', margin: 0 }}>tekno.ma</p>
                                         </div>
                                     )}
                                     </div>
@@ -656,7 +656,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
 
                             {/* Footer */}
                             <div style={{ width: '100%', marginTop: 'auto', paddingTop: isPost ? '40px' : '100px', borderTop: isPost ? 'none' : `10px solid ${config.textColor}1a`, textAlign: 'center', flexShrink: 0 }}>
-                                <p style={{ fontSize: isPost ? '60px' : '110px', fontWeight: '950', color: config.textColor, opacity: 0.1, letterSpacing: isPost ? '15px' : '25px', textTransform: 'uppercase', margin: 0 }}>petsunivers.ma</p>
+                                <p style={{ fontSize: isPost ? '60px' : '110px', fontWeight: '950', color: config.textColor, opacity: 0.1, letterSpacing: isPost ? '15px' : '25px', textTransform: 'uppercase', margin: 0 }}>tekno.ma</p>
                             </div>
                         </div>
                     </div>

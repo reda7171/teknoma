@@ -30,7 +30,7 @@ export async function POST(req: Request) {
             cleanPhone = '212' + cleanPhone;
         }
 
-        const whatsappText = encodeURIComponent(`Bonjour, suite à votre réservation du livre  "${reservation.book.title}" sur PetsUnivers...`);
+        const whatsappText = encodeURIComponent(`Bonjour, suite à votre réservation du livre  "${reservation.book.title}" sur Tekno Store...`);
         const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappText}`;
 
         const replyMarkup = {

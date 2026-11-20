@@ -27,18 +27,18 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isEn = locale === 'en'
 
     const title = isAr
-        ? 'سياسة ومناطق التوصيل في المغرب | مكتبة PetsUnivers'
+        ? 'سياسة ومناطق التوصيل في المغرب | مكتبة Tekno Store'
         : isEn
-            ? 'Delivery Policy & Cities in Morocco | PetsUnivers Bookstore'
-            : 'Livraison de Livres au Maroc · Délais & Villes | Librairie PetsUnivers'
+            ? 'Delivery Policy & Cities in Morocco | Tekno Store Bookstore'
+            : 'Livraison de Livres au Maroc · Délais & Villes | Librairie Tekno Store'
 
     const description = isAr
-        ? 'توصيل سريع لجميع كتب وروايات مكتبة PetsUnivers إلى كافة مدن المغرب (الدار البيضاء، الرباط، مراكش، طنجة...). الدفع عند الاستلام والتوصيل مجاني للطلبات المؤهلة.'
+        ? 'توصيل سريع لجميع كتب وروايات مكتبة Tekno Store إلى كافة مدن المغرب (الدار البيضاء، الرباط، مراكش، طنجة...). الدفع عند الاستلام والتوصيل مجاني للطلبات المؤهلة.'
         : isEn
-            ? 'Fast book delivery across Morocco with PetsUnivers (Casablanca, Rabat, Marrakech, Tangier...). Cash on delivery and free shipping available.'
-            : 'Livraison express de vos livres partout au Maroc avec PetsUnivers. Casablanca, Rabat, Marrakech, Tanger... Paiement à la livraison et livraison offerte dès 300 MAD.'
+            ? 'Fast book delivery across Morocco with Tekno Store (Casablanca, Rabat, Marrakech, Tangier...). Cash on delivery and free shipping available.'
+            : 'Livraison express de vos livres partout au Maroc avec Tekno Store. Casablanca, Rabat, Marrakech, Tanger... Paiement à la livraison et livraison offerte dès 300 MAD.'
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
     return {
         title,
@@ -66,14 +66,14 @@ export default async function DeliveryPage({ params }: { params: Promise<{ local
     const t = await getTranslations('ShippingPolicyPage')
     const isAr = locale === 'ar'
     const isEn = locale === 'en'
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
     const jsonLd = {
         '@context': 'https://schema.org',
         '@graph': [
             {
                 '@type': 'DeliveryChargeSpecification',
-                name: 'Tarifs de livraison PetsUnivers Maroc',
+                name: 'Tarifs de livraison Tekno Store Maroc',
                 appliesToDeliveryMethod: 'https://schema.org/DeliveryModeOwnFleet',
                 price: '35',
                 priceCurrency: 'MAD',

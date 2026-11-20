@@ -2,13 +2,13 @@ services:
   # Database - MySQL 8
   db:
     image: mysql:8.0
-    container_name: petsunivers_db
+    container_name: tekno_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
-      MYSQL_DATABASE: ${DB_NAME:-petsunivers_db}
-      MYSQL_USER: ${DB_USER:-petsunivers_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-petsunivers_pass}
+      MYSQL_DATABASE: ${DB_NAME:-tekno_db}
+      MYSQL_USER: ${DB_USER:-tekno_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-tekno_pass}
     command: --default-authentication-plugin=mysql_native_password --innodb-buffer-pool-size=512M --innodb-log-buffer-size=16M --max-connections=150 --table-open-cache=2000 --thread-cache-size=16 --skip-name-resolve
     deploy:
       resources:
@@ -24,7 +24,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - petsunivers_network
+      - tekno_network
     healthcheck:
       test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD || exit 1" ]
       interval: 10s
@@ -34,7 +34,7 @@ services:
   # Cache & n8n queue - Redis
   redis:
     image: redis:alpine
-    container_name: petsunivers_redis
+    container_name: tekno_redis
     restart: always
     deploy:
       resources:
@@ -47,12 +47,12 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - petsunivers_network
+      - tekno_network
 
   # Application - Next.js
   app:
-    image: ghcr.io/reda7171/petsunivers-app:latest
-    container_name: petsunivers_app
+    image: ghcr.io/reda7171/tekno-app:latest
+    container_name: tekno_app
     restart: always
     ports:
       - "3000:3000"
@@ -60,7 +60,7 @@ services:
       - .env
     environment:
       - WHATSAPP_GATEWAY_URL=http://whatsapp:3000
-      - DATABASE_URL=mysql://${DB_USER:-petsunivers_user}:${DB_PASSWORD:-petsunivers_pass}@db:3306/${DB_NAME:-petsunivers_db}?connect_timeout=30&pool_timeout=30&connection_limit=25
+      - DATABASE_URL=mysql://${DB_USER:-tekno_user}:${DB_PASSWORD:-tekno_pass}@db:3306/${DB_NAME:-tekno_db}?connect_timeout=30&pool_timeout=30&connection_limit=25
       - KEEP_ALIVE_TIMEOUT=75000
       - NODE_OPTIONS=--max-old-space-size=4096
       - UV_THREADPOOL_SIZE=64
@@ -79,7 +79,7 @@ services:
       redis:
         condition: service_started
     networks:
-      - petsunivers_network
+      - tekno_network
     volumes:
       - ./public/uploads:/app/public/uploads
       - ./backups:/app/backups
@@ -93,7 +93,7 @@ services:
   # n8n - Automation
   n8n:
     image: docker.n8n.io/n8nio/n8n:latest
-    container_name: petsunivers_n8n
+    container_name: tekno_n8n
     restart: always
     deploy:
       resources:
@@ -114,12 +114,12 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
     networks:
-      - petsunivers_network
+      - tekno_network
 
   # phpMyAdmin - Database Manager
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
-    container_name: petsunivers_phpmyadmin
+    container_name: tekno_phpmyadmin
     restart: always
     deploy:
       resources:
@@ -130,19 +130,19 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      PMA_USER: ${DB_USER:-petsunivers_user}
-      PMA_PASSWORD: ${DB_PASSWORD:-petsunivers_pass}
+      PMA_USER: ${DB_USER:-tekno_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-tekno_pass}
     ports:
       - "9901:80"
     depends_on:
       - db
     networks:
-      - petsunivers_network
+      - tekno_network
 
   # WhatsApp Gateway - Connexion QR gratuite (WAHA / Baileys)
   whatsapp:
     image: devlikeapro/waha
-    container_name: petsunivers_whatsapp
+    container_name: tekno_whatsapp
     restart: always
     shm_size: '1gb'
     deploy:
@@ -161,11 +161,11 @@ services:
       - WAHA_DASHBOARD_ENABLED=true
       - WAHA_DASHBOARD_USERNAME=${WAHA_USER:-admin}
       - WAHA_DASHBOARD_PASSWORD=${WAHA_PASS:-admin123}
-      - WAHA_API_KEY=${WAHA_API_KEY:-petsunivers_waha_api_key_2026}
+      - WAHA_API_KEY=${WAHA_API_KEY:-tekno_waha_api_key_2026}
     volumes:
       - waha_data:/app/.sessions
     networks:
-      - petsunivers_network
+      - tekno_network
 
 volumes:
   mysql_data:
@@ -174,5 +174,5 @@ volumes:
   waha_data:
 
 networks:
-  petsunivers_network:
+  tekno_network:
     driver: bridge

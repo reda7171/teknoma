@@ -11,7 +11,7 @@ jobs:
     name: Lighthouse Performance, A11y, SEO & Contrast Check
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+      DATABASE_URL: "mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
       NEXT_TELEMETRY_DISABLED: 1
       OUTPUT_STANDALONE: "false"
@@ -21,9 +21,9 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: petsunivers_db
-          MYSQL_USER: petsunivers_user
-          MYSQL_PASSWORD: petsunivers_pass
+          MYSQL_DATABASE: tekno_db
+          MYSQL_USER: tekno_user
+          MYSQL_PASSWORD: tekno_pass
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
@@ -34,9 +34,9 @@ jobs:
 
       - name: Create .env for CI
         run: |
-          echo "DATABASE_URL=mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db" >> .env
-          echo "DATABASE_URL=mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db" >> .env.production
-          echo "DATABASE_URL=mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db" >> .env.local
+          echo "DATABASE_URL=mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db" >> .env
+          echo "DATABASE_URL=mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db" >> .env.production
+          echo "DATABASE_URL=mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db" >> .env.local
           echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env
           echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env.production
           echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env.local
@@ -57,13 +57,13 @@ jobs:
       - name: Setup Database Schema
         run: npx prisma db push --accept-data-loss
         env:
-          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+          DATABASE_URL: "mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db"
 
 
       - name: Build Next.js
         run: npm run build
         env:
-          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+          DATABASE_URL: "mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db"
           NEXT_TELEMETRY_DISABLED: 1
           NEXT_PUBLIC_APP_URL: "http://localhost:3000"
 
@@ -125,7 +125,7 @@ jobs:
         uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: './.lighthouserc.json'
-          uploadArtifacts: true
+          uploadArtifacts: false
           temporaryPublicStorage: true
         env:
-          DATABASE_URL: "mysql://petsunivers_user:petsunivers_pass@127.0.0.1:3306/petsunivers_db"
+          DATABASE_URL: "mysql://tekno_user:tekno_pass@127.0.0.1:3306/tekno_db"

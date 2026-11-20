@@ -41,7 +41,7 @@ const FEATURES = [
     {
         key: 'feature_packs',
         label: 'Vente de Packs',
-        description: 'Active la gestion et la vente de lots de produits animaliers.',
+        description: "Active la gestion et la vente de packs et lots d'appareils et accessoires high-tech.",
         icon: Package,
         color: 'text-blue-500'
     },
@@ -146,7 +146,7 @@ export default function AdvancedSettingsForm({ initialSettings }: AdvancedSettin
 
             // Récupérer le nom du fichier depuis les headers
             const disposition = res.headers.get('Content-Disposition')
-            let filename = 'backup_petsunivers.sql'
+            let filename = 'backup_tekno.sql'
             if (disposition && disposition.indexOf('filename=') !== -1) {
                 filename = disposition.split('filename=')[1].replace(/"/g, '')
             }

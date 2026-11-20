@@ -7,7 +7,7 @@ export interface SavedDeliveryProfile {
     savedAt?: number
 }
 
-const STORAGE_KEY = 'petsunivers_sec_delivery_v1'
+const STORAGE_KEY = 'tekno_sec_delivery_v1'
 const MASK_BYTE = 0x5a
 
 function encodePayload(text: string): string {

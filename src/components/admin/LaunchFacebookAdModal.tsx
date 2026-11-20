@@ -36,7 +36,7 @@ export default function LaunchFacebookAdModal({ isOpen, onClose, asset }: Launch
     if (!isOpen || !asset) return null
 
     const isPack = asset.type === 'PACK'
-    const linkUrl = `https://petsunivers.ma/fr/${isPack ? 'packs' : 'books'}/${isPack ? asset.packId : asset.bookId}`
+    const linkUrl = `https://tekno.ma/fr/${isPack ? 'packs' : 'books'}/${isPack ? asset.packId : asset.bookId}`
 
     const toggleCity = (city: string) => {
         setSelectedCities(prev =>

@@ -732,7 +732,7 @@ export default function BooksTable({
 - SKU Vendeur: ${b.sellerSku || 'N/A'}`
         }).join('\n\n')
 
-        const prompt = `Act as an expert e-commerce copywriter & bookseller for PetsUnivers bookstore & Jumia marketplace.
+        const prompt = `Act as an expert e-commerce copywriter & bookseller for Tekno Store bookstore & Jumia marketplace.
 I have ${selectedBooksData.length} book(s) to optimize.
 
 === BOOKS LIST TO PROCESS ===
@@ -741,7 +741,7 @@ ${booksListText}
 CRITICAL INSTRUCTIONS:
 1. TITLES TRANSLITERATION:
    For title_fr and title_en, DO NOT translate Arabic titles literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
-   Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat petsuniverst basatin arabistan" (NOT "Série de romans...").
+   Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat teknot basatin arabistan" (NOT "Série de romans...").
 2. STRICT ZERO PRICE / NO DISCOUNT POLICY:
    NEVER mention or include any price, currency, discount or promo in descriptions, titles, keywords, highlights or package content (ABSOLUTELY NO 'prix', 'price', 'سعر', 'ثمن', 'DH', 'MAD', 'درهم', 'gratuit', 'free', 'off', 'promo', '%', 'remise', 'solde'). Jumia strictly rejects listings containing price mentions in the description!
 3. MULTILINGUAL CONTENT & SEMANTIC SEO STRUCTURE:

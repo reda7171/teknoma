@@ -109,7 +109,7 @@ async function main() {
 
         const testOrderPayload = {
             fullName: 'E2E Automated Tester',
-            email: 'e2e-test@petsunivers.ma',
+            email: 'e2e-test@tekno.ma',
             phone: '0612345678',
             address: 'Avenue Mohammed V, Résidence Test N°10',
             city: 'Rabat',
@@ -123,7 +123,7 @@ async function main() {
             }]
         }
 
-        const res = await createOrder(testOrderPayload, SalesChannel.PETSUNIVERS_STORE)
+        const res = await createOrder(testOrderPayload, SalesChannel.TEKNO_STORE)
         assert(res.success === true, `Échec createOrder: ${res.error}`)
         assert(!!res.orderId, 'orderId manquant dans la réponse')
 

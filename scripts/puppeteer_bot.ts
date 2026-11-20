@@ -246,7 +246,7 @@ const prisma = new PrismaClient();
                     finalImagePath = path.join(process.cwd(), 'public', book.image.replace(/^\/+/, ''));
                     // Télécharger si manquant
                     if (!fs.existsSync(finalImagePath)) {
-                        const prodUrl = `https://petsunivers.ma${book.image.startsWith('/') ? book.image : '/' + book.image}`;
+                        const prodUrl = `https://tekno.ma${book.image.startsWith('/') ? book.image : '/' + book.image}`;
                         try {
                             const res = await fetch(prodUrl);
                             if (res.ok) {

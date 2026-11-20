@@ -7,7 +7,7 @@ import { getPetContent, PET_CONTACT_EMAIL } from '@/lib/pet-content'
 import { Link } from '@/i18n/routing'
 import { Mail, ArrowUpRight, Package, HeartHandshake } from 'lucide-react'
 import type { Metadata } from 'next'
-export async function generateMetadata({params}:{params:Promise<{locale:string}>}):Promise<Metadata>{const t=getPetContent((await params).locale);return {title:{absolute:t.contactUs+' | PetsUnivers'},description:t.contactIntro}}
+export async function generateMetadata({params}:{params:Promise<{locale:string}>}):Promise<Metadata>{const t=getPetContent((await params).locale);return {title:{absolute:t.contactUs+' | Tekno Store'},description:t.contactIntro}}
 export default async function Contact({params,searchParams}:{params:Promise<{locale:string}>;searchParams:Promise<{subject?:string}>}) {
   const {locale}=await params, c=getPetCopy(locale), t=getPetContent(locale), query=await searchParams
   const subject=typeof query.subject==='string'?query.subject.slice(0,150):''

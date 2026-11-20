@@ -197,8 +197,8 @@ export default function OrderFilters({
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
                             >
                                 <option value="">Tous les canaux</option>
-                                <option value="PETSUNIVERS_STORE">PetsUnivers Store</option>
-                                <option value="PETSUNIVERS_MA">petsunivers.ma</option>
+                                <option value="TEKNO_STORE">Tekno Store Store</option>
+                                <option value="TEKNO_MA">tekno.ma</option>
                                 <option value="ADMIN_POS">Caisse / POS</option>
                                 <option value="MOBILE_APP">Application mobile</option>
                                 <option value="ADMIN_IMPORT">Import administratif</option>

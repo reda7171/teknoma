@@ -41,7 +41,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
 
-        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
         // Prepare line items
         const lineItems = order.items.map(item => {

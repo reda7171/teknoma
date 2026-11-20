@@ -51,7 +51,7 @@ export default function CouponForm() {
                             name="code"
                             required
                             className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent rounded-[1.5rem] font-black text-black focus:bg-white focus:border-black outline-none uppercase placeholder:italic transition-all"
-                            placeholder="PETSUNIVERS10"
+                            placeholder="TEKNO10"
                         />
                     </div>
                 </div>

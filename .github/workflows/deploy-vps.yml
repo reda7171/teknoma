@@ -1,4 +1,4 @@
-name: Deploy PetsUnivers VPS
+name: Deploy Tekno Store VPS
 
 on:
   workflow_dispatch:
@@ -13,14 +13,14 @@ permissions:
   packages: read
 
 concurrency:
-  group: petsunivers-vps
+  group: tekno-vps
   cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Pull and deploy the PetsUnivers image
+      - name: Pull and deploy the Tekno Store image
         uses: appleboy/ssh-action@v1.2.0
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,16 +36,16 @@ jobs:
           envs: GHCR_TOKEN,GHCR_USER,SUDO_PASSWORD,PULL_ONLY
           script: |
             set -eu
-            cd /var/www/petsunivers
-            test "$(pwd -P)" = /var/www/petsunivers
+            cd /var/www/tekno
+            test "$(pwd -P)" = /var/www/tekno
             test -f docker-compose.vps.yml
             printf '%s\n' "$SUDO_PASSWORD" | sudo -S -p '' -v
-            sudo install -d -m 700 /var/www/petsunivers/.docker
-            trap 'sudo docker --config /var/www/petsunivers/.docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
-            printf '%s' "$GHCR_TOKEN" | sudo docker --config /var/www/petsunivers/.docker login ghcr.io -u "$GHCR_USER" --password-stdin
-            sudo docker --config /var/www/petsunivers/.docker pull ghcr.io/reda7171/petsunivers-app:latest
+            sudo install -d -m 700 /var/www/tekno/.docker
+            trap 'sudo docker --config /var/www/tekno/.docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+            printf '%s' "$GHCR_TOKEN" | sudo docker --config /var/www/tekno/.docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            sudo docker --config /var/www/tekno/.docker pull ghcr.io/reda7171/tekno-app:latest
             if [ "$PULL_ONLY" = true ]; then exit 0; fi
-            test "$(sudo docker inspect --format '{{.State.Health.Status}}' petsunivers_db)" = healthy
+            test "$(sudo docker inspect --format '{{.State.Health.Status}}' tekno_db)" = healthy
             sudo docker compose -f docker-compose.vps.yml config -q
             sudo docker compose -f docker-compose.vps.yml up -d --no-deps app
             for attempt in $(seq 1 40); do

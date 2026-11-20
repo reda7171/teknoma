@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
         await verifyAdmin()
         const { searchParams } = new URL(request.url)
         const category = searchParams.get('category')
-        if (isRetiredAccessoryCategory(category)) return NextResponse.json({ error: 'Catégorie supprimée de PetsUnivers' }, { status: 404 })
+        if (isRetiredAccessoryCategory(category)) return NextResponse.json({ error: 'Catégorie supprimée de Tekno Store' }, { status: 404 })
 
         const accessories = await prisma.extraProduct.findMany({
             where: { category: category ? category.toUpperCase() : { notIn: RETIRED_ACCESSORY_CATEGORIES } },
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         await verifyAdmin()
         const data = await request.json()
 
-        if (isRetiredAccessoryCategory(data.category)) return NextResponse.json({ error: 'Catégorie supprimée de PetsUnivers' }, { status: 400 })
+        if (isRetiredAccessoryCategory(data.category)) return NextResponse.json({ error: 'Catégorie supprimée de Tekno Store' }, { status: 400 })
         const accessory = await prisma.extraProduct.create({
             data: {
                 name: data.name,

@@ -26,7 +26,7 @@ export default function ChatBot() {
     // Translatable labels
     const labels: Record<string, any> = {
         ar: {
-            welcome: "مرحباً! ✨ أنا المساعد الذكي لـ **PetsUnivers**. اسألني عن المنتجات، الطلبات أو التوصيل.",
+            welcome: "مرحباً! ✨ أنا المساعد الذكي لـ **Tekno Store**. اسألني عن المنتجات، الطلبات أو التوصيل.",
             quick: ['التوصيل ؟', 'المنتجات الجديدة', 'أغذية الحيوانات', 'تتبع الطلب', 'اقتراحات ؟', 'التصنيفات ؟'],
             placeholder: "اسأل سؤالك هنا...",
             online: "متصل",
@@ -37,7 +37,7 @@ export default function ChatBot() {
             suggestions: "اقتراحات لك"
         },
         fr: {
-            welcome: "Bonjour ! ✨ Je suis l'assistant intelligent de **PetsUnivers**. Posez-moi vos questions sur nos produits animaliers, commandes ou livraison.",
+            welcome: "Bonjour ! ✨ Je suis l'assistant intelligent de **Tekno Store**. Posez-moi vos questions sur nos smartphones, ordinateurs portables, Mac, accessoires ou votre commande.",
             quick: ['Livraison ?', 'Nouveautés', 'Alimentation', 'Suivi Commande', 'Suggestions ?', 'Catégories ?'],
             placeholder: "Posez votre question...",
             online: "En ligne",
@@ -206,7 +206,7 @@ export default function ChatBot() {
                             <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 animate-pulse" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-white font-black text-sm tracking-wide">Assistant PetsUnivers</p>
+                            <p className="text-white font-black text-sm tracking-wide">Assistant Tekno Store</p>
                             <div className="flex items-center gap-1.5 mt-1">
                                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
                                 <span className="text-[10px] text-green-300 font-bold uppercase tracking-widest">{t.online}</span>

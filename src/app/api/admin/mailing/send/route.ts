@@ -88,7 +88,7 @@ export async function POST(req: Request) {
                 orderBy: { createdAt: 'desc' },
                 select: { code: true }
             });
-            couponCode = activeCoupon?.code || 'PETSUNIVERS10';
+            couponCode = activeCoupon?.code || 'TEKNO10';
         }
 
         // Sending via Hostinger Mail API
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
                 const personalizedSubject = replaceTags(subject);
 
                 await transporter.sendMail({
-                    from: '"PetsUnivers" <contact@petsunivers.ma>',
+                    from: '"Tekno Store" <Contact.tekno.ma@gmail.com>',
                     to: recipient.email,
                     subject: personalizedSubject,
                     html: personalizedHtml,

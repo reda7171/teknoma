@@ -406,7 +406,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                                         style={{ opacity: watermarkOpacity }}
                                                     >
                                                         <div className="transform -rotate-12 px-6 py-2 rounded-xl bg-slate-900/80 text-white font-black text-sm tracking-widest border border-white/20">
-                                                            petsunivers.ma
+                                                            tekno.ma
                                                         </div>
                                                     </div>
                                                 ) : watermarkPosition === 'corner' ? (
@@ -414,7 +414,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                                         className="absolute bottom-3 right-3 z-10 p-2.5 rounded-xl text-white shadow-xl border border-blue-400/30"
                                                         style={{ backgroundColor: watermarkColor, opacity: watermarkOpacity }}
                                                     >
-                                                        <div className="text-[11px] font-black tracking-wider">petsunivers.ma</div>
+                                                        <div className="text-[11px] font-black tracking-wider">tekno.ma</div>
                                                         <div className="text-[9px] text-blue-200 font-semibold">{watermarkText}</div>
                                                     </div>
                                                 ) : (
@@ -426,7 +426,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                                         style={{ backgroundColor: watermarkColor, opacity: watermarkOpacity }}
                                                     >
                                                         <div className="text-xs font-black tracking-widest uppercase">
-                                                            petsunivers.ma
+                                                            tekno.ma
                                                         </div>
                                                         <div className="text-[10px] text-blue-200 font-bold truncate">
                                                             {watermarkText}
@@ -447,7 +447,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                         </div>
                                         <h4 className="text-sm font-bold text-slate-800 line-clamp-1">{previewBook.title}</h4>
                                         <div className="text-xs text-slate-500 line-clamp-2">
-                                            {previewBook.description ? previewBook.description.replace(/<[^>]*>?/gm, '') : 'Livre en stock chez PetsUnivers Store Maroc.'}
+                                            {previewBook.description ? previewBook.description.replace(/<[^>]*>?/gm, '') : 'Livre en stock chez Tekno Store Store Maroc.'}
                                         </div>
                                     </div>
                                 </div>

@@ -73,7 +73,7 @@ export async function getPendingReturnReminders(): Promise<ReturnReminder[]> {
 
             const trackingText = order.trackingID ? `N° Suivi : ${order.trackingID}` : `Commande #${order.id.slice(0, 8)}`
 
-            const message = `Bonjour ${companyName},\n\nJe vous contacte concernant le colis en retour de notre commande PetsUnivers :\n- ${trackingText}\n- Client : ${order.fullName} (${order.city})\n- Date commande : ${formattedDate} (il y a ${daysSinceOrder} jours)\n- Montant : ${order.total} DH\n\nCe colis est marqué en retour depuis plus d'une semaine. Pourriez-vous s'il vous plaît nous confirmer où se trouve le colis et quand il nous sera retourné à notre dépôt ?\n\nMerci d'avance pour votre aide,\nL'équipe PetsUnivers.`
+            const message = `Bonjour ${companyName},\n\nJe vous contacte concernant le colis en retour de notre commande Tekno Store :\n- ${trackingText}\n- Client : ${order.fullName} (${order.city})\n- Date commande : ${formattedDate} (il y a ${daysSinceOrder} jours)\n- Montant : ${order.total} DH\n\nCe colis est marqué en retour depuis plus d'une semaine. Pourriez-vous s'il vous plaît nous confirmer où se trouve le colis et quand il nous sera retourné à notre dépôt ?\n\nMerci d'avance pour votre aide,\nL'équipe Tekno Store.`
 
             let waLink = ''
             if (companyPhone) {

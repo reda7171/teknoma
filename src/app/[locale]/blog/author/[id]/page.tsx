@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     if (!user) return {}
 
     return {
-        title: `${user.fullName || user.email} | Blog PetsUnivers`,
-        description: user.bio || `Découvrez les articles écrits par ${user.fullName || user.email} sur le blog PetsUnivers.`
+        title: `${user.fullName || user.email} | Blog Tekno Store`,
+        description: user.bio || `Découvrez les articles écrits par ${user.fullName || user.email} sur le blog Tekno Store.`
     }
 }
 
@@ -25,7 +25,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
     const t = await getTranslations('BlogList') // Utiliser BlogList ou similaire
     const tBlog = await getTranslations('Blog')
     const currentUser = await getCommunityUser()
-    const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.email === 'contact@petsunivers.ma'
+    const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.email === 'Contact.tekno.ma@gmail.com'
 
     const user = await prisma.user.findUnique({
         where: { id },
@@ -59,14 +59,14 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                         "mainEntity": {
                             "@type": "Person",
                             "name": user.fullName || user.email?.split('@')[0],
-                            "url": `https://petsunivers.ma/${locale}/blog/author/${user.id}`,
-                            ...(user.image ? { "image": user.image.startsWith('http') ? user.image : `https://petsunivers.ma${user.image.startsWith('/') ? '' : '/'}${user.image}` } : {}),
+                            "url": `https://tekno.ma/${locale}/blog/author/${user.id}`,
+                            ...(user.image ? { "image": user.image.startsWith('http') ? user.image : `https://tekno.ma${user.image.startsWith('/') ? '' : '/'}${user.image}` } : {}),
                             ...(user.bio ? { "description": user.bio } : {}),
                             ...(user.editorialRole ? { "jobTitle": user.editorialRole } : { "jobTitle": "Rédacteur & Chroniqueur Littéraire" }),
                             "worksFor": {
                                 "@type": "Organization",
-                                "name": "PetsUnivers",
-                                "url": "https://petsunivers.ma"
+                                "name": "Tekno Store",
+                                "url": "https://tekno.ma"
                             }
                         }
                     }).replace(/</g, '\\u003c')
@@ -255,7 +255,7 @@ export default async function BlogAuthorPage({ params }: { params: Promise<{ id:
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
-                                                    <span className="text-gray-200 font-black text-2xl">PetsUnivers</span>
+                                                    <span className="text-gray-200 font-black text-2xl">Tekno Store</span>
                                                 </div>
                                             )}
                                             {post.category && (

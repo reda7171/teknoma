@@ -1,6 +1,6 @@
-# petsunivers.ma premium storefront
+# tekno.ma premium storefront
 
-Frontend autonome destiné à `petsunivers.ma`. Il ne se connecte pas directement à Prisma ou MySQL.
+Frontend autonome destiné à `tekno.ma`. Il ne se connecte pas directement à Prisma ou MySQL.
 
 ## Lancer localement
 
@@ -14,11 +14,11 @@ Le site est disponible sur `http://localhost:3001/fr`, `/ar` et `/en`.
 
 ## Indexation
 
-La préproduction est `noindex` par défaut. Définir `PETSUNIVERS_MA_INDEXABLE=true` uniquement lors de la mise en production publique.
+La préproduction est `noindex` par défaut. Définir `TEKNO_MA_INDEXABLE=true` uniquement lors de la mise en production publique.
 
-Les livres affichés sont temporaires. Ils seront remplacés par le futur contrat API lecture seule du backoffice PetsUnivers.
+Les livres affichés sont temporaires. Ils seront remplacés par le futur contrat API lecture seule du backoffice Tekno Store.
 
-Pour utiliser le catalogue réel, définir `PETSUNIVERS_BACKEND_URL=https://petsunivers.ma`. Le storefront appelle uniquement l'API publique versionnée `/api/storefront/v1/home` ; il ne reçoit aucun accès à la base de données.
+Pour utiliser le catalogue réel, définir `TEKNO_BACKEND_URL=https://tekno.ma`. Le storefront appelle uniquement l'API publique versionnée `/api/storefront/v1/home` ; il ne reçoit aucun accès à la base de données.
 
 ## Préproduction Docker
 

@@ -37,13 +37,13 @@ export default function FollowUpClient({ locale }: { locale: string }) {
 
         switch (type) {
             case 'pending':
-                message = `Bonjour ${name}, c'est l'équipe PetsUnivers 👋. Nous avons bien reçu votre commande sur notre site. Pouvez-vous nous confirmer que tout est correct pour lancer la livraison ?`
+                message = `Bonjour ${name}, c'est l'équipe Tekno Store 👋. Nous avons bien reçu votre commande sur notre site. Pouvez-vous nous confirmer que tout est correct pour lancer la livraison ?`
                 break
             case 'abandoned':
-                message = `Bonjour ${name}, c'est PetsUnivers 👋. Nous avons remarqué que vous avez laissé des articles dans votre panier. Avez-vous rencontré un problème lors de votre commande ? Nous sommes là pour vous aider !`
+                message = `Bonjour ${name}, c'est Tekno Store 👋. Nous avons remarqué que vous avez laissé des articles dans votre panier. Avez-vous rencontré un problème lors de votre commande ? Nous sommes là pour vous aider !`
                 break
             case 'review':
-                message = `Bonjour ${name}, c'est PetsUnivers 👋. Vous avez récemment reçu votre commande. Nous espérons que vous en êtes satisfait ! Pouvez-vous nous laisser un petit avis sur le site ? Ça nous aiderait énormément.`
+                message = `Bonjour ${name}, c'est Tekno Store 👋. Vous avez récemment reçu votre commande. Nous espérons que vous en êtes satisfait ! Pouvez-vous nous laisser un petit avis sur le site ? Ça nous aiderait énormément.`
                 break
         }
 

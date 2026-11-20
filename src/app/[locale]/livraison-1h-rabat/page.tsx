@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: t('Title'),
     description: t('Description'),
-    keywords: ['livraison 1h rabat', 'livres rabat', 'librairie rabat', 'livraison rapide', 'livraison salé', 'livraison témara', 'PetsUnivers Sonic']
+    keywords: ['livraison 1h rabat', 'livres rabat', 'librairie rabat', 'livraison rapide', 'livraison salé', 'livraison témara', 'Tekno Store Sonic']
   }
 }
 

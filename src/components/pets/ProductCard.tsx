@@ -1,4 +1,4 @@
-﻿import {Link} from '@/i18n/routing'
+import {Link} from '@/i18n/routing'
 import {Smartphone, ArrowUpRight} from 'lucide-react'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import {getPetCopy, productTitle} from '@/lib/pets'

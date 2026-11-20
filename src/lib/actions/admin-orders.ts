@@ -168,7 +168,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
                         adresse: order.address,
                         ville: order.city,
                         telephone: order.phone,
-                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.petsunivers.ma'}/track/${order.id}`
+                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'}/track/${order.id}`
                     }).catch(console.error)
                 }).catch(console.error)
             }
@@ -457,7 +457,7 @@ export async function syncOrderToWithYou(orderId: string) {
             adressedest: order.address,
             prixcolis: order.total.toString(),
             refcolis: `RW-${order.id.slice(0, 8)}`,
-            observation: `Commande PetsUnivers #${order.id.slice(0, 8)}`
+            observation: `Commande Tekno Store #${order.id.slice(0, 8)}`
         }
 
         // Créer le colis sur WithYou
@@ -539,7 +539,7 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
                 adressedest: order.address,
                 prixcolis: order.total.toString(),
                 refcolis: `RW-${order.id.slice(0, 8)}`,
-                observation: `Commande PetsUnivers #${order.id.slice(0, 8)}`
+                observation: `Commande Tekno Store #${order.id.slice(0, 8)}`
             }
 
             try {
@@ -555,8 +555,8 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
 
             const packageData = {
                 price: order.total,
-                comment: order.comment || `Commande PetsUnivers #${order.id.slice(0, 8)}`,
-                description: `Commande PetsUnivers #${order.id.slice(0, 8)}`,
+                comment: order.comment || `Commande Tekno Store #${order.id.slice(0, 8)}`,
+                description: `Commande Tekno Store #${order.id.slice(0, 8)}`,
                 inventory: true,
                 name: order.fullName,
                 destination: {
@@ -566,12 +566,12 @@ export async function syncOrderToShippingCompany(orderId: string, companyId: str
                     streetAddress: order.address
                 },
                 pickup_address: {
-                    streetAddress: "Adresse PetsUnivers",
-                    city: "Ville PetsUnivers",
+                    streetAddress: "Adresse Tekno Store",
+                    city: "Ville Tekno Store",
                     phone: "0600000000",
-                    company: "PetsUnivers",
-                    email: "contact@petsunivers.ma",
-                    website: "https://petsunivers.ma"
+                    company: "Tekno Store",
+                    email: "Contact.tekno.ma@gmail.com",
+                    website: "https://tekno.ma"
                 }
             }
 

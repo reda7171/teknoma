@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        const siteUrl = await getSetting('site_url') || 'https://petsunivers.ma'
+        const siteUrl = await getSetting('site_url') || 'https://tekno.ma'
 
         // Fetch active books and packs
         const books = await prisma.book.findMany({
@@ -38,9 +38,9 @@ export async function GET() {
         let xml = `<?xml version="1.0"?>
 <rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">
     <channel>
-        <title>PetsUnivers Catalog</title>
+        <title>Tekno Store Catalog</title>
         <link>${siteUrl}</link>
-        <description>Catalogue des livres et packs PetsUnivers</description>
+        <description>Catalogue des livres et packs Tekno Store</description>
 `
 
         // Add Books
@@ -48,7 +48,7 @@ export async function GET() {
             const availability = book.stock > 0 ? 'in stock' : 'out of stock'
             const escapedDesc = (book.description || book.title).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             const escapedTitle = book.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            const brand = (book.author || 'PetsUnivers').replace(/&/g, '&amp;')
+            const brand = (book.author || 'Tekno Store').replace(/&/g, '&amp;')
 
             xml += `        <item>
             <g:id>${book.id}</g:id>
@@ -74,7 +74,7 @@ export async function GET() {
             <g:description>${escapedDesc.substring(0, 5000)}</g:description>
             <g:link>${siteUrl}/fr/packs/${pack.id}</g:link>
             <g:image_link>${pack.image?.startsWith('http') ? pack.image : `${siteUrl}${pack.image}`}</g:image_link>
-            <g:brand>PetsUnivers Packs</g:brand>
+            <g:brand>Tekno Store Packs</g:brand>
             <g:condition>new</g:condition>
             <g:availability>in stock</g:availability>
             <g:price>${pack.price} درهم</g:price>

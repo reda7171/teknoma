@@ -122,7 +122,7 @@ export default function POSConfigForm({
                         value={storeName}
                         onChange={(e) => setStoreName(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        placeholder="Ex: PetsUnivers Store"
+                        placeholder="Ex: Tekno Store Store"
                     />
                 </div>
 

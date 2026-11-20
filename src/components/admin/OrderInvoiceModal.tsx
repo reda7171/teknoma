@@ -61,10 +61,10 @@ export default function OrderInvoiceModal({
     const [isPaid, setIsPaid] = useState(order.isPaid || initialRemaining <= 0)
 
     // Company info (Émetteur)
-    const [companyName, setCompanyName] = useState('PetsUnivers Books')
-    const [companyLogo, setCompanyLogo] = useState('/uploads/books/0dded6c73e7283c1-PETSUNIVERS__1_.png')
+    const [companyName, setCompanyName] = useState('Tekno Store Books')
+    const [companyLogo, setCompanyLogo] = useState('/uploads/books/0dded6c73e7283c1-TEKNO__1_.png')
     const [companyPhone, setCompanyPhone] = useState('07 02 22 05 75 / 06 66 03 81 29')
-    const [companyEmail, setCompanyEmail] = useState('contact@petsunivers.ma')
+    const [companyEmail, setCompanyEmail] = useState('Contact.tekno.ma@gmail.com')
     const [companyAddress, setCompanyAddress] = useState('Casablanca, Maroc')
     const [companyIce, setCompanyIce] = useState('002589632000045')
 
@@ -113,7 +113,7 @@ export default function OrderInvoiceModal({
         if (!order.items || order.items.length === 0) {
             return [{
                 id: 'item-1',
-                title: 'Livre / Commande PetsUnivers',
+                title: 'Livre / Commande Tekno Store',
                 quantity: 1,
                 price: Number(order.total) || 0,
                 type: 'BOOK'
@@ -121,7 +121,7 @@ export default function OrderInvoiceModal({
         }
         return order.items.map((it: any) => ({
             id: it.id,
-            title: it.book?.title || it.pack?.name || it.extraProduct?.name || (it.type === 'PACK' ? 'Pack PetsUnivers' : 'Livre'),
+            title: it.book?.title || it.pack?.name || it.extraProduct?.name || (it.type === 'PACK' ? 'Pack Tekno Store' : 'Livre'),
             quantity: Number(it.quantity) || 1,
             price: Number(it.price) || 0,
             type: it.type || 'BOOK'
@@ -313,7 +313,7 @@ export default function OrderInvoiceModal({
                     <tr>
                         <td style="vertical-align: top;">
                             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                                <img src="${companyLogo}" alt="PetsUnivers Logo" style="height: 42px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
+                                <img src="${companyLogo}" alt="Tekno Store Logo" style="height: 42px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
                                 <div>
                                     <div class="brand" style="line-height: 1.1;">${companyName}</div>
                                     <div class="brand-sub">Librairie & Édition • Maroc</div>
@@ -420,7 +420,7 @@ export default function OrderInvoiceModal({
 
                 <div class="footer">
                     Merci pour votre confiance ! Pour toute question, contactez notre service client au ${companyPhone}.<br>
-                    Document généré électroniquement par le système de gestion PetsUnivers Store le ${new Date().toLocaleDateString('fr-FR')}.
+                    Document généré électroniquement par le système de gestion Tekno Store Store le ${new Date().toLocaleDateString('fr-FR')}.
                 </div>
 
                 <script>
@@ -452,7 +452,7 @@ export default function OrderInvoiceModal({
 
         const message =
             `Bonjour *${fullName}*,\n\n` +
-            `Voici le récapitulatif de votre commande & facture *#${invoiceNumber}* chez *PetsUnivers* 📚 :\n\n` +
+            `Voici le récapitulatif de votre commande & facture *#${invoiceNumber}* chez *Tekno Store* 📚 :\n\n` +
             `${itemsSummary}\n\n` +
             (Number(shippingFees) > 0 ? `🚚 Frais de livraison : ${shippingFees} DH\n` : `🚚 Livraison : Offerte\n`) +
             (Number(discount) > 0 ? `🎁 Remise : -${discount} DH\n` : '') +

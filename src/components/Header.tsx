@@ -271,7 +271,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 <div className="relative group-hover:scale-105 transition-transform duration-300">
                                     <Image
                                         src={siteLogo}
-                                        alt="PetsUnivers Logo"
+                                        alt="Tekno Store Logo"
                                         width={96}
                                         height={32}
                                         sizes="96px"
@@ -310,7 +310,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                         <BookOpen className="w-5 h-5 text-white" />
                                     </div>
                                     <span className={`text-2xl lg:text-3xl font-black tracking-tighter text-black flex items-center ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
-                                        {'PetsUnivers'.split('').map((char, i) => (
+                                        {'Tekno Store'.split('').map((char, i) => (
                                             <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
                                                 {char}
                                             </span>
@@ -348,7 +348,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                                     {locale === 'ar' ? 'استكشف مجموعاتنا' : locale === 'en' ? 'Explore our collections' : 'Explorez nos collections'}
                                                                 </h3>
                                                                 <p className="mt-1 text-xs font-medium text-gray-400">
-                                                                    {locale === 'ar' ? 'مختارات موضوعية من PetsUnivers' : locale === 'en' ? 'Curated selections from PetsUnivers' : 'Sélections thématiques de la librairie PetsUnivers'}
+                                                                    {locale === 'ar' ? 'مختارات موضوعية من Tekno Store' : locale === 'en' ? 'Curated selections from Tekno Store' : 'Sélections thématiques de la librairie Tekno Store'}
                                                                 </p>
                                                             </div>
                                                             <LayoutGrid className="w-8 h-8 text-gray-200" />
@@ -630,7 +630,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
             >
                 <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-100">
                     <span className={`text-2xl font-black tracking-tighter flex items-center cursor-pointer group ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
-                        {'PetsUnivers'.split('').map((char, i) => (
+                        {'Tekno Store'.split('').map((char, i) => (
                             <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
                                 {char}
                             </span>

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-PetsUnivers is a continuously deployed platform. The following table indicates which environments or versions are currently supported with security updates.
+Tekno Store is a continuously deployed platform. The following table indicates which environments or versions are currently supported with security updates.
 
 | Version / Environment | Supported          |
 | --------------------- | ------------------ |
@@ -12,7 +12,7 @@ PetsUnivers is a continuously deployed platform. The following table indicates w
 
 ## Reporting a Vulnerability
 
-We take the security of PetsUnivers and our users' data very seriously. If you discover a vulnerability, we would like to know about it so we can take steps to address it as quickly as possible.
+We take the security of Tekno Store and our users' data very seriously. If you discover a vulnerability, we would like to know about it so we can take steps to address it as quickly as possible.
 
 ### How to report
 Please **do not** report security vulnerabilities through public GitHub issues.
@@ -24,4 +24,4 @@ Instead, please report them via email to: **redaazizi@hottmail.com**
 - We will send you regular updates about our progress in resolving the issue.
 - Please allow us a reasonable amount of time to fix the vulnerability before disclosing it publicly.
 
-Thank you for helping keep PetsUnivers secure!
+Thank you for helping keep Tekno Store secure!

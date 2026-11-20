@@ -26,7 +26,7 @@ export async function POST(request: Request) {
             },
             body: JSON.stringify({
                 name: name,
-                description: description || 'Créé via PetsUnivers',
+                description: description || 'Créé via Tekno Store',
                 privacy: 'PUBLIC'
             })
         })

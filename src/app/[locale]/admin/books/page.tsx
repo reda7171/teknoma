@@ -305,7 +305,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             title: e.name,
             titleFr: null,
             titleEn: null,
-            author: 'Accessoire animalier',
+            author: 'Accessoire High-Tech',
             price: e.price,
             costPrice: e.costPrice || 0,
             stock: e.stock,

@@ -32,8 +32,8 @@ export async function GET() {
         }
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-        const filename = `backup_petsunivers_${timestamp}.sql`
-        const tempPath = path.join(os.tmpdir(), `petsunivers-${randomUUID()}.sql`)
+        const filename = `backup_tekno_${timestamp}.sql`
+        const tempPath = path.join(os.tmpdir(), `tekno-${randomUUID()}.sql`)
 
         // On utilise spawn pour éviter les problèmes d'échappement du shell
         return new Promise<NextResponse>((resolve) => {

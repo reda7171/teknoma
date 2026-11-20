@@ -91,7 +91,7 @@ export async function register(formData: FormData): Promise<AuthResult> {
                 data: {
                     userId: user.id,
                     title: '🎁 Cadeau de bienvenue !',
-                    message: `Bienvenue sur PetsUnivers ! Vous avez reçu 10 Dhs dans votre wallet et un bon de réduction supplémentaire de 10 Dhs avec le code : ${couponCode}`,
+                    message: `Bienvenue sur Tekno Store ! Vous avez reçu 10 Dhs dans votre wallet et un bon de réduction supplémentaire de 10 Dhs avec le code : ${couponCode}`,
                     type: 'SYSTEM' as any,
                 }
             })

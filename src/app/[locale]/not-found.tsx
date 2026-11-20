@@ -7,8 +7,8 @@ import { getMessages, getLocale } from 'next-intl/server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Page Introuvable | PetsUnivers',
-  description: 'La page demandée est introuvable sur la librairie en ligne petsunivers.ma.',
+  title: 'Page Introuvable | Tekno Store',
+  description: 'La page demandée est introuvable sur la librairie en ligne tekno.ma.',
   robots: {
     index: false,
     follow: false,

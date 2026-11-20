@@ -141,7 +141,7 @@ async function main() {
     const truncatedContent = post.content ? post.content.substring(0, 3000) : "";
 
     const prompt = `
-Tu es un lecteur authentique du blog littéraire "PetsUnivers".
+Tu es un lecteur authentique du blog littéraire "Tekno Store".
 Je vais te fournir le titre et un extrait d'un article de blog.
 L'article est écrit en ${languageStr}.
 

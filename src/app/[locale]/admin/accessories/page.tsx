@@ -21,7 +21,7 @@ export default async function AccessoriesPage({
         orderBy: { createdAt: 'desc' }
     })
 
-    const title = 'Accessoires animaliers'
+    const title = 'Accessoires High-Tech'
 
     return (
         <div className="space-y-8">

@@ -14,16 +14,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const cityName = decodedCity.charAt(0).toUpperCase() + decodedCity.slice(1).toLowerCase();
 
     return {
-        title: `Livraison de Livres à ${cityName} - Achat en Ligne | PetsUnivers`,
+        title: `Livraison de Livres à ${cityName} - Achat en Ligne | Tekno Store`,
         description: `Achetez vos livres en ligne et profitez d'une livraison express à ${cityName}. Paiement à la livraison, large choix de romans et développement personnel au Maroc.`,
         keywords: `librairie ${cityName}, acheter livre ${cityName}, livraison livre ${cityName}, book store ${cityName}, romans ${cityName}, développement personnel ${cityName}`,
         alternates: {
             canonical: city.toLowerCase() === 'rabat'
-                ? `https://petsunivers.ma/${locale}/livraison-1h-rabat`
-                : `https://petsunivers.ma/${locale}/livraison/${city}`,
+                ? `https://tekno.ma/${locale}/livraison-1h-rabat`
+                : `https://tekno.ma/${locale}/livraison/${city}`,
         },
         openGraph: {
-            title: `Livraison de Livres à ${cityName} - Achat en Ligne | PetsUnivers`,
+            title: `Livraison de Livres à ${cityName} - Achat en Ligne | Tekno Store`,
             description: `Achetez vos livres en ligne et profitez d'une livraison express à ${cityName}. Paiement à la livraison, large choix de romans et développement personnel au Maroc.`,
             images: ['/og-image.jpg'],
         }
@@ -48,7 +48,7 @@ export default async function DeliveryCityPage({ params }: { params: Promise<{ l
         take: 8
     });
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma';
 
     // Geo schema (LocalBusiness delivery area + DeliveryEvent placeholder logic)
     const jsonLd = {
@@ -57,7 +57,7 @@ export default async function DeliveryCityPage({ params }: { params: Promise<{ l
             {
                 '@type': 'LocalBusiness',
                 '@id': `${baseUrl}/#organization`,
-                name: 'Librairie PetsUnivers',
+                name: 'Librairie Tekno Store',
                 url: baseUrl,
                 image: `${baseUrl}/logo.png`,
                 areaServed: {
@@ -114,7 +114,7 @@ export default async function DeliveryCityPage({ params }: { params: Promise<{ l
                         <span className="text-emerald-500 italic">{cityName}.</span>
                     </h1>
                     <p className="text-gray-500 max-w-2xl mx-auto text-lg font-medium">
-                        PetsUnivers expédie vos livres favoris directement chez vous à {cityName}.
+                        Tekno Store expédie vos livres favoris directement chez vous à {cityName}.
                         Commandez aujourd'hui et payez à la réception en toute sécurité.
                     </p>
                 </div>

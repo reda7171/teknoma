@@ -4,27 +4,27 @@ import { useState } from 'react'
 import { MessageSquare, X, MessageCircle, Mail, Filter } from 'lucide-react'
 
 const getNotificationLinks = (order: any, lang: 'fr' | 'ar' | 'en' = 'fr', filterType?: string) => {
-    const trackingLink = `https://petsunivers.ma/${lang}/track/${order.id}`
+    const trackingLink = `https://tekno.ma/${lang}/track/${order.id}`
     let text = ''
-    let subject = 'Suivi de votre commande PetsUnivers'
+    let subject = 'Suivi de votre commande Tekno Store'
 
     const isEncouragement = filterType === 'ENCOURAGEMENT' && order.status === 'DELIVERED'
 
     if (lang === 'fr') {
         if (isEncouragement) {
             subject = 'Merci pour votre confiance ! Cadeau exclusif 🎁'
-            text = `Bonjour ${order.fullName},\n\nNous espérons que vous avez apprécié votre dernière lecture avec PetsUnivers ! 📚\n\nPour vous remercier de votre confiance, nous vous offrons le code promo exclusif : *REVIENS20*\n\nUtilisez-le lors de votre prochaine commande pour profiter d'une réduction spéciale. N'hésitez pas à jeter un œil à nos nouveautés !\n\nL'équipe PetsUnivers.`
+            text = `Bonjour ${order.fullName},\n\nNous espérons que vous avez apprécié votre dernière lecture avec Tekno Store ! 📚\n\nPour vous remercier de votre confiance, nous vous offrons le code promo exclusif : *REVIENS20*\n\nUtilisez-le lors de votre prochaine commande pour profiter d'une réduction spéciale. N'hésitez pas à jeter un œil à nos nouveautés !\n\nL'équipe Tekno Store.`
         } else {
         switch (order.status) {
             case 'PENDING':
-                text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur PetsUnivers ! Vous pouvez suivre son avancement ici : ${trackingLink}`
+                text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Tekno Store ! Vous pouvez suivre son avancement ici : ${trackingLink}`
                 break
             case 'ABANDONED_CART':
                 subject = `Finalisez votre commande et profitez de -20 DHS offerts ! 🎁`
-                text = `Bonjour ${order.fullName},\n\nNous avons remarqué que vous n'avez pas terminé votre commande sur PetsUnivers.\n\nPour vous remercier de votre visite et vous encourager dans votre lecture, nous vous offrons une remise exceptionnelle de -20 DHS sur votre panier !\n\nAvez-vous besoin d'aide avec un livre ou le paiement à la livraison ? N'hésitez pas à nous répondre.\n\nL'équipe PetsUnivers.`
+                text = `Bonjour ${order.fullName},\n\nNous avons remarqué que vous n'avez pas terminé votre commande sur Tekno Store.\n\nPour vous remercier de votre visite et vous encourager dans votre lecture, nous vous offrons une remise exceptionnelle de -20 DHS sur votre panier !\n\nAvez-vous besoin d'aide avec un livre ou le paiement à la livraison ? N'hésitez pas à nous répondre.\n\nL'équipe Tekno Store.`
                 break
             case 'CONFIRMED':
-                text = `Bonjour ${order.fullName}, votre commande PetsUnivers est confirmée et en cours de préparation. Suivi : ${trackingLink}`
+                text = `Bonjour ${order.fullName}, votre commande Tekno Store est confirmée et en cours de préparation. Suivi : ${trackingLink}`
                 break
             case 'SHIPPED':
                 text = `Bonne nouvelle ${order.fullName}, votre commande a été expédiée${order.shippingCompanyName ? ` avec ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Suivi: ${order.trackingID})` : ''} ! Lien : ${trackingLink}`
@@ -39,22 +39,22 @@ const getNotificationLinks = (order: any, lang: 'fr' | 'ar' | 'en' = 'fr', filte
                 text = `Bonjour ${order.fullName}, votre commande a été annulée. Si c'est une erreur, n'hésitez pas à nous contacter.`
                 break
             default:
-                text = `Bonjour ${order.fullName}, voici le lien de suivi de votre commande PetsUnivers : ${trackingLink}`
+                text = `Bonjour ${order.fullName}, voici le lien de suivi de votre commande Tekno Store : ${trackingLink}`
         }
         }
     } else if (lang === 'ar') {
-        subject = 'تتبع طلبك من PetsUnivers'
+        subject = 'تتبع طلبك من Tekno Store'
         if (isEncouragement) {
             subject = 'شكراً لثقتكم! هدية حصرية 🎁'
-            text = `مرحباً ${order.fullName}،\n\nنأمل أن تكونوا قد استمتعتم بقراءتكم الأخيرة مع PetsUnivers! 📚\n\nلشكركم على ثقتكم، نقدم لكم كود الخصم الحصري: *REVIENS20*\n\nاستخدموه في طلبكم القادم للاستفادة من تخفيض خاص. لا تترددوا في الاطلاع على جديدنا!\n\nفريق PetsUnivers.`
+            text = `مرحباً ${order.fullName}،\n\nنأمل أن تكونوا قد استمتعتم بقراءتكم الأخيرة مع Tekno Store! 📚\n\nلشكركم على ثقتكم، نقدم لكم كود الخصم الحصري: *REVIENS20*\n\nاستخدموه في طلبكم القادم للاستفادة من تخفيض خاص. لا تترددوا في الاطلاع على جديدنا!\n\nفريق Tekno Store.`
         } else {
         switch (order.status) {
             case 'PENDING':
-                text = `مرحباً ${order.fullName}، لقد توصلنا بطلبك على PetsUnivers! يمكنك تتبع حالته هنا: ${trackingLink}`
+                text = `مرحباً ${order.fullName}، لقد توصلنا بطلبك على Tekno Store! يمكنك تتبع حالته هنا: ${trackingLink}`
                 break
             case 'ABANDONED_CART':
                 subject = `أكمل طلبك واستفد من خصم 20 درهم! 🎁`
-                text = `مرحباً ${order.fullName}،\n\nلاحظنا أنك لم تكمل طلبك على PetsUnivers.\n\nلشكرك على زيارتك وتشجيعك على القراءة، نقدم لك خصماً استثنائياً بقيمة 20 درهم على سلتك!\n\nهل تحتاج إلى مساعدة بخصوص كتاب أو الدفع عند الاستلام؟ لا تتردد في الرد علينا.\n\nفريق PetsUnivers.`
+                text = `مرحباً ${order.fullName}،\n\nلاحظنا أنك لم تكمل طلبك على Tekno Store.\n\nلشكرك على زيارتك وتشجيعك على القراءة، نقدم لك خصماً استثنائياً بقيمة 20 درهم على سلتك!\n\nهل تحتاج إلى مساعدة بخصوص كتاب أو الدفع عند الاستلام؟ لا تتردد في الرد علينا.\n\nفريق Tekno Store.`
                 break
             case 'CONFIRMED':
                 text = `مرحباً ${order.fullName}، تم تأكيد طلبك وهو قيد التحضير. التتبع: ${trackingLink}`
@@ -72,25 +72,25 @@ const getNotificationLinks = (order: any, lang: 'fr' | 'ar' | 'en' = 'fr', filte
                 text = `مرحباً ${order.fullName}، تم إلغاء طلبك. إذا كان هذا خطأ، لا تتردد في الاتصال بنا.`
                 break
             default:
-                text = `مرحباً ${order.fullName}، إليك رابط تتبع طلبك من PetsUnivers: ${trackingLink}`
+                text = `مرحباً ${order.fullName}، إليك رابط تتبع طلبك من Tekno Store: ${trackingLink}`
         }
         }
     } else if (lang === 'en') {
-        subject = 'Track your PetsUnivers order'
+        subject = 'Track your Tekno Store order'
         if (isEncouragement) {
             subject = 'Thank you for your trust! Exclusive gift 🎁'
-            text = `Hello ${order.fullName},\n\nWe hope you enjoyed your recent read with PetsUnivers! 📚\n\nTo thank you for your trust, we are offering you an exclusive promo code: *REVIENS20*\n\nUse it on your next order to enjoy a special discount. Feel free to check out our new arrivals!\n\nThe PetsUnivers team.`
+            text = `Hello ${order.fullName},\n\nWe hope you enjoyed your recent read with Tekno Store! 📚\n\nTo thank you for your trust, we are offering you an exclusive promo code: *REVIENS20*\n\nUse it on your next order to enjoy a special discount. Feel free to check out our new arrivals!\n\nThe Tekno Store team.`
         } else {
         switch (order.status) {
             case 'PENDING':
-                text = `Hello ${order.fullName}, we have received your order on PetsUnivers! You can track its progress here: ${trackingLink}`
+                text = `Hello ${order.fullName}, we have received your order on Tekno Store! You can track its progress here: ${trackingLink}`
                 break
             case 'ABANDONED_CART':
                 subject = `Complete your order and get 20 DHS off! 🎁`
-                text = `Hello ${order.fullName},\n\nWe noticed you didn't complete your order on PetsUnivers.\n\nTo thank you for your visit and encourage your reading, we are offering you an exceptional discount of 20 DHS on your cart!\n\nDo you need help with a book or cash on delivery? Don't hesitate to reply.\n\nThe PetsUnivers team.`
+                text = `Hello ${order.fullName},\n\nWe noticed you didn't complete your order on Tekno Store.\n\nTo thank you for your visit and encourage your reading, we are offering you an exceptional discount of 20 DHS on your cart!\n\nDo you need help with a book or cash on delivery? Don't hesitate to reply.\n\nThe Tekno Store team.`
                 break
             case 'CONFIRMED':
-                text = `Hello ${order.fullName}, your PetsUnivers order is confirmed and being prepared. Tracking: ${trackingLink}`
+                text = `Hello ${order.fullName}, your Tekno Store order is confirmed and being prepared. Tracking: ${trackingLink}`
                 break
             case 'SHIPPED':
                 text = `Good news ${order.fullName}, your order has been shipped${order.shippingCompanyName ? ` with ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Tracking: ${order.trackingID})` : ''}! Link: ${trackingLink}`
@@ -105,7 +105,7 @@ const getNotificationLinks = (order: any, lang: 'fr' | 'ar' | 'en' = 'fr', filte
                 text = `Hello ${order.fullName}, your order has been cancelled. If this is a mistake, please contact us.`
                 break
             default:
-                text = `Hello ${order.fullName}, here is the tracking link for your PetsUnivers order: ${trackingLink}`
+                text = `Hello ${order.fullName}, here is the tracking link for your Tekno Store order: ${trackingLink}`
         }
         }
     }

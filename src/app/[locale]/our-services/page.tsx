@@ -8,7 +8,7 @@ import ServiceCard from '@/components/services/ServiceCard'
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
     const t = await getTranslations({ locale, namespace: 'OurServices' })
     return {
-        title: `${t('title')} - PetsUnivers`,
+        title: `${t('title')} - Tekno Store`,
         description: t('subtitle'),
     }
 }

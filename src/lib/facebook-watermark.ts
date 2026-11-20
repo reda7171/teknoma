@@ -44,7 +44,7 @@ async function loadBookImage(image: string, publicDir: string): Promise<Buffer |
 
     const imageUrl = image.startsWith('http')
         ? image
-        : `https://petsunivers.ma/${image.replace(/^\/+/, '')}`
+        : `https://tekno.ma/${image.replace(/^\/+/, '')}`
 
     try {
         const response = await fetch(imageUrl, { signal: AbortSignal.timeout(20_000) })
@@ -81,7 +81,7 @@ export async function generateFacebookWatermarkedImage(
         const bannerHeight = Math.round(height * 0.15)
         const bannerColor = config.color || '#0f172a'
         const opacity = config.opacity !== undefined ? config.opacity : 0.92
-        const brandText = 'petsunivers.ma'
+        const brandText = 'tekno.ma'
         const customText = config.text || 'WhatsApp: +212 666-038129 • Livraison Partout au Maroc'
         const position = config.position || 'bottom'
         const showPrice = config.showPrice !== false
@@ -149,7 +149,7 @@ export async function generateFacebookWatermarkedImage(
             svgParts.push(`
                 <!-- Bandeau fond -->
                 <rect x="0" y="${bannerY}" width="${width}" height="${bannerHeight}" fill="${bannerColor}" fill-opacity="${opacity}" />
-                <!-- Ligne d'accentuation PetsUnivers -->
+                <!-- Ligne d'accentuation Tekno Store -->
                 <rect x="0" y="${accentY}" width="${width}" height="4" fill="#3b82f6" />
 
                 <!-- Titre de la marque -->

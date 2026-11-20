@@ -75,7 +75,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     const [rotations, setRotations] = useState<Record<string, number>>({})
     const [shadows, setShadows] = useState<Record<string, boolean>>({})
     const [logoScale, setLogoScale] = useState(1)
-    const [logoVariant, setLogoVariant] = useState<'petsunivers' | 'jumia'>('petsunivers')
+    const [logoVariant, setLogoVariant] = useState<'tekno' | 'jumia'>('tekno')
     const [showLogo, setShowLogo] = useState(true)
     const [showFreeDelivery, setShowFreeDelivery] = useState(pack?.isFreeDelivery || false)
     const [showPlus, setShowPlus] = useState(false)
@@ -92,7 +92,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     // State for editable texts
     const [editableTexts, setEditableTexts] = useState({
         badge: 'Pack Spécial',
-        logo: 'PetsUnivers',
+        logo: 'Tekno Store',
         name: pack?.name || 'Nom du Pack',
         description: pack?.description || (pack?.books ? `${pack.books.length} Livres exceptionnels` : 'Livres exceptionnels'),
         limited: 'Offre Limitée',
@@ -322,7 +322,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     // Persist settings to localStorage
     useEffect(() => {
         if (isOpen) {
-            const saved = localStorage.getItem('petsunivers_pack_editor_settings')
+            const saved = localStorage.getItem('tekno_pack_editor_settings')
             if (saved) {
                 try {
                     const data = JSON.parse(saved)
@@ -370,7 +370,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 whatsappNumber: editableTexts.whatsapp,
                 layerOrder
             }
-            localStorage.setItem('petsunivers_pack_editor_settings', JSON.stringify(settings))
+            localStorage.setItem('tekno_pack_editor_settings', JSON.stringify(settings))
         }
     }, [positions, theme, imageScale, plusScale, rotations, shadows, logoScale, showLogo, showPlus, showPrice, showWhatsapp, whatsappScale, editableTexts.whatsapp, isOpen])
 
@@ -392,7 +392,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 .then(data => {
                     if (data.success && data.settings?.contact_phone) {
                         setEditableTexts(prev => {
-                            const saved = localStorage.getItem('petsunivers_pack_editor_settings')
+                            const saved = localStorage.getItem('tekno_pack_editor_settings')
                             const hasSavedWhatsapp = saved && JSON.parse(saved).whatsappNumber
                             if (!hasSavedWhatsapp && !pack?.whatsappNumber) {
                                 return { ...prev, whatsapp: data.settings.contact_phone }
@@ -404,7 +404,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 .catch(console.error)
 
             const titles = pack.books.map(b => `• ${b.title}`).join('\n')
-            const packUrl = pack.id ? `https://petsunivers.ma/fr/packs/${pack.id}` : 'https://petsunivers.ma/fr/packs'
+            const packUrl = pack.id ? `https://tekno.ma/fr/packs/${pack.id}` : 'https://tekno.ma/fr/packs'
 
             setCaption(
                 `🎁 ${pack.name}\n\n` +
@@ -412,7 +412,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 `Livres inclus :\n${titles}\n\n` +
                 `💰 ${pack.price} درهم\n\n` +
                 `اطلب الآن 🛒 ${packUrl}\n\n` +
-                `#petsunivers #livres #packs #maroc #lecture #livresaddict #casablanca #rabat #booktokmaroc #culturemaroc #bibliophile #offre_speciale`
+                `#tekno #livres #packs #maroc #lecture #livresaddict #casablanca #rabat #booktokmaroc #culturemaroc #bibliophile #offre_speciale`
             )
         }
     }, [isOpen, pack?.name, pack?.books?.length, pack?.price, pack?.description, pack?.id])
@@ -496,7 +496,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
             restoreImages(originals)
 
             try {
-                const keywords = ['PetsUnivers', 'Pack', pack.name, ...pack.books.map(b => b.title), ...pack.books.map(b => b.author)]
+                const keywords = ['Tekno Store', 'Pack', pack.name, ...pack.books.map(b => b.title), ...pack.books.map(b => b.author)]
                 dataUrl = injectXMPToPNG(dataUrl, pack.name, keywords.filter(Boolean))
             } catch (err) {
                 console.error("XMP injection failed:", err)
@@ -536,7 +536,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
             const baseUrl = window.location.origin
             const productUrl = `${baseUrl}/fr/packs`
             const text = caption || `${editableTexts.name}\n${editableTexts.description}`
-            const tags = `#petsunivers #pack #lecture #maroc #culture #promo`
+            const tags = `#tekno #pack #lecture #maroc #culture #promo`
 
             const newWindow = window.open()
             if (newWindow) {
@@ -570,7 +570,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                     <div class="post-header">
                                         <div class="avatar">R</div>
                                         <div class="author-info">
-                                            <div class="author-name">PetsUnivers</div>
+                                            <div class="author-name">Tekno Store</div>
                                             <div class="post-time">À l'instant • 🌐</div>
                                         </div>
                                     </div>
@@ -1087,8 +1087,8 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                         >
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
-                                                src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-petsunivers.png?v=petsunivers2'}
-                                                alt={logoVariant === 'jumia' ? 'Jumia Logo' : 'PetsUnivers Logo'}
+                                                src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo.png?v=tekno2'}
+                                                alt={logoVariant === 'jumia' ? 'Jumia Logo' : 'Tekno Store Logo'}
                                                 crossOrigin="anonymous"
                                                 className={`object-contain filter brightness-0 invert transition-transform origin-top-right select-none ${
                                                     logoVariant === 'jumia' ? 'h-7 sm:h-8 max-w-[140px]' : 'h-9 sm:h-11 max-w-[120px]'
@@ -1178,9 +1178,9 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                                     if (raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
                                                     // Si chemin local /uploads/..., garder le chemin relatif pour éviter les blocages CORS
                                                     if (raw.startsWith('/')) return raw;
-                                                    // Si URL absolue du même domaine petsunivers.ma, convertir en chemin relatif
-                                                    if (raw.includes('petsunivers.ma/')) {
-                                                        const parts = raw.split('petsunivers.ma');
+                                                    // Si URL absolue du même domaine tekno.ma, convertir en chemin relatif
+                                                    if (raw.includes('tekno.ma/')) {
+                                                        const parts = raw.split('tekno.ma');
                                                         return parts[1] || raw;
                                                     }
                                                     // Si URL externe, passer par le proxy pour contourner CORS
@@ -1453,7 +1453,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                 theme, imageScale, plusScale, rotations, shadows,
                                 logoScale, showLogo, showPlus, showPrice, layerOrder, customTexts
                             }
-                            localStorage.setItem('petsunivers_pack_editor_settings', JSON.stringify(settings))
+                            localStorage.setItem('tekno_pack_editor_settings', JSON.stringify(settings))
                             onClose()
                         }}
                         className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition p-2 hover:bg-gray-100 rounded-full"
@@ -1695,20 +1695,20 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setLogoVariant('petsunivers')
+                                            setLogoVariant('tekno')
                                             setLogoScale(1)
                                             positionsRef.current['logo'] = { x: 0, y: 0 }
                                             if (dragElemsRef.current['logo']) dragElemsRef.current['logo']!.style.transform = 'translate(0px, 0px)'
                                             setPositions(prev => ({ ...prev, logo: { x: 0, y: 0 } }))
                                         }}
                                         className={`py-2 px-3 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center justify-center gap-2 ${
-                                            logoVariant === 'petsunivers'
+                                            logoVariant === 'tekno'
                                                 ? 'bg-black text-white border-black shadow-md'
                                                 : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                                         }`}
                                     >
-                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'petsunivers' ? 'bg-amber-400' : 'bg-gray-400'}`} />
-                                        PetsUnivers
+                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'tekno' ? 'bg-amber-400' : 'bg-gray-400'}`} />
+                                        Tekno Store
                                     </button>
                                     <button
                                         type="button"

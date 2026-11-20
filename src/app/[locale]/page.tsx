@@ -19,6 +19,7 @@ import {
   HardDrive,
   Truck,
   ShieldCheck,
+  Sparkles,
   HeartHandshake,
   Star,
   CheckCircle2,
@@ -218,7 +219,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#82602d]">PetsUnivers</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#82602d]">Tekno Store</p>
               <h2 className="mt-3 font-serif text-3xl md:text-4xl text-[#17351d]">{c.categories}</h2>
               <p className="mt-2 text-sm text-[#68705f]">{c.categoriesText}</p>
             </div>

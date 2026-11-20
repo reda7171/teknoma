@@ -61,7 +61,7 @@ const ALL_COLUMNS: ColumnDefinition[] = [
         label: 'Canal',
         category: 'Général',
         getValue: (order) => ({
-            text: order.salesChannel || 'PETSUNIVERS_STORE',
+            text: order.salesChannel || 'TEKNO_STORE',
             style: "text-align: center;"
         })
     },
@@ -230,7 +230,7 @@ const PRESETS: Record<string, { label: string; columnIds: string[] }> = {
     }
 }
 
-const STORAGE_KEY = 'petsunivers_export_orders_columns_v1'
+const STORAGE_KEY = 'tekno_export_orders_columns_v1'
 
 export default function ExportOrdersButton({ orders, totalSelected, className }: ExportOrdersButtonProps) {
     const isSelectionEmpty = totalSelected !== undefined ? totalSelected === 0 : orders.length === 0
@@ -316,7 +316,7 @@ export default function ExportOrdersButton({ orders, totalSelected, className }:
                 <x:ExcelWorkbook>
                     <x:ExcelWorksheets>
                         <x:ExcelWorksheet>
-                            <x:Name>Commandes PetsUnivers</x:Name>
+                            <x:Name>Commandes Tekno Store</x:Name>
                             <x:WorksheetOptions>
                                 <x:DisplayGridlines/>
                             </x:WorksheetOptions>
@@ -352,7 +352,7 @@ export default function ExportOrdersButton({ orders, totalSelected, className }:
         const link = document.createElement('a')
         const date = new Date().toISOString().split('T')[0]
         link.href = url
-        link.setAttribute('download', `PetsUnivers_Commandes_${date}.xls`)
+        link.setAttribute('download', `Tekno Store_Commandes_${date}.xls`)
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)

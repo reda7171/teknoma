@@ -257,7 +257,7 @@ export async function importBooksFromExcel(
                     }
                 }
                 if (!authorStr) {
-                    authorStr = language === 'ar' ? 'دار النشر PetsUnivers' : 'PetsUnivers Édition'
+                    authorStr = language === 'ar' ? 'دار النشر Tekno Store' : 'Tekno Store Édition'
                 }
 
                 // Normalisation image
@@ -285,7 +285,7 @@ export async function importBooksFromExcel(
                 // Description
                 const descVal = extractCellValue(getField(row, ['description', 'Description', 'resume', 'desc']))
                 const descriptionStr = descVal || (language === 'ar'
-                    ? `وصف كتاب ${titleStr} متوفر للطلب عبر الدفع عند الاستلام على منصة PetsUnivers.`
+                    ? `وصف كتاب ${titleStr} متوفر للطلب عبر الدفع عند الاستلام على منصة Tekno Store.`
                     : `Livre: ${titleStr}${authorStr ? ' par ' + authorStr : ''}. Disponible en livraison rapide avec paiement à la livraison.`)
 
                 // Stock : 100 par défaut si non spécifié
@@ -422,7 +422,7 @@ export async function generateExcelTemplate() {
         await verifyAdmin()
 
         const workbook = new ExcelJS.Workbook()
-        workbook.creator = 'PetsUnivers'
+        workbook.creator = 'Tekno Store'
         const worksheet = workbook.addWorksheet('Livres')
 
         worksheet.columns = [
@@ -499,7 +499,7 @@ export async function generateExcelTemplate() {
         return {
             success: true,
             base64: Buffer.from(buffer).toString('base64'),
-            filename: 'template_livres_petsunivers.xlsx',
+            filename: 'template_livres_tekno.xlsx',
         }
     } catch {
         return null

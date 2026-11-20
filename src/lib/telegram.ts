@@ -230,7 +230,7 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     }
 
     const whatsappTemplateSetting = await prisma.siteSettings.findUnique({ where: { key: 'whatsapp_template_order' } })
-    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur PetsUnivers a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
+    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Tekno Store a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
     whatsappText = whatsappText.replace(/\{\{fullName\}\}/g, order.fullName)
                                .replace(/\{\{shortId\}\}/g, shortId)
                                .replace(/\{\{city\}\}/g, order.city)

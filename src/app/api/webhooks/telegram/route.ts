@@ -347,7 +347,7 @@ export async function POST(req: Request) {
                         let cleanPhone = order.phone.replace(/[^0-9]/g, '')
                         if (cleanPhone.startsWith('0')) cleanPhone = '212' + cleanPhone.substring(1)
                         else if (!cleanPhone.startsWith('212') && cleanPhone.length === 9) cleanPhone = '212' + cleanPhone
-                        const whatsappMsg = encodeURIComponent(`Bonjour ${order.fullName},\n\nVotre commande #${shortId} sur PetsUnivers a bien été reçue.`)
+                        const whatsappMsg = encodeURIComponent(`Bonjour ${order.fullName},\n\nVotre commande #${shortId} sur Tekno Store a bien été reçue.`)
                         const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappMsg}`
 
                         const activeShipping = order.shippingCompany ? [order.shippingCompany] : []
@@ -621,7 +621,7 @@ export async function POST(req: Request) {
                             `🔢 <b>NOMBRE DE PRODUITS JUMIA</b>\n\n` +
                             `🟠 Catalogue API Jumia : <b>${catalogProducts.length}</b>\n` +
                             (activeCount > 0 ? `✅ Actifs/approuvés détectés : <b>${activeCount}</b>\n` : '') +
-                            `\n🔗 <b>Produits liés dans PetsUnivers : ${linkedTotal}</b>\n` +
+                            `\n🔗 <b>Produits liés dans Tekno Store : ${linkedTotal}</b>\n` +
                             `📚 Livres : <b>${linkedBooks}</b>\n` +
                             `🎁 Packs : <b>${linkedPacks}</b>\n` +
                             `🛍️ Accessoires : <b>${linkedAccessories}</b>\n\n` +
@@ -1072,7 +1072,7 @@ export async function POST(req: Request) {
                                 updates.push({ sellerSku, id: product?.id, stock })
                             }
 
-                            if (updates.length === 0) throw new Error('Aucun SKU de la commande n’est lié à un produit PetsUnivers')
+                            if (updates.length === 0) throw new Error('Aucun SKU de la commande n’est lié à un produit Tekno Store')
 
                             await jumia.updateProductsStock(updates)
                             const details = updates
@@ -1294,7 +1294,7 @@ export async function POST(req: Request) {
                 try {
                     let item: any = null;
                     let imageUrl = '';
-                    let title = 'PetsUnivers';
+                    let title = 'Tekno Store';
 
                     if (itemId && itemId.length === 36 && itemId.includes('-')) {
                         if (itemType === 'BOOK') {
@@ -1324,7 +1324,7 @@ export async function POST(req: Request) {
                         }
                     }
 
-                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                     if (imageUrl && !imageUrl.startsWith('http')) {
                         imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
                     }
@@ -1341,7 +1341,7 @@ export async function POST(req: Request) {
                         itemId: item?.id || 'marketing',
                         itemType,
                         title: title,
-                        author: item?.author || 'PetsUnivers',
+                        author: item?.author || 'Tekno Store',
                         price: item?.price || 0,
                         category: item?.category || 'Promotion',
                         image: imageUrl,
@@ -1441,7 +1441,7 @@ export async function POST(req: Request) {
                 try {
                     let item: any = null;
                     let imageUrl = '';
-                    let title = 'PetsUnivers';
+                    let title = 'Tekno Store';
 
                     if (itemId && itemId.length === 36 && itemId.includes('-')) {
                         if (itemType === 'BOOK') {
@@ -1471,7 +1471,7 @@ export async function POST(req: Request) {
                         }
                     }
 
-                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                     if (imageUrl && !imageUrl.startsWith('http')) {
                         imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
                     }
@@ -2330,7 +2330,7 @@ export async function POST(req: Request) {
             void(`[TELEGRAM MESSAGE] Received from ${chatId}: ${text}`)
 
             if (text.startsWith('/CMD') || text === 'CMD' || text.startsWith('/HELP') || text === 'HELP') {
-                const helpText = `📘 <b>PetsUnivers Bot — Commandes disponibles</b>\n\n` +
+                const helpText = `📘 <b>Tekno Store Bot — Commandes disponibles</b>\n\n` +
                     `<b>📊 Statistiques & Rapports</b>\n` +
                     `/bilan — Stats site web (aujourd'hui, mois, etc.)\n` +
                     `/rapport — Rapport quotidien immédiat\n` +
@@ -2698,7 +2698,7 @@ export async function POST(req: Request) {
                 text.startsWith('/BLIAN') || text === 'BLIAN' ||
                 text.startsWith('/STATS') || text === 'STATS'
             ) {
-                const replyText = `📊 <b>Centre de Rapports PetsUnivers</b>\n\nQue souhaitez-vous consulter ?`
+                const replyText = `📊 <b>Centre de Rapports Tekno Store</b>\n\nQue souhaitez-vous consulter ?`
                 const replyMarkup = {
                     inline_keyboard: [
                         [
@@ -2804,7 +2804,7 @@ export async function POST(req: Request) {
                         return NextResponse.json({ ok: true })
                     }
 
-                    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+                    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
                     // Envoyer un album des 3 dernières images pour l'aperçu
                     if (creatives.length > 0) {
@@ -2838,7 +2838,7 @@ export async function POST(req: Request) {
                     }
 
                     void(`[TELEGRAM] Sending final menu to ${chatId}`)
-                    const result = await sendTelegramMessage(`🚀 <b>Marketing PetsUnivers</b>\n\nChoisissez une créative ci-dessus pour la publier :`, chatId.toString(), token, replyMarkup)
+                    const result = await sendTelegramMessage(`🚀 <b>Marketing Tekno Store</b>\n\nChoisissez une créative ci-dessus pour la publier :`, chatId.toString(), token, replyMarkup)
                     console.log(`[TELEGRAM] Final menu send result:`, result ? 'SUCCESS' : 'FAILED')
                 } catch (error: any) {
                     console.error('[TELEGRAM ERROR] /GENERER failed:', error)
@@ -3333,7 +3333,7 @@ export async function POST(req: Request) {
                         if (!n8nWebhookUrl) {
                             await sendTelegramMessage(`❌ n8n webhook non configuré.`, chatId.toString(), token)
                         } else {
-                            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+                            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                             const postUrl = `${baseUrl}/fr/blog/${post.slug}`
                             const imageUrl = post.coverImage ? (post.coverImage.startsWith('http') ? post.coverImage : `${baseUrl}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`) : `${baseUrl}/images/default-blog.jpg`
 
@@ -3393,7 +3393,7 @@ export async function POST(req: Request) {
                                 const rawImage = book.image || ''
                                 const imageUrl = rawImage.startsWith('http') && !rawImage.includes('127.0.0.1')
                                     ? rawImage
-                                    : `https://petsunivers.ma${rawImage.startsWith('/') ? rawImage : `/${rawImage}`}`
+                                    : `https://tekno.ma${rawImage.startsWith('/') ? rawImage : `/${rawImage}`}`
                                 if (!rawImage) continue
 
                                 const timeSlot = possibleTimes[i % possibleTimes.length]
@@ -3402,7 +3402,7 @@ export async function POST(req: Request) {
                                 scheduleAt.setHours(parseInt(hours), parseInt(minutes), 0, 0)
                                 if (scheduleAt <= today) scheduleAt.setDate(scheduleAt.getDate() + 1)
 
-                                const caption = `📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://petsunivers.ma/fr/books/${book.id}\n\n#livre #lecture #petsunivers`
+                                const caption = `📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://tekno.ma/fr/books/${book.id}\n\n#livre #lecture #tekno`
                                 const post = await prisma.scheduledPost.create({
                                     data: {
                                         date: scheduleAt,

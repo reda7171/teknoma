@@ -17,22 +17,22 @@ export default function PixelTracker({ userId }: { userId?: string }) {
         const referrer = document.referrer || null
 
         // Sync session ID across tabs and analytics
-        let sessionId = sessionStorage.getItem('petsunivers_session_id')
+        let sessionId = sessionStorage.getItem('tekno_session_id')
         const cartSessionId = useCartStore.getState().sessionId
 
         if (cartSessionId && !sessionId) {
             sessionId = cartSessionId
-            sessionStorage.setItem('petsunivers_session_id', sessionId)
+            sessionStorage.setItem('tekno_session_id', sessionId)
         } else if (!sessionId) {
             sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36)
-            sessionStorage.setItem('petsunivers_session_id', sessionId)
+            sessionStorage.setItem('tekno_session_id', sessionId)
             useCartStore.getState().setSessionId(sessionId)
         } else if (sessionId && !cartSessionId) {
             useCartStore.getState().setSessionId(sessionId)
         } else if (sessionId !== cartSessionId) {
             // Priority to cartSessionId as it is stored in localStorage and persists better across tabs
             sessionId = cartSessionId!
-            sessionStorage.setItem('petsunivers_session_id', sessionId)
+            sessionStorage.setItem('tekno_session_id', sessionId)
         }
 
         // Call Server Action

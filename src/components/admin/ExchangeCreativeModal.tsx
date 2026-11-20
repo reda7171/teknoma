@@ -188,7 +188,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    title: `Nouvel échange sur PetsUnivers`,
+                    title: `Nouvel échange sur Tekno Store`,
                     format: 'square', // Default
                     platform: platform === 'all' ? 'both' : platform,
                     scheduleAt: scheduleAt || null,
@@ -277,7 +277,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                             </Draggable>
                             <Draggable>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="/logo-petsunivers.png?v=petsunivers2" alt="PetsUnivers" crossOrigin="anonymous" style={{ height: logoSize }} className={`object-contain pointer-events-none ${theme !== 'light' ? 'filter brightness-0 invert' : ''}`} />
+                                <img src="/logo.png?v=tekno2" alt="Tekno Store" crossOrigin="anonymous" style={{ height: logoSize }} className={`object-contain pointer-events-none ${theme !== 'light' ? 'filter brightness-0 invert' : ''}`} />
                             </Draggable>
                         </div>
 
@@ -369,7 +369,7 @@ export default function ExchangeCreativeModal({ isOpen, onClose, exchange }: Exc
                                 Un nouveau match !
                             </h2>
                             <p className={`text-xs font-medium mt-1 opacity-80 ${currentTheme.text} pointer-events-none`}>
-                                Rejoignez la communauté sur petsunivers.ma
+                                Rejoignez la communauté sur tekno.ma
                             </p>
                         </Draggable>
                     </div>

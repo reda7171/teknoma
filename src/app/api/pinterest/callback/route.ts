@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
     const code = req.nextUrl.searchParams.get('code');
     const error = req.nextUrl.searchParams.get('error');
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.petsunivers.ma';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma';
 
     if (error) {
         return NextResponse.redirect(`${baseUrl}/fr/admin/config/n8n?error=pinterest_auth_denied`);

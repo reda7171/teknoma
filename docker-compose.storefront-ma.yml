@@ -4,23 +4,23 @@ services:
       context: .
       dockerfile: Dockerfile.storefront-ma
       args:
-        NEXT_PUBLIC_SITE_URL: https://staging.petsunivers.ma
-        PETSUNIVERS_MA_INDEXABLE: "false"
-    image: petsunivers-storefront-ma:staging
-    container_name: petsunivers_storefront_ma_staging
+        NEXT_PUBLIC_SITE_URL: https://staging.tekno.ma
+        TEKNO_MA_INDEXABLE: "false"
+    image: tekno-storefront-ma:staging
+    container_name: tekno_storefront_ma_staging
     restart: unless-stopped
     ports:
       - "127.0.0.1:3001:3001"
     environment:
       PORT: 3001
       HOSTNAME: 0.0.0.0
-      NEXT_PUBLIC_SITE_URL: https://staging.petsunivers.ma
-      PETSUNIVERS_BACKEND_URL: http://petsunivers_app:3000
-      PETSUNIVERS_MA_INDEXABLE: "false"
+      NEXT_PUBLIC_SITE_URL: https://staging.tekno.ma
+      TEKNO_BACKEND_URL: http://tekno_app:3000
+      TEKNO_MA_INDEXABLE: "false"
     networks:
-      - petsunivers_network
+      - tekno_network
 
 networks:
-  petsunivers_network:
+  tekno_network:
     external: true
-    name: petsunivers_petsunivers_network
+    name: tekno_tekno_network

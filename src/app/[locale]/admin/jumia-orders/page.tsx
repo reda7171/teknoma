@@ -4,7 +4,7 @@ import Link from 'next/link'
 import JumiaOrdersClient from './JumiaOrdersClient'
 
 export const metadata = {
-    title: 'Commandes Jumia | PetsUnivers Admin'
+    title: 'Commandes Jumia | Tekno Store Admin'
 }
 
 export default async function JumiaOrdersPage({ params }: { params: Promise<{ locale: string }> }) {

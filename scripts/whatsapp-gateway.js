@@ -36,7 +36,7 @@ async function startWhatsApp() {
             auth: state,
             printQRInTerminal: false,
             logger: pino({ level: 'silent' }),
-            browser: ['PetsUnivers Store', 'Chrome', '1.0.0'],
+            browser: ['Tekno Store', 'Chrome', '1.0.0'],
             connectTimeoutMs: 60000,
             defaultQueryTimeoutMs: 60000,
         });
@@ -84,7 +84,7 @@ async function startWhatsApp() {
                 const cleanPhone = userJid.split(':')[0] || userJid.split('@')[0];
                 connectedUser = {
                     id: userJid,
-                    name: sock.user?.name || 'PetsUnivers Store',
+                    name: sock.user?.name || 'Tekno Store',
                     phone: `+${cleanPhone}`
                 };
                 console.log(`[WhatsApp Gateway] Connecté avec succès ! Téléphone : +${cleanPhone}`);

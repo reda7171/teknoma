@@ -150,7 +150,7 @@ export async function GET(req: Request) {
         pdfMake.setFonts(fonts)
         const docDef: any = {
             content: [
-                { text: 'Rapport Mensuel Consolidé - PetsUnivers', style: 'header' },
+                { text: 'Rapport Mensuel Consolidé - Tekno Store', style: 'header' },
                 { text: `Généré le ${new Date().toLocaleString('fr-FR')} pour le mois de ${now.toLocaleString('fr-FR', { month: 'long' })}`, margin: [0, 0, 0, 20] },
                 { text: 'KPIs Principaux (Mois en cours)', style: 'subheader' },
                 {
@@ -175,7 +175,7 @@ export async function GET(req: Request) {
         const pdfDoc = pdfMake.createPdf(docDef)
         const pdfBuffer = await pdfDoc.getBuffer()
 
-        await sendTelegramDocument(pdfBuffer, `Rapport_PetsUnivers_${now.getFullYear()}_${now.getMonth()+1}.pdf`, `📊 <b>Rapport Automatique Mensuel</b>\n📈 Voici votre rapport consolidé incluant les KPIs et graphiques de ce mois.`)
+        await sendTelegramDocument(pdfBuffer, `Rapport_Tekno Store_${now.getFullYear()}_${now.getMonth()+1}.pdf`, `📊 <b>Rapport Automatique Mensuel</b>\n📈 Voici votre rapport consolidé incluant les KPIs et graphiques de ce mois.`)
 
         return NextResponse.json({ success: true, message: 'Rapport PDF généré et envoyé' })
     } catch (error: any) {

@@ -6,8 +6,8 @@ import { Metadata } from 'next'
 export async function generateMetadata({ params }: { params: Promise<{ orderId: string, locale: string }> }): Promise<Metadata> {
     const { orderId } = await params
     return {
-        title: `Suivi de Commande #${orderId.substring(0, 8)} | PetsUnivers`,
-        description: "Suivez l'état de votre commande sur PetsUnivers.",
+        title: `Suivi de Commande #${orderId.substring(0, 8)} | Tekno Store`,
+        description: "Suivez l'état de votre commande sur Tekno Store.",
         robots: {
             index: false, // Ne pas indexer les pages de suivi
             follow: false

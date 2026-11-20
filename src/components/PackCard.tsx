@@ -105,7 +105,7 @@ export default function PackCard({
                     {image ? (
                         <ImageWithFallback
                             src={image}
-                            alt={`Pack ${displayName} - PetsUnivers Selection`}
+                            alt={`Pack ${displayName} - Tekno Store Selection`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             priority={priority}
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

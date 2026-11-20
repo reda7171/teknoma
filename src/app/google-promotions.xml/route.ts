@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// The PetsUnivers product feeds target Morocco and publish every price in MAD.
+// The Tekno Store product feeds target Morocco and publish every price in MAD.
 // Do not make this configurable independently: a different value causes the
 // promotion currency to disagree with both the products and the checkout.
 const MERCHANT_CURRENCY = 'MAD'
@@ -28,9 +28,9 @@ export async function GET() {
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
 <channel>
-    <title>PetsUnivers Promotions</title>
-    <link>https://petsunivers.ma</link>
-    <description>Promotions et codes de réduction pour PetsUnivers</description>
+    <title>Tekno Store Promotions</title>
+    <link>https://tekno.ma</link>
+    <description>Promotions et codes de réduction pour Tekno Store</description>
 `
 
         for (const coupon of coupons) {

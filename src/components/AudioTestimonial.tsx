@@ -101,8 +101,8 @@ export default function AudioTestimonial({ testimonial }: AudioTestimonialProps)
                             unoptimized={process.env.NODE_ENV === 'development'}
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                if (!target.src.includes('petsunivers.ma') && target.src.includes('/uploads/')) {
-                                    target.src = `https://petsunivers.ma${new URL(target.src).pathname}`;
+                                if (!target.src.includes('tekno.ma') && target.src.includes('/uploads/')) {
+                                    target.src = `https://tekno.ma${new URL(target.src).pathname}`;
                                     target.srcset = '';
                                 }
                             }}

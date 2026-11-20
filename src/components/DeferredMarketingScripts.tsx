@@ -27,10 +27,10 @@ export default function DeferredMarketingScripts({
     useEffect(() => {
         const update = () => setEnabled(localStorage.getItem('cookie-consent') === 'accepted')
         update()
-        window.addEventListener('petsunivers-consent-change', update)
+        window.addEventListener('tekno-consent-change', update)
         window.addEventListener('storage', update)
         return () => {
-            window.removeEventListener('petsunivers-consent-change', update)
+            window.removeEventListener('tekno-consent-change', update)
             window.removeEventListener('storage', update)
         }
     }, [])

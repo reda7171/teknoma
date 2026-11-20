@@ -37,9 +37,9 @@ export default function SellerRequestsTable({ initialRequests }: { initialReques
     }
 
     const handleWhatsApp = (req: any) => {
-        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://petsunivers.ma'
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://tekno.ma'
         const resetLink = `${baseUrl}/fr/reset-password?email=${encodeURIComponent(req.email)}`
-        const message = `Bonjour ${req.managerName},\n\nVotre compte vendeur sur PetsUnivers a été créé avec succès. 🎉\n\n📧 Votre email de connexion : ${req.email}\n🔗 Définissez votre mot de passe ici : ${resetLink}\n\nBienvenue sur PetsUnivers !`
+        const message = `Bonjour ${req.managerName},\n\nVotre compte vendeur sur Tekno Store a été créé avec succès. 🎉\n\n📧 Votre email de connexion : ${req.email}\n🔗 Définissez votre mot de passe ici : ${resetLink}\n\nBienvenue sur Tekno Store !`
 
         let phone = req.phone.replace(/[^0-9]/g, '')
         if (phone.startsWith('0')) {

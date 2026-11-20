@@ -27,16 +27,16 @@ export async function POST(req: NextRequest) {
         }
 
         const imageUrl = customImageUrl || item?.image;
-        const title = item?.title || 'PetsUnivers';
+        const title = item?.title || 'Tekno Store';
         const description = customCaption || item?.description || '';
-        const itemUrl = link || (item ? `https://petsunivers.ma/fr/books/${item.id}` : 'https://petsunivers.ma');
+        const itemUrl = link || (item ? `https://tekno.ma/fr/books/${item.id}` : 'https://tekno.ma');
 
         if (!imageUrl) {
             return NextResponse.json({ error: 'Image requise pour Pinterest' }, { status: 400 });
         }
 
         const result = await publishPin(
-            imageUrl.startsWith('http') ? imageUrl : `https://petsunivers.ma${imageUrl}`,
+            imageUrl.startsWith('http') ? imageUrl : `https://tekno.ma${imageUrl}`,
             title,
             description,
             itemUrl,

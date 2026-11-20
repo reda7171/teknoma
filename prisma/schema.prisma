@@ -431,7 +431,7 @@ model Order {
   utmCampaign      String?              @db.VarChar(255)
   fbclid           String?              @db.VarChar(500)
   ttclid           String?              @db.VarChar(500)
-  salesChannel     SalesChannel         @default(PETSUNIVERS_STORE)
+  salesChannel     SalesChannel         @default(TEKNO_STORE)
   items            OrderItem[]
   paypalPayments   PaypalPayment[]
   statusHistory    OrderStatusHistory[]
@@ -1003,7 +1003,7 @@ model AbandonedCart {
   cartData     String       @db.Text
   total        Float
   status       String       @default("PENDING")
-  salesChannel SalesChannel @default(PETSUNIVERS_STORE)
+  salesChannel SalesChannel @default(TEKNO_STORE)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -1307,8 +1307,8 @@ enum OrderStatus {
 }
 
 enum SalesChannel {
-  PETSUNIVERS_STORE
-  PETSUNIVERS_MA
+  TEKNO_STORE
+  TEKNO_MA
   ADMIN_POS
   MOBILE_APP
   ADMIN_IMPORT
@@ -1551,7 +1551,7 @@ model PromoLead {
   id        String   @id @default(uuid())
   phone     String?  @db.VarChar(50)
   email     String?  @db.VarChar(255)
-  promoCode String?  @default("PETSUNIVERS10") @db.VarChar(50)
+  promoCode String?  @default("TEKNO10") @db.VarChar(50)
   source    String?  @default("cart_popup") @db.VarChar(100)
   contacted Boolean  @default(false)
   notes     String?  @db.VarChar(500)

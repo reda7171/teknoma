@@ -471,7 +471,7 @@ export default function EditAccessoryPage({
                                                 }
                                                 // Load images from production in dev mode
                                                 if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
-                                                    src = `https://petsunivers.ma${src}`;
+                                                    src = `https://tekno.ma${src}`;
                                                 }
                                                 return <Image src={src} alt={`preview ${i}`} fill className="object-cover" unoptimized={process.env.NODE_ENV === 'development'} />
                                             })()}

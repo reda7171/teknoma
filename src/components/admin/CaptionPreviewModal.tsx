@@ -43,7 +43,7 @@ export default function CaptionPreviewModal({ isOpen, onClose, book }: CaptionPr
                 const productUrl = `${window.location.origin}/fr/books/${book.id}`
                 const waPhone = whatsappPhone.replace(/[^0-9+]/g, '')
                 const waLink = `https://wa.me/${waPhone.startsWith('+') ? waPhone.slice(1) : waPhone}`
-                const hashtags = `#petsunivers #lecture #booktok #petsunivers #livre #maroc #culture ${book.category ? `#${book.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
+                const hashtags = `#tekno #lecture #booktok #tekno #livre #maroc #culture ${book.category ? `#${book.category.toLowerCase().replace(/\s+/g, '')}` : ''}`
 
                 setCaption(`${baseDesc}\n\n📖 Lien pour commander : ${productUrl}\n💰 Prix : ${book.price} درهم\n🚚 Paiement à la livraison + Livraison rapide !\n\n💬 Commander via WhatsApp : ${waLink}\n\n${hashtags}`)
             })

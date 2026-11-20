@@ -12,7 +12,7 @@ interface DashboardPrivacyContextType {
     formatValue: (name: string, value: string | number) => string | number
 }
 
-const STORAGE_KEY = 'petsunivers_dashboard_privacy_mode'
+const STORAGE_KEY = 'tekno_dashboard_privacy_mode'
 
 export function isSensitiveMetric(name?: string): boolean {
     if (!name) return false

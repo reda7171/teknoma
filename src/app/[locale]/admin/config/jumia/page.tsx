@@ -3,7 +3,7 @@ import JumiaConfigForm from './JumiaConfigForm'
 import { ShoppingBag } from 'lucide-react'
 
 export const metadata = {
-    title: 'Configuration Jumia | PetsUnivers Admin'
+    title: 'Configuration Jumia | Tekno Store Admin'
 }
 
 export default async function JumiaConfigPage() {

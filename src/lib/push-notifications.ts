@@ -50,7 +50,7 @@ export async function notifyOrderStatus(orderId: string, newStatus: string) {
 
   await sendExpoNotification({
     to: order.pushToken,
-    title: 'PetsUnivers — Mise à jour de commande',
+    title: 'Tekno Store — Mise à jour de commande',
     body: msg,
     data: { orderId, status: newStatus },
   });

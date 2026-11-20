@@ -19,7 +19,7 @@ export default function MailingPage() {
     const [htmlContent, setHtmlContent] = useState('')
     const [audience, setAudience] = useState('TEST_ONLY')
     const [targetedEmails, setTargetedEmails] = useState('')
-    const [couponCode, setCouponCode] = useState('PETSUNIVERS10')
+    const [couponCode, setCouponCode] = useState('TEKNO10')
     const [isHtmlMode, setIsHtmlMode] = useState(false)
     const [isSending, setIsSending] = useState(false)
     const [result, setResult] = useState<any>(null)
@@ -98,7 +98,7 @@ export default function MailingPage() {
                     html: htmlContent,
                     audience,
                     targetedEmails: audience === 'TARGETED_CLIENTS' ? targetedEmails : undefined,
-                    couponCode: couponCode.trim() || 'PETSUNIVERS10'
+                    couponCode: couponCode.trim() || 'TEKNO10'
                 })
             })
 
@@ -295,7 +295,7 @@ export default function MailingPage() {
                                     type="text"
                                     value={couponCode}
                                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                    placeholder="Ex: PETSUNIVERS10"
+                                    placeholder="Ex: TEKNO10"
                                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-pixio-yellow uppercase font-mono font-bold text-sm tracking-wider"
                                 />
                                 <p className="text-[11px] text-slate-500 mt-1">

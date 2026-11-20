@@ -1,8 +1,8 @@
-# PetsUnivers
+# Tekno Store
 
-Animalerie en ligne au Maroc : alimentation, accessoires, hygiène et soins pour chats, chiens et petits animaux.
+Boutique High-Tech au Maroc : smartphones neufs, ordinateurs portables, Mac, audio et accessoires de pointe avec paiement à la livraison (COD).
 
-- Accueil : https://petsunivers.ma/fr
-- Boutique : https://petsunivers.ma/fr/products
-- Services : https://petsunivers.ma/fr/services
-- Contact : https://petsunivers.ma/fr/contact
+- Accueil : https://tekno.ma/fr
+- Catalogue : https://tekno.ma/fr/products
+- Services : https://tekno.ma/fr/services
+- Contact : https://tekno.ma/fr/contact

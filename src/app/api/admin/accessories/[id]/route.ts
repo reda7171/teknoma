@@ -29,7 +29,7 @@ export async function PATCH(
         const { id } = await params
         const data = await request.json()
 
-        if (isRetiredAccessoryCategory(data.category)) return NextResponse.json({ error: 'Catégorie supprimée de PetsUnivers' }, { status: 400 })
+        if (isRetiredAccessoryCategory(data.category)) return NextResponse.json({ error: 'Catégorie supprimée de Tekno Store' }, { status: 400 })
         const accessory = await prisma.extraProduct.update({
             where: { id },
             data: {

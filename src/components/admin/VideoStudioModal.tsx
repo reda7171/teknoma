@@ -74,9 +74,9 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
     const [whatsapp, setWhatsapp] = useState('+212 600 00 00 00')
     const [badge, setBadge] = useState('Nouveau')
     const [caption, setCaption] = useState('')
-    const [hashtags, setHashtags] = useState('#petsunivers #lecture #livre #maroc')
-    const [musicLabel, setMusicLabel] = useState('Son original - PetsUnivers')
-    const [socialHandle, setSocialHandle] = useState('@petsunivers.book')
+    const [hashtags, setHashtags] = useState('#tekno #lecture #livre #maroc')
+    const [musicLabel, setMusicLabel] = useState('Son original - Tekno Store')
+    const [socialHandle, setSocialHandle] = useState('@tekno.book')
 
     // Images
     const [images, setImages] = useState<string[]>([])
@@ -865,7 +865,7 @@ export default function VideoStudioModal({ isOpen, onClose, book }: VideoStudioM
                             {/* LOGO */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             {showLogo && el('logo', 'top-6 right-6',
-                                <img src="/logo-petsunivers.png?v=petsunivers2" alt="Logo" crossOrigin="anonymous" className="h-6 object-contain brightness-0 invert opacity-90" />
+                                <img src="/logo.png?v=tekno2" alt="Logo" crossOrigin="anonymous" className="h-6 object-contain brightness-0 invert opacity-90" />
                             )}
 
                             {/* BOOK COVER */}

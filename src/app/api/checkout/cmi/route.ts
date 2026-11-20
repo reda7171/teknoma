@@ -32,7 +32,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
 
-        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma'
+        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
         // CMI Required Parameters
         const params: Record<string, string> = {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
             storetype: '3d_pay_hosting',
             hashAlgorithm: 'ver3',
             lang: 'fr',
-            email: order.email || 'client@petsunivers.ma',
+            email: order.email || 'client@tekno.ma',
             BillToName: order.fullName,
             BillToCompany: '',
             BillToStreet1: order.address,

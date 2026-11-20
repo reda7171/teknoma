@@ -1,4 +1,4 @@
-const FALLBACK_BUILD_SECRET = 'petsunivers-build-prerender-fallback-jwt-secret-key-32-chars-min'
+const FALLBACK_BUILD_SECRET = 'tekno-build-prerender-fallback-jwt-secret-key-32-chars-min'
 
 const configuredSecret = process.env.JWT_SECRET?.trim()
 
