@@ -94,7 +94,7 @@ export default function LoginPage() {
                         <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
                             <Lock className="w-8 h-8 text-white" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-900">PetsUnivers Admin</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">Tekno Store Admin</h1>
                         <p className="text-sm text-gray-600 mt-2">Connectez-vous à votre espace admin</p>
                     </div>
 
@@ -131,7 +131,7 @@ export default function LoginPage() {
                                         name="email"
                                         required
                                         className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="admin@petsunivers.ma"
+                                        placeholder="admin@riwaya.com"
                                     />
                                 </div>
                             </div>

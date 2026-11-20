@@ -357,7 +357,7 @@ export default function AdminLayout({
                     <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center shrink-0">
                         <span className="text-white text-lg font-black italic">R</span>
                     </div>
-                    {!isCollapsed && <h1 className="text-lg font-black text-slate-900 tracking-tight">PetsUnivers<span className="text-blue-600">.</span></h1>}
+                    {!isCollapsed && <h1 className="text-lg font-black text-slate-900 tracking-tight">Tekno Store<span className="text-blue-600">.</span></h1>}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -500,7 +500,7 @@ export default function AdminLayout({
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-bold text-slate-900 truncate">Administrateur</p>
-                                <p className="text-[10px] text-slate-500 font-medium truncate">contact@petsunivers.ma</p>
+                                <p className="text-[10px] text-slate-500 font-medium truncate">Contact.tekno.ma@gmail.com</p>
                             </div>
                         </div>
 
@@ -573,7 +573,7 @@ export default function AdminLayout({
                             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
                                 <span className="text-white text-sm font-black italic">R</span>
                             </div>
-                            <span className="text-base font-black text-slate-900">PetsUnivers<span className="text-blue-600">.</span></span>
+                            <span className="text-base font-black text-slate-900">Tekno Store<span className="text-blue-600">.</span></span>
                         </div>
                         <div className="flex items-center gap-2">
                             <WhatsAppStatusButton isCollapsed={true} />
