@@ -162,5 +162,12 @@
   "key_insights_desc": "Book essentials curated for busy readers",
   "key_quote": "Inspiring quote",
   "share_cart_whatsapp": "Order Cart via WhatsApp",
-  "whatsapp_order_subtitle": "Instant confirmation & fast shipping in Morocco"
+  "whatsapp_order_subtitle": "Instant confirmation & fast shipping in Morocco",
+  "shipping_fees": "Shipping Fees",
+  "free_shipping": "Free Shipping",
+  "free_shipping_congrats": "🎉 Congratulations! Free standard shipping",
+  "free_shipping_reach": "Add {{amount}} MAD more for FREE shipping!",
+  "popular_cities": "Popular Cities",
+  "ok": "OK",
+  "cod_notice": "Cash on delivery everywhere in Morocco • Delivery in 24-48h"
 }

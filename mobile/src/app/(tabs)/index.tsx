@@ -217,6 +217,33 @@ export default function HomeScreen() {
         ))}
       </ScrollView>
 
+      {/* Raccourcis de Catégories Populaires */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesRow} contentContainerStyle={styles.categoriesContent}>
+        {CATEGORIES.filter((c) => c.id !== '').map((cat) => (
+          <TouchableOpacity
+            key={cat.id}
+            onPress={() => setCategoryFilter(categoryFilter === cat.id ? '' : cat.id)}
+            style={[
+              styles.quickCatChip,
+              {
+                backgroundColor: categoryFilter === cat.id ? '#0274DF' : colors.backgroundElement,
+                borderColor: categoryFilter === cat.id ? '#0274DF' : 'transparent',
+              },
+            ]}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.quickCatChipText,
+                { color: categoryFilter === cat.id ? '#FFFFFF' : colors.text },
+              ]}
+            >
+              {cat.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
       {activeFilter !== 'BOOK' && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('packs')}</Text>
@@ -426,8 +453,12 @@ const styles = StyleSheet.create({
   searchIcon:     { fontSize: 16, marginRight: 8 },
   searchInput:    { flex: 1, fontSize: 16, padding: 0 },
   clearBtn:       { fontSize: 16, paddingLeft: 8 },
-  filtersRow:     { marginBottom: Spacing.four, marginTop: Spacing.two },
+  filtersRow:     { marginBottom: Spacing.two, marginTop: Spacing.two },
   filtersContent: { gap: Spacing.two, paddingHorizontal: Spacing.four },
+  categoriesRow:  { marginBottom: Spacing.three },
+  categoriesContent: { gap: 8, paddingHorizontal: Spacing.four },
+  quickCatChip:   { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1 },
+  quickCatChipText: { fontSize: 13, fontWeight: '600' },
   filterChip:     { paddingHorizontal: Spacing.four, paddingVertical: 10, borderRadius: 24 },
   filterChipActive:{ backgroundColor: '#0274DF' },
   filterText:     { fontSize: 14, fontWeight: '500' },

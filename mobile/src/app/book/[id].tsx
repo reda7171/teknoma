@@ -15,6 +15,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useI18nStore } from '@/store/useI18nStore';
 import { BookCard } from '@/components/BookCard';
 import { BookKeyInsights } from '@/components/BookKeyInsights';
+import { CustomAlertModal, AlertType } from '@/components/ui/CustomAlertModal';
 import { Colors, Spacing } from '@/constants/theme';
 import { playFavoriteSound } from '@/utils/sounds';
 
@@ -39,12 +40,36 @@ export default function BookDetailsScreen() {
   const [addingToList, setAddingToList] = useState(false);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
 
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    type?: AlertType;
+    title: string;
+    message: string;
+    primaryButtonText?: string;
+    secondaryButtonText?: string;
+    onPrimaryPress?: () => void;
+    onSecondaryPress?: () => void;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+  });
+
   const handleAddToReadingList = async () => {
     if (!isLoggedIn) {
-      Alert.alert('Connexion requise', 'Connectez-vous pour ajouter ce livre à votre liste.', [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Se connecter', onPress: () => router.push('/login') }
-      ]);
+      setAlertConfig({
+        visible: true,
+        type: 'info',
+        title: 'Connexion requise',
+        message: 'Connectez-vous pour ajouter ce livre à votre liste de lecture.',
+        primaryButtonText: 'Se connecter',
+        secondaryButtonText: 'Annuler',
+        onPrimaryPress: () => {
+          setAlertConfig((p) => ({ ...p, visible: false }));
+          router.push('/login');
+        },
+        onSecondaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+      });
       return;
     }
     try {
@@ -56,10 +81,22 @@ export default function BookDetailsScreen() {
         cover: product.image,
         bookId: product.id,
       });
-      Alert.alert('Succès', 'Ajouté à votre liste de lecture !');
+      setAlertConfig({
+        visible: true,
+        type: 'success',
+        title: 'Succès',
+        message: 'Ajouté à votre liste de lecture !',
+        onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+      });
       refetchReadingList();
     } catch (e: any) {
-      Alert.alert('Erreur', e.response?.data?.error || "Impossible d'ajouter à la liste.");
+      setAlertConfig({
+        visible: true,
+        type: 'error',
+        title: 'Erreur',
+        message: e.response?.data?.error || "Impossible d'ajouter à la liste.",
+        onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+      });
     } finally {
       setAddingToList(false);
     }
@@ -120,7 +157,14 @@ export default function BookDetailsScreen() {
   const handleAddToCart = () => {
     if (product) {
       addItem(product);
-      Alert.alert('Succès', 'Produit ajouté au panier !');
+      setAlertConfig({
+        visible: true,
+        type: 'success',
+        title: 'Panier mis à jour',
+        message: 'Ce livre a été ajouté avec succès à votre panier.',
+        primaryButtonText: 'Continuer',
+        onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+      });
     }
   };
 
@@ -144,7 +188,14 @@ export default function BookDetailsScreen() {
 
   const handleSubmitReview = async () => {
     if (!reviewComment.trim()) {
-      Alert.alert('Erreur', 'Veuillez écrire un commentaire.');
+      setAlertConfig({
+        visible: true,
+        type: 'warning',
+        title: 'Attention',
+        message: 'Veuillez rédiger un commentaire avant de publier.',
+        primaryButtonText: 'D\'accord',
+        onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+      });
       return;
     }
     setSubmittingReview(true);
@@ -154,14 +205,26 @@ export default function BookDetailsScreen() {
           rating: reviewRating,
           comment: reviewComment,
         });
-        Alert.alert('Succès', 'Votre avis a été modifié !');
+        setAlertConfig({
+          visible: true,
+          type: 'success',
+          title: 'Succès',
+          message: 'Votre avis a été modifié !',
+          onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+        });
       } else {
         await postReview(product!.id, {
           fullName: customer?.fullName || 'Client',
           rating: reviewRating,
           comment: reviewComment,
         });
-        Alert.alert('Succès', 'Votre avis a été publié !');
+        setAlertConfig({
+          visible: true,
+          type: 'success',
+          title: 'Succès',
+          message: 'Votre avis a été publié !',
+          onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+        });
       }
       setShowReviewModal(false);
       setReviewComment('');
@@ -169,7 +232,13 @@ export default function BookDetailsScreen() {
       setEditingReviewId(null);
       refetchReviews();
     } catch (error: any) {
-      Alert.alert('Erreur', error.message);
+      setAlertConfig({
+        visible: true,
+        type: 'error',
+        title: 'Erreur',
+        message: error.message || 'Impossible d\'enregistrer votre avis.',
+        onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+      });
     } finally {
       setSubmittingReview(false);
     }
@@ -183,26 +252,36 @@ export default function BookDetailsScreen() {
   };
 
   const handleDeleteReview = (reviewId: string) => {
-    Alert.alert(
-      'Confirmer la suppression',
-      'Êtes-vous sûr de vouloir supprimer cet avis ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Supprimer', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteReview(product!.id, reviewId);
-              Alert.alert('Succès', 'Avis supprimé.');
-              refetchReviews();
-            } catch (error: any) {
-              Alert.alert('Erreur', error.message);
-            }
-          }
+    setAlertConfig({
+      visible: true,
+      type: 'confirm',
+      title: 'Confirmer la suppression',
+      message: 'Êtes-vous sûr de vouloir supprimer cet avis ?',
+      primaryButtonText: 'Supprimer',
+      secondaryButtonText: 'Annuler',
+      onPrimaryPress: async () => {
+        try {
+          await deleteReview(product!.id, reviewId);
+          refetchReviews();
+          setAlertConfig({
+            visible: true,
+            type: 'success',
+            title: 'Succès',
+            message: 'Avis supprimé.',
+            onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+          });
+        } catch (error: any) {
+          setAlertConfig({
+            visible: true,
+            type: 'error',
+            title: 'Erreur',
+            message: error.message,
+            onPrimaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+          });
         }
-      ]
-    );
+      },
+      onSecondaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+    });
   };
 
   if (loadingBooks || loadingPacks) {
@@ -362,10 +441,19 @@ export default function BookDetailsScreen() {
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Avis des lecteurs</Text>
               <TouchableOpacity onPress={() => {
                 if (!isLoggedIn) {
-                  Alert.alert('Connexion requise', 'Vous devez être connecté pour laisser un avis.', [
-                    { text: 'Annuler', style: 'cancel' },
-                    { text: 'Se connecter', onPress: () => router.push('/login') }
-                  ]);
+                  setAlertConfig({
+                    visible: true,
+                    type: 'info',
+                    title: 'Connexion requise',
+                    message: 'Vous devez être connecté pour laisser un avis sur ce livre.',
+                    primaryButtonText: 'Se connecter',
+                    secondaryButtonText: 'Annuler',
+                    onPrimaryPress: () => {
+                      setAlertConfig((p) => ({ ...p, visible: false }));
+                      router.push('/login');
+                    },
+                    onSecondaryPress: () => setAlertConfig((p) => ({ ...p, visible: false })),
+                  });
                 } else {
                   setShowReviewModal(true);
                 }
@@ -509,6 +597,18 @@ export default function BookDetailsScreen() {
           </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
       </Modal>
+
+      {/* Alerte Customisée */}
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        primaryButtonText={alertConfig.primaryButtonText}
+        secondaryButtonText={alertConfig.secondaryButtonText}
+        onPrimaryPress={alertConfig.onPrimaryPress || (() => setAlertConfig((p) => ({ ...p, visible: false })))}
+        onSecondaryPress={alertConfig.onSecondaryPress}
+      />
     </View>
   );
 }

@@ -162,5 +162,12 @@
   "key_insights_desc": "خلاصة سريعة للكتاب للقراء المشغولين",
   "key_quote": "اقتباس ملهم",
   "share_cart_whatsapp": "طلب السلة عبر واتساب",
-  "whatsapp_order_subtitle": "تأكيد فوري وتوصيل سريع في المغرب"
+  "whatsapp_order_subtitle": "تأكيد فوري وتوصيل سريع في المغرب",
+  "shipping_fees": "رسوم التوصيل",
+  "free_shipping": "توصيل مجاني",
+  "free_shipping_congrats": "🎉 مبروك! التوصيل القياسي مجاني",
+  "free_shipping_reach": "أضف {{amount}} درهم إضافية للحصول على التوصيل المجاني!",
+  "popular_cities": "مدن شائعة",
+  "ok": "حسناً",
+  "cod_notice": "الدفع نقداً عند الاستلام في جميع أنحاء المغرب • التوصيل خلال 24-48 ساعة"
 }

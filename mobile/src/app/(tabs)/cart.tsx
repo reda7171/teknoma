@@ -18,6 +18,7 @@ export default function CartScreen() {
   
   const { items, removeItem, updateQuantity, getSubtotal } = useCartStore();
   const subtotal = getSubtotal();
+  const remainingForFreeShipping = Math.max(0, 500 - subtotal);
 
   const handleWhatsAppCartOrder = () => {
     if (items.length === 0) return;
@@ -75,6 +76,26 @@ export default function CartScreen() {
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Jauge de livraison gratuite */}
+        <View style={[
+          styles.freeShippingBox,
+          { backgroundColor: remainingForFreeShipping === 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(2, 116, 223, 0.08)' }
+        ]}>
+          <Ionicons
+            name={remainingForFreeShipping === 0 ? "checkmark-circle" : "car-outline"}
+            size={20}
+            color={remainingForFreeShipping === 0 ? "#10B981" : "#0274DF"}
+          />
+          <Text style={[
+            styles.freeShippingText,
+            { color: remainingForFreeShipping === 0 ? "#10B981" : colors.text }
+          ]}>
+            {remainingForFreeShipping === 0
+              ? (t('free_shipping_congrats') || "🎉 Félicitations ! Livraison standard offerte")
+              : (t('free_shipping_reach')?.replace('{{amount}}', remainingForFreeShipping.toFixed(0)) || `Ajoutez encore ${remainingForFreeShipping.toFixed(0)} MAD pour la livraison GRATUITE !`)}
+          </Text>
+        </View>
+
         {items.map((item) => (
           <View key={item.product.id} style={[styles.cartItem, { backgroundColor: colors.backgroundElement }]}>
             <View style={styles.imageContainer}>
@@ -220,6 +241,19 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '900',
     letterSpacing: -0.5,
+  },
+  freeShippingBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderRadius: 14,
+    marginBottom: 16,
+  },
+  freeShippingText: {
+    fontSize: 13,
+    fontWeight: '600',
+    flex: 1,
   },
   badgeContainer: {
     backgroundColor: '#0274DF',

@@ -162,5 +162,12 @@
   "key_insights_desc": "L'essentiel du livre pour les lecteurs pressés",
   "key_quote": "Citation marquante",
   "share_cart_whatsapp": "Commander le panier sur WhatsApp",
-  "whatsapp_order_subtitle": "Validation instantanée & livraison rapide au Maroc"
+  "whatsapp_order_subtitle": "Validation instantanée & livraison rapide au Maroc",
+  "shipping_fees": "Frais de livraison",
+  "free_shipping": "Livraison Gratuite",
+  "free_shipping_congrats": "🎉 Félicitations ! Livraison standard offerte",
+  "free_shipping_reach": "Ajoutez encore {{amount}} MAD pour la livraison GRATUITE !",
+  "popular_cities": "Villes populaires",
+  "ok": "D'accord",
+  "cod_notice": "Paiement en espèces à la livraison partout au Maroc • Livraison sous 24-48h"
 }
