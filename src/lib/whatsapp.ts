@@ -40,7 +40,8 @@ export function getWhatsAppStatusMessage(payload: WhatsAppNotificationPayload): 
     if (status === 'SHIPPED') {
         const carrierInfo = shippingCompanyName ? ` via ${shippingCompanyName}` : ''
         const trackingInfo = trackingID ? ` (N° de suivi : ${trackingID})` : ''
-        return `Salam ${fullName} ! 📦\n\nBonne nouvelle ! Votre colis Riwaya #${shortId} vient d'être expédié${carrierInfo}${trackingInfo}.\n\nVous pouvez suivre l'acheminement de votre livraison en temps réel ici : ${trackingLink}\n\nMerci infiniment de votre confiance ! 📚✨\nL'équipe Riwaya.store`
+        const amountNotice = payload.total ? `\n💰 Montant du colis à régler à la livraison : ${payload.total} MAD (Paiement à la livraison - COD)\n` : ''
+        return `Salam ${fullName} ! 📦\n\nBonne nouvelle ! Votre colis Riwaya #${shortId} vient d'être expédié${carrierInfo}${trackingInfo}.${amountNotice}\nVous pouvez suivre l'acheminement de votre livraison en temps réel ici : ${trackingLink}\n\nMerci infiniment de votre confiance ! 📚✨\nL'équipe Riwaya.store`
     }
 
     if (status === 'DELIVERED') {
@@ -142,7 +143,7 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
             ? '✅ *Message WhatsApp transmis via Webhook*'
             : '⚠️ *Passerelle WAHA indisponible - Cliquer ci-dessous pour envoyer manuellement :*'
 
-        const totalLine = payload.total ? `\n💰 *Total:* ${payload.total} MAD` : ''
+        const totalLine = payload.total ? `\n💰 *Montant du colis :* ${payload.total} MAD` : ''
         const telegramText = `📱 *Notification WhatsApp Client*\n\n${statusLabel}\n🆔 \`#${orderId.slice(0, 8)}\`\n👤 ${fullName}\n📞 \`+${cleanPhone}\`${totalLine}${trackingID ? `\n🏷️ Suivi : \`${trackingID}\`` : ''}\n\n${deliveryNotice}`
 
         const keyboard = {

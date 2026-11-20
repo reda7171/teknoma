@@ -128,6 +128,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus, op
                 fullName: order.fullName,
                 phone: order.phone,
                 status,
+                total: order.total,
                 trackingID: order.trackingID,
                 shippingCompanyName: companyName
             }).catch(console.error)
