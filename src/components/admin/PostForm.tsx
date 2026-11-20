@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createPost, updatePost } from '@/lib/actions/blog'
 import { uploadPostImage } from '@/lib/actions/upload'
 import { Loader2, Save, ArrowLeft, Image as ImageIcon, Sparkles, ExternalLink, Star } from 'lucide-react'
-import { generatePostContent } from '@/lib/actions/gemini'
+import { generatePostContent, suggestRelatedBooksForPost } from '@/lib/actions/gemini'
 import Link from 'next/link'
 import { Book as BookIcon, Search, X, Wand2, Copy, Check, Filter } from 'lucide-react'
 import { getAdminSelectableBooks } from '@/lib/actions/books'
@@ -26,6 +26,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
     const { showNotification } = useUIStore()
     const [isPending, setIsPending] = useState(false)
     const [isGenerating, setIsGenerating] = useState(false)
+    const [isSuggestingBooks, setIsSuggestingBooks] = useState(false)
     const [isRephrasingExcerpt, setIsRephrasingExcerpt] = useState(false)
     const [isRephrasingTitle, setIsRephrasingTitle] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -204,6 +205,39 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
             alert('Erreur de connexion avec DeepL')
         } finally {
             setIsRephrasingExcerpt(false)
+        }
+    }
+
+    const handleAiSuggestBooks = async () => {
+        if (!title.trim() && !content.trim() && !excerpt.trim()) {
+            showNotification("Veuillez d'abord renseigner un titre ou du contenu pour l'analyse IA.", "error")
+            return
+        }
+
+        setIsSuggestingBooks(true)
+        try {
+            const result = await suggestRelatedBooksForPost({
+                title,
+                excerpt,
+                content,
+                currentBookIds: selectedBookIds,
+            })
+
+            if (result.success && result.suggestedBookIds && result.suggestedBookIds.length > 0) {
+                const newIds = result.suggestedBookIds.filter(id => !selectedBookIds.includes(id))
+                if (newIds.length === 0) {
+                    showNotification("Les livres recommandés par l'IA sont déjà tous associés à cet article.", "info")
+                } else {
+                    setSelectedBookIds(prev => [...prev, ...newIds])
+                    showNotification(`${newIds.length} livre(s) sélectionné(s) par l'IA avec succès !`, "success")
+                }
+            } else {
+                showNotification(result.error || "Aucune recommandation automatique trouvée pour le contenu actuel.", "error")
+            }
+        } catch (err) {
+            showNotification("Erreur lors de l'analyse intelligente des livres liés.", "error")
+        } finally {
+            setIsSuggestingBooks(false)
         }
     }
 
@@ -656,14 +690,35 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
 
                     <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 space-y-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
-                        <div className="flex items-center justify-between relative z-10">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 relative z-10">
                             <div>
                                 <h3 className="font-black text-gray-900 tracking-tight text-lg">Livres liés</h3>
                                 <p className="text-[10px] text-gray-500 font-medium">L'article sera affiché sur la page de ces produits.</p>
                             </div>
-                            <span className="text-[10px] font-bold px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
-                                {isLoadingBooks ? 'Chargement...' : `${allBooks.length} livres`}
-                            </span>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <button
+                                    type="button"
+                                    onClick={handleAiSuggestBooks}
+                                    disabled={isSuggestingBooks || (!title.trim() && !content.trim() && !excerpt.trim())}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-full text-xs font-bold transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                    title={!title.trim() && !content.trim() && !excerpt.trim() ? "Saisissez un titre ou du contenu pour permettre l'analyse" : "Analyser l'article avec Gemini et présélectionner les 2 à 3 livres les plus pertinents"}
+                                >
+                                    {isSuggestingBooks ? (
+                                        <>
+                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                            <span>Analyse IA...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                                            <span>Suggérer par IA</span>
+                                        </>
+                                    )}
+                                </button>
+                                <span className="text-[10px] font-bold px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                                    {isLoadingBooks ? '...' : `${allBooks.length} livres`}
+                                </span>
+                            </div>
                         </div>
 
                         <div className="space-y-3">
