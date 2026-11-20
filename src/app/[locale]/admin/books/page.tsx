@@ -11,6 +11,7 @@ import CheckJumiaAvailabilityButton from '@/components/admin/CheckJumiaAvailabil
 
 import { Prisma } from '@prisma/client'
 
+import { RETIRED_ACCESSORY_CATEGORIES } from '@/lib/pets-catalog'
 import BookFilters from './BookFilters'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import { getAdminRole, getAdminUser } from '@/lib/actions/auth'
@@ -131,7 +132,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     let allProducts: any[] = []
 
     // 1. Fetch Books
-    if (productTypes.includes('all') || productTypes.includes('book')) {
+    if (productTypes.includes('all') || productTypes.includes('book') || productTypes.includes('food') || productTypes.includes('care')) {
         const books = await prisma.book.findMany({
             where,
             select: {
@@ -266,7 +267,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     }
 
     // 3. Fetch Accessories (Kids, USB, Bookmarks, etc)
-    const accessoryTypes = productTypes.filter(t => ['kids', 'usb', 'bookmarks'].includes(t))
+    const accessoryTypes = productTypes.filter(t => ['accessory', 'kids', 'usb', 'bookmarks'].includes(t))
     if (productTypes.includes('all') || accessoryTypes.length > 0) {
         const extraWhere: any = {}
         if (searchQuery) {
@@ -289,7 +290,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         if (linkedParam === 'unlinked') extraWhere.isSyncedWithJumia = false
 
         if (!productTypes.includes('all') && accessoryTypes.length > 0) {
-            extraWhere.category = { in: accessoryTypes.map(t => t.toUpperCase()) }
+            extraWhere.category = accessoryTypes.includes('accessory') ? { notIn: RETIRED_ACCESSORY_CATEGORIES } : { in: accessoryTypes.map(t => t.toUpperCase()) }
         }
 
         const extras = await prisma.extraProduct.findMany({
@@ -304,7 +305,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             title: e.name,
             titleFr: null,
             titleEn: null,
-            author: 'Accessoire',
+            author: 'Accessoire animalier',
             price: e.price,
             costPrice: e.costPrice || 0,
             stock: e.stock,

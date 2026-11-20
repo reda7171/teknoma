@@ -83,7 +83,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-10 md:py-20 pb-24 sm:pb-32 md:pb-40">
             <div className="flex items-center justify-between mb-4 sm:mb-10 md:mb-16 px-2 sm:px-4">
-                <h1 className="text-4xl sm:text-6xl font-black tracking-tighter flex items-center gap-4 sm:gap-6">
+                <h1 className="text-4xl sm:text-5xl font-serif tracking-tight flex items-center gap-4 sm:gap-6">
                     {t('Title')}<span className="text-gray-500">.</span>
                 </h1>
                 <div className="text-[9px] sm:text-[10px] rtl:text-sm font-black uppercase tracking-widest sm:tracking-[0.4em] text-gray-500">
@@ -96,14 +96,14 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
                     <div className="w-24 h-24 sm:w-32 sm:h-32 bg-pixio-cream rounded-full flex items-center justify-center mx-auto mb-8 sm:mb-10 transition-transform hover:scale-110">
                         <ShoppingCart className="w-10 h-10 sm:w-12 sm:h-12 text-gray-500" />
                     </div>
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 sm:mb-6 tracking-tighter">{t('EmptyTitle')}<span className="text-gray-500">.</span></h2>
-                    <p className="text-xs sm:text-sm md:text-base rtl:text-lg font-black uppercase tracking-widest rtl:tracking-normal text-gray-600 mb-10 sm:mb-16 max-w-md mx-auto leading-loose px-2">
+                    <h2 className="text-3xl sm:text-4xl font-serif mb-4 sm:mb-6 tracking-tight">{t('EmptyTitle')}<span className="text-gray-500">.</span></h2>
+                    <p className="text-sm md:text-base font-normal text-[#56634e] mb-10 sm:mb-16 max-w-md mx-auto leading-loose px-2">
                         {t('EmptyDesc')}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-4 sm:px-0">
                         <Link
                             href="/products"
-                            className="px-8 sm:px-12 py-5 sm:py-6 bg-black text-white text-[10px] sm:text-xs md:text-sm rtl:text-base font-black uppercase tracking-[0.2em] rtl:tracking-normal rounded-full hover:bg-gray-800 transition-all shadow-xl w-full sm:w-auto text-center"
+                            className="pet-button"
                         >
                             {t('BrowseLibrary')}
                         </Link>

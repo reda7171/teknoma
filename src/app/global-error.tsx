@@ -14,8 +14,8 @@ export default function GlobalError({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Erreur | PetsUnivers</title>
-        <meta name="description" content="Une erreur inattendue s'est produite sur PetsUnivers. Veuillez rafraîchir la page." />
+        <title>Erreur | Tekno Store</title>
+        <meta name="description" content="Une erreur inattendue s'est produite sur Tekno Store. Veuillez rafraîchir la page." />
         <meta name="robots" content="noindex, nofollow" />
       </head>
       <body style={{ margin: 0, fontFamily: 'system-ui, -apple-system, sans-serif', backgroundColor: '#faf9f6', color: '#111' }}>

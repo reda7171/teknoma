@@ -14,9 +14,9 @@ export function normalizeImage(raw: string | null | undefined): string {
     let img = raw?.trim() || ''
     if (!img) return '/book-placeholder.png'
 
-    // Si l'URL pointe vers petsunivers.ma/uploads/, la ramener en chemin local pour next/image
-    if (img.includes('petsunivers.ma/uploads/')) {
-        img = img.replace(/^https?:\/\/(www\.)?petsunivers\.store/, '')
+    // Si l'URL pointe vers tekno.ma/uploads/, la ramener en chemin local pour next/image
+    if (img.includes('tekno.ma/uploads/')) {
+        img = img.replace(/^https?:\/\/(www\.)?Tekno Store\.store/, '')
     }
 
     if (img.startsWith('/uploads/') || img.startsWith('uploads/')) {
@@ -75,9 +75,9 @@ export function getOgImageUrl(raw: string | null | undefined, baseUrl: string, f
  * si l'URL configurÃ©e pointe vers localhost ou une IP (frÃ©quent avec un reverse proxy).
  */
 export function getBaseUrl(): string {
-    let url = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma';
+    let url = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma';
     if (url.includes('0.0.0.0') || url.includes('127.0.0.1') || url.includes('localhost') || url.includes('167.86.108.246')) {
-        url = 'https://petsunivers.ma';
+        url = 'https://tekno.ma';
     }
     return url;
 }

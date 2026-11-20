@@ -296,10 +296,10 @@ export default function POSConfigForm({
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     >
                         <option value="ALL">Tout le catalogue</option>
-                        <option value="BOOKS">Livres unitaires</option>
+                        <option value="BOOKS">Produits unitaires</option>
                         <option value="PACKS">Packs promo</option>
-                        <option value="ACCESSORIES_LIBRARY">Accessoires lecture</option>
-                        <option value="ACCESSORIES_KIDS">Accessoires enfants</option>
+                        <option value="ACCESSORIES">Accessoires animaux</option>
+                        <option value="CARE">Hygiène et soins</option>
                     </select>
                 </div>
 

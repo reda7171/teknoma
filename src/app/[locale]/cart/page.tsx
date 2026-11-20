@@ -1,3 +1,5 @@
+import {getLocale} from 'next-intl/server'
+import PetHelpBanner from '@/components/pets/PetHelpBanner'
 import Header from '@/components/HeaderWithUser'
 import Footer from '@/components/Footer'
 import CartClient from '@/components/cart/CartClient'
@@ -14,21 +16,22 @@ export const metadata: Metadata = {
 }
 
 export default async function CartPage() {
+    const locale = await getLocale()
     const minAmount = await getSetting('min_order_amount', '0')
     const feature3For4 = await getSetting('feature_3_for_4', 'false')
 
 
     return (
-        <div className="min-h-screen bg-pixio-cream text-black">
+        <div className="min-h-screen bg-[#fffdf8] text-[#17351d]">
             <Header />
 
-            <CartClient
+            <main id="main-content" className="pets-store"><CartClient
                 minOrderAmount={Number(minAmount)}
 
                 is3For4Active={feature3For4 === 'true'}
             />
 
-            <Footer />
+            </main><PetHelpBanner locale={locale}/><Footer />
         </div>
     )
 }

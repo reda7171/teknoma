@@ -26,22 +26,22 @@ export default function ChatBot() {
     // Translatable labels
     const labels: Record<string, any> = {
         ar: {
-            welcome: "مرحباً! ✨ أنا المساعد الذكي لـ **PetsUnivers**. اسألني عن الكتب، الطلبات أو التوصيل.",
-            quick: ['التوصيل ؟', 'الكتب الجديدة', 'مفتاح USB', 'تتبع الطلب', 'اقترح عناوين؟', 'التصنيفات ؟'],
+            welcome: "مرحباً! ✨ أنا المساعد الذكي لـ **PetsUnivers**. اسألني عن المنتجات، الطلبات أو التوصيل.",
+            quick: ['التوصيل ؟', 'المنتجات الجديدة', 'أغذية الحيوانات', 'تتبع الطلب', 'اقتراحات ؟', 'التصنيفات ؟'],
             placeholder: "اسأل سؤالك هنا...",
             online: "متصل",
-            viewBook: "عرض الكتاب",
+            viewBook: "عرض المنتج",
             addToCart: "التفاصيل",
             trackOrder: "تتبع الطلب",
             estimated: "التسليم المتوقع",
             suggestions: "اقتراحات لك"
         },
         fr: {
-            welcome: "Bonjour ! ✨ Je suis l'assistant intelligent de **PetsUnivers**. Posez-moi vos questions sur nos livres, commandes ou livraison.",
-            quick: ['Livraison ?', 'Nouveautés', 'Clé USB', 'Suivi Commande', 'Propose moi des titres?', 'Catégories ?'],
+            welcome: "Bonjour ! ✨ Je suis l'assistant intelligent de **PetsUnivers**. Posez-moi vos questions sur nos produits animaliers, commandes ou livraison.",
+            quick: ['Livraison ?', 'Nouveautés', 'Alimentation', 'Suivi Commande', 'Suggestions ?', 'Catégories ?'],
             placeholder: "Posez votre question...",
             online: "En ligne",
-            viewBook: "Voir le livre",
+            viewBook: "Voir le produit",
             addToCart: "Détails",
             trackOrder: "Détails commande",
             estimated: "Livraison prévue",

@@ -31,7 +31,7 @@ interface BookJsonLdProps {
 }
 
 export function BookJsonLd({ book, locale, displayTitle, displayDescription, imageUrl, averageRating, reviewCount, reviews = [] }: BookJsonLdProps) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://petsunivers.ma';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma';
   const bookUrl = `${baseUrl}/${locale}/books/${book.id}`;
   const googlePrintBooksCategory = {
     "@type": "CategoryCode",
@@ -43,7 +43,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
   const showIsbn = validIsbn && (validIsbn.length === 10 || validIsbn.length === 13);
   const finalDescription = (displayDescription && displayDescription.trim().length > 15)
     ? displayDescription
-    : `Découvrez ${displayTitle || book.title} sur PetsUnivers. Achetez en ligne avec livraison rapide au Maroc (Paiement à la livraison).`;
+    : `Découvrez ${displayTitle || book.title} sur Tekno Store. Achetez en ligne avec livraison rapide au Maroc (Paiement à la livraison).`;
 
   const ratingVal = Number((averageRating > 0 ? averageRating : 4.9).toFixed(1));
   const countVal = reviewCount > 0 ? reviewCount : Math.max(reviews.length, 14);
@@ -113,7 +113,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         "inLanguage": locale === 'ar' ? 'ar' : locale === 'en' ? 'en' : 'fr',
         "publisher": {
           "@type": "Organization",
-          "name": "PetsUnivers",
+          "name": "Tekno Store",
           "url": baseUrl
         },
         "image": safeImageUrl,
@@ -127,7 +127,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
         },
         "brand": {
           "@type": "Brand",
-          "name": "PetsUnivers"
+          "name": "Tekno Store"
         },
         // Use Google's canonical taxonomy for merchant listings. The shop's
         // editorial category remains available through the `genre` property.
@@ -153,7 +153,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           ...(localWarehouses.length > 0 ? {
             "availableAtOrFrom": localWarehouses.map(inventory => ({
               "@type": "Place",
-              "name": inventory.warehouse?.name || "Entrepôt PetsUnivers",
+              "name": inventory.warehouse?.name || "Entrepôt Tekno Store",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": inventory.warehouse?.location || undefined,
@@ -166,7 +166,7 @@ export function BookJsonLd({ book, locale, displayTitle, displayDescription, ima
           "url": bookUrl,
           "seller": {
             "@type": "Organization",
-            "name": "PetsUnivers"
+            "name": "Tekno Store"
           },
           "deliveryLeadTime": {
             "@type": "QuantitativeValue",

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 
 export const DEFAULT_INDEXNOW_KEY = 'a918d1a2e64740c2b085b754a73fabbe'
-export const DEFAULT_HOST = 'petsunivers.ma'
+export const DEFAULT_HOST = 'tekno.ma'
 
 export async function getIndexNowKey(): Promise<string> {
     try {
@@ -16,7 +16,7 @@ export async function getIndexNowKey(): Promise<string> {
 
 export async function getSiteHost(): Promise<string> {
     try {
-        const siteUrl = process.env.NEXTAUTH_URL || 'https://petsunivers.ma'
+        const siteUrl = process.env.NEXTAUTH_URL || 'https://tekno.ma'
         const url = new URL(siteUrl)
         return url.hostname
     } catch {

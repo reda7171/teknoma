@@ -39,7 +39,7 @@
   },
   "Seller": {
     "Sidebar": {
-      "Logo": "PetsUnivers",
+      "Logo": "Tekno Store",
       "LogoSub": "Seller",
       "Dashboard": "Tableau de bord",
       "MyBooks": "Mes Produits",
@@ -50,7 +50,7 @@
     },
     "Dashboard": {
       "Title": "Salut",
-      "Subtitle": "Votre boutique PetsUnivers Marketplace",
+      "Subtitle": "Votre boutique Tekno Store Marketplace",
       "Stats": {
         "Books": "Mes Produits",
         "Orders": "Commandes",
@@ -73,7 +73,7 @@
       "NewBook": "Nouveau Produit",
       "Empty": "Aucun produit pour le moment.",
       "EmptyTitle": "Votre boutique est vide",
-      "EmptyDesc": "Commencez dès maintenant en ajoutant votre premier produit sur le Marketplace PetsUnivers.",
+      "EmptyDesc": "Commencez dès maintenant en ajoutant votre premier produit sur le Marketplace Tekno Store.",
       "EmptyBtn": "Propulser mon premier produit",
       "EmptyHint": "Commencez à vendre en ajoutant votre premier produit.",
       "Price": "Prix",
@@ -105,7 +105,7 @@
       "StockLabel": "Quantité en Stock",
       "DescriptionLabel": "Description détaillée",
       "DescriptionPlaceholder": "Parlez-nous de ce produit (état, édition, contenu)...",
-      "Info": "En publiant ce produit, il sera immédiatement visible sur le Marketplace de PetsUnivers. Veillez à ce que les informations soient exactes.",
+      "Info": "En publiant ce produit, il sera immédiatement visible sur le Marketplace de Tekno Store. Veillez à ce que les informations soient exactes.",
       "Submit": "Publier sur le Marketplace",
       "Submitting": "Publication en cours...",
       "ErrorAdd": "Une erreur est survenue lors de l'ajout.",
@@ -150,7 +150,7 @@
       "Title": "Mes Articles",
       "Subtitle": "Promouvez vos produits — chaque article est validé avant publication",
       "NewPost": "Nouvel Article",
-      "ApprovalNotice": "Vos articles sont soumis à approbation avant d'être publiés sur le blog de PetsUnivers.",
+      "ApprovalNotice": "Vos articles sont soumis à approbation avant d'être publiés sur le blog de Tekno Store.",
       "Empty": "Aucun article",
       "EmptyHint": "Commencez à rédiger pour promouvoir vos produits",
       "Write": "Écrire un article",
@@ -242,7 +242,7 @@
   },
   "UsbPage": {
     "Title": "Clé USB",
-    "Description": "La clé USB éducative PetsUnivers. Plus de 500 heures de contenu éducatif pour enfants.",
+    "Description": "La clé USB éducative Tekno Store. Plus de 500 heures de contenu éducatif pour enfants.",
     "HeroBadge": "NOUVEAU · {seriesCount} séries · {episodesCount}+ épisodes",
     "HeroTitleP1": "La Clé USB ",
     "HeroTitleP2": "Éducative",
@@ -290,22 +290,22 @@
   },
   "Privacy": {
     "Title": "Politique de Confidentialité",
-    "Description": "Découvrez comment PetsUnivers collecte, utilise et protège vos données personnelles."
+    "Description": "Découvrez comment Tekno Store collecte, utilise et protège vos données personnelles."
   },
   "Terms": {
     "Title": "Conditions Générales",
-    "Description": "Veuillez lire attentivement nos conditions d'utilisation. Elles définissent les règles d'utilisation de la plateforme PetsUnivers."
+    "Description": "Veuillez lire attentivement nos conditions d'utilisation. Elles définissent les règles d'utilisation de la plateforme Tekno Store."
   },
   "AboutPage": {
     "OurStory": "Notre Histoire",
     "HeroDesc": "Plus qu'une animalerie, une destination pour les esprits curieux et les amoureux du savoir.",
     "OurMission": "Notre Mission",
-    "MissionDesc": "Depuis notre création, nous nous efforçons de rendre la lecture accessible à tous au Maroc. Nous croyons fermement que chaque produit a le pouvoir de transformer une vie, d'élargir les horizons et de stimuler l'imagination. Notre objectif est de créer un pont entre les marques et les lecteurs, en offrant une sélection diversifiée d'œuvres qui répondent à toutes les curiosités. Avec PetsUnivers, la culture s'invite chez vous, où que vous soyez, pour nourrir votre esprit au quotidien.",
+    "MissionDesc": "Depuis notre création, nous nous efforçons de rendre la lecture accessible à tous au Maroc. Nous croyons fermement que chaque produit a le pouvoir de transformer une vie, d'élargir les horizons et de stimuler l'imagination. Notre objectif est de créer un pont entre les marques et les lecteurs, en offrant une sélection diversifiée d'œuvres qui répondent à toutes les curiosités. Avec Tekno Store, la culture s'invite chez vous, où que vous soyez, pour nourrir votre esprit au quotidien.",
     "PassionTitle": "Passion",
     "PassionDesc": "Sélectionnés avec soin par des passionnés de littérature, pour garantir que chaque produit proposé soit une véritable découverte et une source d'inspiration.",
     "CommunityTitle": "Communauté",
     "CommunityDesc": "Unir les lecteurs marocains autour d'une plateforme unique, créer un espace d'échange et de partage pour célébrer ensemble notre amour commun pour la lecture.",
-    "WhyPetsUnivers": "Pourquoi PetsUnivers ?",
+    "WhyTekno Store": "Pourquoi Tekno Store ?",
     "QualityTitle": "Qualité Garantie",
     "QualityDesc": "Produits originaux uniquement, vérifiés avant envoi.",
     "DeliveryTitle": "Livraison Rapide",
@@ -316,8 +316,8 @@
     "VisitUs": "Venez nous rendre visite à Rabat"
   },
   "AuthorsPage": {
-    "Title": "Nos Marques | PetsUnivers",
-    "Description": "Découvrez tous les marques disponibles chez PetsUnivers. Romans, développement personnel, classiques — explorez les plumes qui ont marqué nos lecteurs.",
+    "Title": "Nos Marques | Tekno Store",
+    "Description": "Découvrez tous les marques disponibles chez Tekno Store. Romans, développement personnel, classiques — explorez les plumes qui ont marqué nos lecteurs.",
     "Heading": "Découvrez nos marques",
     "Subheading": "Explorez les esprits brillants derrière vos produits préférés.",
     "SearchPlaceholder": "Rechercher un marque...",
@@ -334,13 +334,13 @@
       "Badge": "Livraison gratuite dès 300 MAD + Paiement à la livraison partout au Maroc",
       "TitlePart1": "Animalerie en ligne N°1 au Maroc",
       "TitlePart2": "Packs de produits à partir de 100 DH",
-      "Description": "Découvrez une sélection premium de produits et économisez avec nos packs exclusifs. Le savoir, avec style.",
-      "ShopLibrary": "La Animalerie",
+      "Description": "Découvrez notre sélection pour animaux et faites des économies avec nos packs exclusifs.",
+      "ShopLibrary": "La Boutique",
       "OurBundles": "Voir les Packs les plus vendus",
       "GoogleLogin": "Continuer avec Google",
       "GoogleBonus": "+10 DH Offerts",
       "CustomBundle": "Créer mon Pack Perso (-30%)",
-      "SocialProof": "⭐ 4.8/5 par plus de 1000 lecteurs satisfaits",
+      "SocialProof": "⭐ 4.9/5 par plus de 1500 propriétaires comblés",
       "EditorsChoice": "Choix de l'éditeur",
       "Select": "SÉLECTIONNER",
       "PinnedBook": "Produit épinglé au centre",
@@ -354,10 +354,10 @@
     },
     "SearchSection": {
       "Badge": "Recherche",
-      "TitlePart1": "Trouvez votre",
-      "TitlePart2": "prochaine lecture.",
-      "Description": "Utilisez notre recherche avancée pour filtrer par titre, marque ou budget.",
-      "Placeholder": "Rechercher un produit, un mot-clé...",
+      "TitlePart1": "Trouvez le meilleur",
+      "TitlePart2": "pour votre animal.",
+      "Description": "Utilisez notre recherche avancée pour filtrer par produit, marque ou catégorie.",
+      "Placeholder": "Rechercher un produit, une marque, un besoin...",
       "MoreFilters": "Plus de filtres",
       "HideFilters": "Masquer les filtres",
       "Filters": {
@@ -371,7 +371,7 @@
       "Submit": "Lancer la recherche"
     },
     "seo": {
-      "Title": "PetsUnivers — Boutique · Chats & Chiens",
+      "Title": "Tekno Store — Boutique · Chats & Chiens",
       "Description": "Alimentation, accessoires et soins : retrouvez les essentiels pour vos chats, chiens et petits compagnons."
     },
     "Features": {
@@ -425,19 +425,19 @@
     },
     "MobileApp": {
       "ComingSoon": "Bientôt disponible",
-      "Title": "L'application mobile PetsUnivers",
+      "Title": "L'application mobile Tekno Store",
       "Subtitle": "is cooking... 🍳",
       "Description": "L'échange de produits et la gestion de votre bibliothèque seront encore plus simples. Préparez-vous pour une toute nouvelle expérience sur iOS et Android !",
       "SoonOn": "Bientôt sur"
     },
     "AEOSnippet": {
       "Question": "Où acheter des produits en ligne au Maroc ?",
-      "Answer": "PetsUnivers est une animalerie en ligne marocaine permettant de commander des produits et romans avec livraison au Maroc."
+      "Answer": "Tekno Store est une animalerie en ligne marocaine permettant de commander des produits et romans avec livraison au Maroc."
     },
     "CTA": {
-      "TitlePart1": "Prêt pour votre",
-      "TitlePart2": "prochaine lecture ?",
-      "Button": "Démarrer maintenant"
+      "TitlePart1": "Prêt à choyer votre",
+      "TitlePart2": "compagnon ?",
+      "Button": "Explorer la boutique"
     },
     "QuickSearches": {
       "Title": "Recherches Rapides",
@@ -672,7 +672,7 @@
     "Policy": {
       "Point1": "Un retour est accepté uniquement si le produit reçu est défectueux, endommagé ou incorrect.",
       "Point2": "Le problème doit être signalé dans les 3 jours calendaires suivant la livraison, avec le numéro de commande et des photos claires.",
-      "Point3": "Contactez-nous via WhatsApp ou à contact@petsunivers.ma avant tout envoi. Un retour non autorisé pourra être refusé.",
+      "Point3": "Contactez-nous via WhatsApp ou à contact@Tekno Store.ma avant tout envoi. Un retour non autorisé pourra être refusé.",
       "Point4": "Le retour d'un produit défectueux est gratuit. Nous n'acceptons aucun échange. Après réception et inspection, tout retour approuvé donne lieu à un remboursement."
     }
   },
@@ -716,7 +716,7 @@
     "Reference": "Référence",
     "Volume": "Volume",
     "Pages": "Pages",
-    "PetsUniversSelect": "Sélection PetsUnivers",
+    "Tekno StoreSelect": "Sélection Tekno Store",
     "OriginalMasterpiece": "Chef-d'œuvre original",
     "PremiumPaperQual": "Papier Premium",
     "GlobalStandard": "Standard international",
@@ -995,12 +995,12 @@
     "AddToCart": "Ajouter au panier",
     "AddAllToCart": "Tout ajouter au panier",
     "seo": {
-      "Title": "Mes Favoris | PetsUnivers - Curateurs de Littérature",
-      "Description": "Retrouvez votre sélection personnelle de produits et packs premium. Organisez vos prochaines lectures sur PetsUnivers."
+      "Title": "Mes Favoris | Tekno Store - Curateurs de Littérature",
+      "Description": "Retrouvez votre sélection personnelle de produits et packs premium. Organisez vos prochaines lectures sur Tekno Store."
     },
     "By": "Par {author}",
     "Quote": "Le produit que l'on attend est celui qui nous change.",
-    "QuoteSubtitle": "Sélection PetsUnivers · Curateurs de Littérature"
+    "QuoteSubtitle": "Sélection Tekno Store · Curateurs de Littérature"
   },
   "Tracking": {
     "Title": "Suivi de Commande",
@@ -1023,7 +1023,7 @@
     }
   },
   "Community": {
-    "RegisterTitle": "Rejoindre la Communauté PetsUnivers",
+    "RegisterTitle": "Rejoindre la Communauté Tekno Store",
     "RegisterSubtitle": "Echangez vos produits préférés avec des lecteurs passionnés",
     "LoginTitle": "Connexion Membre",
     "LoginSubtitle": "Accédez à votre espace d'échange",
@@ -1082,7 +1082,7 @@
       "SaveChanges": "Enregistrer les modifications",
       "Delete": "Supprimer le produit",
       "ConfirmDelete": "Êtes-vous sûr de vouloir supprimer ce produit de votre bibliothèque ?",
-      "EligibilityError": "Vous devez avoir effectué au moins une commande sur PetsUnivers pour ajouter un produit au système d'échange.",
+      "EligibilityError": "Vous devez avoir effectué au moins une commande sur Tekno Store pour ajouter un produit au système d'échange.",
       "Conditions": {
         "NEW": "Neuf",
         "GOOD": "Bon état",
@@ -1101,7 +1101,7 @@
       "Subtitle": "Troc et bourse aux produits d'occasion entre lecteurs partout au Maroc. Donnez une seconde vie à vos produits près de chez vous sans frais.",
       "Seo": {
         "Heading": "Échange de produits d'occasion au Maroc : comment ça marche ?",
-        "Intro": "PetsUnivers Community est la première bourse d'échange de produits d'occasion et de romans au Maroc. Profitez d'une communauté active de lecteurs passionnés pour troquer vos ouvrages lus contre de nouvelles lectures sans dépenser un dirham.",
+        "Intro": "Tekno Store Community est la première bourse d'échange de produits d'occasion et de romans au Maroc. Profitez d'une communauté active de lecteurs passionnés pour troquer vos ouvrages lus contre de nouvelles lectures sans dépenser un dirham.",
         "Step1Title": "1. Publiez vos produits d'occasion",
         "Step1Desc": "Prenez une photo de votre produit, indiquez son état (comme neuf, bon état, usagé) et votre ville de résidence.",
         "Step2Title": "2. Trouvez des lecteurs près de chez vous",
@@ -1110,14 +1110,14 @@
         "Step3Desc": "Échangez produit contre produit (1 contre 1) ou utilisez les crédits communautaires si vous ne trouvez pas d'échange immédiat.",
         "CitiesTitle": "Bourse aux produits par ville au Maroc",
         "FaqTitle": "Questions fréquentes sur l'échange de produits d'occasion",
-        "FaqQ1": "Comment échanger un produit d'occasion sur PetsUnivers ?",
-        "FaqA1": "Inscrivez-vous sur PetsUnivers, ajoutez les produits d'occasion de votre bibliothèque que vous souhaitez prêter ou échanger, puis parcourez le catalogue pour proposer un échange direct ou via crédits.",
+        "FaqQ1": "Comment échanger un produit d'occasion sur Tekno Store ?",
+        "FaqA1": "Inscrivez-vous sur Tekno Store, ajoutez les produits d'occasion de votre bibliothèque que vous souhaitez prêter ou échanger, puis parcourez le catalogue pour proposer un échange direct ou via crédits.",
         "FaqQ2": "L'échange de produits d'occasion est-il gratuit ?",
-        "FaqA2": "Oui, le troc de produits entre membres de la communauté PetsUnivers est 100% gratuit. Les échanges se font principalement en main propre dans un lieu public sécurisé de votre ville.",
+        "FaqA2": "Oui, le troc de produits entre membres de la communauté Tekno Store est 100% gratuit. Les échanges se font principalement en main propre dans un lieu public sécurisé de votre ville.",
         "FaqQ3": "Quels types de produits peut-on troquer ?",
         "FaqA3": "Tous les genres sont acceptés : romans, polars, mangas, essais, développement personnel, produits jeunesse, manuels scolaires et universitaires en français, arabe ou anglais.",
         "FaqQ4": "Comment faire si aucun produit ne m'intéresse chez le propriétaire ?",
-        "FaqA4": "Grâce au système de crédits PetsUnivers : cédez votre produit pour gagner des crédits et utilisez-les plus tard pour acquérir le produit de n'importe quel autre membre."
+        "FaqA4": "Grâce au système de crédits Tekno Store : cédez votre produit pour gagner des crédits et utilisez-les plus tard pour acquérir le produit de n'importe quel autre membre."
       },
       "SearchPlaceholder": "Rechercher par titre, marque...",
       "NearMe": "Autour de moi",
@@ -1143,8 +1143,8 @@
       "DescriptionTitle": "Résumé de l'ouvrage",
       "MemberSince": "Membre depuis",
       "Credits": "Crédits",
-      "SecurityNotice": "Échange sécurisé garanti par PetsUnivers. Aucune commission.",
-      "MapNetwork": "Réseau PetsUnivers",
+      "SecurityNotice": "Échange sécurisé garanti par Tekno Store. Aucune commission.",
+      "MapNetwork": "Réseau Tekno Store",
       "MapExchange": "Échange de produits",
       "UnlockMap": "Débloquez la carte",
       "UnlockDesc": "Pour voir les produits disponibles près de chez vous et commencer à échanger.",
@@ -1171,7 +1171,7 @@
       "Balance": "Solde : {count} crédits",
       "NoBooksAvailable": "Vous n'avez aucun produit disponible.",
       "AddOneFirst": "Ajoutez-en un d'abord.",
-      "TotalCost": "Coût : 1 crédit PetsUnivers",
+      "TotalCost": "Coût : 1 crédit Tekno Store",
       "InsufficientBalance": "Solde insuffisant",
       "DeliveryMethods": "Modalités de remise",
       "Meetup": "Main à main",
@@ -1181,7 +1181,7 @@
       "MeetingPointPlaceholder": "ex: Gare de Casa Voyageurs",
       "SuggestedMeetingTime": "Heure souhaitée",
       "MessagePlaceholder": "Dites quelques mots sur l'échange...",
-      "EligibilityNote": "* Éligibilité requise : Au moins une commande passée sur PetsUnivers.",
+      "EligibilityNote": "* Éligibilité requise : Au moins une commande passée sur Tekno Store.",
       "SelectPlaceholder": "Choisir un produit..."
     },
     "Exchanges": {
@@ -1518,8 +1518,8 @@
     "LearnMore": "Gérer les cookies"
   },
   "KidsProductDetail": {
-    "NotFoundTitle": "Produit introuvable | PetsUnivers",
-    "MetaDesc": "Découvrez {name} sur PetsUnivers. Livraison rapide au Maroc.",
+    "NotFoundTitle": "Produit introuvable | Tekno Store",
+    "MetaDesc": "Découvrez {name} sur Tekno Store. Livraison rapide au Maroc.",
     "BackToKids": "Retour à l'espace enfant",
     "StockLeft": "Reste {stock}",
     "OutOfStock": "Rupture de stock",
@@ -1577,7 +1577,7 @@
     "ReadArticle": "Lire l'article",
     "Edit": "Modifier",
     "AboutAuthor": "À propos de l'marque",
-    "ModeratorRole": "Équipe Éditoriale PetsUnivers",
+    "ModeratorRole": "Équipe Éditoriale Tekno Store",
     "ModeratorDescription": "Passionné(e) par la lecture et la littérature, je partage avec vous mes découvertes, mes conseils et mes coups de cœur littéraires pour vous accompagner dans vos prochaines lectures.",
     "ShareTitle": "Partager :",
     "Copied": "Copié !",
@@ -1608,7 +1608,7 @@
     "Anonymous": "Anonyme"
   },
   "PWAInstallPrompt": {
-    "title": "Installer PetsUnivers",
+    "title": "Installer Tekno Store",
     "description": "Accédez à la animalerie rapidement depuis votre écran d'accueil.",
     "install": "Installer",
     "later": "Plus tard"
@@ -1636,21 +1636,21 @@
     "fileLimits": "PDF, DOCX ou TXT (Max 10MB)",
     "sending": "Envoi en cours...",
     "send": "Envoyer ma liste",
-    "seoText": "PetsUnivers est votre animalerie en ligne au Maroc. Nous proposons un large choix de produits (romans, mangas, beaux-arts, produits pour enfants, développement personnel et anglais) ainsi que toutes les fournitures scolaires (cartables, trousses, indispensables de la rentrée). Déposez votre liste scolaire en ligne et profitez d'une livraison rapide à domicile partout au Maroc (Casablanca, Rabat, Tanger, etc.). Tous nos produits sont 100% authentiques avec possibilité de paiement cash à la livraison ou par carte bancaire sécurisée."
+    "seoText": "Tekno Store est votre animalerie en ligne au Maroc. Nous proposons un large choix de produits (romans, mangas, beaux-arts, produits pour enfants, développement personnel et anglais) ainsi que toutes les fournitures scolaires (cartables, trousses, indispensables de la rentrée). Déposez votre liste scolaire en ligne et profitez d'une livraison rapide à domicile partout au Maroc (Casablanca, Rabat, Tanger, etc.). Tous nos produits sont 100% authentiques avec possibilité de paiement cash à la livraison ou par carte bancaire sécurisée."
   },
   "JoinUs": {
     "heroTag": "Opportunité",
     "heroTitle1": "Rejoignez",
     "heroTitle2": "l'équipe",
-    "heroDescription": "Le blog PetsUnivers recherche un blogueur talentueux et créatif pour un poste officiel sur le blog. Si vous êtes talentueux, que vous aimez bloguer et que vous avez de nombreuses idées, nous vous recherchons. Écrivez un article d'essai + une présentation de vous-même et envoyez le tout à PetsUnivers team.",
+    "heroDescription": "Le blog Tekno Store recherche un blogueur talentueux et créatif pour un poste officiel sur le blog. Si vous êtes talentueux, que vous aimez bloguer et que vous avez de nombreuses idées, nous vous recherchons. Écrivez un article d'essai + une présentation de vous-même et envoyez le tout à Tekno Store team.",
     "conditionsTitle": "Conditions de participation",
-    "conditionsDescription": "Merci d'avoir choisi de contribuer par vos sujets au blog PetsUnivers, nous vous invitons à lire ces conditions pour que votre sujet soit publié :",
+    "conditionsDescription": "Merci d'avoir choisi de contribuer par vos sujets au blog Tekno Store, nous vous invitons à lire ces conditions pour que votre sujet soit publié :",
     "condition1Title": "Nous n'acceptons pas les sujets copiés",
-    "condition1Desc": "La politique du blog PetsUnivers depuis 31 ans repose sur l'enrichissement du contenu technique arabe et par conséquent, nous n'acceptons aucun sujet copié entièrement d'autres sites. En revanche, nous acceptons les sujets rédigés à votre manière, même s'ils proviennent d'une ou plusieurs sources.",
+    "condition1Desc": "La politique du blog Tekno Store depuis 31 ans repose sur l'enrichissement du contenu technique arabe et par conséquent, nous n'acceptons aucun sujet copié entièrement d'autres sites. En revanche, nous acceptons les sujets rédigés à votre manière, même s'ils proviennent d'une ou plusieurs sources.",
     "condition2Title": "Nous n'acceptons pas les sujets déjà abordés",
     "condition2Desc": "Bien sûr, nous ne pouvons pas publier des sujets qui ont déjà été publiés afin d'éviter les répétitions.",
     "condition3Title": "Nous n'acceptons pas les sujets contenant des codes ou logiciels d'activation",
-    "condition3Desc": "Au blog PetsUnivers, nous veillons à ne pas enfreindre les droits de propriété intellectuelle. En revanche, nous acceptons tout sujet incluant des codes d'activation officiels obtenus par des moyens légaux.",
+    "condition3Desc": "Au blog Tekno Store, nous veillons à ne pas enfreindre les droits de propriété intellectuelle. En revanche, nous acceptons tout sujet incluant des codes d'activation officiels obtenus par des moyens légaux.",
     "condition4Title": "Nous n'acceptons pas les sujets mal formulés",
     "condition4Desc": "Nous faisons tous des erreurs, et quelques petites fautes ne posent pas de problème, mais si elles rendent les phrases incompréhensibles ou si les fautes d'orthographe sont trop nombreuses, la publication est impossible.",
     "applyTitle": "Comment postuler",
@@ -1695,14 +1695,14 @@
     "Section3Title": "3. Articles défectueux",
     "Section3Desc": "Si vous recevez un produit endommagé ou présentant un défaut de fabrication, nous nous engageons à le remplacer gratuitement dans les plus brefs délais.",
     "Section4Title": "4. Procédure de retour",
-    "Section4Desc": "Pour initier un retour, veuillez contacter notre service client via WhatsApp ou par email à contact@petsunivers.ma. Veuillez inclure votre numéro de commande et des photos si le produit est défectueux.",
+    "Section4Desc": "Pour initier un retour, veuillez contacter notre service client via WhatsApp ou par email à contact@Tekno Store.ma. Veuillez inclure votre numéro de commande et des photos si le produit est défectueux.",
     "Section5Title": "5. Frais de retour",
-    "Section5Desc": "Les frais d'expédition d'un retour sont à la charge du client et s'élèvent à <bold>35 MAD</bold>. Si l'article reçu est endommagé, défectueux ou incorrect, PetsUnivers prend en charge son remplacement sans frais."
+    "Section5Desc": "Les frais d'expédition d'un retour sont à la charge du client et s'élèvent à <bold>35 MAD</bold>. Si l'article reçu est endommagé, défectueux ou incorrect, Tekno Store prend en charge son remplacement sans frais."
   },
   "ShippingPolicyPage": {
     "Title": "Politique de Livraison",
     "Section1Title": "1. Zones de livraison",
-    "Section1Desc": "<bold>PetsUnivers</bold> produit dans toutes les villes du Royaume du Maroc. Que vous soyez à Casablanca, Rabat, Marrakech, Tanger ou dans les zones plus reculées, nous nous assurons que vos produits arrivent à bon port.",
+    "Section1Desc": "<bold>Tekno Store</bold> produit dans toutes les villes du Royaume du Maroc. Que vous soyez à Casablanca, Rabat, Marrakech, Tanger ou dans les zones plus reculées, nous nous assurons que vos produits arrivent à bon port.",
     "Section2Title": "2. Délais de livraison",
     "Section2Desc": "Nos délais de livraison varient généralement entre <bold>24h et 48h</bold> ouvrables pour les grandes villes. Pour les autres régions, le délai peut s'étendre jusqu'à 4 jours ouvrables.",
     "Section3Title": "3. Frais de livraison",
@@ -1717,13 +1717,13 @@
     "Section2Title": "2. Utilisation des données",
     "Section2Desc": "Vos informations servent à l'expédition de vos commandes, au support client et à l'amélioration de notre boutique. Nous utilisons également ces données, avec votre consentement, pour personnaliser votre expérience et vous proposer des annonces publicitaires pertinentes.",
     "Section3Title": "3. Cookies et Outils d'analyse",
-    "Section3Desc": "PetsUnivers utilise des cookies, <bold>Google Analytics 4</bold> et <bold>Google Tag Manager (GTM)</bold> pour comprendre l'utilisation de notre site, mesurer notre audience et améliorer nos services de manière continue.",
+    "Section3Desc": "Tekno Store utilise des cookies, <bold>Google Analytics 4</bold> et <bold>Google Tag Manager (GTM)</bold> pour comprendre l'utilisation de notre site, mesurer notre audience et améliorer nos services de manière continue.",
     "Section4Title": "4. Google AdSense et Publicité",
     "Section4Desc": "Des fournisseurs tiers, y compris Google, utilisent des cookies pour diffuser des annonces en fonction de vos visites antérieures. Vous pouvez désactiver la publicité personnalisée en visitant les <link>Paramètres des annonces Google</link>.",
     "Section5Title": "5. Durée de conservation",
     "Section5Desc": "Les données liées à vos commandes sont conservées pendant la durée légale nécessaire à des fins comptables et de gestion. Les données de navigation et cookies sont conservés selon les recommandations en vigueur.",
     "Section6Title": "6. Vos droits et Contact",
-    "Section6Desc": "Conformément aux lois sur la protection des données, vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles. Pour exercer ces droits, contactez-nous à <contact>contact@petsunivers.ma</contact>."
+    "Section6Desc": "Conformément aux lois sur la protection des données, vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles. Pour exercer ces droits, contactez-nous à <contact>contact@Tekno Store.ma</contact>."
   },
   "CookieBanner": {
     "Message": "Nous utilisons des cookies pour améliorer votre expérience sur notre site et personnaliser les annonces. En continuant à naviguer, vous acceptez notre utilisation des cookies.",
@@ -1734,21 +1734,21 @@
   "TermsPage": {
     "Title": "Conditions Générales de Vente",
     "Section1Title": "1. Introduction",
-    "Section1Desc": "Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions effectuées sur le site <bold>PetsUnivers</bold>. En utilisant notre plateforme ou en passant commande, vous acceptez ces conditions dans leur intégralité.",
+    "Section1Desc": "Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des transactions effectuées sur le site <bold>Tekno Store</bold>. En utilisant notre plateforme ou en passant commande, vous acceptez ces conditions dans leur intégralité.",
     "Section2Title": "2. Commandes et Paiement",
     "Section2Desc": "Toutes les commandes sont soumises à la disponibilité des stocks. Nous proposons le paiement à la livraison (Cash on Delivery). Le paiement est exigé au moment où la commande est remise au client par notre service de livraison.",
     "Section3Title": "3. Livraison et Expédition",
-    "Section3Desc": "Nous livrons partout au Maroc. Les délais de livraison varient en fonction de votre ville et de la disponibilité des produits. PetsUnivers s'efforce de respecter les délais annoncés mais n'est pas responsable des retards liés aux sociétés de transport.",
+    "Section3Desc": "Nous livrons partout au Maroc. Les délais de livraison varient en fonction de votre ville et de la disponibilité des produits. Tekno Store s'efforce de respecter les délais annoncés mais n'est pas responsable des retards liés aux sociétés de transport.",
     "Section4Title": "4. Retours et Remboursements",
     "Section4Desc": "Si un article reçu est défectueux ou non conforme, vous disposez d'un délai défini dans notre politique de retour pour nous contacter. Les produits doivent être retournés dans leur état d'origine.",
     "Section5Title": "5. Propriété Intellectuelle",
-    "Section5Desc": "L'ensemble du contenu présent sur le site petsunivers.ma (textes, images, logos) est protégé par les droits d'marque. Toute reproduction non autorisée est strictement interdite.",
+    "Section5Desc": "L'ensemble du contenu présent sur le site Tekno Store.ma (textes, images, logos) est protégé par les droits d'marque. Toute reproduction non autorisée est strictement interdite.",
     "Section6Title": "6. Modifications des conditions",
-    "Section6Desc": "PetsUnivers se réserve le droit de modifier ces CGV à tout moment. Les modifications prendront effet dès leur publication sur le site. Nous vous encourageons à consulter cette page régulièrement."
+    "Section6Desc": "Tekno Store se réserve le droit de modifier ces CGV à tout moment. Les modifications prendront effet dès leur publication sur le site. Nous vous encourageons à consulter cette page régulièrement."
   },
   "OurServices": {
     "title": "Nos Services",
-    "subtitle": "Découvrez tous les services que PetsUnivers propose aux passionnés de lecture",
+    "subtitle": "Découvrez tous les services que Tekno Store propose aux passionnés de lecture",
     "hero_title": "Améliorez Votre Expérience de Lecture",
     "hero_desc": "De l'achat et l'échange aux packs spéciaux et la livraison locale, nous avons tout ce dont vous avez besoin.",
     "services": {
@@ -1789,11 +1789,11 @@
     "Delivery": "Livraison Partout au Maroc",
     "PaymentOnDelivery": "Paiement à la Livraison",
     "QualityGuaranteed": "Qualité Garantie",
-    "WhyChooseUs": "Pourquoi choisir PetsUnivers pour vos lectures ?",
+    "WhyChooseUs": "Pourquoi choisir Tekno Store pour vos lectures ?",
     "BrowseCollection": "Parcourez notre collection pour trouver des histoires captivantes écrites par les plus grands écrivains du monde arabe.",
     "Mission1": "Notre mission est de démocratiser l'accès à la culture. En choisissant",
     "Mission2": "via notre plateforme, vous bénéficiez d'une interface intuitive, d'un service client à l'écoute et de recommandations personnalisées.",
-    "Guarantee": "Garantie PetsUnivers",
+    "Guarantee": "Garantie Tekno Store",
     "GuaranteeText": "Satisfait ou remboursé sous 7 jours. Emballage soigné et expédition rapide en 24h ouvrées vers toutes les villes du Maroc (Casablanca, Rabat, Marrakech, Tanger, etc.).",
     "SelectionOfTheWeek": "Sélection de la semaine",
     "ViewCatalog": "Voir tout le catalogue",
@@ -1806,11 +1806,11 @@
     "Title": "Suivez-nous sur Instagram"
   },
   "Livraison1hRabatPage": {
-    "Title": "Livraison de produits en 1h à Rabat, Salé, Témara | PetsUnivers Sonic",
+    "Title": "Livraison de produits en 1h à Rabat, Salé, Témara | Tekno Store Sonic",
     "Description": "Profitez de la livraison ultra-rapide Sonic ! Recevez vos produits préférés en moins d'une heure à Rabat, Salé et Témara. Découvrez notre sélection disponible immédiatement.",
     "Badge": "Service Sonic Exclusif",
     "H1": "Livraison de produits en 1h à Rabat, Salé, Témara",
-    "P1": "Vous avez une envie soudaine de lecture ? Vous cherchez le cadeau parfait à la dernière minute ? PetsUnivers présente <strong>Sonic</strong>, le premier service de livraison de produits ultra-rapide au Maroc. Désormais, recevez vos romans, essais et ouvrages scolaires préférés en <strong>moins d'une heure</strong>.",
+    "P1": "Vous avez une envie soudaine de lecture ? Vous cherchez le cadeau parfait à la dernière minute ? Tekno Store présente <strong>Sonic</strong>, le premier service de livraison de produits ultra-rapide au Maroc. Désormais, recevez vos romans, essais et ouvrages scolaires préférés en <strong>moins d'une heure</strong>.",
     "P2": "Notre service exclusif couvre actuellement <strong>Rabat, Salé et Témara</strong>. Fini l'attente de plusieurs jours : grâce à notre réseau optimisé de coursiers partenaires et notre hub logistique situé au cœur de la capitale, la culture vient à vous à la vitesse de l'éclair.",
     "P3": "Comment ça marche ? C'est simple ! Parcourez notre catalogue complet de produits éligibles au service Sonic ci-dessous. Tous ces titres sont en stock et prêts à être expédiés instantanément. Validez votre commande avec l'option de livraison Sonic, et détendez-vous. Votre prochain produit est déjà en route.",
     "Feature1Title": "Moins d'1 heure",
@@ -1830,7 +1830,7 @@
     "HeroDescription": "Touchez des milliers de lecteurs à travers tout le Maroc. Vous gérez vos ventes, nous vous apportons un trafic qualifié.",
     "BtnDevenirVendeur": "Devenir vendeur",
     "BtnCommentCaMarche": "Comment ça marche ?",
-    "PourquoiVendre": "Pourquoi vendre sur PetsUnivers ?",
+    "PourquoiVendre": "Pourquoi vendre sur Tekno Store ?",
     "CroissancePriorite": "Votre croissance, notre priorité.",
     "Feature1Title": "Audience qualifiée",
     "Feature1Desc": "Vos produits sont directement présentés à des milliers de passionnés de lecture au Maroc.",
@@ -1873,7 +1873,7 @@
     "Stock4": "1000+ produits",
     "Submitting": "Envoi en cours...",
     "SubmitBtn": "Soumettre ma candidature",
-    "Disclaimer": "En soumettant ce formulaire, vous acceptez d'être recontacté par l'équipe PetsUnivers.",
+    "Disclaimer": "En soumettant ce formulaire, vous acceptez d'être recontacté par l'équipe Tekno Store.",
     "ThanksTitle": "Merci !",
     "ThanksMsg": "Votre candidature a bien été reçue. Notre équipe vous contactera très prochainement pour finaliser la création de votre boutique.",
     "ErrorMsg": "Une erreur est survenue."
@@ -2004,11 +2004,11 @@
       "Standard": "Standard",
       "BoardGameAge": "10+ ans / 2-4 joueurs",
       "BoardGameContent": "Complet",
-      "PetsUniversWarranty": "Garantie qualité PetsUnivers"
+      "Tekno StoreWarranty": "Garantie qualité Tekno Store"
     }
   },
   "AuthBenefits": {
-    "title": "Pourquoi rejoindre PetsUnivers ?",
+    "title": "Pourquoi rejoindre Tekno Store ?",
     "b1_title": "Bonus de Bienvenue",
     "b1_desc": "Recevez 10 DH dans votre portefeuille et un code promo dès votre inscription.",
     "b2_title": "Paiement à la Livraison",
@@ -2052,7 +2052,7 @@
     "SpeedTitle": "Délais rapides :",
     "SpeedDesc": "Nous expédions dans toutes les grandes villes du Maroc en 24h à 48h. Pour les autres régions, comptez 72h maximum.",
     "GuaranteeTitle": "Garantie :",
-    "GuaranteeDesc": "Si l'article ne correspond pas à la description ou présente un défaut, PetsUnivers s'engage à vous le remplacer ou vous rembourser.",
+    "GuaranteeDesc": "Si l'article ne correspond pas à la description ou présente un défaut, Tekno Store s'engage à vous le remplacer ou vous rembourser.",
     "YouMightAlsoLike": "Vous aimerez aussi...",
     "StockLeft": "Reste {stock}",
     "OutOfStock": "Rupture de stock",
@@ -2068,7 +2068,7 @@
       "BookmarkDim": "12 x 3 cm",
       "Standard": "Standard",
       "USBCapacity": "64 Go",
-      "PetsUniversWarranty": "Garantie qualité PetsUnivers"
+      "Tekno StoreWarranty": "Garantie qualité Tekno Store"
     }
   },
   "ReturnReminders": {

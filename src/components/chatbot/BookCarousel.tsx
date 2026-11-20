@@ -44,7 +44,7 @@ export default function BookCarousel({ books, t }: BookCarouselProps) {
                             <p className="text-[10px] text-gray-500 font-bold truncate">{book.author}</p>
                         </div>
                         <a 
-                            href={`/${locale}/books/${book.id}`}
+                            href={`/${locale}/products/${book.id}`}
                             className="mt-3 w-full py-2 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-tighter hover:bg-orange-600 transition-all active:scale-95 shadow-lg shadow-gray-200 text-center block"
                         >
                             {t.addToCart}

@@ -188,7 +188,7 @@ export default function UserDropdown({ user, features = {} }: UserDropdownProps)
                             <span className="text-sm font-bold text-gray-700 group-hover:text-black">{t('UserMenu.Orders')}</span>
                         </Link>
 
-                        {(['ADMIN', 'MANAGER', 'SELLER', 'INFLUENCER', 'CONFIRMATOR'].includes(user.role?.toUpperCase() || '') || user.email === 'contact@petsunivers.ma') && (
+                        {(['ADMIN', 'MANAGER', 'SELLER', 'INFLUENCER', 'CONFIRMATOR'].includes(user.role?.toUpperCase() || '') || user.email === 'Contact.tekno.ma@gmail.com' || user.email === 'admin@riwaya.com') && (
                             <Link
                                 href={
                                     user.role?.toUpperCase() === 'SELLER' ? '/seller' :

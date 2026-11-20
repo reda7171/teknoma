@@ -20,8 +20,8 @@ export default async function NotFound() {
   return (
     <html lang="fr" dir="ltr" suppressHydrationWarning>
       <head>
-        <title>Page Introuvable | PetsUnivers</title>
-        <meta name="description" content="La page demandée est introuvable sur la librairie en ligne petsunivers.ma." />
+        <title>Page Introuvable | Tekno Store</title>
+        <meta name="description" content="La page demandée est introuvable sur Tekno Store (tekno.ma)." />
         <meta name="robots" content="noindex, nofollow" />
       </head>
       <body className={`${outfit.variable} font-sans antialiased bg-white`} suppressHydrationWarning>

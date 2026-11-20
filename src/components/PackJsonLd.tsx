@@ -16,7 +16,7 @@ interface PackJsonLdProps {
   baseUrl?: string;
 }
 
-export function PackJsonLd({ pack, locale, baseUrl = 'https://petsunivers.ma' }: PackJsonLdProps) {
+export function PackJsonLd({ pack, locale, baseUrl = 'https://tekno.ma' }: PackJsonLdProps) {
   const packUrl = `${baseUrl}/${locale}/packs/${pack.id}`;
   const validFrom = pack.createdAt
     ? new Date(pack.createdAt).toISOString().split('T')[0]
@@ -28,10 +28,10 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://petsunivers.ma' }:
   // Description auto si absente
   const description = pack.description ||
     (locale === 'ar'
-      ? `باقة ${pack.name} تحتوي على ${pack.books?.length || 'عدة'} كتب من مكتبة PetsUnivers. الدفع عند الاستلام، توصيل في المغرب.`
+      ? `باقة ${pack.name} تحتوي على ${pack.books?.length || 'عدة'} كتب من مكتبة Tekno Store. الدفع عند الاستلام، توصيل في المغرب.`
       : locale === 'en'
-        ? `Pack ${pack.name} includes ${pack.books?.length || 'several'} books from PetsUnivers bookstore. Cash on delivery, shipping across Morocco.`
-        : `Le pack ${pack.name} contient ${pack.books?.length || 'plusieurs'} livres de la librairie PetsUnivers. Paiement à la livraison, livraison partout au Maroc.`
+        ? `Pack ${pack.name} includes ${pack.books?.length || 'several'} books from Tekno Store bookstore. Cash on delivery, shipping across Morocco.`
+        : `Le pack ${pack.name} contient ${pack.books?.length || 'plusieurs'} livres de la librairie Tekno Store. Paiement à la livraison, livraison partout au Maroc.`
     );
 
   // FAQ dynamique sur le pack
@@ -96,7 +96,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://petsunivers.ma' }:
       ...(pack.image ? { "image": pack.image } : {}),
       "brand": {
         "@type": "Brand",
-        "name": "PetsUnivers"
+        "name": "Tekno Store"
       },
       "category": {
         "@type": "CategoryCode",
@@ -112,7 +112,7 @@ export function PackJsonLd({ pack, locale, baseUrl = 'https://petsunivers.ma' }:
         "url": packUrl,
         "seller": {
           "@type": "Organization",
-          "name": "PetsUnivers"
+          "name": "Tekno Store"
         },
         "deliveryLeadTime": {
           "@type": "QuantitativeValue",

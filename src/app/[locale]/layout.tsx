@@ -1,3 +1,4 @@
+import {PET_CONTACT_EMAIL} from '@/lib/pet-content'
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../globals.css";
@@ -53,7 +54,7 @@ const cairo = Cairo({
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const siteUrl = await getSetting('site_url') || 'https://petsunivers.ma';
+  const siteUrl = await getSetting('site_url') || 'https://tekno.ma';
 
   // Dynamic SEO configurations from database
   const [
@@ -307,15 +308,13 @@ export default async function LocaleLayout({
           <style>{`.reveal-hidden { opacity: 1 !important; transform: none !important; }`}</style>
         </noscript>
         {/* Google Tag Manager (noscript) */}
-        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSD75KHT"
-          height="0" width="0" style={{ display: 'none', visibility: 'hidden' }} title="Google Tag Manager"></iframe></noscript>
         {/* End Google Tag Manager (noscript) */}
         <UtmTracker />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({'@context':'https://schema.org','@type':'PetStore',name:'PetsUnivers',url:siteUrl,description:'Animalerie : alimentation, accessoires et soins pour chats, chiens et petits animaux.',logo:siteUrl+'/petsunivers-brand.svg',email:'contact@ecom.ma'}).replace(/</g,'\\u003c')}} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({'@context':'https://schema.org','@type':'PetStore',name:'PetsUnivers',url:siteUrl,description:'Animalerie : alimentation, accessoires et soins pour chats, chiens et petits animaux.',logo:siteUrl+'/petsunivers-brand.svg',email:PET_CONTACT_EMAIL}).replace(/</g,'\\u003c')}} />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <main id="main-content">
+          <div id="site-shell">
             {children}
-          </main>
+          </div>
           <Toaster />
           <CookieConsent />
           {isWhatsAppEnabled && (

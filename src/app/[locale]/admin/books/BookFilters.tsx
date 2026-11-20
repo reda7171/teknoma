@@ -211,11 +211,11 @@ export default function BookFilters({
                             <div className="flex flex-wrap gap-2">
                                 {[
                                     { id: '', label: 'Tous' },
-                                    { id: 'book', label: 'Produits' },
-                                    { id: 'pack', label: 'Packs' },
-                                    { id: 'kids', label: 'Enfants (Kids)' },
-                                    { id: 'usb', label: 'Clés USB' },
-                                    { id: 'bookmarks', label: 'Marque-pages' }
+                                    { id: 'book', label: 'Produits unitaires' },
+                                    { id: 'pack', label: 'Packs promo' },
+                                    { id: 'accessory', label: 'Accessoires' },
+                                    { id: 'food', label: 'Alimentation' },
+                                    { id: 'care', label: 'Hygiène & Soins' }
                                 ].map((f) => {
                                     const currentTypes = activeFilters.type ? activeFilters.type.split(',') : []
                                     const isActive = f.id === '' ? currentTypes.length === 0 : currentTypes.includes(f.id)

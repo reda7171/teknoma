@@ -30,23 +30,23 @@ export function formatMoroccanPhone(phone: string): string {
 export function getWhatsAppStatusMessage(payload: WhatsAppNotificationPayload): string {
     const { orderId, fullName, status, trackingID, shippingCompanyName, locale = 'fr' } = payload
     const shortId = orderId.slice(0, 8)
-    const trackingLink = `https://petsunivers.ma/${locale}/track/${orderId}`
+    const trackingLink = `https://tekno.ma/${locale}/track/${orderId}`
 
     if (status === 'SHIPPED') {
         const carrierInfo = shippingCompanyName ? ` via ${shippingCompanyName}` : ''
         const trackingInfo = trackingID ? ` (N° suivi: ${trackingID})` : ''
-        return `Salam ${fullName} ! 📦\n\nBonne nouvelle ! Votre colis PetsUnivers #${shortId} vient d'être expédié${carrierInfo}${trackingInfo}.\n\nLe livreur vous contactera par téléphone pour la livraison à domicile (Paiement à la livraison 💵).\n\nVous pouvez suivre votre livraison en direct : ${trackingLink}\n\nMerci infiniment de votre confiance ! 📚✨\nL'équipe petsunivers.ma`
+        return `Salam ${fullName} ! 📦\n\nBonne nouvelle ! Votre colis Tekno Store #${shortId} vient d'être expédié${carrierInfo}${trackingInfo}.\n\nLe livreur vous contactera par téléphone pour la livraison à domicile (Paiement à la livraison 💵).\n\nVous pouvez suivre votre livraison en direct : ${trackingLink}\n\nMerci infiniment de votre confiance ! 📚✨\nL'équipe tekno.ma`
     }
 
     if (status === 'DELIVERED') {
-        return `Salam ${fullName} ! 🎉\n\nVotre commande PetsUnivers #${shortId} a été livrée avec succès !\n\nToute l'équipe PetsUnivers vous remercie chaleureusement pour votre confiance. Nous espérons que vos livres vous apporteront beaucoup de plaisir et d'inspiration 📖✨.\n\nN'hésitez pas à nous laisser votre avis sur le site : https://petsunivers.ma\n\nMerci de votre confiance et à très bientôt pour de nouvelles lectures ! 📚`
+        return `Salam ${fullName} ! 🎉\n\nVotre commande Tekno Store #${shortId} a été livrée avec succès !\n\nToute l'équipe Tekno Store vous remercie chaleureusement pour votre confiance. Nous espérons que vos livres vous apporteront beaucoup de plaisir et d'inspiration 📖✨.\n\nN'hésitez pas à nous laisser votre avis sur le site : https://tekno.ma\n\nMerci de votre confiance et à très bientôt pour de nouvelles lectures ! 📚`
     }
 
     if (status === 'CONFIRMED') {
-        return `Salam ${fullName} !\n\nVotre commande PetsUnivers #${shortId} est confirmée et en cours de préparation dans notre dépôt 📦.\n\nSuivi de commande : ${trackingLink}\nMerci de votre confiance ! 📚✨`
+        return `Salam ${fullName} !\n\nVotre commande Tekno Store #${shortId} est confirmée et en cours de préparation dans notre dépôt 📦.\n\nSuivi de commande : ${trackingLink}\nMerci de votre confiance ! 📚✨`
     }
 
-    return `Salam ${fullName} !\n\nLe statut de votre commande PetsUnivers #${shortId} a été mis à jour : ${status}.\nSuivi : ${trackingLink}\nMerci de votre confiance ! 📚`
+    return `Salam ${fullName} !\n\nLe statut de votre commande Tekno Store #${shortId} a été mis à jour : ${status}.\nSuivi : ${trackingLink}\nMerci de votre confiance ! 📚`
 }
 
 /**
@@ -157,7 +157,7 @@ export async function notifyAdminOnSellerLogin(seller: {
         const dateStr = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' })
         const adminUrl = 'http://localhost:3000/fr/admin/vendeurs'
 
-        const message = `[PetsUnivers] Connexion Vendeur détectée\n\n` +
+        const message = `[Tekno Store] Connexion Vendeur détectée\n\n` +
             `Nom: ${seller.fullName || 'Non renseigné'}\n` +
             `Email: ${seller.email}\n` +
             `Téléphone: ${seller.phone || 'Non renseigné'}\n` +
