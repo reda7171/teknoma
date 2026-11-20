@@ -819,7 +819,14 @@
     "NoBooksFound": "لم يتم العثور على كتب",
     "NoBooksDesc": "هذا الكاتب لم ينشر أي كتب على منصتنا بعد.",
     "SellerRating": "تقييم البائع",
-    "Views": "{count} مشاهدة"
+    "Views": "{count} مشاهدة",
+    "SummaryTabSynopsis": "ملخص الكتاب",
+    "SummaryTabKeyTakeaways": "خلاصة واقتباسات",
+    "SummaryTabBusyReaders": "للقراء المستعجلين",
+    "SummaryKeyIdeasTitle": "3 أفكار رئيسية من الكتاب",
+    "SummaryKeyQuoteTitle": "اقتباس ملهم",
+    "SummaryReadFullArticle": "قراءة المراجعة الكاملة",
+    "SummaryExtractedFrom": "مستخلص من مراجعتنا التحريرية"
   },
   "Cart": {
     "Title": "سلتك",

@@ -819,7 +819,14 @@
     "NoBooksFound": "No books found",
     "NoBooksDesc": "This author hasn't published any books on our platform yet.",
     "SellerRating": "Seller rating",
-    "Views": "{count} views"
+    "Views": "{count} views",
+    "SummaryTabSynopsis": "Synopsis",
+    "SummaryTabKeyTakeaways": "Summary & Quotes",
+    "SummaryTabBusyReaders": "For busy readers",
+    "SummaryKeyIdeasTitle": "3 Key Takeaways",
+    "SummaryKeyQuoteTitle": "Notable Quote",
+    "SummaryReadFullArticle": "Read full review",
+    "SummaryExtractedFrom": "From our editorial review"
   },
   "Cart": {
     "Title": "Your Cart",
