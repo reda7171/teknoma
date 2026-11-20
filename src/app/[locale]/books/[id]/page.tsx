@@ -24,6 +24,7 @@ import WhatsAppOrderButton from '@/components/WhatsAppOrderButton'
 import { getSetting } from '@/lib/server/site-settings'
 import AnnouncementBar from '@/components/AnnouncementBar'
 import { getPostsByBookId } from '@/lib/actions/blog'
+import EditorialArticlesSection from '@/components/books/EditorialArticlesSection'
 import Image from 'next/image'
 import { Calendar, User as UserIcon, ArrowUpRight, FileText } from 'lucide-react'
 import BookSubNav from '@/components/BookSubNav'
@@ -589,57 +590,6 @@ export default async function BookDetailPage({
                                     </Link>
                                 </div>
                             </div>
-
-                            {/* Related Blog Posts - Articles parlant de ce produit (Desktop Only) */}
-                            {relatedPosts && relatedPosts.length > 0 && (
-                                <div className="mt-8 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden hidden lg:block">
-                                    <div className="flex items-center gap-2 mb-6">
-                                        <FileText className="w-4 h-4 text-blue-600" />
-                                        <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black">
-                                            {tBook('ArticleMentions')}
-                                        </h3>
-                                    </div>
-
-                                    <div className="flex flex-col gap-4">
-                                        {relatedPosts.map((post: any) => (
-                                            <Link
-                                                key={post.id}
-                                                href={`/blog/${post.slug}`}
-                                                className="group flex gap-5 bg-white p-4 sm:p-5 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow items-center"
-                                            >
-                                                <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                                                    {post.coverImage ? (
-                                                        <ImageWithFallback
-                                                            src={normalizeImage(post.coverImage)}
-                                                            alt={post.title}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center">
-                                                            <span className="text-gray-500 font-black text-xs opacity-50">Blog</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0 py-1">
-                                                    {post.publishedAt && (
-                                                        <p className="text-[10px] sm:text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                                                            <Calendar className="w-3 h-3" />
-                                                            {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
-                                                        </p>
-                                                    )}
-                                                    <h4 className="text-sm sm:text-base font-black text-black leading-tight group-hover:text-blue-600 transition-colors line-clamp-3 mb-2">
-                                                        {post.title}
-                                                    </h4>
-                                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-blue-500 inline-flex items-center gap-1">
-                                                        {tBlog('ReadArticle')}
-                                                        <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                                    </span>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
                         {/* Info */}
@@ -696,8 +646,8 @@ export default async function BookDetailPage({
                                 </p>
                             </div>
 
-                            {/* Rating Summary */}
-                            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                            {/* Rating Summary & Editorial Badge */}
+                            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                                 {reviews.length > 0 && averageRating > 0 && (
                                     <div className="flex items-center gap-2 bg-white px-4 md:px-5 py-2 md:py-3 rounded-2xl shadow-sm border border-gray-50">
                                         <div className="flex items-center gap-1">
@@ -714,6 +664,16 @@ export default async function BookDetailPage({
                                 <span className="text-[9px] rtl:text-sm rtl:tracking-normal font-black text-gray-500 uppercase tracking-[0.2em]">
                                     {reviews.length > 0 ? tBook('ReaderReviews', { count: reviews.length }) : tBook('BeFirstToReview')}
                                 </span>
+                                {relatedPosts && relatedPosts.length > 0 && (
+                                    <a
+                                        href="#editorial-reviews"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200/60 hover:bg-amber-100 transition-colors text-[10px] font-bold uppercase tracking-wider shadow-sm group"
+                                    >
+                                        <Sparkles className="w-3 h-3 text-amber-600" />
+                                        <span>{tBook('EditorialJumpLink')}</span>
+                                        <span className="text-amber-500 group-hover:translate-y-0.5 transition-transform">↓</span>
+                                    </a>
+                                )}
                             </div>
 
                             {/* Price Section */}
@@ -1073,59 +1033,22 @@ export default async function BookDetailPage({
                                 </div>
                             </div>
 
-                            {/* Related Blog Posts - Articles parlant de ce produit (Mobile Only) */}
-                            {relatedPosts && relatedPosts.length > 0 && (
-                                <div className="mt-8 bg-gray-50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 shadow-sm relative overflow-hidden block lg:hidden">
-                                    <div className="flex items-center gap-2 mb-6">
-                                        <FileText className="w-4 h-4 text-blue-600" />
-                                        <h3 className="text-sm rtl:text-base rtl:tracking-normal font-black uppercase tracking-widest text-black">
-                                            {tBook('ArticleMentions')}
-                                        </h3>
-                                    </div>
 
-                                    <div className="flex flex-col gap-4">
-                                        {relatedPosts.map((post: any) => (
-                                            <Link
-                                                key={post.id}
-                                                href={`/blog/${post.slug}`}
-                                                className="group flex gap-5 bg-white p-4 sm:p-5 rounded-[1.5rem] shadow-sm hover:shadow-md transition-shadow items-center"
-                                            >
-                                                <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                                                    {post.coverImage ? (
-                                                        <ImageWithFallback
-                                                            src={post.coverImage}
-                                                            alt={post.title}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center">
-                                                            <span className="text-gray-500 font-black text-xs opacity-50">Blog</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0 py-1">
-                                                    {post.publishedAt && (
-                                                        <p className="text-[10px] sm:text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                                                            <Calendar className="w-3 h-3" />
-                                                            {new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR')}
-                                                        </p>
-                                                    )}
-                                                    <h4 className="text-sm sm:text-base font-black text-black leading-tight group-hover:text-blue-600 transition-colors line-clamp-3 mb-2">
-                                                        {post.title}
-                                                    </h4>
-                                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-blue-500 inline-flex items-center gap-1">
-                                                        {tBlog('ReadArticle')}
-                                                        <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                                    </span>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
 
+                    {/* Encart Éditorial Enrichi (SEO sémantique & Booster de conversion) */}
+                    {relatedPosts && relatedPosts.length > 0 && (
+                        <EditorialArticlesSection
+                            posts={relatedPosts}
+                            bookId={book.id}
+                            bookTitle={displayTitle}
+                            bookPrice={book.price}
+                            bookImage={book.image}
+                            locale={locale}
+                            inStock={book.stock > 0}
+                        />
+                    )}
 
                     {/* Reviews Section */}
                     <section className="py-10 md:py-16 border-t border-gray-100">
@@ -1168,57 +1091,7 @@ export default async function BookDetailPage({
                         </section>
                     )}
 
-                    {/* Related Articles */}
-                    {relatedPosts && relatedPosts.length > 0 && (
-                        <section className="py-8 md:py-16 border-t border-gray-100">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-8 md:mb-16 px-2">
-                                <div>
-                                    <h2 className="text-4xl font-black text-black tracking-tighter">
-                                        {locale === 'ar' ? 'مقالات ذات صلة' : locale === 'en' ? 'Related Articles' : 'Articles Liés'}
-                                        <span className="text-gray-200">.</span>
-                                    </h2>
-                                </div>
-                                <Link href="/blog" className="text-[10px] rtl:text-xs rtl:tracking-normal font-black text-black uppercase tracking-widest bg-white px-8 py-4 rounded-full border border-gray-100 shadow-sm hover:shadow-xl transition-all whitespace-nowrap">
-                                    {locale === 'ar' ? 'عرض المدونة' : locale === 'en' ? 'Read the blog' : 'Lire le blog'}
-                                </Link>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {relatedPosts.map((post: any) => (
-                                    <Link key={post.id} href={`/blog/${post.slug}`} className="group flex flex-col bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-300">
-                                        <div className="relative aspect-[4/3] w-full overflow-hidden">
-                                            {post.coverImage ? (
-                                                <ImageWithFallback
-                                                    src={normalizeImage(post.coverImage)}
-                                                    alt={post.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                                                    <span className="text-gray-200 font-black text-xl">Riwaya</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-6 flex flex-col flex-1">
-                                            {post.category && (
-                                                <div className="mb-3">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-gray-50 rounded-full text-gray-500">{post.category}</span>
-                                                </div>
-                                            )}
-                                            <h3 className="text-xl font-black text-black leading-tight mb-3 group-hover:text-orange-500 transition-colors line-clamp-2">
-                                                {post.title}
-                                            </h3>
-                                            <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                                                    {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-MA' : 'fr-FR') : ''}
-                                                </span>
-                                                <ArrowUpRight className="w-4 h-4 text-black group-hover:text-orange-500 transition-colors rtl:-scale-x-100" />
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </section>
-                    )}
+
 
                     {/* Testimonials Section (Audio & Images) */}
                     {(audioTestimonials.length > 0 || imageTestimonials.length > 0) && (
