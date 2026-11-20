@@ -14,6 +14,7 @@ import InstantOfferPopup from '@/components/cart/InstantOfferPopup'
 import { usePathname } from 'next/navigation'
 import { calculate3For4Discount } from '@/lib/utils'
 import { ga4TrackViewCart, ga4TrackRemoveFromCart } from '@/lib/tracking'
+import CartDrawerSkeleton from '@/components/cart/CartDrawerSkeleton'
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -164,7 +165,9 @@ export default function CartDrawer({ isOpen, onClose, is3For4Active = false }: C
         }
     }, [isOpen, onClose])
 
-    if (!mounted) return null
+    if (!mounted) {
+        return isOpen ? <CartDrawerSkeleton onClose={onClose} /> : null
+    }
 
     return (
         <>

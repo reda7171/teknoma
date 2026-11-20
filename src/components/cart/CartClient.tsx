@@ -14,6 +14,7 @@ import AddToCartButton from '@/components/AddToCartButton'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { calculate3For4Discount } from '@/lib/utils'
 import { ga4TrackViewCart, ga4TrackRemoveFromCart } from '@/lib/tracking'
+import CartPageSkeleton from '@/components/cart/CartPageSkeleton'
 
 interface CartClientProps {
     minOrderAmount?: number
@@ -99,7 +100,7 @@ export default function CartClient({ minOrderAmount = 0, recommendedBooks = [], 
         }
     }, [mounted])
 
-    if (!mounted) return null
+    if (!mounted) return <CartPageSkeleton />
 
     const totalPrice = getTotalPrice()
     const totalItems = getTotalItems()
