@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-Email: admin@riwaya.com
+Email: admin@tekno.ma (ou admin@riwaya.com)
 Password: admin123 (hash: $2a$10$...)
 Role: ADMIN
 
