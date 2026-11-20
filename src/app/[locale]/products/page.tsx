@@ -9,7 +9,7 @@ import { Cpu, Search, X } from 'lucide-react'
 import type { Prisma } from '@prisma/client'
 import type { Metadata } from 'next'
 
-const POPULAR_BRANDS = ['Apple', 'Samsung', 'Xiaomi', 'Dell', 'HP', 'Lenovo']
+const POPULAR_BRANDS = ['Apple', 'Samsung', 'Xiaomi', 'Dell', 'HP', 'Lenovo', 'Asus', 'Sony']
 
 export async function generateMetadata({
   params
