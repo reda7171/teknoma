@@ -130,6 +130,7 @@ model User {
   readingList          ReadingList[]
   wishlist             Wishlist[]
   posSessions          PosSession[]
+  loyaltyAccount       LoyaltyAccount?
 
   @@index([email])
   @@index([role])
@@ -432,9 +433,13 @@ model Order {
   fbclid           String?              @db.VarChar(500)
   ttclid           String?              @db.VarChar(500)
   salesChannel     SalesChannel         @default(RIWAYA_STORE)
+  pointsUsed       Int                  @default(0)
+  pointsDiscount   Float                @default(0)
+  pointsEarned     Int                  @default(0)
   items            OrderItem[]
   paypalPayments   PaypalPayment[]
   statusHistory    OrderStatusHistory[]
+  loyaltyTransactions LoyaltyTransaction[]
   customer         Customer?            @relation(fields: [customerId], references: [id])
   expense          Expense?             @relation(fields: [expenseId], references: [id])
   financeArchive   FinanceArchive?      @relation(fields: [financeArchiveId], references: [id])
@@ -1633,4 +1638,58 @@ model AdCampaignSpend {
   @@index([utmSlug])
   @@index([syncedAt])
   @@map("ad_campaign_spends")
+}
+
+enum LoyaltyTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum LoyaltyTransactionType {
+  EARNED
+  REDEEMED
+  BONUS
+  REFUNDED
+  EXPIRED
+  ADJUSTMENT
+}
+
+model LoyaltyAccount {
+  id             String               @id @default(uuid())
+  userId         String               @unique
+  pointsBalance  Int                  @default(0)
+  lifetimePoints Int                  @default(0)
+  tier           LoyaltyTier          @default(BRONZE)
+  tierUpdatedAt  DateTime             @default(now())
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   LoyaltyTransaction[]
+
+  @@index([tier])
+  @@index([pointsBalance])
+  @@map("loyalty_accounts")
+}
+
+model LoyaltyTransaction {
+  id           String                 @id @default(uuid())
+  accountId    String
+  orderId      String?
+  type         LoyaltyTransactionType
+  points       Int
+  balanceAfter Int
+  description  String?                @db.VarChar(255)
+  referenceId  String?                @db.VarChar(100)
+  expiresAt    DateTime?
+  createdAt    DateTime               @default(now())
+  account      LoyaltyAccount         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  order        Order?                 @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([accountId])
+  @@index([orderId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("loyalty_transactions")
 }
