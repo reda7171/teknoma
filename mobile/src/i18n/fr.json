@@ -156,5 +156,11 @@
   "items_count": "articles",
   "BankTransfer": "Virement Bancaire",
   "TransferAmountToBank": "Transférez le montant sur notre compte bancaire",
-  "OrderProcessedAfterTransfer": "Votre commande sera traitée après confirmation du virement."
+  "OrderProcessedAfterTransfer": "Votre commande sera traitée après confirmation du virement.",
+  "order_whatsapp": "Commander via WhatsApp",
+  "key_insights": "Points Clés & Citations",
+  "key_insights_desc": "L'essentiel du livre pour les lecteurs pressés",
+  "key_quote": "Citation marquante",
+  "share_cart_whatsapp": "Commander le panier sur WhatsApp",
+  "whatsapp_order_subtitle": "Validation instantanée & livraison rapide au Maroc"
 }

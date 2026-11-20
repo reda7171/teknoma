@@ -156,5 +156,11 @@
   "items_count": "عناصر",
   "BankTransfer": "تحويل بنكي",
   "TransferAmountToBank": "قم بتحويل المبلغ إلى حسابنا البنكي",
-  "OrderProcessedAfterTransfer": "ستتم معالجة طلبك بعد تأكيد التحويل."
+  "OrderProcessedAfterTransfer": "ستتم معالجة طلبك بعد تأكيد التحويل.",
+  "order_whatsapp": "طلب عبر واتساب",
+  "key_insights": "النقاط الرئيسية والاقتباسات",
+  "key_insights_desc": "خلاصة سريعة للكتاب للقراء المشغولين",
+  "key_quote": "اقتباس ملهم",
+  "share_cart_whatsapp": "طلب السلة عبر واتساب",
+  "whatsapp_order_subtitle": "تأكيد فوري وتوصيل سريع في المغرب"
 }

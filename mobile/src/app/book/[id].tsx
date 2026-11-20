@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share, View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Platform, Modal, TextInput, Alert, useColorScheme, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView, RefreshControl } from 'react-native';
+import { Share, View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Platform, Modal, TextInput, Alert, useColorScheme, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView, RefreshControl, Linking } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -12,7 +12,9 @@ import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useRecentStore } from '@/store/useRecentStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useI18nStore } from '@/store/useI18nStore';
 import { BookCard } from '@/components/BookCard';
+import { BookKeyInsights } from '@/components/BookKeyInsights';
 import { Colors, Spacing } from '@/constants/theme';
 import { playFavoriteSound } from '@/utils/sounds';
 
@@ -27,6 +29,7 @@ export default function BookDetailsScreen() {
   const items = useWishlistStore((state) => state.items);
   const addRecent = useRecentStore((state) => state.addRecent);
   const { isLoggedIn, customer } = useAuthStore();
+  const { t } = useI18nStore();
   const liked = items.some((p) => p.id === id);
 
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -119,6 +122,24 @@ export default function BookDetailsScreen() {
       addItem(product);
       Alert.alert('Succès', 'Produit ajouté au panier !');
     }
+  };
+
+  const handleWhatsAppOrder = () => {
+    if (!product) return;
+    const priceText = product.price > 0 ? ` (Prix : ${product.price.toFixed(2)} MAD)` : '';
+    const authorText = product.author ? ` par ${product.author}` : '';
+    const message = `Bonjour, je souhaite commander ce ${product.type === 'PACK' ? 'pack' : 'livre'} : "${product.title}"${authorText}${priceText}. Livraison au Maroc.`;
+    const url = `whatsapp://send?phone=212702220575&text=${encodeURIComponent(message)}`;
+    const webUrl = `https://wa.me/212702220575?text=${encodeURIComponent(message)}`;
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        Linking.openURL(webUrl);
+      }
+    }).catch(() => {
+      Linking.openURL(webUrl);
+    });
   };
 
   const handleSubmitReview = async () => {
@@ -292,6 +313,29 @@ export default function BookDetailsScreen() {
             )}
           </View>
 
+          {/* Quick WhatsApp Order Banner */}
+          <TouchableOpacity 
+            style={[
+              styles.whatsAppQuickBtn, 
+              { backgroundColor: scheme === 'dark' ? '#064E3B' : '#ECFDF5', borderColor: scheme === 'dark' ? '#047857' : '#A7F3D0' }
+            ]} 
+            onPress={handleWhatsAppOrder}
+            activeOpacity={0.85}
+          >
+            <View style={styles.whatsAppIconCircle}>
+              <Ionicons name="logo-whatsapp" size={20} color="#FFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.whatsAppBtnTitle, { color: scheme === 'dark' ? '#A7F3D0' : '#065F46' }]}>
+                {t('order_whatsapp')}
+              </Text>
+              <Text style={[styles.whatsAppBtnSubtitle, { color: scheme === 'dark' ? '#6EE7B7' : '#047857' }]}>
+                {t('whatsapp_order_subtitle')}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={scheme === 'dark' ? '#34D399' : '#059669'} />
+          </TouchableOpacity>
+
           {product.description ? (
             <View style={styles.descriptionBox}>
               <Text style={[styles.sectionHeading, { color: colors.text }]}>Description</Text>
@@ -300,6 +344,15 @@ export default function BookDetailsScreen() {
               </Text>
             </View>
           ) : null}
+
+          {/* Sommaire & Citations */}
+          {product.type === 'BOOK' && (
+            <BookKeyInsights
+              title={product.title}
+              author={product.author}
+              description={product.description}
+            />
+          )}
         </View>
 
         {/* Reviews Section */}
@@ -479,6 +532,10 @@ const styles = StyleSheet.create({
   currency: { fontSize: 18, fontWeight: '700' },
   ratingBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
   ratingText: { fontSize: 14, fontWeight: '800', color: '#92400E', marginLeft: 4 },
+  whatsAppQuickBtn: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 16, borderWidth: 1, marginBottom: 20, gap: 12 },
+  whatsAppIconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#25D366', justifyContent: 'center', alignItems: 'center' },
+  whatsAppBtnTitle: { fontSize: 14, fontWeight: '800', letterSpacing: -0.2 },
+  whatsAppBtnSubtitle: { fontSize: 11, marginTop: 2, fontWeight: '500' },
   descriptionBox: { marginTop: 8 },
   description: { fontSize: 15, lineHeight: 24 },
   section: { paddingHorizontal: 20, marginBottom: 32 },

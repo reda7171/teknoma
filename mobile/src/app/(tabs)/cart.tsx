@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
@@ -18,6 +18,25 @@ export default function CartScreen() {
   
   const { items, removeItem, updateQuantity, getSubtotal } = useCartStore();
   const subtotal = getSubtotal();
+
+  const handleWhatsAppCartOrder = () => {
+    if (items.length === 0) return;
+    const itemsList = items
+      .map((i) => `• ${i.quantity}x ${i.product.title} (${(i.product.price * i.quantity).toFixed(2)} MAD)`)
+      .join('\n');
+    const msg = `Salam / Bonjour, je souhaite commander mon panier Riwaya :\n\n${itemsList}\n\n*Total : ${subtotal.toFixed(2)} MAD*\nPaiement à la livraison (COD).`;
+    const url = `whatsapp://send?phone=212702220575&text=${encodeURIComponent(msg)}`;
+    const webUrl = `https://wa.me/212702220575?text=${encodeURIComponent(msg)}`;
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        Linking.openURL(webUrl);
+      }
+    }).catch(() => {
+      Linking.openURL(webUrl);
+    });
+  };
 
   if (items.length === 0) {
     return (
@@ -130,6 +149,17 @@ export default function CartScreen() {
             <Ionicons name="arrow-forward" size={20} color="#FFF" />
           </LinearGradient>
         </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.whatsappCartBtn, { backgroundColor: scheme === 'dark' ? '#064E3B' : '#ECFDF5', borderColor: scheme === 'dark' ? '#047857' : '#A7F3D0' }]} 
+          onPress={handleWhatsAppCartOrder} 
+          activeOpacity={0.85}
+        >
+          <Ionicons name="logo-whatsapp" size={18} color="#10B981" />
+          <Text style={[styles.whatsappCartText, { color: scheme === 'dark' ? '#A7F3D0' : '#065F46' }]}>
+            {t('share_cart_whatsapp')}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -205,7 +235,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
-    paddingBottom: 140, // Espace pour la barre flottante
+    paddingBottom: 190, // Espace pour la barre flottante et les 2 boutons
   },
   cartItem: {
     flexDirection: 'row',
@@ -347,5 +377,19 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '800',
+  },
+  whatsappCartBtn: {
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 8,
+  },
+  whatsappCartText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

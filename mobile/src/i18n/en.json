@@ -156,5 +156,11 @@
   "items_count": "items",
   "BankTransfer": "Bank Transfer",
   "TransferAmountToBank": "Transfer the amount to our bank account",
-  "OrderProcessedAfterTransfer": "Your order will be processed after payment confirmation."
+  "OrderProcessedAfterTransfer": "Your order will be processed after payment confirmation.",
+  "order_whatsapp": "Order via WhatsApp",
+  "key_insights": "Key Insights & Quotes",
+  "key_insights_desc": "Book essentials curated for busy readers",
+  "key_quote": "Inspiring quote",
+  "share_cart_whatsapp": "Order Cart via WhatsApp",
+  "whatsapp_order_subtitle": "Instant confirmation & fast shipping in Morocco"
 }
