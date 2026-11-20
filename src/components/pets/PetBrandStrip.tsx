@@ -1,14 +1,15 @@
 import { Cpu, Award, ShieldCheck } from 'lucide-react'
+import { Link } from '@/i18n/routing'
 
 const BRANDS = [
   { name: 'Apple', tag: 'iPhone, Mac & iPad' },
   { name: 'Samsung', tag: 'Galaxy & Écrans' },
-  { name: 'Dell', tag: 'XPS & Inspiron' },
-  { name: 'Asus', tag: 'ROG & ZenBook' },
-  { name: 'Lenovo', tag: 'Legion & ThinkPad' },
-  { name: 'Sony', tag: 'Audio Hi-Res & ANC' },
   { name: 'Xiaomi', tag: 'Ultra & Fast Charge' },
-  { name: 'Anker', tag: 'Chargeurs GaN & Câbles' },
+  { name: 'Dell', tag: 'XPS & Inspiron' },
+  { name: 'HP', tag: 'Spectre & Pavilion' },
+  { name: 'Lenovo', tag: 'Legion & ThinkPad' },
+  { name: 'Asus', tag: 'ROG & ZenBook' },
+  { name: 'Sony', tag: 'Audio Hi-Res & ANC' },
 ]
 
 export default function PetBrandStrip({ title }: { title: string }) {
@@ -27,14 +28,15 @@ export default function PetBrandStrip({ title }: { title: string }) {
         </div>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
           {BRANDS.map((brand) => (
-            <div
+            <Link
               key={brand.name}
-              className="flex flex-col items-center justify-center rounded-2xl border border-[#17351d]/10 bg-white p-3.5 text-center shadow-xs transition hover:-translate-y-0.5 hover:border-[#96703a]/40 hover:shadow-sm"
+              href={'/products?brand=' + encodeURIComponent(brand.name)}
+              className="flex flex-col items-center justify-center rounded-2xl border border-[#17351d]/10 bg-white p-3.5 text-center shadow-xs transition hover:-translate-y-1 hover:border-blue-600 hover:shadow-md"
             >
-              <Cpu className="mb-1.5 h-4 w-4 text-[#96703a]/60" />
+              <Cpu className="mb-1.5 h-4 w-4 text-[#96703a]/70" />
               <span className="text-xs font-bold text-[#17351d]">{brand.name}</span>
               <span className="mt-1 text-[10px] text-[#6d7966]">{brand.tag}</span>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
