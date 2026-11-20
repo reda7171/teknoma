@@ -12,6 +12,7 @@ import ImageWithFallback from '@/components/ImageWithFallback'
 import { useTranslations, useLocale } from 'next-intl'
 import { getLocalizedTitle, generateBookUrl } from '@/lib/i18n-utils'
 import { ga4TrackViewItemList } from '@/lib/tracking'
+import CatalogSkeleton from '@/components/books/CatalogSkeleton'
 
 interface InfiniteBookListProps {
     initialBooks: Book[]
@@ -350,18 +351,7 @@ export default function InfiniteBookList({ initialBooks, initialFilters, adsense
             {hasMore && (
                 <div ref={observerTarget} className="mt-10">
                     {loading && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="bg-white rounded-[2rem] overflow-hidden border border-gray-100/50 shadow-sm h-full flex flex-col p-4 animate-pulse lg:animate-none">
-                                    <div className="aspect-square bg-gray-100 rounded-[1.5rem] mb-6"></div>
-                                    <div className="space-y-3 px-2">
-                                        <div className="h-4 bg-gray-100 rounded-full w-3/4 mx-auto"></div>
-                                        <div className="h-3 bg-gray-100 rounded-full w-1/2 mx-auto"></div>
-                                        <div className="h-8 bg-gray-100 rounded-full w-full mt-4"></div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <CatalogSkeleton count={4} />
                     )}
                 </div>
             )}
