@@ -1,34 +1,35 @@
-# PetsUnivers
+# Tekno.ma (Tekno Store)
 
-Boutique animalière au Maroc : alimentation, accessoires, hygiène et soins pour
-chats, chiens et petits animaux. Interface en français, arabe et anglais,
-catalogue, panier, commandes et administration.
+Plateforme e-commerce High-Tech au Maroc : Smartphones, Ordinateurs portables, Mac, Audio et Accessoires électroniques de pointe avec paiement à la livraison (Cash On Delivery - COD).
 
-## Installation locale
+## Caractéristiques principales
 
-1. Installer les dépendances : `npm install --legacy-peer-deps`.
-2. Copier `.env.example` vers `.env` et configurer une base MySQL dédiée.
-3. Générer Prisma : `npm run prisma:generate`.
-4. Initialiser le schéma : `npm run db:push` sur une base PetsUnivers neuve.
-5. Définir `ADMIN_INITIAL_PASSWORD`, puis exécuter `npm run prisma:seed`.
-6. Démarrer : `npm run dev`.
+- **Catalogue High-Tech** : Smartphones (iPhone, Samsung Galaxy), PC & Mac (MacBook Pro/Air M3, Asus ROG, Dell XPS), Casques & Écouteurs (Sony, AirPods), Chargeurs GaN et Accessoires.
+- **Paiement à la livraison (COD)** : Commande rapide avec expédition 24/48h dans toutes les villes du Maroc (Casablanca, Rabat, Marrakech, Tanger, Fès, Agadir...).
+- **Multi-devises & Multi-langues** : Interface disponible en Français, Arabe (RTL complet) et Anglais.
+- **Back-office Admin & POS** : Gestion complète des commandes, stocks, packs promotionnels et expéditions.
+- **Stack technique** : Next.js 16 (App Router & Turbopack), React 19, TypeScript, Tailwind CSS, Prisma ORM, MySQL.
 
-Le seed initialise un administrateur et les catégories animalières, sans
-catalogue de démonstration. Les produits sont gérés depuis l'administration.
+## Démarrage rapide
 
-## Déploiement
+1. Installer les dépendances :
+   ```bash
+   npm install
+   ```
 
-Consulter [le guide PetsUnivers](docs/DEPLOYMENT_PETSUNIVERS.md).
-Le workflow publie l'image `ghcr.io/reda7171/petsunivers-app`.
-Le déploiement VPS exige `ENABLE_VPS_DEPLOY=true` et des secrets propres au site.
+2. Configurer les variables d'environnement dans `.env` :
+   ```env
+   DATABASE_URL="mysql://teknoma_user:TeknoPass2026_Secure!@167.86.108.246:3908/teknoma_db"
+   NEXT_PUBLIC_SITE_URL="https://tekno.ma"
+   NEXT_PUBLIC_CONTACT_EMAIL="Contact.tekno.ma@gmail.com"
+   ```
 
-## Structure héritée
+3. Générer le client Prisma :
+   ```bash
+   npx prisma generate
+   ```
 
-Le projet conserve les modèles Prisma et routes d'administration du socle
-d'origine, notamment `Book` pour les produits. Des modules historiques de
-librairie, contenus d'exemple et documents binaires restent à revoir avant leur
-utilisation pour PetsUnivers. Leur renommage ne valide pas leur contenu.
-Ne pas réutiliser la base, les clients ou les intégrations de Riwaya.
-
-La configuration existante ignore les erreurs TypeScript pendant `next build`.
-Exécuter `npx tsc --noEmit` séparément pour les identifier.
+4. Lancer le serveur de développement :
+   ```bash
+   npm run dev
+   ```
