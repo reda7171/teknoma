@@ -113,7 +113,10 @@ export function formatOrderItemsList(items?: any[]): { itemsList: string; hasMis
                 rawTitle = i.gift.name || 'Cadeau'
             }
             const typeBadge = i.type === 'PACK' ? '📦' : i.type === 'DIGITAL' ? '💻' : i.type === 'ACCESSORY' ? '🎁' : '📖'
-            const price = i.price !== undefined ? ` (${i.price} MAD)` : ''
+            const itemPrice = typeof i.price === 'number' ? i.price : Number(i.price) || 0
+            const priceText = itemPrice > 0 ? ` • ${itemPrice.toFixed(2)} MAD` : ''
+            const qty = i.quantity || 1
+            const subtotalText = (itemPrice > 0 && qty > 1) ? ` [Total: ${(itemPrice * qty).toFixed(2)} MAD]` : ''
             
             const isItemMissing = Boolean(
                 i.isMissing ||
@@ -127,7 +130,7 @@ export function formatOrderItemsList(items?: any[]): { itemsList: string; hasMis
             }
 
             const missingBadge = isItemMissing ? ' ⚠️ <b>[MANQUANT]</b>' : ''
-            return `  • ${typeBadge} ${escapeHtml(rawTitle)} x${i.quantity}${price}${missingBadge}`
+            return `  • ${typeBadge} ${escapeHtml(rawTitle)} x${qty}${priceText}${subtotalText}${missingBadge}`
         })
         .join('\n')
 
@@ -230,10 +233,21 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     }
 
     const whatsappTemplateSetting = await prisma.siteSettings.findUnique({ where: { key: 'whatsapp_template_order' } })
-    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Riwaya a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
+    const defaultWaTemplate = `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Riwaya d'un montant de {{total}} a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}} (Paiement à la livraison).\n\nMerci de votre confiance ! 📚✨`
+    let whatsappText = whatsappTemplateSetting?.value || defaultWaTemplate
+    const formattedTotal = `${order.total.toFixed(2)} MAD`
     whatsappText = whatsappText.replace(/\{\{fullName\}\}/g, order.fullName)
                                .replace(/\{\{shortId\}\}/g, shortId)
                                .replace(/\{\{city\}\}/g, order.city)
+                               .replace(/\{\{total\}\}/g, formattedTotal)
+
+    // Si l'ancien template personnalisé ne contenait pas encore la variable {{total}}
+    if (!whatsappText.includes(order.total.toFixed(2)) && !whatsappText.includes('MAD') && !whatsappText.includes('DH')) {
+        whatsappText = whatsappText.replace(
+            /(\n\nMerci de votre confiance)/,
+            `\n💰 Montant total : ${formattedTotal} (Paiement à la livraison)\n$1`
+        )
+    }
 
     const whatsappMsg = encodeURIComponent(whatsappText)
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappMsg}`
