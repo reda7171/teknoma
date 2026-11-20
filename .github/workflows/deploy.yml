@@ -161,7 +161,7 @@ jobs:
             fi
 
             # ─── Retrait et nettoyage de la page 502 de Nginx ─────────────
-            NGINX_CONF="/etc/nginx/sites-enabled/default"
+            NGINX_CONF="/etc/nginx/sites-available/riwayama"
             if [ -f "$NGINX_CONF" ]; then
               echo "Nettoyage de Nginx (suppression interception page 502)..."
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i '/error_page 502/d' "$NGINX_CONF" || true
@@ -202,29 +202,14 @@ jobs:
               fi
             fi
 
-            # Rechargement atomique sans interruption (Zero-Downtime)
-            echo "Rechargement atomique du service..."
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S docker compose up -d --no-deps --force-recreate app || {
-              echo "ERREUR critique: docker compose up app a echoue!"
+            # Rechargement atomique sans interruption (Zero-Downtime Blue/Green)
+            echo "Rechargement atomique Zero-Downtime..."
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S sed -i 's/\r$//' scripts/deploy-zero-downtime.sh
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/deploy-zero-downtime.sh
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S ./scripts/deploy-zero-downtime.sh "${{ github.sha }}" || {
+              echo "ERREUR critique: le deploiement Zero-Downtime a echoue!"
               exit 1
             }
-
-            # Verification immediate de disponibilite HTTP + version de deploiement
-            echo "Attente de reponse HTTP 200 et verification de version ${{ github.sha }} sur port 3000..."
-            READY=0
-            for i in $(seq 1 45); do
-              BODY=$(curl -s -f -L --max-time 5 http://127.0.0.1:3000/fr || true)
-              if [ -n "$BODY" ] && echo "$BODY" | grep -q "${{ github.sha }}"; then
-                echo "Application operationnelle (HTTP 200 OK, version ${{ github.sha }}) en ${i} checks"
-                READY=1
-                break
-              fi
-              sleep 2
-            done
-            if [ $READY -eq 0 ]; then
-              echo "ERREUR: Le port 3000 ne sert pas la version attendue ${{ github.sha }}."
-              exit 1
-            fi
 
             # Rechargement et contrôle du conteneur WhatsApp (WAHA)
             echo "Rechargement de la passerelle WhatsApp (WAHA)..."
