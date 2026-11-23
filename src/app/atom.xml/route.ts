@@ -84,7 +84,7 @@ export async function GET() {
         const entries: AtomEntry[] = []
 
         for (const book of books) {
-            const localizedTitle = getLocalizedTitle(book, 'fr') || book.title || 'Livre Riwaya'
+            const localizedTitle = getLocalizedTitle(book, 'fr') || book.title || 'Livre Tekno Store'
             const localizedDesc = cleanDescription(getLocalizedDescription(book, 'fr') || book.description)
             const bookUrl = `${baseUrl}/fr${generateBookUrl(book, 'fr')}`
 
@@ -94,7 +94,7 @@ export async function GET() {
                 id: `${baseUrl}/books/${book.id}`,
                 updated: book.updatedAt || book.createdAt || new Date(),
                 summary: `${localizedDesc}${book.price ? ` (Prix: ${book.price} MAD)` : ''}`,
-                author: book.author || 'Riwaya',
+                author: book.author || 'Tekno Store',
                 category: book.category || 'Livres',
             })
         }
@@ -110,7 +110,7 @@ export async function GET() {
                 id: `${baseUrl}/blog/${post.slug}`,
                 updated: post.updatedAt || post.publishedAt || post.createdAt || new Date(),
                 summary: desc,
-                author: post.author?.fullName || 'Riwaya',
+                author: post.author?.fullName || 'Tekno Store',
                 category: post.category || 'Blog',
             })
         }
@@ -135,8 +135,8 @@ export async function GET() {
 
         const atomXml = `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Riwaya | Nouveaux Livres et Articles</title>
-  <subtitle>Derniers livres et articles publiés sur la librairie Riwaya au Maroc</subtitle>
+  <title>Tekno Store | Nouveaux Livres et Articles</title>
+  <subtitle>Derniers livres et articles publiés sur la librairie Tekno Store au Maroc</subtitle>
   <link href="${baseUrl}/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="${baseUrl}/"/>
   <id>${baseUrl}/</id>

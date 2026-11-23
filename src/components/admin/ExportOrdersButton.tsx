@@ -61,7 +61,7 @@ const ALL_COLUMNS: ColumnDefinition[] = [
         label: 'Canal',
         category: 'Général',
         getValue: (order) => ({
-            text: order.salesChannel || 'RIWAYA_STORE',
+            text: order.salesChannel || 'TEKNO_STORE',
             style: "text-align: center;"
         })
     },
@@ -230,7 +230,7 @@ const PRESETS: Record<string, { label: string; columnIds: string[] }> = {
     }
 }
 
-const STORAGE_KEY = 'riwaya_export_orders_columns_v1'
+const STORAGE_KEY = 'tekno_export_orders_columns_v1'
 
 export default function ExportOrdersButton({ orders, totalSelected, className }: ExportOrdersButtonProps) {
     const isSelectionEmpty = totalSelected !== undefined ? totalSelected === 0 : orders.length === 0
@@ -316,7 +316,7 @@ export default function ExportOrdersButton({ orders, totalSelected, className }:
                 <x:ExcelWorkbook>
                     <x:ExcelWorksheets>
                         <x:ExcelWorksheet>
-                            <x:Name>Commandes Riwaya</x:Name>
+                            <x:Name>Commandes Tekno Store</x:Name>
                             <x:WorksheetOptions>
                                 <x:DisplayGridlines/>
                             </x:WorksheetOptions>
@@ -352,7 +352,7 @@ export default function ExportOrdersButton({ orders, totalSelected, className }:
         const link = document.createElement('a')
         const date = new Date().toISOString().split('T')[0]
         link.href = url
-        link.setAttribute('download', `Riwaya_Commandes_${date}.xls`)
+        link.setAttribute('download', `Tekno Store_Commandes_${date}.xls`)
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -365,8 +365,8 @@ export default function ExportOrdersButton({ orders, totalSelected, className }:
                 <button
                     onClick={handleExport}
                     className={className || `inline-flex items-center gap-2 ${
-                        isSelectionEmpty 
-                            ? 'bg-gray-100 text-gray-500 hover:bg-gray-200' 
+                        isSelectionEmpty
+                            ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                             : 'bg-emerald-600 text-white hover:bg-emerald-700'
                     } px-4 py-2 font-black text-sm transition-all uppercase tracking-wider cursor-pointer active:scale-95`}
                     title={isSelectionEmpty ? "Veuillez cocher des commandes à exporter" : `Exporter ${countDisplay} commande(s) sous format Excel (.xls)`}
@@ -379,8 +379,8 @@ export default function ExportOrdersButton({ orders, totalSelected, className }:
                     type="button"
                     onClick={() => setShowConfigModal(true)}
                     className={`${
-                        isSelectionEmpty 
-                            ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-l border-gray-200' 
+                        isSelectionEmpty
+                            ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-l border-gray-200'
                             : 'bg-emerald-700 text-white hover:bg-emerald-800 border-l border-emerald-800'
                     } px-2.5 py-2 transition-colors cursor-pointer`}
                     title="Filtrer les colonnes de l'export"
@@ -418,8 +418,8 @@ export default function ExportOrdersButton({ orders, totalSelected, className }:
                                             type="button"
                                             onClick={() => applyPreset(key)}
                                             className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
-                                                isActive 
-                                                    ? 'bg-emerald-600 text-white shadow-sm' 
+                                                isActive
+                                                    ? 'bg-emerald-600 text-white shadow-sm'
                                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                             }`}
                                         >

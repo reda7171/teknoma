@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { 
-    Bot, Play, AlertCircle, Loader2, CheckCircle2, Download, 
-    Search, CheckSquare, Square, Eye, Sparkles, Sliders, 
+import {
+    Bot, Play, AlertCircle, Loader2, CheckCircle2, Download,
+    Search, CheckSquare, Square, Eye, Sparkles, Sliders,
     Layers, Tag, Phone, ShieldCheck, ChevronLeft, ChevronRight,
     ShoppingBag, ExternalLink
 } from 'lucide-react'
@@ -52,8 +52,8 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
     // Filtrage des livres
     const filteredBooks = useMemo(() => {
         return books.filter(book => {
-            const matchesSearch = !searchQuery || 
-                book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            const matchesSearch = !searchQuery ||
+                book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (book.author && book.author.toLowerCase().includes(searchQuery.toLowerCase()))
             const matchesCat = selectedCategory === 'all' || book.category === selectedCategory
             return matchesSearch && matchesCat
@@ -102,10 +102,10 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
         setIsLoading(true)
         setMessage(null)
         try {
-            const res = await fetch('/api/admin/bot/facebook', { 
+            const res = await fetch('/api/admin/bot/facebook', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     bookIds: selectedBookIds,
                     watermark: {
                         enabled: watermarkEnabled,
@@ -119,10 +119,10 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
             })
             const data = await res.json()
             if (!res.ok || !data.success) throw new Error(data.error || 'Erreur de lancement')
-            
-            setMessage({ 
-                type: 'success', 
-                text: `Bot lancé avec succès pour ${selectedBookIds.length} livre(s) ! Chrome s'ouvre sur votre machine.` 
+
+            setMessage({
+                type: 'success',
+                text: `Bot lancé avec succès pour ${selectedBookIds.length} livre(s) ! Chrome s'ouvre sur votre machine.`
             })
         } catch (error: any) {
             console.error(error)
@@ -197,7 +197,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
 
             {/* Layout principal 2 Colonnes */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                
+
                 {/* COLONNE GAUCHE (7 cols) : Sélection par lot des livres */}
                 <div className="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
@@ -220,7 +220,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                     <div className="space-y-3">
                         <div className="relative">
                             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                            <input 
+                            <input
                                 type="text"
                                 placeholder="Rechercher par titre, auteur..."
                                 value={searchQuery}
@@ -231,7 +231,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
 
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             {/* Filtre catégorie */}
-                            <select 
+                            <select
                                 value={selectedCategory}
                                 onChange={(e) => setSelectedCategory(e.target.value)}
                                 aria-label="Filtrer par catégorie"
@@ -245,13 +245,13 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
 
                             {/* Actions de sélection globale */}
                             <div className="flex items-center gap-2 text-xs">
-                                <button 
+                                <button
                                     onClick={handleSelectAllFiltered}
                                     className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition"
                                 >
                                     Tout cocher
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleDeselectAll}
                                     className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition"
                                 >
@@ -273,20 +273,20 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                 const isPreviewing = previewBookId === book.id
 
                                 return (
-                                    <div 
+                                    <div
                                         key={book.id}
                                         onClick={() => setPreviewBookId(book.id)}
                                         className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
-                                            isPreviewing 
-                                                ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-500/10 shadow-sm' 
-                                                : isSelected 
-                                                    ? 'bg-slate-50/80 border-slate-300' 
+                                            isPreviewing
+                                                ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-500/10 shadow-sm'
+                                                : isSelected
+                                                    ? 'bg-slate-50/80 border-slate-300'
                                                     : 'bg-white border-slate-100 hover:border-slate-300 hover:bg-slate-50/40'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
                                             {/* Checkbox pour le lot */}
-                                            <button 
+                                            <button
                                                 type="button"
                                                 onClick={(e) => handleToggleSelectBook(book.id, e)}
                                                 className="text-slate-400 hover:text-blue-600 transition shrink-0"
@@ -301,8 +301,8 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
 
                                             {/* Miniature */}
                                             <div className="w-11 h-14 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-200 relative">
-                                                <img 
-                                                    src={formatImageUrl(book.image)} 
+                                                <img
+                                                    src={formatImageUrl(book.image)}
                                                     alt={book.title}
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => { (e.target as HTMLImageElement).src = '/book-placeholder.png' }}
@@ -357,14 +357,14 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
                                     <span>{currentPreviewIndex + 1}/{selectedBookIds.length}</span>
                                     <div className="flex items-center">
-                                        <button 
+                                        <button
                                             disabled={currentPreviewIndex <= 0}
                                             onClick={() => setPreviewBookId(selectedBookIds[currentPreviewIndex - 1])}
                                             className="p-1 rounded hover:bg-slate-100 disabled:opacity-30"
                                         >
                                             <ChevronLeft className="w-3.5 h-3.5" />
                                         </button>
-                                        <button 
+                                        <button
                                             disabled={currentPreviewIndex >= selectedBookIds.length - 1}
                                             onClick={() => setPreviewBookId(selectedBookIds[currentPreviewIndex + 1])}
                                             className="p-1 rounded hover:bg-slate-100 disabled:opacity-30"
@@ -382,7 +382,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                 <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-md bg-white">
                                     {/* Conteneur Image avec Filigrane dynamique appliqué en temps réel */}
                                     <div className="relative aspect-[3/4] w-full bg-slate-900 overflow-hidden flex items-center justify-center">
-                                        <img 
+                                        <img
                                             src={formatImageUrl(previewBook.image)}
                                             alt={previewBook.title}
                                             className="w-full h-full object-cover"
@@ -401,32 +401,32 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
 
                                                 {/* Filigrane selon la position */}
                                                 {watermarkPosition === 'center' ? (
-                                                    <div 
+                                                    <div
                                                         className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
                                                         style={{ opacity: watermarkOpacity }}
                                                     >
                                                         <div className="transform -rotate-12 px-6 py-2 rounded-xl bg-slate-900/80 text-white font-black text-sm tracking-widest border border-white/20">
-                                                            RIWAYA.STORE
+                                                            tekno.ma
                                                         </div>
                                                     </div>
                                                 ) : watermarkPosition === 'corner' ? (
-                                                    <div 
+                                                    <div
                                                         className="absolute bottom-3 right-3 z-10 p-2.5 rounded-xl text-white shadow-xl border border-blue-400/30"
                                                         style={{ backgroundColor: watermarkColor, opacity: watermarkOpacity }}
                                                     >
-                                                        <div className="text-[11px] font-black tracking-wider">RIWAYA.STORE</div>
+                                                        <div className="text-[11px] font-black tracking-wider">tekno.ma</div>
                                                         <div className="text-[9px] text-blue-200 font-semibold">{watermarkText}</div>
                                                     </div>
                                                 ) : (
                                                     // Bandeau en bas ou en haut
-                                                    <div 
+                                                    <div
                                                         className={`absolute left-0 right-0 z-10 px-4 py-2.5 text-center text-white border-t border-blue-500/60 shadow-2xl ${
                                                             watermarkPosition === 'top' ? 'top-0 border-b border-t-0' : 'bottom-0'
                                                         }`}
                                                         style={{ backgroundColor: watermarkColor, opacity: watermarkOpacity }}
                                                     >
                                                         <div className="text-xs font-black tracking-widest uppercase">
-                                                            RIWAYA.STORE
+                                                            tekno.ma
                                                         </div>
                                                         <div className="text-[10px] text-blue-200 font-bold truncate">
                                                             {watermarkText}
@@ -447,7 +447,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                         </div>
                                         <h4 className="text-sm font-bold text-slate-800 line-clamp-1">{previewBook.title}</h4>
                                         <div className="text-xs text-slate-500 line-clamp-2">
-                                            {previewBook.description ? previewBook.description.replace(/<[^>]*>?/gm, '') : 'Livre en stock chez Riwaya Store Maroc.'}
+                                            {previewBook.description ? previewBook.description.replace(/<[^>]*>?/gm, '') : 'Livre en stock chez Tekno Store Store Maroc.'}
                                         </div>
                                     </div>
                                 </div>
@@ -473,7 +473,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                     <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
                         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                             <label className="flex items-center gap-2.5 cursor-pointer">
-                                <input 
+                                <input
                                     type="checkbox"
                                     checked={watermarkEnabled}
                                     onChange={(e) => setWatermarkEnabled(e.target.checked)}
@@ -495,7 +495,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                         <Phone className="w-3.5 h-3.5 text-blue-600" />
                                         Texte commercial / WhatsApp
                                     </label>
-                                    <input 
+                                    <input
                                         type="text"
                                         value={watermarkText}
                                         onChange={(e) => setWatermarkText(e.target.value)}
@@ -507,7 +507,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                 {/* Sticker de Prix */}
                                 <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
                                     <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-                                        <input 
+                                        <input
                                             type="checkbox"
                                             checked={showPriceBadge}
                                             onChange={(e) => setShowPriceBadge(e.target.checked)}
@@ -528,13 +528,13 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                             { id: 'corner', label: 'Coin' },
                                             { id: 'center', label: 'Centre' }
                                         ].map(pos => (
-                                            <button 
+                                            <button
                                                 key={pos.id}
                                                 type="button"
                                                 onClick={() => setWatermarkPosition(pos.id as any)}
                                                 className={`py-2 rounded-xl text-center font-bold border transition ${
-                                                    watermarkPosition === pos.id 
-                                                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm' 
+                                                    watermarkPosition === pos.id
+                                                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                                                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                                                 }`}
                                             >
@@ -550,7 +550,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                                         <label className="block text-slate-600 font-bold mb-1">
                                             Opacité : {Math.round(watermarkOpacity * 100)}%
                                         </label>
-                                        <input 
+                                        <input
                                             type="range"
                                             min="0.5"
                                             max="1.0"
@@ -596,7 +596,7 @@ export default function FacebookBotClient({ books }: { books: BookItem[] }) {
                             </span>
                         </div>
 
-                        <button 
+                        <button
                             onClick={handleLaunchBot}
                             disabled={isLoading || selectedBookIds.length === 0}
                             className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-sm rounded-2xl shadow-lg hover:shadow-blue-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"

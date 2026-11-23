@@ -37,54 +37,54 @@ export async function POST(
         }
 
         const absolutePath = join(process.cwd(), 'public', imageUrl)
-        
+
         try {
             await stat(absolutePath)
         } catch {
-            // Logique de secours : si le fichier n'existe pas, on tente de le télécharger depuis riwaya.store
+            // Logique de secours : si le fichier n'existe pas, on tente de le télécharger depuis tekno.ma
             try {
-                const remoteUrl = `https://riwaya.store${imageUrl}`;
+                const remoteUrl = `https://tekno.ma${imageUrl}`;
                 const response = await fetch(remoteUrl);
                 if (!response.ok) throw new Error('Introuvable sur le serveur distant');
-                
+
                 const arrayBuffer = await response.arrayBuffer();
                 const buffer = Buffer.from(arrayBuffer);
-                
+
                 // S'assurer que le dossier parent existe
                 const dir = join(process.cwd(), 'public', ...imageUrl.split('/').slice(0, -1).filter(Boolean));
                 if (!fs.existsSync(dir)) {
                     fs.mkdirSync(dir, { recursive: true });
                 }
-                
+
                 fs.writeFileSync(absolutePath, buffer);
-                void(`[Auto-Recovery] Image téléchargée depuis riwaya.store: ${imageUrl}`);
+                void(`[Auto-Recovery] Image téléchargée depuis tekno.ma: ${imageUrl}`);
             } catch (dlError) {
-                return NextResponse.json({ success: false, error: 'Fichier introuvable localement et sur riwaya.store' }, { status: 404 })
+                return NextResponse.json({ success: false, error: 'Fichier introuvable localement et sur tekno.ma' }, { status: 404 })
             }
         }
 
         const title = book.titleFr || book.title || 'livre'
         const baseSlug = slugify(title)
-        
+
         const pathParts = imageUrl.split('/').filter(Boolean) // ['uploads', 'books', 'file.jpg']
         const fileName = pathParts[pathParts.length - 1]
         const extensionMatch = fileName.match(/\.([a-z0-9]+)$/i)
         const extension = extensionMatch ? extensionMatch[1] : 'jpg'
-        
+
         // Retirer le nom de fichier pour obtenir le dossier (ex: ['uploads', 'books'])
         const folderParts = pathParts.slice(0, -1)
         const dirPath = join(process.cwd(), 'public', ...folderParts)
-        
+
         let newFileName = `${baseSlug || 'livre'}.${extension}`
-        
+
         // Ensure no collisions
         let counter = 1
         let newAbsolutePath = join(dirPath, newFileName)
-        
+
         if (newAbsolutePath === absolutePath) {
              return NextResponse.json({ success: true, message: 'Fichier déjà bien nommé', newUrl: imageUrl })
         }
-        
+
         while (fs.existsSync(newAbsolutePath)) {
             newFileName = `${baseSlug}-${counter}.${extension}`
             newAbsolutePath = join(dirPath, newFileName)
@@ -92,9 +92,9 @@ export async function POST(
         }
 
         await rename(absolutePath, newAbsolutePath)
-        
+
         const newUrl = `/${folderParts.join('/')}/${newFileName}`
-        
+
         await prisma.book.update({
             where: { id },
             data: { image: newUrl }

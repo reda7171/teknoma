@@ -22,7 +22,7 @@ export default function BuyingGuidesPage() {
         },
         {
             title: "Échanger ou Acheter neuf ?",
-            desc: "Tout comprendre sur le système d'échange Riwaya et comment optimiser votre budget lecture.",
+            desc: "Tout comprendre sur le système d'échange Tekno Store et comment optimiser votre budget lecture.",
             icon: Users,
             color: "bg-pixio-yellow",
             image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=800&auto=format&fit=crop"
@@ -55,9 +55,9 @@ export default function BuyingGuidesPage() {
                     {guides.map((guide, idx) => (
                         <div key={idx} className="group bg-white rounded-[3rem] overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-500">
                             <div className="relative h-64 overflow-hidden">
-                                <img 
-                                    src={guide.image} 
-                                    alt={guide.title} 
+                                <img
+                                    src={guide.image}
+                                    alt={guide.title}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                 />
                                 <div className={`absolute top-6 left-6 w-12 h-12 ${guide.color} rounded-2xl flex items-center justify-center text-white shadow-lg`}>
@@ -71,8 +71,8 @@ export default function BuyingGuidesPage() {
                                 <p className="text-gray-500 font-medium leading-relaxed mb-8">
                                     {guide.desc}
                                 </p>
-                                <Link 
-                                    href="/blog" 
+                                <Link
+                                    href="/blog"
                                     className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-black group-hover:gap-5 transition-all"
                                 >
                                     Lire le guide
@@ -99,9 +99,9 @@ export default function BuyingGuidesPage() {
                     </div>
                     <div className="lg:w-1/2 relative">
                         <div className="absolute -top-10 -right-10 w-40 h-40 bg-pixio-yellow/20 rounded-full blur-3xl"></div>
-                        <img 
-                            src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800&auto=format&fit=crop" 
-                            alt="Reading help" 
+                        <img
+                            src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800&auto=format&fit=crop"
+                            alt="Reading help"
                             className="rounded-[3rem] shadow-xl relative z-10"
                         />
                     </div>

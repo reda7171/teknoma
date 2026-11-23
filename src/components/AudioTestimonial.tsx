@@ -51,7 +51,7 @@ export default function AudioTestimonial({ testimonial }: AudioTestimonialProps)
             const current = audioRef.current.currentTime
             const duration = audioRef.current.duration || 1
             setProgress((current / duration) * 100)
-            
+
             const minutes = Math.floor(current / 60)
             const seconds = Math.floor(current % 60)
             setCurrentTime(`${minutes}:${seconds.toString().padStart(2, '0')}`)
@@ -87,22 +87,22 @@ export default function AudioTestimonial({ testimonial }: AudioTestimonialProps)
                 {testimonial.avatarUrl ? (
                     (() => {
                         const normalizedImg = testimonial.avatarUrl?.trim() || '';
-                        const finalImage = normalizedImg.startsWith('http') || normalizedImg.startsWith('data:') 
-                            ? normalizedImg 
-                            : normalizedImg.startsWith('/') 
-                                ? normalizedImg 
+                        const finalImage = normalizedImg.startsWith('http') || normalizedImg.startsWith('data:')
+                            ? normalizedImg
+                            : normalizedImg.startsWith('/')
+                                ? normalizedImg
                                 : '/' + normalizedImg;
-                        return <Image 
-                            src={finalImage} 
-                            alt={testimonial.customerName} 
+                        return <Image
+                            src={finalImage}
+                            alt={testimonial.customerName}
                             fill
                             sizes="40px"
-                            className="object-cover" 
-                            unoptimized={process.env.NODE_ENV === 'development'} 
+                            className="object-cover"
+                            unoptimized={process.env.NODE_ENV === 'development'}
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                if (!target.src.includes('riwaya.store') && target.src.includes('/uploads/')) {
-                                    target.src = `https://riwaya.store${new URL(target.src).pathname}`;
+                                if (!target.src.includes('tekno.ma') && target.src.includes('/uploads/')) {
+                                    target.src = `https://tekno.ma${new URL(target.src).pathname}`;
                                     target.srcset = '';
                                 }
                             }}
@@ -121,9 +121,9 @@ export default function AudioTestimonial({ testimonial }: AudioTestimonialProps)
                 <div className="bg-[#E7FFDB] rounded-2xl rounded-bl-none p-2.5 shadow-sm relative flex items-center gap-3">
                     {/* Tail */}
                     <div className="absolute -left-2 bottom-0 w-4 h-4 bg-[#E7FFDB]" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }}></div>
-                    
+
                     {/* Play Button */}
-                    <button 
+                    <button
                         onClick={togglePlay}
                         className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm hover:scale-105 hover:shadow-md transition-all active:scale-95"
                     >
@@ -134,12 +134,12 @@ export default function AudioTestimonial({ testimonial }: AudioTestimonialProps)
                     <div className="flex-1 min-w-[140px] flex flex-col justify-center">
                         <div className="w-full flex items-center gap-2">
                             <div className="flex-1 h-1.5 bg-emerald-200/50 rounded-full overflow-hidden relative">
-                                <div 
+                                <div
                                     className="absolute left-0 top-0 bottom-0 bg-emerald-500 rounded-full transition-all duration-100 ease-linear"
                                     style={{ width: `${progress}%` }}
                                 />
                             </div>
-                            
+
                             {/* Animated Equalizer when playing */}
                             {isPlaying && (
                                 <div className="flex items-end gap-[2px] h-3 ml-1">

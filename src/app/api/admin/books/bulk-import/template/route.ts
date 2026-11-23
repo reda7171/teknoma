@@ -7,7 +7,7 @@ export async function GET() {
         await verifyAdmin()
 
         const workbook = new ExcelJS.Workbook()
-        workbook.creator = 'Riwaya'
+        workbook.creator = 'Tekno Store'
         workbook.created = new Date()
 
         const worksheet = workbook.addWorksheet('Livres')
@@ -93,7 +93,7 @@ export async function GET() {
             status: 200,
             headers: {
                 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition': 'attachment; filename="template_livres_riwaya.xlsx"',
+                'Content-Disposition': 'attachment; filename="template_livres_tekno.xlsx"',
             },
         })
     } catch (error: unknown) {

@@ -20,8 +20,8 @@ export default async function NotFound() {
   return (
     <html lang="fr" dir="ltr" suppressHydrationWarning>
       <head>
-        <title>Page Introuvable | Riwaya</title>
-        <meta name="description" content="La page demandée est introuvable sur la librairie en ligne Riwaya.store." />
+        <title>Page Introuvable | Tekno Store</title>
+        <meta name="description" content="La page demandée est introuvable sur Tekno Store (tekno.ma)." />
         <meta name="robots" content="noindex, nofollow" />
       </head>
       <body className={`${outfit.variable} font-sans antialiased bg-white`} suppressHydrationWarning>
@@ -47,15 +47,15 @@ export default async function NotFound() {
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-                <a 
-                  href="/fr" 
+                <a
+                  href="/fr"
                   className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-black text-white font-black text-sm uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all shadow-xl hover:-translate-y-1"
                 >
                   <Home className="w-5 h-5" />
                   <span>Retour à l'accueil</span>
                 </a>
-                <a 
-                  href="/fr/books" 
+                <a
+                  href="/fr/books"
                   className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white border-2 border-gray-200 text-black font-black text-sm uppercase tracking-widest rounded-full hover:border-black transition-all shadow-sm hover:-translate-y-1"
                 >
                   <BookOpen className="w-5 h-5" />

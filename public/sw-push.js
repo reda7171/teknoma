@@ -8,7 +8,7 @@ self.addEventListener('push', (event) => {
     try {
         payload = event.data.json()
     } catch {
-        payload = { title: 'Riwaya', body: event.data.text() }
+        payload = { title: 'Tekno Store', body: event.data.text() }
     }
 
     const options = {
@@ -18,11 +18,11 @@ self.addEventListener('push', (event) => {
         data: { url: payload.url || '/' },
         vibrate: [200, 100, 200],
         requireInteraction: false,
-        tag: 'riwaya-promo',
+        tag: 'tekno-promo',
     }
 
     event.waitUntil(
-        self.registration.showNotification(payload.title || 'Riwaya', options)
+        self.registration.showNotification(payload.title || 'Tekno Store', options)
     )
 })
 

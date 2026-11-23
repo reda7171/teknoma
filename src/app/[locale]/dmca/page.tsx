@@ -14,11 +14,11 @@ export default async function DMCAPage({
     const t = {
         title: isAr ? 'سياسة حقوق النشر (DMCA)' : isEn ? 'DMCA Policy' : 'Politique DMCA',
         introTitle: isAr ? '1. مقدمة' : isEn ? '1. Introduction' : '1. Introduction',
-        introText: isAr 
-            ? 'في رواية (Riwaya)، نحن نحترم حقوق الملكية الفكرية للآخرين ونتوقع من مستخدمينا فعل الشيء نفسه. وفقًا لقانون الألفية للملكية الرقمية (DMCA)، سنستجيب بسرعة لإشعارات انتهاك حقوق الطبع والنشر التي يتم الإبلاغ عنها بشكل صحيح.'
-            : isEn 
-            ? 'At Riwaya, we respect the intellectual property rights of others and expect our users to do the same. In accordance with the Digital Millennium Copyright Act (DMCA), we will respond promptly to notices of alleged copyright infringement that are properly reported to us.'
-            : 'Chez Riwaya, nous respectons les droits de propriété intellectuelle d\'autrui et nous attendons de nos utilisateurs qu\'ils en fassent de même. Conformément au Digital Millennium Copyright Act (DMCA), nous répondrons rapidement aux avis de violation de droits d\'auteur qui nous sont dûment signalés.',
+        introText: isAr
+            ? 'في Tekno Store (Tekno Store)، نحن نحترم حقوق الملكية الفكرية للآخرين ونتوقع من مستخدمينا فعل الشيء نفسه. وفقًا لقانون الألفية للملكية الرقمية (DMCA)، سنستجيب بسرعة لإشعارات انتهاك حقوق الطبع والنشر التي يتم الإبلاغ عنها بشكل صحيح.'
+            : isEn
+            ? 'At Tekno Store, we respect the intellectual property rights of others and expect our users to do the same. In accordance with the Digital Millennium Copyright Act (DMCA), we will respond promptly to notices of alleged copyright infringement that are properly reported to us.'
+            : 'Chez Tekno Store, nous respectons les droits de propriété intellectuelle d\'autrui et nous attendons de nos utilisateurs qu\'ils en fassent de même. Conformément au Digital Millennium Copyright Act (DMCA), nous répondrons rapidement aux avis de violation de droits d\'auteur qui nous sont dûment signalés.',
         reportTitle: isAr ? '2. الإبلاغ عن انتهاك' : isEn ? '2. Report an Infringement' : '2. Signaler une violation',
         reportIntro: isAr
             ? 'إذا كنت مالكًا لحقوق الطبع والنشر أو مفوضًا بالتصرف نيابة عن أحدهم، يمكنك الإبلاغ عن انتهاك مزعوم من خلال تقديم المعلومات التالية كتابةً:'

@@ -29,7 +29,7 @@ interface CommentsSectionProps {
 function getEngagingQuestion(category: string, locale: string): string {
     const cat = category.toLowerCase()
     if (locale === 'ar') {
-        if (cat.includes('roman') || cat.includes('رواية') || cat.includes('fiction')) return 'هل غيّر هذا المقال نظرتك للقراءة؟'
+        if (cat.includes('roman') || cat.includes('Tekno Store') || cat.includes('fiction')) return 'هل غيّر هذا المقال نظرتك للقراءة؟'
         if (cat.includes('développement') || cat.includes('تطوير') || cat.includes('personal')) return 'هل جربت تطبيق هذه النصائح؟ شاركنا!'
         return 'ما رأيك في هذا المقال؟ شاركنا تجربتك!'
     }

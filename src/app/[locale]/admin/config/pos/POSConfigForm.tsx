@@ -5,10 +5,10 @@ import { updateSetting } from '@/lib/actions/site-settings'
 import { Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function POSConfigForm({ 
-    initialStoreName, 
-    initialStoreAddress, 
-    initialStorePhone, 
+export default function POSConfigForm({
+    initialStoreName,
+    initialStoreAddress,
+    initialStorePhone,
     initialReceiptMessage,
     initialTaxRate,
     initialCurrency,
@@ -24,10 +24,10 @@ export default function POSConfigForm({
     initialAllowOutOfStock,
     initialRequireCustomer,
     initialEnableSessions
-}: { 
-    initialStoreName: string, 
-    initialStoreAddress: string, 
-    initialStorePhone: string, 
+}: {
+    initialStoreName: string,
+    initialStoreAddress: string,
+    initialStorePhone: string,
     initialReceiptMessage: string,
     initialTaxRate: string,
     initialCurrency: string,
@@ -122,7 +122,7 @@ export default function POSConfigForm({
                         value={storeName}
                         onChange={(e) => setStoreName(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        placeholder="Ex: Riwaya Store"
+                        placeholder="Ex: Tekno Store Store"
                     />
                 </div>
 
@@ -296,10 +296,10 @@ export default function POSConfigForm({
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     >
                         <option value="ALL">Tout le catalogue</option>
-                        <option value="BOOKS">Livres unitaires</option>
+                        <option value="BOOKS">Produits unitaires</option>
                         <option value="PACKS">Packs promo</option>
-                        <option value="ACCESSORIES_LIBRARY">Accessoires lecture</option>
-                        <option value="ACCESSORIES_KIDS">Accessoires enfants</option>
+                        <option value="ACCESSORIES">Accessoires animaux</option>
+                        <option value="CARE">Hygiène et soins</option>
                     </select>
                 </div>
 
@@ -370,7 +370,7 @@ export default function POSConfigForm({
                             </div>
                         </label>
                     </div>
-                    
+
                     <div className="flex-1">
                         <label htmlFor="printerType" className="block text-sm font-bold text-gray-900 mb-2">
                             Type d'imprimante

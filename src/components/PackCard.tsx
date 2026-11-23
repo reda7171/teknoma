@@ -105,7 +105,7 @@ export default function PackCard({
                     {image ? (
                         <ImageWithFallback
                             src={image}
-                            alt={`Pack ${displayName} - Riwaya Selection`}
+                            alt={`Pack ${displayName} - Tekno Store Selection`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             priority={priority}
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -181,7 +181,7 @@ export default function PackCard({
                                     booksCount: books.length,
                                     shippingFees,
                                 })
-                                
+
                                 // Fire Confetti
                                 import('canvas-confetti').then((confetti) => {
                                     confetti.default({
@@ -207,15 +207,15 @@ export default function PackCard({
                                     currentSessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
                                     setSessionId(currentSessionId)
                                 }
-                                
+
                                 const { items, discount } = useCartStore.getState()
                                 const currentTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
                                 const itemsText = items.map(i => `${i.quantity}x ${i.title}`).join(', ')
-                                
+
                                 notifyAddToCart(displayName, displayPrice, 'PACK', currentSessionId, currentTotal, itemsText, discount).catch(console.error)
 
                                 showNotification(tCommon('AddedToCartSuccess'), 'success')
-                                
+
                                 setIsAdded(true)
                                 setTimeout(() => setIsAdded(false), 2000)
                             } catch (error) {

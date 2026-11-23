@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 
-import { 
-    Edit, 
-    Trash2, 
-    Eye, 
+import {
+    Edit,
+    Trash2,
+    Eye,
     Search,
     Package,
     Star,
@@ -28,24 +28,24 @@ interface Accessory {
     createdAt: string
 }
 
-export default function AccessoriesTable({ 
-    initialData, 
-    locale 
-}: { 
-    initialData: Accessory[], 
-    locale: string 
+export default function AccessoriesTable({
+    initialData,
+    locale
+}: {
+    initialData: Accessory[],
+    locale: string
 }) {
     const [data, setData] = useState(initialData)
     const [search, setSearch] = useState('')
 
-    const filteredData = data.filter(item => 
+    const filteredData = data.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase()) ||
         item.category.toLowerCase().includes(search.toLowerCase())
     )
 
     async function handleDelete(id: string) {
         if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return
-        
+
         try {
             const res = await fetch(`/api/admin/accessories/${id}`, { method: 'DELETE' })
             if (res.ok) {
@@ -132,10 +132,10 @@ export default function AccessoriesTable({
                                                     </div>
                                                 );
                                                 let src = img.startsWith('http') || img.startsWith('/') ? img : `/uploads/images/${img}`;
-                                                
+
                                                 // Load images from production in dev mode
                                                 if (process.env.NODE_ENV === 'development' && src.startsWith('/uploads')) {
-                                                    src = `https://riwaya.store${src}`;
+                                                    src = `https://tekno.ma${src}`;
                                                 }
 
                                                 return <Image src={src} alt={item.name} fill className="object-cover" unoptimized={process.env.NODE_ENV === 'development'} />;
@@ -194,21 +194,6 @@ export default function AccessoriesTable({
                                             title="Modifier"
                                         >
                                             <Edit className="w-4 h-4" />
-                                        </Link>
-                                        <Link
-                                            href={`/${locale}/${
-                                                item.category === 'BOARD_GAME' ? 'jeux-societe' :
-                                                item.category === 'USB' ? 'cle-usb' :
-                                                item.category === 'KIDS' ? 'mon-enfant' :
-                                                item.category === 'FURNITURE' ? 'fourniture-bureau' :
-                                                'fourniture-bureau'
-                                            }/${item.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                                            title="Voir la page produit"
-                                        >
-                                            <Eye className="w-4 h-4" />
                                         </Link>
                                         <button
                                             onClick={() => handleDelete(item.id)}

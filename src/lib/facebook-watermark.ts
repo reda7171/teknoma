@@ -44,7 +44,7 @@ async function loadBookImage(image: string, publicDir: string): Promise<Buffer |
 
     const imageUrl = image.startsWith('http')
         ? image
-        : `https://riwaya.store/${image.replace(/^\/+/, '')}`
+        : `https://tekno.ma/${image.replace(/^\/+/, '')}`
 
     try {
         const response = await fetch(imageUrl, { signal: AbortSignal.timeout(20_000) })
@@ -81,7 +81,7 @@ export async function generateFacebookWatermarkedImage(
         const bannerHeight = Math.round(height * 0.15)
         const bannerColor = config.color || '#0f172a'
         const opacity = config.opacity !== undefined ? config.opacity : 0.92
-        const brandText = 'RIWAYA.STORE'
+        const brandText = 'tekno.ma'
         const customText = config.text || 'WhatsApp: +212 666-038129 • Livraison Partout au Maroc'
         const position = config.position || 'bottom'
         const showPrice = config.showPrice !== false
@@ -102,7 +102,7 @@ export async function generateFacebookWatermarkedImage(
                 <g filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.45))">
                     <rect x="${badgeX}" y="${badgeY}" width="${badgeW}" height="${badgeH}" rx="${badgeH / 2}" fill="#2563eb" fill-opacity="0.95" />
                     <rect x="${badgeX}" y="${badgeY}" width="${badgeW}" height="${badgeH}" rx="${badgeH / 2}" fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity="0.8" />
-                    <text x="${badgeX + badgeW / 2}" y="${badgeY + badgeH / 2 + priceFontSize * 0.35}" 
+                    <text x="${badgeX + badgeW / 2}" y="${badgeY + badgeH / 2 + priceFontSize * 0.35}"
                           fill="#ffffff" font-size="${priceFontSize}" font-weight="900" font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
                         ${escapeXml(priceText)}
                     </text>
@@ -149,17 +149,17 @@ export async function generateFacebookWatermarkedImage(
             svgParts.push(`
                 <!-- Bandeau fond -->
                 <rect x="0" y="${bannerY}" width="${width}" height="${bannerHeight}" fill="${bannerColor}" fill-opacity="${opacity}" />
-                <!-- Ligne d'accentuation Riwaya -->
+                <!-- Ligne d'accentuation Tekno Store -->
                 <rect x="0" y="${accentY}" width="${width}" height="4" fill="#3b82f6" />
-                
+
                 <!-- Titre de la marque -->
-                <text x="${width / 2}" y="${bannerY + bannerHeight * 0.42}" 
+                <text x="${width / 2}" y="${bannerY + bannerHeight * 0.42}"
                       fill="#ffffff" font-size="${titleFontSize}" font-weight="900" letter-spacing="4" font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
                     ${escapeXml(brandText)}
                 </text>
-                
+
                 <!-- Texte secondaire (WhatsApp, Contact, Livraison) -->
-                <text x="${width / 2}" y="${bannerY + bannerHeight * 0.78}" 
+                <text x="${width / 2}" y="${bannerY + bannerHeight * 0.78}"
                       fill="#93c5fd" font-size="${subFontSize}" font-weight="700" font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
                     ${escapeXml(customText)}
                 </text>

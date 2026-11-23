@@ -33,13 +33,13 @@ export interface OrderInvoiceData {
     }>;
 }
 
-const DEFAULT_RIWAYA_LOGO = "/uploads/books/0dded6c73e7283c1-RIWAYA__1_.png";
+const DEFAULT_TEKNO_LOGO = "/logo.png";
 
 export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'fr', customPhone?: string, customLogo?: string): string {
     const isAr = locale === 'ar';
     const isEn = locale === 'en';
-    const phone = customPhone || "07 02 22 05 75 / 06 66 03 81 29";
-    const logoSrc = customLogo || DEFAULT_RIWAYA_LOGO;
+    const phone = customPhone || "";
+    const logoSrc = customLogo || DEFAULT_TEKNO_LOGO;
 
     const invoiceNum = order.invoiceNumber || `FAC-${order.id.slice(0, 8).toUpperCase()}`;
     const orderDate = new Date(order.invoiceDate || order.createdAt).toLocaleDateString(
@@ -78,8 +78,8 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             remainingBalance: "RESTE À PAYER (LIVRAISON) :",
             paidStatus: "Facture soldée",
             unpaidStatus: "Paiement à la livraison (COD)",
-            footer1: "Riwaya Books — Librairie en ligne au Maroc. ICE: 002589632000045.",
-            footer2: `Pour toute question : contact@riwaya.store | ${phone}`,
+            footer1: "Tekno Store — High-Tech, Smartphones, PC, Mac & Accessoires au Maroc.",
+            footer2: `Pour toute question : Contact.tekno.ma@gmail.com | ${phone}`,
             printBtn: "Imprimer / Enregistrer en PDF",
             closeBtn: "Fermer"
         },
@@ -103,8 +103,8 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             remainingBalance: "المبلغ المتبقي (عند الاستلام) :",
             paidStatus: "مدفوعة بالكامل",
             unpaidStatus: "الدفع عند الاستلام (COD)",
-            footer1: "مكتبة رواية — بيع الكتب وتوصيلها بالمغرب.",
-            footer2: `لأي استفسار : contact@riwaya.store | ${phone}`,
+            footer1: "Tekno Store — متجر مستلزمات الحيوانات الأليفة بالمغرب.",
+            footer2: `لأي استفسار : Contact.tekno.ma@gmail.com | ${phone}`,
             printBtn: "طباعة / حفظ بصيغة PDF",
             closeBtn: "إغلاق"
         },
@@ -128,12 +128,13 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             remainingBalance: "REMAINING BALANCE (COD):",
             paidStatus: "Paid in Full",
             unpaidStatus: "Cash on Delivery (COD)",
-            footer1: "Riwaya Books — Online Bookstore in Morocco. ICE: 002589632000045.",
-            footer2: `Support: contact@riwaya.store | ${phone}`,
+            footer1: "Tekno Store — Online pet shop in Morocco.",
+            footer2: `Support: Contact.tekno.ma@gmail.com | ${phone}`,
             printBtn: "Print / Save as PDF",
             closeBtn: "Close"
         }
-    }[locale as 'fr' | 'ar' | 'en'] || dict.fr;
+    };
+    const labels = dict[locale as 'fr' | 'ar' | 'en'] || dict.fr;
 
     const itemsRows = order.items.map((it) => {
         const title = it.book?.title || it.pack?.name || it.extraProduct?.name || it.digitalProduct?.title || it.title || it.name || 'Livre';
@@ -359,13 +360,13 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
                     <tr>
                         <td style="vertical-align: middle;">
                             <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
-                                <img src="${logoSrc}" alt="Riwaya Logo" style="height: 44px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
+                                <img src="${logoSrc}" alt="Tekno Store Logo" style="height: 44px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
                                 <div style="display: inline-block; vertical-align: middle;">
-                                    <div class="company-title" style="margin: 0; line-height: 1.1;">RIWAYA BOOKS</div>
+                                    <div class="company-title" style="margin: 0; line-height: 1.1;">Tekno Store BOOKS</div>
                                     <div class="company-sub" style="margin-top: 2px;">Librairie & Édition • Maroc</div>
                                 </div>
                             </div>
-                            <div class="company-sub">contact@riwaya.store | ${escapeHtml(phone)}</div>
+                            <div class="company-sub">Contact.tekno.ma@gmail.com | ${escapeHtml(phone)}</div>
                         </td>
                         <td class="invoice-tag" style="vertical-align: middle;">
                             <div class="invoice-badge">${labels.title}</div>
@@ -379,10 +380,10 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
                     <tr>
                         <td style="border-${isAr ? 'left' : 'right'}: 1px solid #e2e8f0;">
                             <div class="section-header">${labels.seller}</div>
-                            <div class="party-name">Riwaya SARL</div>
+                            <div class="party-name">Tekno Store SARL</div>
                             <div class="party-info">Casablanca, Maroc</div>
                             <div class="party-info">ICE : 002589632000045</div>
-                            <div class="party-info">Web : https://riwaya.store</div>
+                            <div class="party-info">Web : https://tekno.ma</div>
                         </td>
                         <td>
                             <div class="section-header">${labels.customer}</div>

@@ -1,32 +1,8 @@
-# Riwaya
+# Tekno Store
 
-> Riwaya est la première librairie en ligne et plateforme communautaire du livre au Maroc. Vente de livres neufs et d'occasion, packs thématiques à prix réduits, livraison express en 24-48h partout au Maroc avec paiement à la livraison (Cash on Delivery) et application de suivi de lecture.
+Boutique High-Tech au Maroc : smartphones neufs, ordinateurs portables, Mac, audio et accessoires de pointe avec paiement à la livraison (COD).
 
-## Catalogue & Boutique
-
-- [Accueil Riwaya](https://www.riwaya.store/fr): Première librairie en ligne au Maroc avec livraison express et paiement à la livraison.
-- [Catalogue des Livres](https://www.riwaya.store/fr/books): Plus de 1 000 livres disponibles en développement personnel, romans, psychologie, business et philosophie.
-- [Livres d'Occasion](https://www.riwaya.store/fr/books?usedOnly=true): Sélection de livres d'occasion vérifiés et économiques.
-- [Packs de Livres Promotionnels](https://www.riwaya.store/fr/packs): Packs thématiques avantageux (packs développement personnel, romans, philosophie) à prix réduits.
-- [Livres Numériques](https://www.riwaya.store/fr/livres-numeriques): Ebooks et livres numériques au format PDF téléchargeables immédiatement.
-- [Espace Enfants & Jeunesse](https://www.riwaya.store/fr/mon-enfant): Livres éducatifs, contes et jeux de société pour enfants.
-- [Auteurs](https://www.riwaya.store/fr/authors): Répertoire complet des auteurs et écrivains disponibles sur Riwaya.
-
-## Services & Communauté
-
-- [Échange de Livres](https://www.riwaya.store/fr/community): Plateforme communautaire de troc et échange direct de livres entre lecteurs partout au Maroc.
-- [Déposer sa Liste Scolaire](https://www.riwaya.store/fr/deposer-liste): Service de préparation sur mesure de fournitures et listes scolaires.
-- [Devenir Vendeur](https://www.riwaya.store/fr/devenir-vendeur): Programme partenaire pour vendre ses livres neufs ou d'occasion sur Riwaya.
-- [Journal & Blog Littéraire](https://www.riwaya.store/fr/blog): Articles, résumés, conseils de lecture et recommandations littéraires.
-
-## Livraison & Support
-
-- [Politique et Villes de Livraison](https://www.riwaya.store/fr/livraison): Livraison rapide en 24-48h à Casablanca, Rabat, Marrakech, Tanger, Fès, Agadir et partout au Maroc.
-- [Foire Aux Questions (FAQ)](https://www.riwaya.store/fr/faq): Réponses aux questions fréquentes sur les commandes, les délais et le paiement à la livraison.
-- [Politique de Retour & Remboursement](https://www.riwaya.store/fr/returns): Conditions de retour sous 3 jours et garantie satisfaction.
-- [Contactez-nous](https://www.riwaya.store/fr/contact): Service client Riwaya joignable par WhatsApp et email.
-
-## Optional
-
-- [Version Arabe (رواية)](https://www.riwaya.store/ar): تصفح مكتبة رواية باللغة العربية مع التوصيل لكافة مدن المغرب والدفع عند الاستلام.
-- [English Version](https://www.riwaya.store/en): Browse Riwaya bookstore in English with cash on delivery across Morocco.
+- Accueil : https://tekno.ma/fr
+- Catalogue : https://tekno.ma/fr/products
+- Services : https://tekno.ma/fr/services
+- Contact : https://tekno.ma/fr/contact

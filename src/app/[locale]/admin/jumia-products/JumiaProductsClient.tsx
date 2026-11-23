@@ -24,8 +24,8 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
     const categories = Array.from(new Set(products.map((p: any) => p.category?.name || p.primaryCategory?.name).filter(Boolean))) as string[]
 
     const handleSyncStock = async () => {
-        if (!confirm("Voulez-vous synchroniser le stock de Riwaya vers Jumia pour tous les produits (basé sur le nom du produit) ?")) return;
-        
+        if (!confirm("Voulez-vous synchroniser le stock de Tekno Store vers Jumia pour tous les produits (basé sur le nom du produit) ?")) return;
+
         setSyncing(true)
         try {
             const res = await syncAllJumiaStock()
@@ -56,7 +56,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
     const handleUpdateStock = async (product: any) => {
         const sku = product.sellerSku || (product.variations && product.variations[0]?.sellerSku)
         if (!sku) return alert("SKU Jumia introuvable pour ce produit")
-        
+
         const currentStock = product.variations?.[0]?.quantity ?? product.variations?.[0]?.businessClients?.[0]?.stock ?? ""
         const newStockStr = prompt(`Entrez le nouveau stock pour ${product.name} (SKU: ${sku}) :`, String(currentStock))
         if (newStockStr === null) return
@@ -81,7 +81,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
 
     const handleBulkUpdateStock = async () => {
         if (selectedIds.length === 0) return alert("Sélectionnez au moins un produit")
-        
+
         const newStockStr = prompt(`Entrez le nouveau stock pour les ${selectedIds.length} produits sélectionnés :`)
         if (newStockStr === null) return
         const newStock = parseInt(newStockStr, 10)
@@ -121,10 +121,10 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
     const handleUpdatePrice = async (product: any) => {
         const sku = product.sellerSku || (product.variations && product.variations[0]?.sellerSku)
         if (!sku) return alert("SKU Jumia introuvable pour ce produit")
-        
-        const effectivePrice = product.variations?.[0]?.price?.salePrice?.value 
-            || product.variations?.[0]?.price?.value 
-            || product.variations?.[0]?.globalPrice?.value 
+
+        const effectivePrice = product.variations?.[0]?.price?.salePrice?.value
+            || product.variations?.[0]?.price?.value
+            || product.variations?.[0]?.globalPrice?.value
             || ""
         const newPriceStr = prompt(`Entrez le nouveau prix pour ${product.name} (SKU: ${sku}) :`, String(effectivePrice))
         if (newPriceStr === null) return
@@ -139,7 +139,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                 price: {
                     currency: "درهم",
                     value: newPrice,
-                    salePrice: {} 
+                    salePrice: {}
                 }
             }])
             if (res.error) throw new Error(res.error)
@@ -155,14 +155,14 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
         <div className="space-y-4">
             <div className="flex justify-between items-center bg-white p-4 rounded-md border gap-4 flex-wrap">
                 <div className="flex gap-2 flex-1 flex-wrap min-w-[300px]">
-                    <input 
-                        type="text" 
-                        placeholder="Rechercher par nom, SKU vendeur ou SKU Jumia..." 
-                        className="border rounded-md px-3 py-2 text-sm w-full max-w-sm" 
+                    <input
+                        type="text"
+                        placeholder="Rechercher par nom, SKU vendeur ou SKU Jumia..."
+                        className="border rounded-md px-3 py-2 text-sm w-full max-w-sm"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <select aria-label="Champ de sélection" 
+                    <select aria-label="Champ de sélection"
                         className="border rounded-md px-3 py-2 text-sm"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
@@ -172,7 +172,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                         <option value="REJECTED">Rejeté (REJECTED)</option>
                         <option value="PENDING">En attente (PENDING)</option>
                     </select>
-                    <select aria-label="Champ de sélection" 
+                    <select aria-label="Champ de sélection"
                         className="border rounded-md px-3 py-2 text-sm"
                         value={visibilityFilter}
                         onChange={(e) => setVisibilityFilter(e.target.value)}
@@ -181,7 +181,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                         <option value="VISIBLE">Visible</option>
                         <option value="HIDDEN">Masqué</option>
                     </select>
-                    <select aria-label="Champ de sélection" 
+                    <select aria-label="Champ de sélection"
                         className="border rounded-md px-3 py-2 text-sm max-w-[200px]"
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
@@ -193,20 +193,20 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                     </select>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button 
-                        onClick={handleBulkUpdateStock} 
+                    <button
+                        onClick={handleBulkUpdateStock}
                         disabled={actionLoading === 'bulk-stock'}
                         className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${selectedIds.length > 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-100 text-blue-400 cursor-not-allowed'}`}
                     >
-                        <Package className={`mr-2 h-4 w-4 ${actionLoading === 'bulk-stock' ? 'animate-spin' : ''}`} /> 
+                        <Package className={`mr-2 h-4 w-4 ${actionLoading === 'bulk-stock' ? 'animate-spin' : ''}`} />
                         Synchronise Stock Jumia {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
                     </button>
-                    <button 
-                        onClick={handleSyncStock} 
+                    <button
+                        onClick={handleSyncStock}
                         disabled={syncing}
                         className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 text-sm font-medium transition-colors"
                     >
-                        <ArrowRightLeft className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} /> 
+                        <ArrowRightLeft className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
                         {syncing ? 'Synchronisation...' : 'Synchroniser Stock Auto'}
                     </button>
                     <button onClick={() => window.location.reload()} className="flex items-center px-4 py-2 border rounded-md hover:bg-slate-50 text-sm font-medium transition-colors">
@@ -220,7 +220,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                     <thead className="bg-slate-50 border-b">
                         <tr>
                             <th className="px-4 py-3 text-left w-10">
-                                <input 
+                                <input
                                     type="checkbox"
                                     className="rounded border-gray-300"
                                     checked={selectedIds.length > 0 && products.length > 0 && selectedIds.length === products.length}
@@ -257,7 +257,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                             const cat = p.category?.name || p.primaryCategory?.name
 
                             if (statusFilter !== "ALL" && qcStatus !== statusFilter) return false
-                            
+
                             if (visibilityFilter === "VISIBLE" && !isVisible) return false
                             if (visibilityFilter === "HIDDEN" && isVisible) return false
 
@@ -274,7 +274,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                             return (
                                 <tr key={p.id} className="hover:bg-slate-50">
                                     <td className="px-4 py-3">
-                                        <input 
+                                        <input
                                             type="checkbox"
                                             className="rounded border-gray-300"
                                             checked={selectedIds.includes(p.id)}
@@ -345,7 +345,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex justify-end gap-2">
-                                            <button 
+                                            <button
                                                 className="flex items-center px-3 py-1.5 border rounded-md text-xs hover:bg-slate-50 disabled:opacity-50"
                                                 disabled={actionLoading === `stock-${p.id}`}
                                                 onClick={() => handleUpdateStock(p)}
@@ -353,7 +353,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                                                 <Package className="h-3.5 w-3.5 mr-1.5" />
                                                 Stock
                                             </button>
-                                        <button 
+                                        <button
                                             className="flex items-center px-3 py-1.5 border rounded-md text-xs hover:bg-slate-50 disabled:opacity-50"
                                             disabled={actionLoading === `price-${p.id}`}
                                             onClick={() => handleUpdatePrice(p)}
@@ -369,7 +369,7 @@ export default function JumiaProductsClient({ initialData, nextToken: initialNex
                     </tbody>
                 </table>
             </div>
-            
+
             {/* Pagination removed - All loaded at once */}
         </div>
     )

@@ -4,24 +4,24 @@
 
 ALTER TABLE `orders`
     ADD COLUMN `salesChannel` ENUM(
-        'RIWAYA_STORE',
-        'RIWAYA_MA',
+        'TEKNO_STORE',
+        'TEKNO_MA',
         'ADMIN_POS',
         'MOBILE_APP',
         'ADMIN_IMPORT'
-    ) NOT NULL DEFAULT 'RIWAYA_STORE';
+    ) NOT NULL DEFAULT 'TEKNO_STORE';
 
 CREATE INDEX `orders_salesChannel_createdAt_idx`
     ON `orders` (`salesChannel`, `createdAt`);
 
 ALTER TABLE `abandoned_carts`
     ADD COLUMN `salesChannel` ENUM(
-        'RIWAYA_STORE',
-        'RIWAYA_MA',
+        'TEKNO_STORE',
+        'TEKNO_MA',
         'ADMIN_POS',
         'MOBILE_APP',
         'ADMIN_IMPORT'
-    ) NOT NULL DEFAULT 'RIWAYA_STORE';
+    ) NOT NULL DEFAULT 'TEKNO_STORE';
 
 CREATE INDEX `abandoned_carts_salesChannel_createdAt_idx`
     ON `abandoned_carts` (`salesChannel`, `createdAt`);

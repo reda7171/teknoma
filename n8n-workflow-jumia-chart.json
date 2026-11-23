@@ -1,5 +1,5 @@
 {
-  "name": "Riwaya - Rapport Jumia Mensuel",
+  "name": "Tekno Store - Rapport Jumia Mensuel",
   "nodes": [
     {
       "parameters": {
@@ -24,7 +24,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://riwaya.store/api/cron/telegram-yearly-chart",
+        "url": "https://tekno.ma/api/cron/telegram-yearly-chart",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -68,7 +68,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "https://riwaya.store/api/cron/jumia-new-orders",
+        "url": "https://tekno.ma/api/cron/jumia-new-orders",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [

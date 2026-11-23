@@ -47,7 +47,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                         skipFonts: false,
                     })
                     const link = document.createElement('a')
-                    link.download = `riwaya-challenge-${user?.fullName || 'reader'}.png`
+                    link.download = `tekno-challenge-${user?.fullName || 'reader'}.png`
                     link.href = dataUrl
                     link.click()
                 } catch (err) {
@@ -82,7 +82,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                         Fermer
                     </button>
 
-                    <div 
+                    <div
                         ref={cardRef}
                         className="bg-white rounded-[40px] overflow-hidden shadow-2xl border-8 border-white relative"
                         style={{ width: '408px', height: '725px' }} // Exact 9:16 ratio for 408px width
@@ -100,7 +100,7 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                                         <span className="text-white font-black text-xl italic">R</span>
                                     </div>
                                     <div>
-                                        <h2 className="font-black text-lg leading-tight">Riwaya</h2>
+                                        <h2 className="font-black text-lg leading-tight">Tekno Store</h2>
                                         <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400">Community</p>
                                     </div>
                                 </div>
@@ -115,11 +115,11 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                                     <div className="absolute inset-0 bg-emerald-600 rounded-full animate-pulse opacity-20 scale-110" />
                                     <div className="relative w-full h-full rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-100">
                                         {user.image ? (
-                                            <Image 
-                                                src={normalizeImage(user.image)} 
-                                                alt={user.fullName} 
-                                                fill 
-                                                className="object-cover" 
+                                            <Image
+                                                src={normalizeImage(user.image)}
+                                                alt={user.fullName}
+                                                fill
+                                                className="object-cover"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
@@ -173,10 +173,10 @@ export default function GenerateReadingCard({ user, items }: GenerateReadingCard
                             <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                                 <div>
                                     <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Challenge</div>
-                                    <div className="text-xl font-black text-emerald-600 tracking-tighter">#RiwayaChallenge</div>
+                                    <div className="text-xl font-black text-emerald-600 tracking-tighter">#Tekno StoreChallenge</div>
                                 </div>
                                 <div className="bg-black text-white px-5 py-2.5 rounded-2xl font-black text-sm">
-                                    riwaya.store
+                                    tekno.ma
                                 </div>
                             </div>
                         </div>

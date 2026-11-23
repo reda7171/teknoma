@@ -1,6 +1,6 @@
 import { getBookById } from '@/lib/db/books'
 
-export const alt = 'Livre sur Riwaya'
+export const alt = 'Livre sur Tekno Store'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 export const revalidate = 86400
@@ -8,7 +8,7 @@ export const revalidate = 86400
 export default async function BookOpengraphImage(props: {
   params: Promise<{ id: string; locale: string }>
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
   try {
     const { id } = await props.params
     const bookId = id.slice(0, 36)
@@ -24,4 +24,3 @@ export default async function BookOpengraphImage(props: {
     return Response.redirect(`${baseUrl}/og-image.jpg`, 302)
   }
 }
-

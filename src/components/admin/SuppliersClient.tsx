@@ -45,7 +45,7 @@ function formatWhatsAppUrl(rawPhone: string, contactName?: string, company?: str
     const greeting = contactName ? `Bonjour ${contactName}` : 'Bonjour'
     const companyText = company ? ` (${company})` : ''
     const text = encodeURIComponent(
-        `${greeting}${companyText}, je vous contacte de la part de la librairie Riwaya concernant nos commandes et collaborations.`
+        `${greeting}${companyText}, je vous contacte de la part de la librairie Tekno Store concernant nos commandes et collaborations.`
     )
     return `https://wa.me/${clean}?text=${text}`
 }
@@ -222,7 +222,7 @@ export default function SuppliersClient({ initialContacts }: { initialContacts: 
         const link = document.createElement('a')
         const date = new Date().toISOString().split('T')[0]
         link.href = url
-        link.setAttribute('download', `Riwaya_Fournisseurs_Contacts_${date}.xls`)
+        link.setAttribute('download', `Tekno Store_Fournisseurs_Contacts_${date}.xls`)
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)

@@ -32,13 +32,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             Keywords: kwArray,
             Rating: 5,
             RatingPercent: 99,
-            XPAuthor: `${book.author} | Riwaya`,
-            Artist: `${book.author} | Riwaya`,
-            Creator: `${book.author} | Riwaya`,
-            XPComment: `Acheter ${book.title} de ${book.author} sur la librairie Riwaya Maroc`,
-            Description: `Acheter ${book.title} de ${book.author} sur la librairie Riwaya Maroc`,
-            Copyright: 'Riwaya',
-            Software: 'Riwaya',
+            XPAuthor: `${book.author} | Tekno Store`,
+            Artist: `${book.author} | Tekno Store`,
+            Creator: `${book.author} | Tekno Store`,
+            XPComment: `Acheter ${book.title} de ${book.author} sur la librairie Tekno Store Maroc`,
+            Description: `Acheter ${book.title} de ${book.author} sur la librairie Tekno Store Maroc`,
+            Copyright: 'Tekno Store',
+            Software: 'Tekno Store',
         }
 
         // Image locale /uploads/
@@ -47,7 +47,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
             // Télécharger depuis prod si fichier manquant en local
             if (!fs.existsSync(filePath)) {
-                const remoteUrl = `https://riwaya.store${book.image}`
+                const remoteUrl = `https://tekno.ma${book.image}`
                 const response = await fetch(remoteUrl)
                 if (!response.ok) {
                     return NextResponse.json({ success: false, error: 'Fichier image introuvable (local et prod)' }, { status: 404 })
@@ -67,7 +67,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
         // Image distante (Cloudinary, S3, URL absolue...)
         // Télécharger → temp → EXIF → supprimer temp
-        const imageUrl = book.image.startsWith('http') ? book.image : `https://riwaya.store${book.image}`
+        const imageUrl = book.image.startsWith('http') ? book.image : `https://tekno.ma${book.image}`
         const response = await fetch(imageUrl)
         if (!response.ok) {
             return NextResponse.json({ success: false, error: `Image distante inaccessible (${response.status})` }, { status: 400 })
@@ -75,7 +75,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
         const ext = imageUrl.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
         const buffer = Buffer.from(await response.arrayBuffer())
-        tempFilePath = path.join(os.tmpdir(), `riwaya-exif-${id}.${ext}`)
+        tempFilePath = path.join(os.tmpdir(), `tekno-exif-${id}.${ext}`)
         fs.writeFileSync(tempFilePath, buffer)
 
         await exiftool.write(tempFilePath, exifData)

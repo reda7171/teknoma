@@ -4,7 +4,7 @@ import { Metadata } from 'next'
 import { Activity } from 'lucide-react'
 
 export const metadata: Metadata = {
-    title: 'Cannibalisation SEO - Admin Riwaya',
+    title: 'Cannibalisation SEO - Admin Tekno Store',
 }
 
 export default async function SeoCannibalizationPage() {

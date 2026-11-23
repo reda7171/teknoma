@@ -23,7 +23,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
     const [search, setSearch] = useState('')
     const [saving, setSaving] = useState<string | null>(null)
     const [saved, setSaved] = useState<Set<string>>(new Set())
-    
+
     // New state for EXIF
     const [injectingExif, setInjectingExif] = useState<string | null>(null)
     const [exifSuccess, setExifSuccess] = useState<Set<string>>(new Set())
@@ -44,9 +44,9 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
 
     const [edits, setEdits] = useState<Record<string, { alt: string; title: string; keywords: string }>>(
         Object.fromEntries(books.map(b => [b.id, {
-            alt: b.altText || `${b.title} - ${b.author} | Riwaya`,
-            title: b.imageTitle || `Acheter ${b.title} de ${b.author} sur Riwaya`,
-            keywords: b.imageKeywords || `${b.title}, ${b.author}, livre, riwaya, acheter livre maroc${b.category ? `, ${b.category}` : ''}`
+            alt: b.altText || `${b.title} - ${b.author} | Tekno Store`,
+            title: b.imageTitle || `Acheter ${b.title} de ${b.author} sur Tekno Store`,
+            keywords: b.imageKeywords || `${b.title}, ${b.author}, livre, tekno, acheter livre maroc${b.category ? `, ${b.category}` : ''}`
         }]))
     )
     const [message, setMessage] = useState('')
@@ -92,14 +92,14 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ edits: chunk })
                 })
-                
+
                 const contentType = res.headers.get('content-type')
                 if (!contentType || !contentType.includes('application/json')) {
                     errorCount += Object.keys(chunk).length
                     console.error(`Erreur serveur chunk sauvegarde: La réponse n'est pas au format JSON`)
                     continue
                 }
-                
+
                 const data = await res.json()
                 if (res.ok && data.success) {
                     totalSaved += data.count || Object.keys(chunk).length
@@ -315,13 +315,13 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
 
     async function downloadAll() {
         if (!confirm(`Voulez-vous vraiment télécharger ${filtered.length} images ? Votre navigateur pourrait vous demander l'autorisation de télécharger plusieurs fichiers.`)) return;
-        
+
         setIsDownloading(true);
         setMessage('');
         setProgress({ current: 0, total: filtered.length, label: 'Téléchargement en cours...' });
-        
+
         let errorCount = 0;
-        
+
         for (let i = 0; i < filtered.length; i++) {
             const book = filtered[i];
             try {
@@ -331,14 +331,14 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                
+
                 let filename = book.image.split('/').pop() || `${book.id}.jpg`;
                 if (filename.includes('?')) filename = filename.split('?')[0];
                 a.download = filename;
-                
+
                 document.body.appendChild(a);
                 a.click();
-                
+
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
             } catch (e) {
@@ -346,11 +346,11 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                 console.error(`Erreur téléchargement ${book.image}`, e);
             }
             setProgress({ current: i + 1, total: filtered.length, label: 'Téléchargement en cours...' });
-            
+
             // Attendre 250ms pour ne pas bloquer le navigateur
             await new Promise(r => setTimeout(r, 250));
         }
-        
+
         setTimeout(() => setProgress(null), 2000);
         if (errorCount > 0) {
             setMessage(`Téléchargement terminé : ${filtered.length - errorCount} succès, ${errorCount} erreurs.`);
@@ -362,15 +362,15 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
 
     function autoGenerateAll() {
         const updated: Record<string, { alt: string; title: string; keywords: string }> = {}
-        
+
         // Mots-clés FR — longue traîne géolocalisée pour battre Mylibrairie / LivreMoi / DSM
-        const frKeywords = "librairie en ligne maroc, librairie livraison maroc, acheter livre maroc, acheter livres en ligne maroc, livres en ligne maroc, commander livre en ligne maroc, livraison livres maroc, livraison livre à domicile maroc, livraison rapide livre maroc, livres pas cher maroc, livres moins cher maroc, meilleur prix livre maroc, librairie en ligne rabat, librairie en ligne casablanca, librairie en ligne tanger, librairie en ligne marrakech, librairie en ligne agadir, librairie en ligne fes, livres livraison casablanca, livres livraison rabat, livres livraison tanger, acheter roman maroc, roman pas cher maroc, roman en ligne maroc, romans français maroc, romans arabes maroc, romans policiers maroc, romans historiques maroc, romans d'amour maroc, best-sellers maroc, nouveautés livres maroc, livres développement personnel maroc, livres motivation maroc, livres psychologie maroc, livres business maroc, livres entrepreneuriat maroc, livres confiance en soi, livres bien-être maroc, livres enfants maroc, livres scolaires maroc, livres jeunesse maroc, livres manga maroc, pack livres maroc, pack romans maroc, coffret livres maroc, riwaya librairie maroc, riwaya livres, librairie riwaya, acheter livre paiement à la livraison maroc, livre cod maroc, livre cash on delivery maroc, vente livre en ligne maroc, boutique livre maroc, site livre maroc";
+        const frKeywords = "librairie en ligne maroc, librairie livraison maroc, acheter livre maroc, acheter livres en ligne maroc, livres en ligne maroc, commander livre en ligne maroc, livraison livres maroc, livraison livre à domicile maroc, livraison rapide livre maroc, livres pas cher maroc, livres moins cher maroc, meilleur prix livre maroc, librairie en ligne rabat, librairie en ligne casablanca, librairie en ligne tanger, librairie en ligne marrakech, librairie en ligne agadir, librairie en ligne fes, livres livraison casablanca, livres livraison rabat, livres livraison tanger, acheter roman maroc, roman pas cher maroc, roman en ligne maroc, romans français maroc, romans arabes maroc, romans policiers maroc, romans historiques maroc, romans d'amour maroc, best-sellers maroc, nouveautés livres maroc, livres développement personnel maroc, livres motivation maroc, livres psychologie maroc, livres business maroc, livres entrepreneuriat maroc, livres confiance en soi, livres bien-être maroc, livres enfants maroc, livres scolaires maroc, livres jeunesse maroc, livres manga maroc, pack livres maroc, pack romans maroc, coffret livres maroc, tekno librairie maroc, tekno livres, librairie tekno, acheter livre paiement à la livraison maroc, livre cod maroc, livre cash on delivery maroc, vente livre en ligne maroc, boutique livre maroc, site livre maroc";
 
         // Mots-clés AR — géolocalisés Maroc
-        const arKeywords = "مكتبة إلكترونية المغرب, شراء الكتب أونلاين المغرب, شراء كتب عبر الإنترنت المغرب, توصيل الكتب المغرب, توصيل كتب للمنزل المغرب, كتب بأرخص الأسعار المغرب, أفضل مكتبة إلكترونية مغربية, شراء روايات المغرب, روايات عربية للبيع المغرب, روايات عالمية للبيع المغرب, كتب التنمية الذاتية المغرب, كتب تطوير الذات, كتب علم النفس, كتب الأعمال والريادة, كتب التحفيز والإنتاجية, كتب للأطفال المغرب, كتب مدرسية المغرب, مكتبة رواية المغرب, شراء كتب بالدفع عند التسليم, كتب كاش أون ديليفري المغرب, أفضل الكتب المغرب, كتب للبيع بالمغرب, توصيل سريع للكتب المغرب, طلب كتب أونلاين المغرب, موقع بيع الكتب المغرب";
+        const arKeywords = "مكتبة إلكترونية المغرب, شراء الكتب أونلاين المغرب, شراء كتب عبر الإنترنت المغرب, توصيل الكتب المغرب, توصيل كتب للمنزل المغرب, كتب بأرخص الأسعار المغرب, أفضل مكتبة إلكترونية مغربية, شراء روايات المغرب, روايات عربية للبيع المغرب, روايات عالمية للبيع المغرب, كتب التنمية الذاتية المغرب, كتب تطوير الذات, كتب علم النفس, كتب الأعمال والريادة, كتب التحفيز والإنتاجية, كتب للأطفال المغرب, كتب مدرسية المغرب, مكتبة Tekno Store المغرب, شراء كتب بالدفع عند التسليم, كتب كاش أون ديليفري المغرب, أفضل الكتب المغرب, كتب للبيع بالمغرب, توصيل سريع للكتب المغرب, طلب كتب أونلاين المغرب, موقع بيع الكتب المغرب";
 
         // Mots-clés EN — Morocco English book buyers
-        const enKeywords = "online bookstore Morocco, buy books online Morocco, book delivery Morocco, books delivered to your door Morocco, cheap books Morocco, best price books Morocco, fast book delivery Morocco, online library Morocco, bookshop Morocco, buy novels Morocco, fiction books Morocco, self help books Morocco, personal development books Morocco, business books Morocco, children books Morocco, school books Morocco, English books Morocco, French books Morocco, Arabic books Morocco, book store Casablanca, book store Rabat, book store Tangier, best books Morocco, new releases books Morocco, riwaya bookstore, riwaya books Morocco, book cash on delivery Morocco, COD books Morocco, order books online Morocco";
+        const enKeywords = "online bookstore Morocco, buy books online Morocco, book delivery Morocco, books delivered to your door Morocco, cheap books Morocco, best price books Morocco, fast book delivery Morocco, online library Morocco, bookshop Morocco, buy novels Morocco, fiction books Morocco, self help books Morocco, personal development books Morocco, business books Morocco, children books Morocco, school books Morocco, English books Morocco, French books Morocco, Arabic books Morocco, book store Casablanca, book store Rabat, book store Tangier, best books Morocco, new releases books Morocco, tekno bookstore, tekno books Morocco, book cash on delivery Morocco, COD books Morocco, order books online Morocco";
 
         books.forEach(b => {
             let baseKeywords = "";
@@ -379,9 +379,9 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
             else baseKeywords = frKeywords;
 
             updated[b.id] = {
-                alt: `${b.title} - ${b.author}${b.category ? ` | ${b.category}` : ''} | Librairie Riwaya Maroc`,
-                title: `Acheter "${b.title}" de ${b.author} - Livraison rapide au Maroc | Riwaya`,
-                keywords: `${b.title}, ${b.author}, livre, riwaya${b.category ? `, ${b.category}` : ''}, ${baseKeywords}`
+                alt: `${b.title} - ${b.author}${b.category ? ` | ${b.category}` : ''} | Librairie Tekno Store Maroc`,
+                title: `Acheter "${b.title}" de ${b.author} - Livraison rapide au Maroc | Tekno Store`,
+                keywords: `${b.title}, ${b.author}, livre, tekno${b.category ? `, ${b.category}` : ''}, ${baseKeywords}`
             }
         })
         setEdits(updated)
@@ -421,8 +421,8 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                         <span className="text-xs font-black text-blue-600">{Math.round((progress.current / progress.total) * 100)}%</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                        <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out" 
+                        <div
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
                             style={{ width: `${(progress.current / progress.total) * 100}%` }}
                         ></div>
                     </div>
@@ -508,7 +508,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                             {/* Image */}
                             <a href={`/fr/admin/books/${book.id}/edit`} target="_blank" title="Éditer ce produit" className="block w-16 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
                                 <img
-                                    src={book.image?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${book.image}` : book.image}
+                                    src={book.image?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://tekno.ma${book.image}` : book.image}
                                     alt={edits[book.id]?.alt || book.title}
                                     title={edits[book.id]?.title || book.title}
                                     className="w-full h-full object-cover"
@@ -532,7 +532,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                                         value={edits[book.id]?.alt || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [book.id]: { ...prev[book.id], alt: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                                        placeholder={`${book.title} - ${book.author} | Riwaya`}
+                                        placeholder={`${book.title} - ${book.author} | Tekno Store`}
                                     />
                                 </div>
 
@@ -545,7 +545,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                                         value={edits[book.id]?.title || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [book.id]: { ...prev[book.id], title: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                                        placeholder={`Acheter ${book.title} | Riwaya`}
+                                        placeholder={`Acheter ${book.title} | Tekno Store`}
                                     />
                                 </div>
                                 <div>
@@ -557,13 +557,13 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                                         value={edits[book.id]?.keywords || ''}
                                         onChange={e => setEdits(prev => ({ ...prev, [book.id]: { ...prev[book.id], keywords: e.target.value } }))}
                                         className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-                                        placeholder={`Livre, Riwaya, ...`}
+                                        placeholder={`Livre, Tekno Store, ...`}
                                     />
                                 </div>
                             </div>
 
                         </div>
-                        
+
                         {/* Save individual (Actions at the bottom) */}
                         <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap gap-2 items-center justify-between">
                             <button
@@ -581,7 +581,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                                 )}
                                 {saved.has(book.id) ? 'Sauvé' : 'Sauver SEO'}
                             </button>
-                            
+
                             <button
                                 type="button"
                                 onClick={() => injectExif(book.id)}

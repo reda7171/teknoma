@@ -18,10 +18,10 @@ export async function POST(req: Request) {
 
             if (post?.coverImage && post.coverImage.startsWith('/uploads/')) {
                 const filePath = path.join(process.cwd(), 'public', post.coverImage)
-                
+
                 if (fs.existsSync(filePath)) {
                     const kwArray = data.keywords ? data.keywords.split(',').map((k: string) => k.trim()).filter(Boolean) : []
-                    
+
                     await exiftool.write(filePath, {
                         XPTitle: data.title || post.title,
                         Title: data.title || post.title,
@@ -29,11 +29,11 @@ export async function POST(req: Request) {
                         XPKeywords: kwArray.join(';'),
                         Keywords: kwArray,
                         Subject: kwArray,
-                        XPAuthor: post.authorName || 'Riwaya',
-                        Artist: post.authorName || 'Riwaya',
-                        Creator: post.authorName || 'Riwaya',
-                        XPComment: 'Blog Riwaya',
-                        Description: 'Blog Riwaya',
+                        XPAuthor: post.authorName || 'Tekno Store',
+                        Artist: post.authorName || 'Tekno Store',
+                        Creator: post.authorName || 'Tekno Store',
+                        XPComment: 'Blog Tekno Store',
+                        Description: 'Blog Tekno Store',
                     })
 
                     const backupPath = filePath + '_original'

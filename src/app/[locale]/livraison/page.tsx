@@ -27,18 +27,18 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isEn = locale === 'en'
 
     const title = isAr
-        ? 'سياسة ومناطق التوصيل في المغرب | مكتبة رواية'
+        ? 'سياسة ومناطق التوصيل في المغرب | مكتبة Tekno Store'
         : isEn
-            ? 'Delivery Policy & Cities in Morocco | Riwaya Bookstore'
-            : 'Livraison de Livres au Maroc · Délais & Villes | Librairie Riwaya'
+            ? 'Delivery Policy & Cities in Morocco | Tekno Store Bookstore'
+            : 'Livraison de Livres au Maroc · Délais & Villes | Librairie Tekno Store'
 
     const description = isAr
-        ? 'توصيل سريع لجميع كتب وروايات مكتبة رواية إلى كافة مدن المغرب (الدار البيضاء، الرباط، مراكش، طنجة...). الدفع عند الاستلام والتوصيل مجاني للطلبات المؤهلة.'
+        ? 'توصيل سريع لجميع كتب وروايات مكتبة Tekno Store إلى كافة مدن المغرب (الدار البيضاء، الرباط، مراكش، طنجة...). الدفع عند الاستلام والتوصيل مجاني للطلبات المؤهلة.'
         : isEn
-            ? 'Fast book delivery across Morocco with Riwaya (Casablanca, Rabat, Marrakech, Tangier...). Cash on delivery and free shipping available.'
-            : 'Livraison express de vos livres partout au Maroc avec Riwaya. Casablanca, Rabat, Marrakech, Tanger... Paiement à la livraison et livraison offerte dès 300 MAD.'
+            ? 'Fast book delivery across Morocco with Tekno Store (Casablanca, Rabat, Marrakech, Tangier...). Cash on delivery and free shipping available.'
+            : 'Livraison express de vos livres partout au Maroc avec Tekno Store. Casablanca, Rabat, Marrakech, Tanger... Paiement à la livraison et livraison offerte dès 300 MAD.'
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
     return {
         title,
@@ -66,14 +66,14 @@ export default async function DeliveryPage({ params }: { params: Promise<{ local
     const t = await getTranslations('ShippingPolicyPage')
     const isAr = locale === 'ar'
     const isEn = locale === 'en'
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
     const jsonLd = {
         '@context': 'https://schema.org',
         '@graph': [
             {
                 '@type': 'DeliveryChargeSpecification',
-                name: 'Tarifs de livraison Riwaya Maroc',
+                name: 'Tarifs de livraison Tekno Store Maroc',
                 appliesToDeliveryMethod: 'https://schema.org/DeliveryModeOwnFleet',
                 price: '35',
                 priceCurrency: 'MAD',

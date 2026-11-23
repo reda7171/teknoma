@@ -5,7 +5,7 @@ import POSConfigForm from './POSConfigForm'
 import { Monitor } from 'lucide-react'
 
 export const metadata = {
-    title: 'Configuration POS | Admin Riwaya',
+    title: 'Configuration POS | Admin Tekno Store',
 }
 
 export const dynamic = 'force-dynamic'
@@ -17,7 +17,7 @@ export default async function POSConfigPage() {
         redirect('/login')
     }
 
-    const posStoreName = await getSetting('pos_store_name') || 'Riwaya Store'
+    const posStoreName = await getSetting('pos_store_name') || 'Tekno Store Store'
     const posStoreAddress = await getSetting('pos_store_address') || ''
     const posStorePhone = await getSetting('pos_store_phone') || ''
     const posReceiptMessage = await getSetting('pos_receipt_message') || 'Merci pour votre visite !'
@@ -60,7 +60,7 @@ export default async function POSConfigPage() {
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">Informations de la boutique pour les reçus</p>
                         </div>
                     </div>
-                    <POSConfigForm 
+                    <POSConfigForm
                         initialStoreName={posStoreName}
                         initialStoreAddress={posStoreAddress}
                         initialStorePhone={posStorePhone}

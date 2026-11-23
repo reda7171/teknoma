@@ -13,10 +13,10 @@ export function cn(...inputs: ClassValue[]) {
 export function normalizeImage(raw: string | null | undefined): string {
     let img = raw?.trim() || ''
     if (!img) return '/book-placeholder.png'
-    
-    // Si l'URL pointe vers riwaya.store/uploads/, la ramener en chemin local pour next/image
-    if (img.includes('riwaya.store/uploads/')) {
-        img = img.replace(/^https?:\/\/(www\.)?riwaya\.store/, '')
+
+    // Si l'URL pointe vers tekno.ma/uploads/, la ramener en chemin local pour next/image
+    if (img.includes('tekno.ma/uploads/')) {
+        img = img.replace(/^https?:\/\/(www\.)?Tekno Store\.store/, '')
     }
 
     if (img.startsWith('/uploads/') || img.startsWith('uploads/')) {
@@ -34,7 +34,7 @@ export function normalizeImage(raw: string | null | undefined): string {
         }
         // Ignorer si c'est un message d'erreur
         if (img.includes('cellule')) return '/book-placeholder.png'
-        
+
         // Cas particulier : /9j/ détecté comme chemin local alors que c'est du JPEG Base64
         if (img.startsWith('/9j/')) return 'data:image/jpeg;base64,' + img
         return img
@@ -42,7 +42,7 @@ export function normalizeImage(raw: string | null | undefined): string {
 
     // DÃ©tection Base64 pure (Odoo)
     if (img.includes(' ')) return '/book-placeholder.png'
-    
+
     if (img.startsWith('iVBOR')) return 'data:image/png;base64,' + img
     if (img.startsWith('/9j/')) return 'data:image/jpeg;base64,' + img
     if (img.length > 50) return 'data:image/jpeg;base64,' + img
@@ -57,15 +57,15 @@ export function normalizeImage(raw: string | null | undefined): string {
  */
 export function getOgImageUrl(raw: string | null | undefined, baseUrl: string, fallbackApiUrl: string): string {
     const img = normalizeImage(raw);
-    
+
     if (img.startsWith('http')) {
         return img;
     }
-    
+
     if (img.startsWith('/')) {
         return `${baseUrl}${img}`;
     }
-    
+
     // Si c'est du base64 ou autre chose non gÃ©rÃ©, on passe par l'API pour que Next.js puisse servir le binaire
     return fallbackApiUrl;
 }
@@ -75,9 +75,9 @@ export function getOgImageUrl(raw: string | null | undefined, baseUrl: string, f
  * si l'URL configurÃ©e pointe vers localhost ou une IP (frÃ©quent avec un reverse proxy).
  */
 export function getBaseUrl(): string {
-    let url = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store';
+    let url = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma';
     if (url.includes('0.0.0.0') || url.includes('127.0.0.1') || url.includes('localhost') || url.includes('167.86.108.246')) {
-        url = 'https://riwaya.store';
+        url = 'https://tekno.ma';
     }
     return url;
 }
@@ -110,7 +110,7 @@ export function computePostSeoScore(content: string | null | undefined): number 
 export function calculate3For4Discount(items: { type: string, price: number, quantity: number }[]): number {
     // Ne prendre en compte que les livres physiques (type === 'BOOK')
     const bookItems = items.filter(item => item.type === 'BOOK');
-    
+
     // Aplatir le panier pour avoir une liste de prix (ex: 2 livres à 100 = [100, 100])
     const allPrices: number[] = [];
     bookItems.forEach(item => {
@@ -135,5 +135,3 @@ export function calculate3For4Discount(items: { type: string, price: number, qua
 
     return discount;
 }
-
-

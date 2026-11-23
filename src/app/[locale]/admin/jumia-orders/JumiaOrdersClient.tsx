@@ -39,12 +39,12 @@ export default function JumiaOrdersClient() {
     const [restoreStockId, setRestoreStockId] = useState<string | null>(null)
     const [syncingStock, setSyncingStock] = useState(false)
     const [confirmAction, setConfirmAction] = useState<{ action: 'PACK' | 'READY_TO_SHIP' | 'CANCEL', orderId: string, orderNumber: string } | null>(null)
-    
+
     // Order items details state
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
     const [orderItems, setOrderItems] = useState<any[]>([])
     const [loadingItems, setLoadingItems] = useState(false)
-    
+
     const size = 50
 
     const fetchOrders = async (status: string, token?: string | null, isNext: boolean = false, orderDir: 'desc' | 'asc' = sortOrder) => {
@@ -61,11 +61,11 @@ export default function JumiaOrdersClient() {
             const createdBefore = tomorrow.toISOString().split('T')[0]
 
             const response = await getJumiaOrders(size, token || undefined, status || undefined, createdAfter, createdBefore, 'createdAt', orderDir.toUpperCase())
-            
+
             setOrders(response.orders)
             setCurrentToken(response.nextToken)
             setHasNextPage(!!response.nextToken)
-            
+
             if (isNext && token) {
                 setTokenHistory(prev => [...prev, token])
             } else if (!token) {
@@ -196,7 +196,7 @@ export default function JumiaOrdersClient() {
         setPackingId(orderId)
         setErrorMsg(null)
         setSuccessMsg(null)
-        
+
         try {
             await packJumiaOrderFull(orderId)
             setSuccessMsg(`Commande ${orderId} marquée comme "Prête à expédier" !`)
@@ -214,13 +214,13 @@ export default function JumiaOrdersClient() {
         setSuccessMsg(null)
         try {
             const response = await printJumiaOrderLabelsFull(orderId)
-            
+
             // Jumia API may return base64 document, a URL, or the V2 format with success.labels
             const v2Base64 = response?.success?.labels?.[0]?.label
             const base64Data = v2Base64 || response.document || response.file || response.data || response.pdf || response
             const contentType = response.contentType || 'application/pdf'
             const extension = contentType.includes('zip') ? 'zip' : 'pdf'
-            
+
             if (typeof base64Data === 'string' && (base64Data.startsWith('JVBER') || base64Data.startsWith('UEsDB') || base64Data.length > 100)) {
                 // Base64 to Blob
                 const byteCharacters = atob(base64Data)
@@ -231,7 +231,7 @@ export default function JumiaOrdersClient() {
                 const byteArray = new Uint8Array(byteNumbers)
                 const blob = new Blob([byteArray], { type: contentType })
                 const url = window.URL.createObjectURL(blob)
-                
+
                 const link = document.createElement('a')
                 link.href = url
                 link.setAttribute('download', `etiquette_jumia_${orderId}.${extension}`)
@@ -239,7 +239,7 @@ export default function JumiaOrdersClient() {
                 link.click()
                 link.parentNode?.removeChild(link)
                 window.URL.revokeObjectURL(url)
-                
+
                 setSuccessMsg(`Étiquettes pour la commande ${orderId} générées et téléchargées.`)
             } else if (response.url || response.link || (typeof base64Data === 'string' && base64Data.startsWith('http'))) {
                 const targetUrl = response.url || response.link || base64Data
@@ -255,7 +255,7 @@ export default function JumiaOrdersClient() {
             setPrintingId(null)
         }
     }
-    
+
     const handleViewItems = async (orderId: string) => {
         if (expandedOrder === orderId) {
             setExpandedOrder(null)
@@ -279,9 +279,9 @@ export default function JumiaOrdersClient() {
         setErrorMsg(null)
         setSuccessMsg(null)
         try {
-            // Jumia V2 API does not have an endpoint for invoice generation. 
+            // Jumia V2 API does not have an endpoint for invoice generation.
             // We generate the invoice locally using the order details and items.
-            
+
             // 1. Find the order in state
             const order = orders.find((o: any) => (o.id || o.number || o.OrderId || o.OrderNumber) === orderId)
             if (!order) throw new Error("Commande introuvable.")
@@ -319,10 +319,10 @@ export default function JumiaOrdersClient() {
                 </head>
                 <body>
                     <div class="header">
-                        <div class="logo">RIWAYA x JUMIA</div>
+                        <div class="logo">Tekno Store x JUMIA</div>
                         <div class="invoice-title">Facture</div>
                     </div>
-                    
+
                     <div class="details">
                         <div class="box">
                             <h3>Détails de la commande</h3>
@@ -368,7 +368,7 @@ export default function JumiaOrdersClient() {
                     </table>
 
                     <div class="footer">
-                        Merci de votre confiance. Cette facture a été générée automatiquement depuis le système Riwaya.
+                        Merci de votre confiance. Cette facture a été générée automatiquement depuis le système Tekno Store.
                     </div>
                     <script>
                         window.onload = function() { window.print(); }
@@ -386,7 +386,7 @@ export default function JumiaOrdersClient() {
             } else {
                 setErrorMsg("Veuillez autoriser les pop-ups pour afficher la facture.")
             }
-            
+
         } catch (e: any) {
             setErrorMsg(`Impossible de générer la facture: ${e.message}`)
         } finally {
@@ -399,7 +399,7 @@ export default function JumiaOrdersClient() {
         setReadyId(orderId)
         setErrorMsg(null)
         setSuccessMsg(null)
-        
+
         try {
             await readyToShipJumiaOrderFull(orderId)
             setSuccessMsg(`Commande ${orderId} validée "Prête à expédier" (Ready to Ship) avec succès !`)
@@ -492,7 +492,7 @@ export default function JumiaOrdersClient() {
                     </h1>
                 </div>
                 <div className="flex items-center gap-2">
-                    <select aria-label="Champ de sélection" 
+                    <select aria-label="Champ de sélection"
                         value={statusFilter}
                         onChange={handleStatusChange}
                         className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -518,13 +518,13 @@ export default function JumiaOrdersClient() {
                         <option value="desc">Tri : Date DESC (Plus récent)</option>
                         <option value="asc">Tri : Date ASC (Plus ancien)</option>
                     </select>
-                    <button 
+                    <button
                         onClick={() => fetchOrders(statusFilter, currentToken || undefined)}
                         className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all"
                     >
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-orange-500' : ''}`} />
                     </button>
-                    <button 
+                    <button
                         onClick={handleSyncStock}
                         disabled={syncingStock}
                         className="flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-orange-100 transition-all disabled:opacity-50"
@@ -553,7 +553,7 @@ export default function JumiaOrdersClient() {
                     </div>
                 </div>
             )}
-            
+
             {successMsg && (
                 <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-3xl flex items-center gap-4 text-emerald-700">
                     <CheckCircle2 className="w-8 h-8 shrink-0" />
@@ -579,7 +579,7 @@ export default function JumiaOrdersClient() {
                             <Search className="w-4 h-4" />
                             {isFilterOpen ? 'Fermer la recherche' : 'Recherche & Filtres'}
                         </button>
-                        
+
                         {(searchTerm || productTitleFilter || statusFilter) && (
                             <button
                                 onClick={() => {
@@ -704,7 +704,7 @@ export default function JumiaOrdersClient() {
                                 <thead>
                                     <tr className="border-b border-slate-100 bg-slate-50/50">
                                         <th className="p-4 text-[10px] font-black uppercase tracking-[0.1em] text-slate-500">ID Jumia</th>
-                                        <th 
+                                        <th
             onClick={() => {
                 const nextSort = sortOrder === 'desc' ? 'asc' : 'desc'
                 setSortOrder(nextSort)
@@ -776,7 +776,7 @@ export default function JumiaOrdersClient() {
                                                             <div className="flex flex-col gap-2 w-full max-w-[140px] mx-auto">
                                                                 {currentStatus === 'pending' && (
                                                                     <>
-                                                                        <button 
+                                                                        <button
                                                                             onClick={() => setConfirmAction({ action: 'PACK', orderId: order.id || order.number || order.OrderId || order.OrderNumber, orderNumber: order.number || order.OrderId || order.OrderNumber || 'N/A' })}
                                                                             disabled={packingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                             className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-orange-100 text-orange-700 hover:bg-orange-200`}
@@ -787,8 +787,8 @@ export default function JumiaOrdersClient() {
                                                                                 <><Package className="w-3 h-3" /> Préparer</>
                                                                             )}
                                                                         </button>
-                                                                        
-                                                                        <button 
+
+                                                                        <button
                                                                             onClick={() => setConfirmAction({ action: 'READY_TO_SHIP', orderId: order.number || order.OrderId || order.OrderNumber, orderNumber: order.number || order.OrderId || order.OrderNumber || 'N/A' })}
                                                                             disabled={readyId === (order.number || order.OrderId || order.OrderNumber)}
                                                                             className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-blue-100 text-blue-700 hover:bg-blue-200`}
@@ -800,8 +800,8 @@ export default function JumiaOrdersClient() {
                                                                                 <><Send className="w-3 h-3" /> Expédier</>
                                                                             )}
                                                                         </button>
-                                                                        
-                                                                        <button 
+
+                                                                        <button
                                                                             onClick={() => setConfirmAction({ action: 'CANCEL', orderId: order.id || order.number || order.OrderId || order.OrderNumber, orderNumber: order.number || order.OrderId || order.OrderNumber || 'N/A' })}
                                                                             disabled={cancelingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                             className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-red-50 text-red-600 hover:bg-red-100`}
@@ -814,10 +814,10 @@ export default function JumiaOrdersClient() {
                                                                         </button>
                                                                     </>
                                                                 )}
-                                                                
+
                                                                 {(currentStatus === 'ready_to_ship' || currentStatus === 'shipped' || currentStatus === 'delivered') && (
                                                                     <>
-                                                                        <button 
+                                                                        <button
                                                                             onClick={() => handlePrintLabels(order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                             disabled={printingId === (order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                             className="text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-blue-50 text-blue-600 hover:bg-blue-100"
@@ -829,7 +829,7 @@ export default function JumiaOrdersClient() {
                                                                             )}
                                                                         </button>
 
-                                                                        <button 
+                                                                        <button
                                                                             onClick={() => handlePrintInvoice(order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                             disabled={printInvoiceId === (order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                             className="text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -842,13 +842,13 @@ export default function JumiaOrdersClient() {
                                                                         </button>
                                                                     </>
                                                                 )}
-                                                                
-                                                                <button 
+
+                                                                <button
                                                                     onClick={() => handleViewItems(order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                     disabled={loadingItems && expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber)}
                                                                     className={`text-[10px] font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all w-full mt-1 ${
-                                                                        expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber) 
-                                                                        ? 'bg-slate-700 text-white hover:bg-slate-800' 
+                                                                        expandedOrder === (order.id || order.number || order.OrderId || order.OrderNumber)
+                                                                        ? 'bg-slate-700 text-white hover:bg-slate-800'
                                                                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                                                                     }`}
                                                                 >
@@ -861,7 +861,7 @@ export default function JumiaOrdersClient() {
 
                                                                 {/* Bouton Restaurer Stock pour FAILED/CANCELED/RETURNED */}
                                                                 {(currentStatus === 'failed' || currentStatus === 'canceled' || currentStatus === 'cancelled' || currentStatus === 'returned') && (
-                                                                    <button 
+                                                                    <button
                                                                         onClick={() => handleRestoreStock(
                                                                             order.id || order.number || order.OrderId || order.OrderNumber,
                                                                             currentStatus === 'failed' ? 'FAILED' : currentStatus === 'returned' ? 'RETURNED' : 'CANCELED'
@@ -918,9 +918,9 @@ export default function JumiaOrdersClient() {
                                                                                             </div>
                                                                                         )}
                                                                                         <span className="font-medium text-slate-700 line-clamp-2 max-w-[250px]">
-                                                                                             <a 
-                                                                                                href={item.productUrl || item.ProductUrl || (item.product?.name ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(item.product.name)}` : 'https://www.jumia.ma')} 
-                                                                                                target="_blank" 
+                                                                                             <a
+                                                                                                href={item.productUrl || item.ProductUrl || (item.product?.name ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(item.product.name)}` : 'https://www.jumia.ma')}
+                                                                                                target="_blank"
                                                                                                 rel="noreferrer"
                                                                                                 className="hover:text-orange-500 hover:underline inline-flex items-center gap-1 transition-colors"
                                                                                                 title="Voir sur Jumia"
@@ -966,7 +966,7 @@ export default function JumiaOrdersClient() {
                             </table>
                         )}
                     </div>
-                    
+
                     {/* Pagination Jumia Token-based */}
                     <div className="flex items-center justify-between mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                         <p className="text-xs font-medium text-slate-500">
@@ -991,7 +991,7 @@ export default function JumiaOrdersClient() {
                         </div>
                     </div>
             </div>
-            
+
             {/* Modal de confirmation */}
             {confirmAction && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
@@ -1006,13 +1006,13 @@ export default function JumiaOrdersClient() {
                             </p>
                         </div>
                         <div className="flex items-center gap-3 w-full">
-                            <button 
+                            <button
                                 onClick={() => setConfirmAction(null)}
                                 className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
                             >
                                 Non, retour
                             </button>
-                            <button 
+                            <button
                                 onClick={() => {
                                     if (confirmAction.action === 'PACK') handlePackOrder(confirmAction.orderId)
                                     if (confirmAction.action === 'READY_TO_SHIP') handleReadyToShipOrder(confirmAction.orderId)

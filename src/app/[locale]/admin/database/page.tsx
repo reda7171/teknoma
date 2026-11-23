@@ -13,7 +13,7 @@ interface BackupFile {
 
 export default function DatabasePage() {
     const [activeTab, setActiveTab] = useState<'backups' | 'terminal'>('backups')
-    
+
     // Backups state
     const [backups, setBackups] = useState<BackupFile[]>([])
     const [loading, setLoading] = useState(true)
@@ -87,7 +87,7 @@ export default function DatabasePage() {
         setSqlError(null)
         setSqlResult(null)
         setExecutionTime(null)
-        
+
         const start = performance.now()
         try {
             const res = await fetch('/api/admin/sql', {
@@ -98,7 +98,7 @@ export default function DatabasePage() {
             const data = await res.json()
             const end = performance.now()
             setExecutionTime(Math.round(end - start))
-            
+
             if (data.success) {
                 setSqlResult(data.data)
             } else {
@@ -113,23 +113,23 @@ export default function DatabasePage() {
 
     const exportToExcel = async () => {
         if (!sqlResult || sqlResult.length === 0) return;
-        
+
         try {
             // @ts-ignore
             const ExcelJS = (await import('exceljs')).default;
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Résultats SQL');
-            
+
             const headers = Object.keys(sqlResult[0]);
             worksheet.addRow(headers);
-            
+
             worksheet.getRow(1).font = { bold: true };
             worksheet.getRow(1).fill = {
                 type: 'pattern',
                 pattern: 'solid',
                 fgColor: { argb: 'FFE0E7FF' }
             };
-            
+
             for (const row of sqlResult) {
                 const values = headers.map(header => {
                     const val = row[header];
@@ -138,7 +138,7 @@ export default function DatabasePage() {
                 });
                 worksheet.addRow(values);
             }
-            
+
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const url = URL.createObjectURL(blob);
@@ -165,7 +165,7 @@ export default function DatabasePage() {
     return (
         <div className="p-6 max-w-6xl mx-auto space-y-8">
             <div className="flex items-center gap-4 border-b border-gray-200">
-                <button 
+                <button
                     onClick={() => setActiveTab('backups')}
                     className={`pb-4 px-4 font-bold transition-all border-b-2 ${activeTab === 'backups' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-900'}`}
                 >
@@ -174,7 +174,7 @@ export default function DatabasePage() {
                         Sauvegardes
                     </div>
                 </button>
-                <button 
+                <button
                     onClick={() => setActiveTab('terminal')}
                     className={`pb-4 px-4 font-bold transition-all border-b-2 ${activeTab === 'terminal' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-900'}`}
                 >
@@ -226,7 +226,7 @@ export default function DatabasePage() {
                                 <FileText className="w-4 h-4" />
                                 Sauvegardes disponibles ({backups.length})
                             </h2>
-                            <button aria-label="Action RefreshCw" 
+                            <button aria-label="Action RefreshCw"
                                 onClick={fetchBackups}
                                 className="p-2 hover:bg-white rounded-lg transition text-gray-400 hover:text-indigo-600 shadow-sm border border-transparent hover:border-gray-100"
                             >
@@ -328,61 +328,61 @@ export default function DatabasePage() {
                     {/* Snippets for Book Table */}
                     <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         <span className="text-sm font-bold text-gray-500 whitespace-nowrap bg-white px-3 py-1.5 rounded-lg border border-gray-200">Table Livre (Book) :</span>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("SELECT * FROM books ORDER BY createdAt DESC LIMIT 50;")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-indigo-100"
                         >
                             Derniers ajouts
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("SELECT id, title, stock, price FROM books WHERE stock = 0;")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-indigo-100"
                         >
                             En rupture (stock = 0)
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("SELECT id, title, price, originalPrice FROM books WHERE originalPrice IS NOT NULL;")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-indigo-100"
                         >
                             En promotion
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("UPDATE books SET price = 100 WHERE id = 'ID_ICI';")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-amber-50 text-gray-700 hover:text-amber-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-amber-100"
                         >
                             Mettre à jour un prix
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("UPDATE books SET stock = stock + 10 WHERE id = 'ID_ICI';")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-amber-50 text-gray-700 hover:text-amber-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-amber-100"
                         >
                             Ajouter au stock
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("SELECT id, title, author, stock, price FROM books WHERE title LIKE '%mot_cle%';")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-indigo-100"
                         >
                             Rechercher par titre
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("SELECT id, title, price FROM books ORDER BY price DESC LIMIT 10;")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-indigo-100"
                         >
                             Top 10 plus chers
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("SELECT id, title FROM books WHERE image IS NULL OR image = '';")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-indigo-100"
                         >
                             Sans images
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("UPDATE books SET active = 0 WHERE id = 'ID_ICI';")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-amber-50 text-gray-700 hover:text-amber-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-amber-100"
                         >
                             Désactiver (cacher)
                         </button>
-                        <button 
+                        <button
                             onClick={() => setSqlQuery("DELETE FROM books WHERE id = 'ID_ICI';")}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-red-50 text-gray-700 hover:text-red-700 text-xs font-bold rounded-lg transition-colors whitespace-nowrap border border-transparent hover:border-red-100"
                         >
@@ -398,7 +398,7 @@ export default function DatabasePage() {
                                     <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                                 </div>
-                                <span className="ml-4 text-xs font-mono text-gray-400">console_sql - root@riwaya</span>
+                                <span className="ml-4 text-xs font-mono text-gray-400">console_sql - root@tekno</span>
                             </div>
                             <button
                                 onClick={executeQuery}
@@ -445,7 +445,7 @@ export default function DatabasePage() {
                                     Résultats de la requête
                                 </h3>
                                 <div className="flex items-center gap-3">
-                                    <select aria-label="Champ de sélection" 
+                                    <select aria-label="Champ de sélection"
                                         className="text-xs font-medium text-gray-600 bg-white px-2 py-1 rounded-lg border border-gray-200 shadow-sm outline-none cursor-pointer hover:border-indigo-300 focus:border-indigo-500 transition-colors"
                                         onChange={(e) => {
                                             const limit = e.target.value;
@@ -483,7 +483,7 @@ export default function DatabasePage() {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div className="overflow-x-auto max-h-[500px]">
                                 {sqlResult.length === 0 ? (
                                     <div className="p-8 text-center text-gray-500 text-sm">
@@ -505,8 +505,8 @@ export default function DatabasePage() {
                                                 <tr key={i} className="hover:bg-indigo-50/30 transition-colors">
                                                     {Object.values(row).map((val: any, j) => (
                                                         <td key={j} className="px-4 py-3 text-gray-700 font-mono text-xs truncate max-w-[300px]" title={String(val)}>
-                                                            {val === null ? <span className="text-gray-400 italic">NULL</span> : 
-                                                             typeof val === 'object' ? JSON.stringify(val) : 
+                                                            {val === null ? <span className="text-gray-400 italic">NULL</span> :
+                                                             typeof val === 'object' ? JSON.stringify(val) :
                                                              String(val)}
                                                         </td>
                                                     ))}

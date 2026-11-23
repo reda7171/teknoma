@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-    getEmailTemplates, 
-    createEmailTemplate, 
-    updateEmailTemplate, 
+import {
+    getEmailTemplates,
+    createEmailTemplate,
+    updateEmailTemplate,
     deleteEmailTemplate,
     getAutomatedEmailRules,
     saveAutomatedEmailRules,
@@ -69,27 +69,27 @@ export default function EmailTemplatesTab() {
             subject: '',
             body: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
   <div style="text-align: center; padding: 20px;">
-    <img src="https://riwaya.store/logo.png" alt="Riwaya Logo" style="max-height: 60px;" />
+    <img src="https://tekno.ma/logo.png" alt="Tekno Store Logo" style="max-height: 60px;" />
   </div>
-  
+
   <div style="padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
     <h2>Bonjour {{client_nom}},</h2>
     <p>Merci pour votre confiance ! Voici votre code coupon :</p>
-    
+
     <div style="text-align: center; margin: 30px 0;">
       <span style="background-color: #000; color: #fff; padding: 10px 20px; font-size: 20px; font-weight: bold; border-radius: 4px; letter-spacing: 2px;">
         {{coupon_code}}
       </span>
     </div>
-    
+
     <p>Ce code est valable sur tout notre catalogue.</p>
   </div>
-  
+
   <div style="padding: 20px; text-align: center; font-size: 12px; color: #666; margin-top: 20px; border-top: 1px solid #eee;">
-    <p><strong>L'équipe Riwaya</strong></p>
+    <p><strong>L'équipe Tekno Store</strong></p>
     <p>Livraison partout au Maroc 🚚</p>
     <p>Paiement à la livraison 💵</p>
-    <p><a href="https://riwaya.store" style="color: #666;">www.riwaya.store</a></p>
+    <p><a href="https://tekno.ma" style="color: #666;">tekno.ma</a></p>
   </div>
 </div>`,
             description: ''
@@ -439,7 +439,7 @@ export default function EmailTemplatesTab() {
                                     type="text"
                                     value={currentTemplate.subject || ''}
                                     onChange={e => setCurrentTemplate({ ...currentTemplate, subject: e.target.value })}
-                                    placeholder="ex: Confirmation de votre commande Riwaya #{{order_id}}"
+                                    placeholder="ex: Confirmation de votre commande Tekno Store #{{order_id}}"
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black/5 outline-none font-medium text-sm"
                                     required
                                 />
@@ -530,7 +530,7 @@ export default function EmailTemplatesTab() {
                                     type="email"
                                     value={testEmail}
                                     onChange={(e) => setTestEmail(e.target.value)}
-                                    placeholder="admin@riwaya.com ou client@gmail.com"
+                                    placeholder="Contact.tekno.ma@gmail.com ou client@gmail.com"
                                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-black/5"
                                     required
                                     autoFocus
@@ -571,4 +571,3 @@ export default function EmailTemplatesTab() {
         </div>
     )
 }
-

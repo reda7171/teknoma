@@ -5,7 +5,7 @@ import { getAllSettings } from '@/lib/actions/site-settings'
 import AeoConfigForm from './AeoConfigForm'
 
 export const metadata = {
-    title: 'Expert AEO | Admin Riwaya',
+    title: 'Expert AEO | Admin Tekno Store',
 }
 
 export default async function AeoConfigPage() {
@@ -19,7 +19,7 @@ export default async function AeoConfigPage() {
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style Tekno Store */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
@@ -43,7 +43,7 @@ export default async function AeoConfigPage() {
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Optimisation pour les moteurs de réponses (ChatGPT, Perplexity, etc.)</p>
                             </div>
                         </div>
-                        
+
                         <AeoConfigForm initialData={settings} />
                     </div>
                 </div>

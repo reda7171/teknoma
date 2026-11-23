@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { answerCallbackQuery, editTelegramMessage, sendTelegramMessage, sendTelegramPhoto, sendTelegramMediaGroup, escapeHtml } from '@/lib/telegram'
+import { answerCallbackQuery, editTelegramMessage, sendTelegramMessage, sendTelegramPhoto, sendTelegramMediaGroup, escapeHtml, formatOrderItemsList, buildOrderKeyboard } from '@/lib/telegram'
 import { OrderStatus } from '@prisma/client'
 import fs from 'fs/promises'
 import path from 'path'
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json()
-        
+
         // Récupérer le token depuis la DB
         const tokenSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } })
         const token = tokenSetting?.value || process.env.TELEGRAM_BOT_TOKEN || ''
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
             const { id: callbackId, data, message } = body.callback_query
             currentCallbackId = callbackId
             const { escapeHtml } = await import('@/lib/telegram')
-            
+
             void(`[TELEGRAM CALLBACK] Received ID: ${callbackId}, Data: ${data}`)
 
             // ─── Bouton Ping (Session) ───────────────────────────────────────
@@ -82,14 +82,14 @@ export async function POST(req: Request) {
                 } else {
                     const diffMs = new Date().getTime() - lastView.createdAt.getTime()
                     const diffMins = Math.floor(diffMs / 60000)
-                    
+
                     if (diffMins < 5) {
                         await answerCallbackQuery(callbackId, `✅ En ligne ! (Dernière action il y a ${diffMins} min)`, token, true)
                     } else {
                         await answerCallbackQuery(callbackId, `⚠️ Inactif depuis ${diffMins} min`, token, true)
                     }
                 }
-                
+
                 return NextResponse.json({ ok: true })
             }
             // ─────────────────────────────────────────────────────────────────
@@ -154,9 +154,222 @@ export async function POST(req: Request) {
 
                     return NextResponse.json({ ok: true })
                 }
-                
+
                 await answerCallbackQuery(callbackId, '❌ Erreur ID livre', token)
                 return NextResponse.json({ ok: true })
+            }
+            // ─── Bouton Déclarer / Gérer Manquant ───────────────────────────
+            if (data && data.startsWith('toggle_missing:')) {
+                const orderId = data.split(':')[1]
+                try {
+                    const existingOrder = await prisma.order.findUnique({
+                        where: { id: orderId },
+                        include: {
+                            items: {
+                                include: {
+                                    book: true,
+                                    pack: true,
+                                    extraProduct: true,
+                                    digitalProduct: true
+                                }
+                            }
+                        }
+                    })
+
+                    if (!existingOrder) {
+                        await answerCallbackQuery(callbackId, '❌ Commande introuvable', token)
+                        return NextResponse.json({ ok: true })
+                    }
+
+                    if (existingOrder.items.length === 0) {
+                        await answerCallbackQuery(callbackId, '❌ Aucun article dans la commande', token)
+                        return NextResponse.json({ ok: true })
+                    }
+
+                    // Si la commande n'a qu'un seul article, on bascule directement son statut
+                    if (existingOrder.items.length === 1) {
+                        const item = existingOrder.items[0]
+                        const nextMissing = !item.isMissing
+                        await prisma.orderItem.update({
+                            where: { id: item.id },
+                            data: { isMissing: nextMissing }
+                        })
+
+                        const rawTitle = item.book?.title || item.pack?.name || item.extraProduct?.name || 'Article'
+                        await prisma.orderStatusHistory.create({
+                            data: {
+                                orderId,
+                                status: existingOrder.status,
+                                comment: nextMissing
+                                    ? `Article "${rawTitle}" signalé comme MANQUANT via Telegram Bot`
+                                    : `Article "${rawTitle}" retiré des manquants via Telegram Bot`,
+                                createdBy: 'TELEGRAM'
+                            }
+                        })
+
+                        const alertMsg = nextMissing
+                            ? `⚠️ Article marqué comme MANQUANT !`
+                            : `✅ Article marqué comme DISPONIBLE !`
+                        await answerCallbackQuery(callbackId, alertMsg, token)
+
+                        const shortId = orderId.slice(0, 8).toUpperCase()
+                        const notifText = nextMissing
+                            ? `⚠️ <b>Article Déclaré MANQUANT</b>\n\n📦 <b>Commande #${shortId}</b>\n📖 <b>${escapeHtml(rawTitle)}</b>\n🔴 Statut: <b>MANQUANT</b>\n👤 Client: ${escapeHtml(existingOrder.fullName)} (${escapeHtml(existingOrder.city)})`
+                            : `✅ <b>Article Déclaré DISPONIBLE</b>\n\n📦 <b>Commande #${shortId}</b>\n📖 <b>${escapeHtml(rawTitle)}</b>\n🟢 Statut: <b>EN STOCK</b>`
+
+                        if (message?.chat?.id) {
+                            await sendTelegramMessage(notifText, message.chat.id.toString(), token)
+                        }
+
+                        return NextResponse.json({ ok: true })
+                    }
+
+                    // Si plusieurs articles, proposer de choisir l'article à basculer
+                    const itemButtons = existingOrder.items.map(item => {
+                        const title = item.book?.title || item.pack?.name || item.extraProduct?.name || 'Article'
+                        const isMissing = Boolean(item.isMissing)
+                        const icon = isMissing ? '🔴' : '⚪'
+                        const statusBadge = isMissing ? '[MANQUANT]' : '[En stock]'
+                        return [{
+                            text: `${icon} ${title.slice(0, 25)} ${statusBadge}`,
+                            callback_data: `toggle_item_missing:${orderId}:${item.id}`
+                        }]
+                    })
+
+                    itemButtons.push([
+                        { text: '🔙 Terminer / Retour', callback_data: `show_order_menu:${orderId}` }
+                    ])
+
+                    await answerCallbackQuery(callbackId, 'Sélectionnez l\'article à déclarer', token)
+                    if (message?.chat?.id && message?.message_id) {
+                        const shortId = orderId.slice(0, 8).toUpperCase()
+                        const promptText = `⚠️ <b>Gestion des Manquants — Commande #${shortId}</b>\n\n` +
+                            `Cliquez sur un article pour basculer son statut (🔴 Manquant / ⚪ En stock) :`
+                        await editTelegramMessage(message.chat.id, message.message_id, promptText, token, { inline_keyboard: itemButtons })
+                    }
+
+                    return NextResponse.json({ ok: true })
+                } catch (e: any) {
+                    console.error('[TELEGRAM TOGGLE MISSING ERROR]', e)
+                    await answerCallbackQuery(callbackId, '❌ Erreur traitement', token)
+                    return NextResponse.json({ ok: true })
+                }
+            }
+
+            // ─── Basculer un article spécifique dans une commande multi-articles ─
+            if (data && data.startsWith('toggle_item_missing:')) {
+                const [, orderId, itemId] = data.split(':')
+                try {
+                    const item = await prisma.orderItem.findUnique({
+                        where: { id: itemId },
+                        include: { book: true, pack: true, extraProduct: true }
+                    })
+
+                    if (!item) {
+                        await answerCallbackQuery(callbackId, '❌ Article introuvable', token)
+                        return NextResponse.json({ ok: true })
+                    }
+
+                    const nextMissing = !item.isMissing
+                    await prisma.orderItem.update({
+                        where: { id: itemId },
+                        data: { isMissing: nextMissing }
+                    })
+
+                    const rawTitle = item.book?.title || item.pack?.name || item.extraProduct?.name || 'Article'
+                    const existingOrder = await prisma.order.findUnique({
+                        where: { id: orderId },
+                        include: { items: { include: { book: true, pack: true, extraProduct: true } } }
+                    })
+
+                    if (existingOrder) {
+                        await prisma.orderStatusHistory.create({
+                            data: {
+                                orderId,
+                                status: existingOrder.status,
+                                comment: nextMissing
+                                    ? `Article "${rawTitle}" signalé comme MANQUANT via Telegram Bot`
+                                    : `Article "${rawTitle}" retiré des manquants via Telegram Bot`,
+                                createdBy: 'TELEGRAM'
+                            }
+                        })
+                    }
+
+                    const alertMsg = nextMissing
+                        ? `🔴 ${rawTitle.slice(0, 20)} marqué MANQUANT`
+                        : `🟢 ${rawTitle.slice(0, 20)} marqué EN STOCK`
+                    await answerCallbackQuery(callbackId, alertMsg, token)
+
+                    // Reconstruire les boutons mis à jour
+                    if (existingOrder && message?.chat?.id && message?.message_id) {
+                        const itemButtons = existingOrder.items.map(it => {
+                            const title = it.book?.title || it.pack?.name || it.extraProduct?.name || 'Article'
+                            const isMissing = it.id === itemId ? nextMissing : Boolean(it.isMissing)
+                            const icon = isMissing ? '🔴' : '⚪'
+                            const statusBadge = isMissing ? '[MANQUANT]' : '[En stock]'
+                            return [{
+                                text: `${icon} ${title.slice(0, 25)} ${statusBadge}`,
+                                callback_data: `toggle_item_missing:${orderId}:${it.id}`
+                            }]
+                        })
+
+                        itemButtons.push([
+                            { text: '🔙 Terminer / Retour', callback_data: `show_order_menu:${orderId}` }
+                        ])
+
+                        const shortId = orderId.slice(0, 8).toUpperCase()
+                        const promptText = `⚠️ <b>Gestion des Manquants — Commande #${shortId}</b>\n\n` +
+                            `Cliquez sur un article pour basculer son statut (🔴 Manquant / ⚪ En stock) :`
+                        await editTelegramMessage(message.chat.id, message.message_id, promptText, token, { inline_keyboard: itemButtons })
+                    }
+
+                    return NextResponse.json({ ok: true })
+                } catch (e: any) {
+                    console.error('[TELEGRAM TOGGLE ITEM ERROR]', e)
+                    await answerCallbackQuery(callbackId, '❌ Erreur', token)
+                    return NextResponse.json({ ok: true })
+                }
+            }
+
+            // ─── Restaurer le menu principal de la commande ─────────────────
+            if (data && data.startsWith('show_order_menu:')) {
+                const orderId = data.split(':')[1]
+                try {
+                    const order = await prisma.order.findUnique({
+                        where: { id: orderId },
+                        include: { items: { include: { book: true, pack: true, extraProduct: true, digitalProduct: true } } }
+                    })
+
+                    if (order && message?.chat?.id && message?.message_id) {
+                        const { itemsList, hasMissing } = formatOrderItemsList(order.items)
+                        const shortId = order.id.slice(0, 8).toUpperCase()
+
+                        let cleanPhone = order.phone.replace(/[^0-9]/g, '')
+                        if (cleanPhone.startsWith('0')) cleanPhone = '212' + cleanPhone.substring(1)
+                        else if (!cleanPhone.startsWith('212') && cleanPhone.length === 9) cleanPhone = '212' + cleanPhone
+                        const whatsappMsg = encodeURIComponent(`Bonjour ${order.fullName},\n\nVotre commande #${shortId} sur Tekno Store a bien été reçue.`)
+                        const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappMsg}`
+
+                        const activeShipping = order.shippingCompany ? [order.shippingCompany] : []
+                        const keyboard = buildOrderKeyboard(order.id, whatsappUrl, activeShipping, hasMissing)
+
+                        const banner = hasMissing ? `🚨 <b>ATTENTION : ARTICLE(S) MANQUANT(S) DÉTECTÉ(S) !</b>\n\n` : ''
+                        const updatedText = `${banner}🛒 <b>Commande #${shortId}</b>\n\n` +
+                            `👤 <b>Client:</b> ${escapeHtml(order.fullName)}\n` +
+                            `📞 <b>Téléphone:</b> ${escapeHtml(order.phone)}\n` +
+                            `📍 <b>Ville:</b> ${escapeHtml(order.city)}\n` +
+                            `💰 <b>Total:</b> ${order.total.toFixed(2)} MAD\n` +
+                            `📌 <b>Statut:</b> ${order.status}\n\n` +
+                            `📦 <b>Articles:</b>\n${itemsList}\n\n` +
+                            `🔗 <a href="${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}">Voir la commande</a>`
+
+                        await answerCallbackQuery(callbackId, 'Menu restauré', token)
+                        await editTelegramMessage(message.chat.id, message.message_id, updatedText, token, keyboard)
+                        return NextResponse.json({ ok: true })
+                    }
+                } catch (e: any) {
+                    console.error('[TELEGRAM RESTORE MENU ERROR]', e)
+                }
             }
             // ─────────────────────────────────────────────────────────────────
 
@@ -165,7 +378,7 @@ export async function POST(req: Request) {
                 const parts = data.split(':')
                 const orderId = parts[1]
                 const newStatus = parts[2]
-                
+
                 void(`[TELEGRAM STATUS] Updating order ${orderId} to status: ${newStatus}`)
 
                 if (!STATUS_LABELS[newStatus]) {
@@ -245,7 +458,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, '❌ Erreur : Commande introuvable ou erreur DB', token)
                 }
             }
-            
+
             // Format: sw:{orderId}
             else if (data && data.startsWith('sw:')) {
                 const [, orderId] = data.split(':')
@@ -273,7 +486,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, `❌ Erreur système : ${error.message}`, token)
                 }
             }
-            
+
             else if (data && data.startsWith('jumia_label:')) {
                 const [, orderId] = data.split(':')
                 const { printJumiaOrderLabelsFull } = await import('@/app/[locale]/admin/jumia-orders/actions')
@@ -327,7 +540,7 @@ export async function POST(req: Request) {
 
                 try {
                     await packJumiaOrderFull(orderId)
-                    
+
                     if (message?.chat?.id) {
                         const successMarkup = {
                             inline_keyboard: [
@@ -408,7 +621,7 @@ export async function POST(req: Request) {
                             `🔢 <b>NOMBRE DE PRODUITS JUMIA</b>\n\n` +
                             `🟠 Catalogue API Jumia : <b>${catalogProducts.length}</b>\n` +
                             (activeCount > 0 ? `✅ Actifs/approuvés détectés : <b>${activeCount}</b>\n` : '') +
-                            `\n🔗 <b>Produits liés dans Riwaya : ${linkedTotal}</b>\n` +
+                            `\n🔗 <b>Produits liés dans Tekno Store : ${linkedTotal}</b>\n` +
                             `📚 Livres : <b>${linkedBooks}</b>\n` +
                             `🎁 Packs : <b>${linkedPacks}</b>\n` +
                             `🛍️ Accessoires : <b>${linkedAccessories}</b>\n\n` +
@@ -524,7 +737,7 @@ export async function POST(req: Request) {
                         const { getJumiaPayoutStatements } = await import('@/app/[locale]/admin/jumia-orders/actions')
                         const data = await getJumiaPayoutStatements({ page: 1, size: 3 })
                         const statements = data?.statements || (Array.isArray(data) ? data : [])
-                        
+
                         if (statements.length === 0) {
                             await answerCallbackQuery(callbackId, '✅ Aucun paiement trouvé', token)
                         } else {
@@ -533,12 +746,12 @@ export async function POST(req: Request) {
                                 const currency = stmt.payout?.currency ?? stmt.currency ?? 'درهم'
                                 const dateStr = stmt.createdAt ? new Date(stmt.createdAt).toLocaleDateString('fr-FR') : 'Inconnue'
                                 const status = stmt.paid || stmt.status === 'paid' ? '✅ Payé' : '⏳ En attente'
-                                const period = stmt.periodStart && stmt.periodEnd 
-                                    ? `(${new Date(stmt.periodStart).toLocaleDateString('fr-FR')} - ${new Date(stmt.periodEnd).toLocaleDateString('fr-FR')})` 
+                                const period = stmt.periodStart && stmt.periodEnd
+                                    ? `(${new Date(stmt.periodStart).toLocaleDateString('fr-FR')} - ${new Date(stmt.periodEnd).toLocaleDateString('fr-FR')})`
                                     : ''
                                 return `💰 <b>${amount} ${currency}</b>\n${status} | 📅 ${dateStr} ${period}`
                             }).join('\n\n')
-                            
+
                             await answerCallbackQuery(callbackId, 'Derniers paiements chargés', token)
                             await sendTelegramMessage(`🟠 <b>Les 3 Derniers Paiements Jumia</b>\n\n${lines}`, message?.chat?.id.toString(), token)
                         }
@@ -549,7 +762,7 @@ export async function POST(req: Request) {
                         const now = new Date()
                         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
                         const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
-                        
+
                         let allOrders: any[] = []
                         let hasMore = true
                         let nextToken: string | undefined = undefined
@@ -560,7 +773,7 @@ export async function POST(req: Request) {
                             nextToken = response?.nextToken || response?.data?.nextToken
                             if (!nextToken || orders.length === 0 || allOrders.length > 10000) hasMore = false
                         }
-                        
+
                         const summary = summarizeJumiaOrders(allOrders)
                         const text = `📊 <b>Bilan Jumia — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}</b>\n\n📦 Commandes valides: <b>${summary.valid}</b> / ${summary.total}\n⏳ En attente: <b>${summary.statusCounts.PENDING || 0}</b>\n✅ Prêt à expédier: <b>${summary.statusCounts.READY_TO_SHIP || 0}</b>\n🚚 Expédiées: <b>${summary.statusCounts.SHIPPED || 0}</b>\n🏁 Livrées: <b>${summary.statusCounts.DELIVERED || 0}</b>\n❌ Annulées/retournées/échouées: <b>${summary.excluded}</b>\n\n💰 CA net: <b>${summary.revenue.toFixed(2)} درهم</b>`
                         await answerCallbackQuery(callbackId, 'Bilan Jumia chargé', token)
@@ -571,7 +784,7 @@ export async function POST(req: Request) {
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
                         let allOrders: any[] = []
-                        
+
                         const year = now.getFullYear();
                         const quarters = [
                             { start: `${year}-01-01`, end: `${year}-03-31` },
@@ -603,7 +816,7 @@ export async function POST(req: Request) {
                         if (!jumia) throw new Error('Jumia non configuré')
                         const now = new Date()
                         let allOrders: any[] = []
-                        
+
                         const year = now.getFullYear();
                         const quarters = [
                             { start: `${year}-01-01`, end: `${year}-03-31` },
@@ -628,12 +841,12 @@ export async function POST(req: Request) {
                         const monthlyRevenue = Array(12).fill(0)
                         const monthlyTotalOrders = Array(12).fill(0)
                         const monthlyCanceledOrders = Array(12).fill(0)
-                        
+
                         allOrders.forEach(o => {
                             if (o.createdAt && o.status) {
                                 const month = new Date(o.createdAt).getMonth()
                                 monthlyTotalOrders[month]++
-                                
+
                                 if (!isJumiaRevenueOrder(o)) {
                                     monthlyCanceledOrders[month]++
                                 } else {
@@ -679,9 +892,9 @@ export async function POST(req: Request) {
                                 }
                             }
                         }
-                        
+
                         const chartUrl = `https://quickchart.io/chart?v=3&c=${encodeURIComponent(JSON.stringify(chartConfig))}`
-                        
+
                         const { sendTelegramPhoto } = await import('@/lib/telegram')
                         await sendTelegramPhoto(chartUrl, `📈 <b>Évolution du CA Jumia et Annulations (${now.getFullYear()})</b>`, message?.chat?.id.toString(), token)
                     } else if (action === 'jumia_vs_store_chart') {
@@ -691,7 +904,7 @@ export async function POST(req: Request) {
                         const now = new Date()
                         const yearStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
                         const yearEnd = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0]
-                        
+
                         await answerCallbackQuery(callbackId, 'Génération comparatif en cours...', token)
 
                         let allJumiaOrders: any[] = []
@@ -768,9 +981,9 @@ export async function POST(req: Request) {
                                 }
                             }
                         }
-                        
+
                         const chartUrl = `https://quickchart.io/chart?v=3&c=${encodeURIComponent(JSON.stringify(chartConfig))}`
-                        
+
                         const { sendTelegramPhoto } = await import('@/lib/telegram')
                         await sendTelegramPhoto(chartUrl, `📊 <b>Comparatif Jumia vs Boutique (${now.getFullYear()})</b>`, message?.chat?.id.toString(), token)
                     } else if (action === 'returns_check') {
@@ -778,13 +991,13 @@ export async function POST(req: Request) {
                         try {
                             const res = await callProtectedCron('/api/cron/jumia-returns-alert')
                             const data = await res.json()
-                            
+
                             if (data.success) {
                                 let resultMsg = `🔄 <b>Bilan de la vérification Jumia</b>\n\n`
                                 resultMsg += `↩️ Retours détectés : <b>${data.returned || 0}</b>\n`
                                 resultMsg += `❌ Annulations : <b>${data.canceled || 0}</b>\n`
                                 resultMsg += `📦 Stocks réintégrés (Nouveaux) : <b>${data.restored || 0}</b>`
-                                
+
                                 await sendTelegramMessage(resultMsg, message?.chat?.id.toString(), token)
                             } else {
                                 await sendTelegramMessage(`❌ Erreur lors de la vérification: ${data.error}`, message?.chat?.id.toString(), token)
@@ -859,7 +1072,7 @@ export async function POST(req: Request) {
                                 updates.push({ sellerSku, id: product?.id, stock })
                             }
 
-                            if (updates.length === 0) throw new Error('Aucun SKU de la commande n’est lié à un produit Riwaya')
+                            if (updates.length === 0) throw new Error('Aucun SKU de la commande n’est lié à un produit Tekno Store')
 
                             await jumia.updateProductsStock(updates)
                             const details = updates
@@ -893,14 +1106,14 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, `❌ Erreur: ${err.message}`, token)
                 }
             }
-            
+
             // Format: promo_flash:{bookId}
             else if (data && data.startsWith('promo_flash:')) {
                 const [, bookId] = data.split(':')
                 try {
                     const book = await prisma.book.findUnique({ where: { id: bookId } })
                     if (!book) throw new Error('Livre introuvable')
-                    
+
                     const newPrice = Math.round(book.price * 0.9) // -10%
                     await prisma.book.update({
                         where: { id: bookId },
@@ -928,7 +1141,7 @@ export async function POST(req: Request) {
                     const { JumiaAPI } = await import('@/lib/jumia-api')
                     const jumia = await JumiaAPI.getInstance()
                     if (!jumia) throw new Error('Jumia non configuré')
-                    
+
                     const itemsResponse = await jumia.getOrderItems(orderNumber)
                     const items = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
                     const orderItemIds = items.map((i: any) => i.orderItemId)
@@ -936,7 +1149,7 @@ export async function POST(req: Request) {
                     if (orderItemIds.length === 0) throw new Error('Aucun article trouvé')
 
                     await jumia.packOrders({ orderItemIds, deliveryType: 'dropship' })
-                    
+
                     const providersResponse = await jumia.getShipmentProviders(orderItemIds)
                     const providers = providersResponse?.shipmentProviders || providersResponse?.data?.shipmentProviders || []
                     const defaultProvider = providers.length > 0 ? providers[0].name : ''
@@ -970,7 +1183,7 @@ export async function POST(req: Request) {
                     const { JumiaAPI } = await import('@/lib/jumia-api')
                     const jumia = await JumiaAPI.getInstance()
                     if (!jumia) throw new Error('Jumia non configuré')
-                    
+
                     const itemsResponse = await jumia.getOrderItems(orderNumber)
                     const items = itemsResponse?.orderItems || itemsResponse?.data?.orderItems || []
                     const orderItemIds = items.map((i: any) => i.orderItemId)
@@ -978,7 +1191,7 @@ export async function POST(req: Request) {
                     if (orderItemIds.length === 0) throw new Error('Aucun article trouvé')
 
                     await jumia.cancelOrders(orderItemIds)
-                    
+
                     await answerCallbackQuery(callbackId, `❌ Commande ${orderNumber} annulée`, token)
                     if (message?.chat?.id && message?.message_id) {
                         const updatedText = `❌ <b>Commande Jumia annulée</b>\n\n🆔 Commande: <b>${orderNumber}</b>`
@@ -1028,7 +1241,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, `❌ Erreur : ${error.message}`, token)
                 }
             }
-            
+
             // Format: gen_creative:{orderId}
             else if (data && data.startsWith('gen_creative:')) {
                 const [, orderId] = data.split(':')
@@ -1037,9 +1250,9 @@ export async function POST(req: Request) {
                         where: { id: orderId },
                         include: { items: { include: { book: true, pack: true } } }
                     })
-                    
+
                     if (!order || order.items.length === 0) throw new Error('Commande ou articles introuvables')
-                    
+
                     const firstItem = order.items[0]
                     const itemId = firstItem.bookId || firstItem.packId
                     const itemType = firstItem.bookId ? 'BOOK' : 'PACK'
@@ -1081,7 +1294,7 @@ export async function POST(req: Request) {
                 try {
                     let item: any = null;
                     let imageUrl = '';
-                    let title = 'Riwaya';
+                    let title = 'Tekno Store';
 
                     if (itemId && itemId.length === 36 && itemId.includes('-')) {
                         if (itemType === 'BOOK') {
@@ -1111,7 +1324,7 @@ export async function POST(req: Request) {
                         }
                     }
 
-                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                     if (imageUrl && !imageUrl.startsWith('http')) {
                         imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
                     }
@@ -1121,14 +1334,14 @@ export async function POST(req: Request) {
 
                     const customCaptionSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_custom_caption' } })
                     const customCaption = customCaptionSetting?.value
-                    
+
                     const finalCaption = (customCaption && customCaption.length > 0) ? customCaption : (item?.description || title)
 
                     const baseItem = {
                         itemId: item?.id || 'marketing',
                         itemType,
                         title: title,
-                        author: item?.author || 'Riwaya',
+                        author: item?.author || 'Tekno Store',
                         price: item?.price || 0,
                         category: item?.category || 'Promotion',
                         image: imageUrl,
@@ -1140,7 +1353,7 @@ export async function POST(req: Request) {
                         caption: finalCaption,
                         format: 'story',
                         source: 'telegram-bot-action',
-                        
+
                         facebook_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'facebook_access_token' } }))?.value,
                         instagram_account_id: (await prisma.siteSettings.findUnique({ where: { key: 'marketing_instagram_id' } }))?.value,
                         tiktok_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'tiktok_access_token' } }))?.value,
@@ -1220,7 +1433,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, `❌ Erreur: ${error.message}`, token)
                 }
             }
-            
+
             // Format: view_c:{itemId}:{shortType}
             else if (data && data.startsWith('view_c:')) {
                 const [, itemId, shortType] = data.split(':')
@@ -1228,7 +1441,7 @@ export async function POST(req: Request) {
                 try {
                     let item: any = null;
                     let imageUrl = '';
-                    let title = 'Riwaya';
+                    let title = 'Tekno Store';
 
                     if (itemId && itemId.length === 36 && itemId.includes('-')) {
                         if (itemType === 'BOOK') {
@@ -1258,13 +1471,13 @@ export async function POST(req: Request) {
                         }
                     }
 
-                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                     if (imageUrl && !imageUrl.startsWith('http')) {
                         imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
                     }
 
                     await answerCallbackQuery(callbackId, `Envoi de l'image...`, token)
-                    
+
                     const replyMarkup = {
                         inline_keyboard: [
                             [
@@ -1285,7 +1498,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, `❌ Erreur : ${error.message}`, token)
                 }
             }
-            
+
             // Format: caption_info
             else if (data === 'caption_info') {
                 await answerCallbackQuery(callbackId, `Comment ajouter une légende`, token)
@@ -1293,7 +1506,7 @@ export async function POST(req: Request) {
                     await sendTelegramMessage(`✏️ <b>Pour personnaliser la légende :</b>\n\nEnvoyez simplement un message dans ce chat commençant par <code>#legende</code>.\n\nExemple :\n<code>#legende 🔥 Ne ratez pas notre promotion ! Lien en bio.</code>\n\nUne fois enregistrée, la légende sera utilisée pour votre prochaine publication.`, message.chat.id.toString(), token)
                 }
             }
-            
+
             // Format: approve_review:{reviewId}
             else if (data && data.startsWith('approve_review:')) {
                 const [, reviewId] = data.split(':')
@@ -1302,7 +1515,7 @@ export async function POST(req: Request) {
                     data: { isApproved: true },
                     include: { book: { select: { title: true } } }
                 })
-                
+
                 await answerCallbackQuery(callbackId, '✅ Avis approuvé !', token)
                 const updatedText = `✅ <b>Avis Approuvé</b>\n\n` +
                     `👤 <b>Client:</b> ${review.fullName}\n` +
@@ -1319,7 +1532,7 @@ export async function POST(req: Request) {
             else if (data && data.startsWith('delete_review:')) {
                 const [, reviewId] = data.split(':')
                 await prisma.review.delete({ where: { id: reviewId } })
-                
+
                 await answerCallbackQuery(callbackId, '🗑️ Avis supprimé !', token)
                 const updatedText = `🗑️ <b>Avis Supprimé</b>\n\nL'avis a été définitivement retiré.`
 
@@ -1345,7 +1558,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, 'Demande expirée ou déjà traitée.', token)
                     return NextResponse.json({ ok: true })
                 }
-                
+
                 await answerCallbackQuery(callbackId, '✅ Connexion approuvée !', token)
                 const updatedText = `✅ <b>Demande d'accès Approuvée</b>\n\n` +
                     `👤 <b>Utilisateur:</b> ${escapeHtml(request.email)}\n` +
@@ -1374,7 +1587,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, 'Demande expirée ou déjà traitée.', token)
                     return NextResponse.json({ ok: true })
                 }
-                
+
                 await answerCallbackQuery(callbackId, '❌ Connexion refusée !', token)
                 const updatedText = `❌ <b>Demande d'accès Refusée</b>\n\n` +
                     `👤 <b>Utilisateur:</b> ${escapeHtml(request.email)}\n` +
@@ -1385,7 +1598,7 @@ export async function POST(req: Request) {
                     await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
                 }
             }
-            
+
             // Format: approve_review:{reviewId}
             else if (data && data.startsWith('approve_review:')) {
                 const [, reviewId] = data.split(':')
@@ -1405,7 +1618,7 @@ export async function POST(req: Request) {
                     await editTelegramMessage(message.chat.id, message.message_id, `🗑️ <b>Avis supprimé.</b>`, token)
                 }
             }
-            
+
             // Format: month_orders:{year}:{month}
             else if (data && data.startsWith('month_orders:')) {
                 const [, yearStr, monthStr] = data.split(':')
@@ -1413,20 +1626,20 @@ export async function POST(req: Request) {
                 const month = parseInt(monthStr)
                 const start = new Date(year, month, 1)
                 const end = new Date(year, month + 1, 0, 23, 59, 59, 999)
-                
+
                 const siteOrders = await prisma.order.findMany({
                     where: { createdAt: { gte: start, lte: end } },
                     orderBy: { createdAt: 'desc' },
                     select: { id: true, status: true }
                 })
-                
+
                 const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
                 const label = `${months[month]} ${year}`
-                
+
                 let orderText = `📦 <b>Détails des Commandes - ${label}</b>\n\n`
                 orderText += `🔵 <b>SITE WEB :</b>\n`
                 let siteCount = 0
-                
+
                 for (const o of siteOrders) {
                     if (orderText.length > 3700) {
                         orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
@@ -1446,7 +1659,7 @@ export async function POST(req: Request) {
                         const createdBefore = end.toISOString().split('T')[0]
                         const response = await jumia.getOrders(500, undefined, undefined, createdAfter, createdBefore)
                         const jumiaOrders = response?.orders || response?.data?.orders || []
-                        
+
                         let jumiaCount = 0
                         for (const o of jumiaOrders) {
                             if (orderText.length > 3700) {
@@ -1464,11 +1677,11 @@ export async function POST(req: Request) {
                     console.error('Erreur stats Jumia:', e)
                     orderText += `\n⚠️ Impossible de charger les commandes Jumia.`
                 }
-                
+
                 await answerCallbackQuery(callbackId, `Détails ${label} générés`, token)
                 await sendTelegramMessage(orderText, message?.chat?.id.toString(), token)
             }
-            
+
             // Format: stats:{period}
             else if (data && data.startsWith('stats:') && !['stats:recent_orders', 'stats:compare_months', 'stats:all_time', 'stats:yearly_chart'].includes(data)) {
                 const [, period] = data.split(':')
@@ -1531,12 +1744,29 @@ export async function POST(req: Request) {
                     const showRegistrations = (await prisma.siteSettings.findUnique({ where: { key: 'telegram_stats_registrations' } }))?.value === 'true'
                     const showViews = (await prisma.siteSettings.findUnique({ where: { key: 'telegram_stats_top_views' } }))?.value === 'true'
 
-                    const [orderStats, visitors, registrations] = await Promise.all([
+                    // Charger les tarifs de livraison depuis la table CityDelivery
+                    const cityDeliveryPrices = await (prisma as any).cityDelivery.findMany({
+                        where: { active: true },
+                        select: { city: true, price: true }
+                    })
+                    const cityPriceMap = new Map<string, number>()
+                    for (const cd of cityDeliveryPrices) {
+                        const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                        cityPriceMap.set(key, cd.price)
+                    }
+                    const defaultDeliveryFee = 30
+
+                    const [orderStats, ordersForDelivery, visitors, registrations] = await Promise.all([
                         prisma.order.groupBy({
                             by: ['status'],
                             where: { createdAt: { gte: start, lte: end } },
                             _count: true,
                             _sum: { total: true }
+                        }),
+                        // Récupérer les commandes non annulées pour calculer les frais via CityDelivery
+                        prisma.order.findMany({
+                            where: { createdAt: { gte: start, lte: end }, status: { not: 'CANCELLED' } },
+                            select: { city: true, total: true }
                         }),
                         showVisitors ? prisma.pageView.groupBy({
                             by: ['sessionId'],
@@ -1547,23 +1777,41 @@ export async function POST(req: Request) {
                         }) : Promise.resolve(0)
                     ])
 
-                    let siteStats = { count: 0, revenue: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
+                    // Calculer les frais de livraison depuis la table CityDelivery
+                    let totalDeliveryFees = 0
+                    for (const order of ordersForDelivery) {
+                        const cleanCity = (order.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                        let fee = cityPriceMap.get(cleanCity)
+                        if (fee === undefined) {
+                            // Recherche partielle
+                            for (const [key, price] of cityPriceMap) {
+                                if (key.includes(cleanCity) || cleanCity.includes(key)) {
+                                    fee = price
+                                    break
+                                }
+                            }
+                        }
+                        totalDeliveryFees += fee ?? defaultDeliveryFee
+                    }
+
+                    let siteStats = { count: 0, revenue: 0, revenueNet: 0, deliveryFees: totalDeliveryFees, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
                     for (const stat of orderStats) {
                         const status = stat.status;
                         const count = stat._count;
                         const revenue = stat._sum.total || 0;
-                        
+
                         siteStats.count += count;
-                        
+
                         if (status !== 'CANCELLED') {
                             siteStats.revenue += revenue;
                         }
-                        
+
                         if (status === 'PENDING') siteStats.pending += count;
                         else if (status === 'SHIPPED') siteStats.shipped += count;
                         else if (status === 'DELIVERED') siteStats.delivered += count;
                         else if (status === 'CANCELLED') siteStats.canceled += count;
                     }
+                    siteStats.revenueNet = siteStats.revenue - siteStats.deliveryFees
 
                     let jumiaStats = { count: 0, revenue: 0, pending: 0, shipped: 0, delivered: 0, canceled: 0 }
                     let jumiaStatsError: string | null = null
@@ -1691,12 +1939,14 @@ export async function POST(req: Request) {
                     let text = `📊 <b>RAPPORT : ${label.toUpperCase()}</b>\n\n` +
                                `🔵 <b>SITE WEB :</b>\n` +
                                `📦 Commandes Total : <b>${siteStats.count}</b>\n` +
-                               `💰 CA Total : <b>${siteStats.revenue.toFixed(2)} درهم</b>\n` +
+                               `💰 CA Brut : <b>${siteStats.revenue.toFixed(2)} درهم</b>\n` +
+                               `🚚 Frais Livraison : <b>-${siteStats.deliveryFees.toFixed(2)} درهم</b>\n` +
+                               `💵 CA Net : <b>${siteStats.revenueNet.toFixed(2)} درهم</b>\n` +
                                `⏳ En attente : ${siteStats.pending}\n` +
                                `🚚 En expédition : ${siteStats.shipped}\n` +
                                `✅ Livrées : ${siteStats.delivered}\n` +
                                `❌ Annulées/Retours : ${siteStats.canceled}`
-                    
+
                     text += `\n\n🟠 <b>JUMIA :</b>\n` +
                             `📦 Commandes valides : <b>${jumiaStats.count}</b>\n` +
                             `💰 CA net : <b>${jumiaStats.revenue.toFixed(2)} درهم</b>\n` +
@@ -1705,14 +1955,14 @@ export async function POST(req: Request) {
                             `✅ Livrées : ${jumiaStats.delivered}\n` +
                             `❌ Annulées/Retours : ${jumiaStats.canceled}` +
                             (jumiaStatsError ? `\n⚠️ ${jumiaStatsError}` : '')
-                    
+
                     if (showVisitors) text += `\n👥 Visiteurs Uniques : <b>${visitors}</b>`
                     if (showRegistrations) text += `\n👤 Inscriptions : <b>${registrations}</b>`
 
                     if (showViews) {
                         const topViews = await prisma.pageView.groupBy({
                             by: ['url'],
-                            where: { 
+                            where: {
                                 createdAt: { gte: start, lte: end },
                                 url: { contains: '/books/' }
                             },
@@ -1750,7 +2000,7 @@ export async function POST(req: Request) {
                             }
                         }
                     }
-                    
+
                     await answerCallbackQuery(callbackId, `Stats ${label} envoyées`, token)
                     await sendTelegramMessage(text, message?.chat?.id.toString(), token)
                 }
@@ -1787,14 +2037,23 @@ export async function POST(req: Request) {
             // Format: stats:compare_months
             else if (data === 'stats:compare_months') {
                 const now = new Date()
-                // Mois actuel
                 const startCurrent = new Date(now.getFullYear(), now.getMonth(), 1)
                 const endCurrent = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
-                // Mois précédent
                 const startPrev = new Date(now.getFullYear(), now.getMonth() - 1, 1)
                 const endPrev = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
 
-                const [current, prev] = await Promise.all([
+                // Charger les tarifs CityDelivery
+                const cityDeliveryPricesCmp = await (prisma as any).cityDelivery.findMany({
+                    where: { active: true },
+                    select: { city: true, price: true }
+                })
+                const cityPriceMapCmp = new Map<string, number>()
+                for (const cd of cityDeliveryPricesCmp) {
+                    const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    cityPriceMapCmp.set(key, cd.price)
+                }
+
+                const [current, prev, ordersCurrent, ordersPrev] = await Promise.all([
                     prisma.order.aggregate({
                         where: { createdAt: { gte: startCurrent, lte: endCurrent }, status: { not: 'CANCELLED' } },
                         _sum: { total: true },
@@ -1804,13 +2063,41 @@ export async function POST(req: Request) {
                         where: { createdAt: { gte: startPrev, lte: endPrev }, status: { not: 'CANCELLED' } },
                         _sum: { total: true },
                         _count: true
+                    }),
+                    prisma.order.findMany({
+                        where: { createdAt: { gte: startCurrent, lte: endCurrent }, status: { not: 'CANCELLED' } },
+                        select: { city: true }
+                    }),
+                    prisma.order.findMany({
+                        where: { createdAt: { gte: startPrev, lte: endPrev }, status: { not: 'CANCELLED' } },
+                        select: { city: true }
                     })
                 ])
 
-                const caMois = current._sum.total || 0
-                const caPrev = prev._sum.total || 0
-                const diff = caMois - caPrev
-                const pct = caPrev > 0 ? ((diff / caPrev) * 100).toFixed(1) : 'N/A'
+                // Calculer frais de livraison pour chaque mois
+                const calcDeliveryFees = (orders: { city: string }[]) => {
+                    let total = 0
+                    for (const o of orders) {
+                        const cleanCity = (o.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                        let fee = cityPriceMapCmp.get(cleanCity)
+                        if (fee === undefined) {
+                            for (const [key, price] of cityPriceMapCmp) {
+                                if (key.includes(cleanCity) || cleanCity.includes(key)) { fee = price; break }
+                            }
+                        }
+                        total += fee ?? 30
+                    }
+                    return total
+                }
+
+                const feesCurrent = calcDeliveryFees(ordersCurrent)
+                const feesPrev = calcDeliveryFees(ordersPrev)
+                const caBrutMois = current._sum.total || 0
+                const caBrutPrev = prev._sum.total || 0
+                const caNetMois = caBrutMois - feesCurrent
+                const caNetPrev = caBrutPrev - feesPrev
+                const diff = caNetMois - caNetPrev
+                const pct = caNetPrev > 0 ? ((diff / caNetPrev) * 100).toFixed(1) : 'N/A'
                 const trend = diff >= 0 ? `📈 +${pct}%` : `📉 ${pct}%`
 
                 const moisActuel = startCurrent.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
@@ -1818,20 +2105,35 @@ export async function POST(req: Request) {
 
                 const text = `📊 <b>CA MENSUEL COMPARÉ</b>\n\n` +
                     `📅 <b>${moisActuel} :</b>\n` +
-                    `   💰 CA : <b>${caMois.toFixed(2)} درهم</b>\n` +
+                    `   💰 CA Brut : <b>${caBrutMois.toFixed(2)} درهم</b>\n` +
+                    `   🚚 Frais Livraison : <b>-${feesCurrent.toFixed(2)} درهم</b>\n` +
+                    `   💵 CA Net : <b>${caNetMois.toFixed(2)} درهم</b>\n` +
                     `   📦 Commandes : <b>${current._count}</b>\n\n` +
                     `📅 <b>${moisPrec} :</b>\n` +
-                    `   💰 CA : <b>${caPrev.toFixed(2)} درهم</b>\n` +
+                    `   💰 CA Brut : <b>${caBrutPrev.toFixed(2)} درهم</b>\n` +
+                    `   🚚 Frais Livraison : <b>-${feesPrev.toFixed(2)} درهم</b>\n` +
+                    `   💵 CA Net : <b>${caNetPrev.toFixed(2)} درهم</b>\n` +
                     `   📦 Commandes : <b>${prev._count}</b>\n\n` +
-                    `${trend} vs mois précédent`
+                    `${trend} vs mois précédent (CA Net)`
 
                 await answerCallbackQuery(callbackId, '📊 Comparaison mensuelle', token)
                 await sendTelegramMessage(text, message?.chat?.id.toString(), token)
             }
-            
+
             // Format: stats:all_time
             else if (data === 'stats:all_time') {
-                const [total, revenue, firstOrder, byStatus] = await Promise.all([
+                // Charger les tarifs de livraison depuis la table CityDelivery
+                const cityDeliveryPricesAll = await (prisma as any).cityDelivery.findMany({
+                    where: { active: true },
+                    select: { city: true, price: true }
+                })
+                const cityPriceMapAll = new Map<string, number>()
+                for (const cd of cityDeliveryPricesAll) {
+                    const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    cityPriceMapAll.set(key, cd.price)
+                }
+
+                const [total, revenue, firstOrder, byStatus, allSiteOrders] = await Promise.all([
                     prisma.order.count(),
                     prisma.order.aggregate({
                         where: { status: { not: 'CANCELLED' } },
@@ -1844,8 +2146,28 @@ export async function POST(req: Request) {
                     prisma.order.groupBy({
                         by: ['status'],
                         _count: { status: true }
+                    }),
+                    prisma.order.findMany({
+                        where: { status: { not: 'CANCELLED' } },
+                        select: { city: true }
                     })
                 ])
+
+                // Calculer les frais de livraison depuis CityDelivery
+                let totalDeliveryFeesAll = 0
+                for (const order of allSiteOrders) {
+                    const cleanCity = (order.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    let fee = cityPriceMapAll.get(cleanCity)
+                    if (fee === undefined) {
+                        for (const [key, price] of cityPriceMapAll) {
+                            if (key.includes(cleanCity) || cleanCity.includes(key)) {
+                                fee = price
+                                break
+                            }
+                        }
+                    }
+                    totalDeliveryFeesAll += fee ?? 30
+                }
 
                 const statusIcons: Record<string, string> = {
                     PENDING: '⏳', CONFIRMED: '✅', SHIPPED: '🚚',
@@ -1875,7 +2197,7 @@ export async function POST(req: Request) {
                             quarters.push({ start: `${y}-07-01`, end: `${y}-09-30` });
                             quarters.push({ start: `${y}-10-01`, end: `${y}-12-31` });
                         }
-                        
+
                         let allOrders: any[] = []
                         await Promise.all(quarters.map(async (q) => {
                             let hasMore = true
@@ -1889,7 +2211,7 @@ export async function POST(req: Request) {
                                 if (!nextToken || orders.length === 0 || allOrders.length > 20000) hasMore = false
                             }
                         }));
-                        
+
                         const summary = summarizeJumiaOrders(allOrders)
                         jumiaStats = { count: summary.valid, revenue: summary.revenue, canceled: summary.excluded }
                     }
@@ -1899,16 +2221,19 @@ export async function POST(req: Request) {
 
                 const totalSite = total
                 const revenueSite = revenue._sum.total || 0
+                const revenueSiteNet = revenueSite - totalDeliveryFeesAll
                 const totalCombined = totalSite + jumiaStats.count
-                const revenueCombined = revenueSite + jumiaStats.revenue
+                const revenueCombinedNet = revenueSiteNet + jumiaStats.revenue
 
                 const text = `🗂️ <b>STATISTIQUES GLOBALES</b>\n\n` +
                     `📅 <b>Depuis :</b> ${since}\n` +
                     `📦 <b>Total commandes (Site + Jumia) :</b> ${totalCombined}\n` +
-                    `💰 <b>CA total (Site + Jumia) :</b> <b>${revenueCombined.toFixed(2)} درهم</b>\n\n` +
+                    `💵 <b>CA Net total (Site + Jumia) :</b> <b>${revenueCombinedNet.toFixed(2)} درهم</b>\n\n` +
                     `🔵 <b>SITE WEB :</b>\n` +
                     `📦 Commandes Site : ${totalSite}\n` +
-                    `💰 CA Site : <b>${revenueSite.toFixed(2)} درهم</b>\n` +
+                    `💰 CA Brut Site : <b>${revenueSite.toFixed(2)} درهم</b>\n` +
+                    `🚚 Frais Livraison : <b>-${totalDeliveryFeesAll.toFixed(2)} درهم</b>\n` +
+                    `💵 CA Net Site : <b>${revenueSiteNet.toFixed(2)} درهم</b>\n` +
                     `\n🟠 <b>JUMIA :</b>\n` +
                     `📦 Commandes Jumia valides : ${jumiaStats.count}\n` +
                     `❌ Annulées/retournées Jumia : ${jumiaStats.canceled}\n` +
@@ -1925,7 +2250,18 @@ export async function POST(req: Request) {
                 const year = now.getFullYear()
                 const startYear = new Date(year, 0, 1)
                 const endYear = new Date(year, 11, 31, 23, 59, 59)
-                
+
+                // Charger les tarifs CityDelivery
+                const cityDeliveryPricesChart = await (prisma as any).cityDelivery.findMany({
+                    where: { active: true },
+                    select: { city: true, price: true }
+                })
+                const cityPriceMapChart = new Map<string, number>()
+                for (const cd of cityDeliveryPricesChart) {
+                    const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    cityPriceMapChart.set(key, cd.price)
+                }
+
                 const orders = await prisma.order.findMany({
                     where: {
                         createdAt: { gte: startYear, lte: endYear },
@@ -1933,32 +2269,49 @@ export async function POST(req: Request) {
                     },
                     select: {
                         total: true,
+                        city: true,
                         createdAt: true
                     }
                 })
-                
+
                 const monthlyCA = Array(12).fill(0)
+                const monthlyFees = Array(12).fill(0)
                 for (const o of orders) {
                     const month = new Date(o.createdAt).getMonth()
                     monthlyCA[month] += o.total
+                    // Calculer les frais de livraison depuis CityDelivery
+                    const cleanCity = (o.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+                    let fee = cityPriceMapChart.get(cleanCity)
+                    if (fee === undefined) {
+                        for (const [key, price] of cityPriceMapChart) {
+                            if (key.includes(cleanCity) || cleanCity.includes(key)) { fee = price; break }
+                        }
+                    }
+                    monthlyFees[month] += fee ?? 30
                 }
-                
+
+                const monthlyNet = monthlyCA.map((ca, i) => ca - monthlyFees[i])
                 const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
-                let maxCA = Math.max(...monthlyCA, 1) // avoid div by 0
-                
-                let chartText = `📈 <b>CA ANNUEL ${year} (Site Web)</b>\n\n`
+                let maxCA = Math.max(...monthlyNet, 1)
+
+                let chartText = `📈 <b>CA NET ANNUEL ${year} (Site Web)</b>\n\n`
                 let totalYearCA = 0
-                
+                let totalYearFees = 0
+
                 for (let i = 0; i <= now.getMonth(); i++) {
-                    const val = monthlyCA[i]
-                    totalYearCA += val
-                    const blocks = Math.round((val / maxCA) * 10)
+                    const netVal = monthlyNet[i]
+                    totalYearCA += monthlyCA[i]
+                    totalYearFees += monthlyFees[i]
+                    const blocks = Math.round((Math.max(netVal, 0) / maxCA) * 10)
                     const bar = '█'.repeat(blocks) + '▒'.repeat(10 - blocks)
-                    chartText += `<code>${months[i].padEnd(4)} |</code> ${bar} <b>${val.toFixed(0)}</b>\n`
+                    chartText += `<code>${months[i].padEnd(4)} |</code> ${bar} <b>${netVal.toFixed(0)}</b>\n`
                 }
-                
-                chartText += `\n💰 <b>Total : ${totalYearCA.toFixed(2)} درهم</b>`
-                
+
+                const totalNetYear = totalYearCA - totalYearFees
+                chartText += `\n💰 <b>CA Brut : ${totalYearCA.toFixed(2)} درهم</b>`
+                chartText += `\n🚚 <b>Frais Livraison : -${totalYearFees.toFixed(2)} درهم</b>`
+                chartText += `\n💵 <b>CA Net : ${totalNetYear.toFixed(2)} درهم</b>`
+
                 await answerCallbackQuery(callbackId, '📈 Graphique Annuel chargé', token)
                 await sendTelegramMessage(chartText, message?.chat?.id.toString(), token)
             }
@@ -1977,14 +2330,15 @@ export async function POST(req: Request) {
             void(`[TELEGRAM MESSAGE] Received from ${chatId}: ${text}`)
 
             if (text.startsWith('/CMD') || text === 'CMD' || text.startsWith('/HELP') || text === 'HELP') {
-                const helpText = `📘 <b>Riwaya Bot — Commandes disponibles</b>\n\n` +
+                const helpText = `📘 <b>Tekno Store Bot — Commandes disponibles</b>\n\n` +
                     `<b>📊 Statistiques & Rapports</b>\n` +
                     `/bilan — Stats site web (aujourd'hui, mois, etc.)\n` +
                     `/rapport — Rapport quotidien immédiat\n` +
                     `/commandes_mois — Toutes les commandes du mois (Site & Jumia)\n` +
                     `/2026 — Lister les commandes par mois pour l'année 2026\n` +
                     `/stockalerte — Vérifier le stock critique\n\n` +
-                    `/manque — Articles signalés manquants avec les détails des commandes\n\n` +
+                    `/manque — Articles signalés manquants avec les détails des commandes\n` +
+                    `/manquant [ID ou Titre] — Déclarer un article ou livre comme manquant\n\n` +
                     `<b>🟠 Jumia</b>\n` +
                     `/jumia — Menu complet Jumia (pending, bilan, retours, comparatifs, graphiques)\n` +
                     `/jumia_top — Top 10 des livres Jumia et CA par produit pour le mois\n\n` +
@@ -2020,6 +2374,148 @@ export async function POST(req: Request) {
                     `CSV commandes Jumia → <code>/api/admin/jumia/export</code>\n\n` +
                     `<i>💡 Toutes les commandes sont insensibles à la casse</i>`
                 await sendTelegramMessage(helpText, chatId.toString(), token)
+            }
+            else if (text.startsWith('/MANQUANT') || text === 'MANQUANT' || text.startsWith('MANQUANT ')) {
+                const query = rawText.replace(/^\/manquant\s*/i, '').replace(/^manquant\s*/i, '').trim()
+
+                if (!query) {
+                    // Sans paramètre : afficher l'aide et les dernières commandes avec boutons
+                    const recentOrders = await prisma.order.findMany({
+                        take: 5,
+                        orderBy: { createdAt: 'desc' },
+                        include: {
+                            items: {
+                                include: { book: true, pack: true, extraProduct: true }
+                            }
+                        }
+                    })
+
+                    const keyboardButtons = recentOrders.map(o => {
+                        const shortId = o.id.slice(0, 8).toUpperCase()
+                        const clientName = o.fullName.split(' ')[0]
+                        const hasMissing = o.items.some(i => i.isMissing)
+                        const icon = hasMissing ? '🔴' : '⚪'
+                        return [{
+                            text: `${icon} #${shortId} (${clientName}) — Déclarer`,
+                            callback_data: `toggle_missing:${o.id}`
+                        }]
+                    })
+
+                    const helpMsg = `⚠️ <b>DÉCLARATION D'ARTICLE MANQUANT</b>\n\n` +
+                        `<b>Comment déclarer un article manquant :</b>\n` +
+                        `1️⃣ Cliquez sur le bouton <b>⚠️ Déclarer Manquant</b> sous une commande\n` +
+                        `2️⃣ Ou tapez : <code>/manquant [ID Commande]</code> (ex: <code>/manquant #A1B2C3D4</code>)\n` +
+                        `3️⃣ Ou tapez : <code>/manquant [Nom du livre]</code> pour déclarer une rupture générale\n` +
+                        `4️⃣ Pour voir la liste complète : <code>/manque</code>\n\n` +
+                        `📋 <b>5 Dernières Commandes :</b>`
+
+                    await sendTelegramMessage(helpMsg, chatId.toString(), token, { inline_keyboard: keyboardButtons })
+                } else {
+                    const cleanQuery = query.replace('#', '').trim()
+                    let targetOrder = await prisma.order.findFirst({
+                        where: {
+                            OR: [
+                                { id: cleanQuery },
+                                { id: { startsWith: cleanQuery } }
+                            ]
+                        },
+                        include: {
+                            items: {
+                                include: { book: true, pack: true, extraProduct: true }
+                            }
+                        }
+                    })
+
+                    if (targetOrder) {
+                        const shortId = targetOrder.id.slice(0, 8).toUpperCase()
+                        if (targetOrder.items.length === 1) {
+                            const it = targetOrder.items[0]
+                            await prisma.orderItem.update({
+                                where: { id: it.id },
+                                data: { isMissing: true }
+                            })
+
+                            const rawTitle = it.book?.title || it.pack?.name || it.extraProduct?.name || 'Article'
+                            await prisma.orderStatusHistory.create({
+                                data: {
+                                    orderId: targetOrder.id,
+                                    status: targetOrder.status,
+                                    comment: `Article "${rawTitle}" signalé comme MANQUANT via commande /manquant`,
+                                    createdBy: 'TELEGRAM'
+                                }
+                            })
+
+                            const confirmMsg = `⚠️ <b>Article Déclaré MANQUANT avec Succès !</b>\n\n` +
+                                `📦 <b>Commande #${shortId}</b>\n` +
+                                `👤 Client: <b>${escapeHtml(targetOrder.fullName)}</b> (${escapeHtml(targetOrder.city)})\n` +
+                                `📞 Tél: <code>${targetOrder.phone}</code>\n` +
+                                `📖 Article: <b>${escapeHtml(rawTitle)}</b>\n` +
+                                `🔴 Statut: <b>MANQUANT</b>\n\n` +
+                                `<i>L'article portera désormais le libellé [MANQUANT] sur les notifications et la commande.</i>`
+
+                            await sendTelegramMessage(confirmMsg, chatId.toString(), token)
+                        } else {
+                            const itemButtons = targetOrder.items.map(it => {
+                                const title = it.book?.title || it.pack?.name || it.extraProduct?.name || 'Article'
+                                const isMissing = Boolean(it.isMissing)
+                                const icon = isMissing ? '🔴' : '⚪'
+                                const statusBadge = isMissing ? '[MANQUANT]' : '[En stock]'
+                                return [{
+                                    text: `${icon} ${title.slice(0, 25)} ${statusBadge}`,
+                                    callback_data: `toggle_item_missing:${targetOrder!.id}:${it.id}`
+                                }]
+                            })
+
+                            itemButtons.push([
+                                { text: '🔙 Terminer / Retour', callback_data: `show_order_menu:${targetOrder.id}` }
+                            ])
+
+                            const promptText = `⚠️ <b>Commande #${shortId} (${targetOrder.items.length} articles)</b>\n\n` +
+                                `Sélectionnez l'article à déclarer comme <b>MANQUANT</b> :`
+
+                            await sendTelegramMessage(promptText, chatId.toString(), token, { inline_keyboard: itemButtons })
+                        }
+                    } else {
+                        const book = await prisma.book.findFirst({
+                            where: {
+                                OR: [
+                                    { title: { contains: cleanQuery } },
+                                    { isbn: cleanQuery },
+                                    { id: cleanQuery }
+                                ]
+                            }
+                        })
+
+                        if (book) {
+                            await prisma.book.update({
+                                where: { id: book.id },
+                                data: { stock: 0 }
+                            })
+
+                            const updateResult = await prisma.orderItem.updateMany({
+                                where: {
+                                    bookId: book.id,
+                                    order: { status: { in: ['PENDING', 'CONFIRMED'] } }
+                                },
+                                data: { isMissing: true }
+                            })
+
+                            const msg = `⚠️ <b>Livre Déclaré MANQUANT (Rupture Immédiate)</b>\n\n` +
+                                `📖 <b>${escapeHtml(book.title)}</b>\n` +
+                                `📉 Stock passé à <b>0</b>\n` +
+                                `🔔 <b>${updateResult.count}</b> commande(s) en attente marquée(s) avec le libellé <b>[MANQUANT]</b>.`
+
+                            await sendTelegramMessage(msg, chatId.toString(), token)
+                        } else {
+                            await sendTelegramMessage(
+                                `❌ <b>Introuvable :</b> Aucun livre ou commande ne correspond à <code>${escapeHtml(cleanQuery)}</code>.\n\n` +
+                                `Utilisez <code>/manquant [ID Commande]</code> ou <code>/manquant</code> pour afficher le menu.`,
+                                chatId.toString(),
+                                token
+                            )
+                        }
+                    }
+                }
             }
             else if (text === '/MANQUE' || text === 'MANQUE' || text.startsWith('/MANQUE@')) {
                 const missingItems = await prisma.orderItem.findMany({
@@ -2078,7 +2574,7 @@ export async function POST(req: Request) {
                     where: { stock: { lte: 0 } },
                     select: { title: true, id: true }
                 })
-                
+
                 if (outOfStockBooks.length === 0) {
                     await sendTelegramMessage(`✅ <b>Tout est en stock !</b>\nAucun livre n'est actuellement en rupture.`, chatId.toString(), token)
                 } else {
@@ -2098,7 +2594,7 @@ export async function POST(req: Request) {
                 const start = new Date(now.getFullYear(), now.getMonth(), 1)
                 const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
                 const end = new Date(nextMonth.getTime() - 1)
-                
+
                 const siteOrders = await prisma.order.findMany({
                     where: { createdAt: { gte: start, lte: end } },
                     orderBy: { createdAt: 'desc' },
@@ -2185,7 +2681,7 @@ export async function POST(req: Request) {
                 const year = text.substring(1)
                 const replyText = `📅 <b>Détails des Commandes - Année ${year}</b>\n\nSélectionnez un mois pour voir la liste des commandes :`
                 const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
-                
+
                 const inline_keyboard = []
                 for (let i = 0; i < 12; i += 2) {
                     inline_keyboard.push([
@@ -2193,7 +2689,7 @@ export async function POST(req: Request) {
                         { text: months[i+1], callback_data: `month_orders:${year}:${i+1}` }
                     ])
                 }
-                
+
                 const replyMarkup = { inline_keyboard }
                 await sendTelegramMessage(replyText, chatId.toString(), token, replyMarkup)
             }
@@ -2202,7 +2698,7 @@ export async function POST(req: Request) {
                 text.startsWith('/BLIAN') || text === 'BLIAN' ||
                 text.startsWith('/STATS') || text === 'STATS'
             ) {
-                const replyText = `📊 <b>Centre de Rapports Riwaya</b>\n\nQue souhaitez-vous consulter ?`
+                const replyText = `📊 <b>Centre de Rapports Tekno Store</b>\n\nQue souhaitez-vous consulter ?`
                 const replyMarkup = {
                     inline_keyboard: [
                         [
@@ -2248,28 +2744,28 @@ export async function POST(req: Request) {
             }
             else if (text.startsWith('/GENERER') || text === 'GENERER' || text.startsWith('/MARKETING')) {
                 void(`[TELEGRAM] Command /GENERER received from chat ${chatId}`)
-                
+
                 // Envoyer un accusé de réception immédiat
                 await sendTelegramMessage(`🔍 Recherche de créatives sur le serveur...`, chatId.toString(), token)
 
                 try {
                     let creatives: any[] = []
-                    
+
                     // 1. Scanner le disque (Priorité car l'utilisateur dit qu'elles sont là)
                     const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'books')
                     void(`[TELEGRAM] Scanning directory: ${uploadDir}`)
-                    
+
                     try {
                         const files = await fs.readdir(uploadDir)
                         void(`[TELEGRAM] Found ${files.length} total files in directory`)
-                        
-                        const filteredFiles = files.filter(f => 
-                            f.toLowerCase().startsWith('creative_') || 
-                            f.toLowerCase().startsWith('pack_') || 
-                            f.toLowerCase().startsWith('desc_') || 
+
+                        const filteredFiles = files.filter(f =>
+                            f.toLowerCase().startsWith('creative_') ||
+                            f.toLowerCase().startsWith('pack_') ||
+                            f.toLowerCase().startsWith('desc_') ||
                             f.toLowerCase().includes('pack')
                         );
-                        
+
                         // Mélanger aléatoirement pour ne pas toujours afficher les mêmes
                         const marketingFiles = filteredFiles.sort(() => 0.5 - Math.random()).slice(0, 10)
 
@@ -2294,7 +2790,7 @@ export async function POST(req: Request) {
                             orderBy: { createdAt: 'desc' }
                         })
                         const randomAssets = dbAssets.sort(() => 0.5 - Math.random()).slice(0, 10);
-                        
+
                         creatives = randomAssets.map(a => ({
                             name: a.name,
                             type: a.type,
@@ -2308,7 +2804,7 @@ export async function POST(req: Request) {
                         return NextResponse.json({ ok: true })
                     }
 
-                    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
                     // Envoyer un album des 3 dernières images pour l'aperçu
                     if (creatives.length > 0) {
@@ -2328,8 +2824,8 @@ export async function POST(req: Request) {
                         const rawId = (c as any).bookId || (c as any).packId || c.name
                         const itemId = String(rawId).substring(0, 30)
                         const shortType = c.type === 'PACK' ? 'P' : 'B'
-                        return [{ 
-                            text: `${typeLabel} ${label}`, 
+                        return [{
+                            text: `${typeLabel} ${label}`,
                             callback_data: `prep_c:${itemId}:${shortType}`
                         }]
                     })
@@ -2342,7 +2838,7 @@ export async function POST(req: Request) {
                     }
 
                     void(`[TELEGRAM] Sending final menu to ${chatId}`)
-                    const result = await sendTelegramMessage(`🚀 <b>Marketing Riwaya</b>\n\nChoisissez une créative ci-dessus pour la publier :`, chatId.toString(), token, replyMarkup)
+                    const result = await sendTelegramMessage(`🚀 <b>Marketing Tekno Store</b>\n\nChoisissez une créative ci-dessus pour la publier :`, chatId.toString(), token, replyMarkup)
                     console.log(`[TELEGRAM] Final menu send result:`, result ? 'SUCCESS' : 'FAILED')
                 } catch (error: any) {
                     console.error('[TELEGRAM ERROR] /GENERER failed:', error)
@@ -2671,7 +3167,7 @@ export async function POST(req: Request) {
                 const parts = rawText.split(' ').slice(1)
                 const price = parseFloat(parts.pop() || '0')
                 const query = parts.join(' ')
-                
+
                 if (!query || !price) {
                     await sendTelegramMessage(`💡 Utilisation : <code>/promo [titre du livre] [nouveau_prix]</code>`, chatId.toString(), token)
                 } else {
@@ -2694,7 +3190,7 @@ export async function POST(req: Request) {
                     try {
                         const order = await prisma.order.update({
                             where: { id: query },
-                            data: { 
+                            data: {
                                 status: 'SHIPPED',
                                 statusHistory: {
                                     create: {
@@ -2798,13 +3294,13 @@ export async function POST(req: Request) {
                         const prompt = `Rédige un article de blog complet, optimisé pour le SEO (en français), d'environ 500 mots sur le sujet suivant : ${topic}. Retourne le titre de l'article sur la première ligne, suivi d'un saut de ligne, puis le contenu formaté en HTML propre.`
                         const generated = await generateText(prompt)
                         if (!generated) throw new Error('Generation failed')
-                        
+
                         const parts = generated.split('\n')
                         let title = parts[0].replace(/<[^>]*>?/gm, '').trim()
                         const content = parts.slice(1).join('\n').trim()
-                        
+
                         const adminUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } })
-                        
+
                         const post = await prisma.post.create({
                             data: {
                                 title: title || topic,
@@ -2816,7 +3312,7 @@ export async function POST(req: Request) {
                                 authorName: adminUser?.fullName || 'Admin'
                             }
                         })
-                        
+
                         await sendTelegramMessage(`✅ <b>Article généré avec succès !</b>\n\nTitre : ${title}\nStatut : <b>Brouillon</b>\n\nVous pouvez le lire et l'éditer depuis l'administration.`, chatId.toString(), token)
                     } catch (e: any) {
                         await sendTelegramMessage(`❌ Erreur lors de la génération : ${e.message}`, chatId.toString(), token)
@@ -2837,10 +3333,10 @@ export async function POST(req: Request) {
                         if (!n8nWebhookUrl) {
                             await sendTelegramMessage(`❌ n8n webhook non configuré.`, chatId.toString(), token)
                         } else {
-                            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                             const postUrl = `${baseUrl}/fr/blog/${post.slug}`
                             const imageUrl = post.coverImage ? (post.coverImage.startsWith('http') ? post.coverImage : `${baseUrl}${post.coverImage.startsWith('/') ? '' : '/'}${post.coverImage}`) : `${baseUrl}/images/default-blog.jpg`
-                            
+
                             const baseItem = {
                                 itemId: post.id,
                                 itemType: 'BLOG',
@@ -2854,7 +3350,7 @@ export async function POST(req: Request) {
                                 facebook_access_token: (await prisma.siteSettings.findUnique({ where: { key: 'facebook_access_token' } }))?.value,
                                 instagram_account_id: (await prisma.siteSettings.findUnique({ where: { key: 'marketing_instagram_id' } }))?.value
                             }
-                            
+
                             const payload = {
                                 batch: ['facebook', 'instagram', 'tiktok'].map(p => ({
                                     ...baseItem,
@@ -2862,7 +3358,7 @@ export async function POST(req: Request) {
                                 }))
                             }
                             fetch(n8nWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(console.error)
-                            
+
                             const { escapeHtml } = await import('@/lib/telegram')
                             await sendTelegramMessage(`🚀 Partage de l'article <b>${escapeHtml(post.title)}</b> lancé vers vos réseaux sociaux !`, chatId.toString(), token)
                         }
@@ -2897,7 +3393,7 @@ export async function POST(req: Request) {
                                 const rawImage = book.image || ''
                                 const imageUrl = rawImage.startsWith('http') && !rawImage.includes('127.0.0.1')
                                     ? rawImage
-                                    : `https://riwaya.store${rawImage.startsWith('/') ? rawImage : `/${rawImage}`}`
+                                    : `https://tekno.ma${rawImage.startsWith('/') ? rawImage : `/${rawImage}`}`
                                 if (!rawImage) continue
 
                                 const timeSlot = possibleTimes[i % possibleTimes.length]
@@ -2906,7 +3402,7 @@ export async function POST(req: Request) {
                                 scheduleAt.setHours(parseInt(hours), parseInt(minutes), 0, 0)
                                 if (scheduleAt <= today) scheduleAt.setDate(scheduleAt.getDate() + 1)
 
-                                const caption = `📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://riwaya.store/fr/books/${book.id}\n\n#livre #lecture #riwaya`
+                                const caption = `📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://tekno.ma/fr/books/${book.id}\n\n#livre #lecture #tekno`
                                 const post = await prisma.scheduledPost.create({
                                     data: {
                                         date: scheduleAt,

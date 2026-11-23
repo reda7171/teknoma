@@ -52,7 +52,7 @@ export const useReadingListStore = create<ReadingListStore>()(
             clearReadingList: () => set({ items: [] }),
         }),
         {
-            name: 'riwaya-reading-list',
+            name: 'tekno-reading-list',
             skipHydration: true,
         }
     )

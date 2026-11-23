@@ -17,7 +17,7 @@ jobs:
           port: 2222
           command_timeout: 10m
           script: |
-            cd /var/www/riwayama
+            cd /var/www/tekno
             echo "Redémarrage du conteneur WAHA..."
             if [ -f "scripts/restart-waha.sh" ]; then
               echo "${{ secrets.VPS_PASSWORD }}" | sudo -S chmod +x scripts/restart-waha.sh

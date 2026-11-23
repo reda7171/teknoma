@@ -29,7 +29,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
     const [currentChunkIdx, setCurrentChunkIdx] = useState(0)
     const [statusText, setStatusText] = useState('')
     const [config, setConfig] = useState({
-        title: 'Collection Riwaya',
+        title: 'Collection Tekno Store',
         primaryColor: '#2563eb',
         backgroundColor: '#ffffff',
         textColor: '#111827',
@@ -72,8 +72,8 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
         }
         return true
     })
-    const filteredBooks = config.selectedCategory === 'all' 
-        ? availableBooks 
+    const filteredBooks = config.selectedCategory === 'all'
+        ? availableBooks
         : availableBooks.filter(b => b.category === config.selectedCategory)
 
     const sortedBooks = [...filteredBooks].sort((a, b) => {
@@ -167,7 +167,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
     const handleExportAll = async () => {
         if (chunkedBooks.length === 0) return
         setIsGenerating(true)
-        
+
         let successCount = 0
 
         try {
@@ -188,16 +188,16 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                     style: { fontFamily: "'Cairo', sans-serif" },
                     imagePlaceholder: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
                 })
-                
+
                 const link = document.createElement('a')
                 link.href = dataUrl
-                link.download = `riwaya-catalog-p${i + 1}.png`
+                link.download = `tekno-catalog-p${i + 1}.png`
                 link.click()
                 successCount++
-                
+
                 await new Promise(resolve => setTimeout(resolve, 800))
             }
-            
+
             if (successCount > 0) {
                 setStatusText('✓ Terminé !')
                 setTimeout(() => { setStatusText(''); onClose(); }, 2000)
@@ -214,22 +214,22 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
     const getPatternStyle = (pattern: string, color: string) => {
         const op = color === '#0f172a' ? 0.08 : 0.05
         const pColor = config.primaryColor
-        
+
         if (pattern === 'dots') {
-            return { 
-                backgroundImage: `radial-gradient(${pColor} 15%, transparent 16%)`, 
-                backgroundSize: '40px 40px' 
+            return {
+                backgroundImage: `radial-gradient(${pColor} 15%, transparent 16%)`,
+                backgroundSize: '40px 40px'
             }
         }
         if (pattern === 'stripes') {
-            return { 
+            return {
                 backgroundImage: `repeating-linear-gradient(45deg, ${pColor} 0, ${pColor} 5px, transparent 5px, transparent 25px)`,
                 opacity: op * 2
             }
         }
         if (pattern === 'grid') {
-            return { 
-                backgroundImage: `linear-gradient(${pColor} 1.5px, transparent 1.5px), linear-gradient(90deg, ${pColor} 1.5px, transparent 1.5px)`, 
+            return {
+                backgroundImage: `linear-gradient(${pColor} 1.5px, transparent 1.5px), linear-gradient(90deg, ${pColor} 1.5px, transparent 1.5px)`,
                 backgroundSize: '60px 60px',
                 opacity: op * 1.5
             }
@@ -255,7 +255,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Fond</label>
                                 <div className="grid grid-cols-5 gap-3">
                                     {BG_COLORS.map(bg => (
-                                        <button 
+                                        <button
                                             key={bg.color}
                                             onClick={() => setConfig({...config, backgroundColor: bg.color, textColor: bg.text})}
                                             className={`w-full aspect-square rounded-xl border-2 transition-all ${config.backgroundColor === bg.color ? 'border-blue-600 scale-110 shadow-lg' : 'border-gray-100 hover:scale-110'}`}
@@ -269,7 +269,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Motif</label>
                                 <div className="grid grid-cols-4 gap-2">
                                     {['none', 'dots', 'stripes', 'grid'].map(p => (
-                                        <button 
+                                        <button
                                             key={p}
                                             onClick={() => setConfig({...config, pattern: p})}
                                             className={`py-3 rounded-2xl text-[9px] font-black border-2 transition-all uppercase ${config.pattern === p ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-gray-400 border-gray-100'}`}
@@ -284,7 +284,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest">Thème</label>
                                 <div className="flex gap-2.5">
                                     {['#2563eb', '#059669', '#d97706', '#dc2626', '#0f172a'].map(c => (
-                                        <button 
+                                        <button
                                             key={c}
                                             onClick={() => setConfig({...config, primaryColor: c})}
                                             className={`w-8 h-8 rounded-full border-2 transition-all ${config.primaryColor === c ? 'border-gray-900 scale-110' : 'border-transparent'}`}
@@ -298,8 +298,8 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Titre de l'image</label>
                                 <div className="relative">
                                     <Type className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={config.title}
                                         onChange={(e) => setConfig({...config, title: e.target.value})}
                                         className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-sm font-bold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none"
@@ -315,13 +315,13 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                         { id: 'catalog', label: 'Catalogue (Vertical)' },
                                         { id: 'post', label: 'Post (Facebook/Insta)' },
                                     ].map(f => (
-                                        <button 
+                                        <button
                                             key={f.id}
                                             onClick={() => {
                                                 const newBooks = f.id === 'post' ? 6 : 24;
                                                 const newCols = f.id === 'post' ? 3 : 3;
-                                                setConfig({...config, format: f.id, booksPerPage: newBooks, columns: newCols}); 
-                                                setCurrentChunkIdx(0); 
+                                                setConfig({...config, format: f.id, booksPerPage: newBooks, columns: newCols});
+                                                setCurrentChunkIdx(0);
                                             }}
                                             className={`py-3 rounded-2xl text-[9px] font-black border-2 transition-all uppercase ${config.format === f.id ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-gray-400 border-gray-100'}`}
                                         >
@@ -333,7 +333,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
 
                             <div>
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Catalogue de quel entrepôt</label>
-                                <select aria-label="Catalogue de quel entrepôt" 
+                                <select aria-label="Catalogue de quel entrepôt"
                                     value={config.selectedWarehouse}
                                     onChange={(e) => {
                                         setConfig({...config, selectedWarehouse: e.target.value});
@@ -350,7 +350,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
 
                             <div>
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Catégorie</label>
-                                <select aria-label="Champ de sélection" 
+                                <select aria-label="Champ de sélection"
                                     value={config.selectedCategory}
                                     onChange={(e) => {
                                         setConfig({...config, selectedCategory: e.target.value});
@@ -370,7 +370,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                     <ArrowUpDown className="w-3.5 h-3.5 text-blue-600" />
                                     Trier par
                                 </label>
-                                <select 
+                                <select
                                     aria-label="Trier par"
                                     value={config.sortBy}
                                     onChange={(e) => {
@@ -393,7 +393,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                     <Layers className="w-3.5 h-3.5 text-blue-600" />
                                     Regrouper par
                                 </label>
-                                <select 
+                                <select
                                     aria-label="Regrouper par"
                                     value={config.grouping}
                                     onChange={(e) => {
@@ -411,7 +411,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                             <div>
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Prix</label>
                                 <label className="flex items-center gap-2 cursor-pointer py-1">
-                                    <input 
+                                    <input
                                         type="checkbox"
                                         checked={config.showPrice}
                                         onChange={(e) => setConfig({...config, showPrice: e.target.checked})}
@@ -425,7 +425,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                 <label className="text-[10px] uppercase text-gray-400 font-black tracking-widest block mb-3">Livres par image</label>
                                 <div className="grid grid-cols-4 gap-2">
                                     {(config.format === 'post' ? [2, 4, 6, 9] : [12, 24, 48, 96]).map(num => (
-                                        <button 
+                                        <button
                                             key={num}
                                             onClick={() => { setConfig({...config, booksPerPage: num}); setCurrentChunkIdx(0); }}
                                             className={`py-2 rounded-xl text-[10px] font-black border-2 transition-all ${config.booksPerPage === num ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400 border-gray-100'}`}
@@ -459,12 +459,12 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-md px-6 py-3 rounded-3xl shadow-xl flex flex-col items-center gap-2">
                             <div className="flex items-center gap-4 w-full justify-between">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 w-32">Taille Horizontale</span>
-                                <input 
-                                    type="range" 
-                                    min="0.5" 
-                                    max="1.5" 
-                                    step="0.05" 
-                                    value={config.scaleX} 
+                                <input
+                                    type="range"
+                                    min="0.5"
+                                    max="1.5"
+                                    step="0.05"
+                                    value={config.scaleX}
                                     onChange={(e) => setConfig({...config, scaleX: parseFloat(e.target.value)})}
                                     className="w-32 accent-blue-600"
                                 />
@@ -472,12 +472,12 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                             </div>
                             <div className="flex items-center gap-4 w-full justify-between">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 w-32">Taille Verticale</span>
-                                <input 
-                                    type="range" 
-                                    min="0.5" 
-                                    max="1.5" 
-                                    step="0.05" 
-                                    value={config.scaleY} 
+                                <input
+                                    type="range"
+                                    min="0.5"
+                                    max="1.5"
+                                    step="0.05"
+                                    value={config.scaleY}
                                     onChange={(e) => setConfig({...config, scaleY: parseFloat(e.target.value)})}
                                     className="w-32 accent-blue-600"
                                 />
@@ -522,7 +522,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                     </div>
                                     {config.format === 'post' && (
                                         <div style={{ marginTop: 'auto', paddingTop: '40px', textAlign: 'center', width: '100%' }}>
-                                             <p style={{ fontSize: '40px', fontWeight: '950', color: config.textColor, opacity: 0.15, letterSpacing: '10px', textTransform: 'uppercase', margin: 0 }}>RIWAYA.STORE</p>
+                                             <p style={{ fontSize: '40px', fontWeight: '950', color: config.textColor, opacity: 0.15, letterSpacing: '10px', textTransform: 'uppercase', margin: 0 }}>tekno.ma</p>
                                         </div>
                                     )}
                                     </div>
@@ -551,13 +551,13 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                     const cols = isPost && config.booksPerPage <= 4 ? 2 : config.columns;
                     const innerWidth = isPost ? 1000 : 1040;
                     const gapX = isPost ? 40 : 60;
-                    
+
                     return (
-                    <div 
+                    <div
                         key={chunkIdx}
                         ref={(el) => { captureRefs.current[chunkIdx] = el }}
-                        style={{ 
-                            width: isPost ? '1080px' : '1200px', 
+                        style={{
+                            width: isPost ? '1080px' : '1200px',
                             height: isPost ? '1350px' : 'auto',
                             minHeight: isPost ? '1350px' : '1200px',
                             backgroundColor: config.backgroundColor,
@@ -576,7 +576,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                         {/* Content Layer */}
                         <div style={{ transform: `scale(${config.scaleX}, ${config.scaleY})`, transformOrigin: 'top center', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <div style={{ position: 'relative', zIndex: 10, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                
+
                                 {/* Header */}
                                 <div style={{ width: '100%', textAlign: 'center', marginBottom: isPost ? '60px' : '140px', flexShrink: 0 }}>
                                 {chunkedBooks.length > 1 && !isPost && (
@@ -615,11 +615,11 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                                 </div>
                                             )}
                                             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: isPost ? '120px' : '220px' }}>
-                                                <h3 dir="auto" style={{ 
-                                                    fontSize: isPost ? '30px' : '48px', 
-                                                    fontWeight: '850', 
-                                                    color: config.textColor, 
-                                                    margin: '0', 
+                                                <h3 dir="auto" style={{
+                                                    fontSize: isPost ? '30px' : '48px',
+                                                    fontWeight: '850',
+                                                    color: config.textColor,
+                                                    margin: '0',
                                                     textAlign: 'center',
                                                     width: '100%',
                                                     lineHeight: '1.2',
@@ -634,13 +634,13 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
                                                     {bookTitle}
                                                 </h3>
                                                 {config.showPrice && (
-                                                    <div style={{ 
-                                                        backgroundColor: config.primaryColor, 
-                                                        color: '#ffffff', 
-                                                        padding: isPost ? '14px 40px' : '22px 65px', 
-                                                        borderRadius: '100px', 
-                                                        fontSize: isPost ? '26px' : '42px', 
-                                                        fontWeight: '950', 
+                                                    <div style={{
+                                                        backgroundColor: config.primaryColor,
+                                                        color: '#ffffff',
+                                                        padding: isPost ? '14px 40px' : '22px 65px',
+                                                        borderRadius: '100px',
+                                                        fontSize: isPost ? '26px' : '42px',
+                                                        fontWeight: '950',
                                                         marginTop: 'auto',
                                                         boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
                                                         whiteSpace: 'nowrap'
@@ -656,7 +656,7 @@ export default function CatalogImageModal({ isOpen, onClose, onSelect }: Catalog
 
                             {/* Footer */}
                             <div style={{ width: '100%', marginTop: 'auto', paddingTop: isPost ? '40px' : '100px', borderTop: isPost ? 'none' : `10px solid ${config.textColor}1a`, textAlign: 'center', flexShrink: 0 }}>
-                                <p style={{ fontSize: isPost ? '60px' : '110px', fontWeight: '950', color: config.textColor, opacity: 0.1, letterSpacing: isPost ? '15px' : '25px', textTransform: 'uppercase', margin: 0 }}>RIWAYA.STORE</p>
+                                <p style={{ fontSize: isPost ? '60px' : '110px', fontWeight: '950', color: config.textColor, opacity: 0.1, letterSpacing: isPost ? '15px' : '25px', textTransform: 'uppercase', margin: 0 }}>tekno.ma</p>
                             </div>
                         </div>
                     </div>

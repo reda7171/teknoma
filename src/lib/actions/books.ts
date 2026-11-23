@@ -5,16 +5,16 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { verifyAdmin, getAdminRole, getAdminUser } from '@/lib/actions/auth'
 import { createAuditLog } from './audit'
-import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 
-// Schéma de validation pour un livre
+
+// Schéma de validation pour un produit
 import { getBooks as getBooksDb, BookFilters, getAllAuthors } from '@/lib/db/books'
 
 const BookSchemaBase = z.object({
     title: z.string().optional().default(""),
     titleFr: z.string().optional(),
     titleEn: z.string().optional(),
-    author: z.string().min(1, 'L\'auteur est requis'),
+    author: z.string().min(1, 'L\'marque est requis'),
     description: z.string().optional().default(""),
     descriptionFr: z.string().optional(),
     descriptionEn: z.string().optional(),
@@ -78,7 +78,7 @@ export type BookResult =
     | { success: false; error: string }
 
 /**
- * Créer un nouveau livre
+ * Créer un nouveau produit
  */
 export async function createBook(input: BookInput): Promise<BookResult> {
     try {
@@ -99,14 +99,14 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             return {
                 success: false,
                 error: existing.isbn === validatedData.isbn
-                    ? `Un livre avec l'ISBN ${existing.isbn} existe déjà.`
-                    : `Le livre "${validatedData.title}" par ${validatedData.author} existe déjà.`
+                    ? `Un produit avec l'EAN ${existing.isbn} existe déjà.`
+                    : `Le produit "${validatedData.title}" par ${validatedData.author} existe déjà.`
             }
         }
 
         const role = await getAdminRole()
         const userId = await getAdminUser()
-        
+
         let additionalData: any = {}
         if (role === 'SELLER' && userId) {
             additionalData = {
@@ -125,19 +125,12 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             if (existingWithIsbn) {
                 return {
                     success: false,
-                    error: `Cet ISBN (${cleanIsbn}) est déjà attribué au livre "${existingWithIsbn.title}".`
+                    error: `Cet EAN (${cleanIsbn}) est déjà attribué au produit "${existingWithIsbn.title}".`
                 }
             }
         }
 
-        const classification = autoClassifyBook({
-            title: validatedData.title,
-            author: validatedData.author,
-            description: validatedData.description,
-            language: validatedData.language,
-            category: validatedData.category,
-            subCategory: validatedData.subCategory
-        })
+        const classification = { category: validatedData.category || 'Accessoires', subCategory: validatedData.subCategory || null }
 
         const book = await prisma.book.create({
             data: {
@@ -161,14 +154,14 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             action: 'CREATE',
             entity: 'BOOK',
             entityId: book.id,
-            details: `Livre créé: ${book.title} par ${book.author}`
+            details: `Produit créé: ${book.title} par ${book.author}`
         })
 
         try {
             const { submitBookToIndexNow } = await import('@/lib/indexnow')
             submitBookToIndexNow(book.id)
         } catch (idxErr) {
-            console.warn('[IndexNow] Erreur notification création livre:', idxErr)
+            console.warn('[IndexNow] Erreur notification création produit:', idxErr)
         }
 
         if (book.image) {
@@ -179,7 +172,7 @@ export async function createBook(input: BookInput): Promise<BookResult> {
                     await indexCoverBuffer(imgBuffer, book.title, book.author || undefined)
                 }
             } catch (cacheErr) {
-                console.warn('[GeminiCache] Erreur indexation auto couverture création livre:', cacheErr)
+                console.warn('[GeminiCache] Erreur indexation auto couverture création produit:', cacheErr)
             }
         }
 
@@ -188,25 +181,25 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             bookId: book.id,
         }
     } catch (error: any) {
-        console.error('Erreur lors de la création du livre:', error)
+        console.error('Erreur lors de la création du produit:', error)
 
         if (error?.code === 'P2002') {
             const target = String(error.meta?.target || '')
             if (target.includes('isbn')) {
                 return {
                     success: false,
-                    error: 'Cet ISBN est déjà attribué à un autre livre dans le catalogue.'
+                    error: 'Cet EAN est déjà attribué à un autre produit dans le catalogue.'
                 }
             }
             if (target.includes('sellerSku')) {
                 return {
                     success: false,
-                    error: 'Ce SKU vendeur est déjà attribué à un autre livre.'
+                    error: 'Ce SKU vendeur est déjà attribué à un autre produit.'
                 }
             }
             return {
                 success: false,
-                error: 'Une valeur unique existe déjà pour un autre livre.'
+                error: 'Une valeur unique existe déjà pour un autre produit.'
             }
         }
 
@@ -219,13 +212,13 @@ export async function createBook(input: BookInput): Promise<BookResult> {
 
         return {
             success: false,
-            error: error.message || 'Une erreur est survenue lors de la création du livre',
+            error: error.message || 'Une erreur est survenue lors de la création du produit',
         }
     }
 }
 
 /**
- * Récupérer un livre par son ID
+ * Récupérer un produit par son ID
  */
 export async function getBookById(id: string) {
     try {
@@ -249,7 +242,7 @@ export async function getBookById(id: string) {
         if (!book) {
             return {
                 success: false,
-                error: 'Livre introuvable',
+                error: 'Produit introuvable',
                 data: null,
             }
         }
@@ -267,7 +260,7 @@ export async function getBookById(id: string) {
             image = 'data:image/jpeg;base64,' + image
         }
 
-        // Statistiques réelles du livre : commandes, visites, ajouts au panier
+        // Statistiques réelles du produit : commandes, visites, ajouts au panier
         const [orders, orderQuantityAgg] = await Promise.all([
             prisma.orderItem.findMany({
                 where: { bookId: id },
@@ -290,7 +283,7 @@ export async function getBookById(id: string) {
             error: null,
         }
     } catch (error) {
-        console.error('Erreur lors de la récupération du livre:', error)
+        console.error('Erreur lors de la récupération du produit:', error)
         return {
             success: false,
             error: 'Une erreur est survenue',
@@ -300,7 +293,7 @@ export async function getBookById(id: string) {
 }
 
 /**
- * Mettre à jour un livre
+ * Mettre à jour un produit
  */
 export async function updateBook(
     id: string,
@@ -309,18 +302,18 @@ export async function updateBook(
     try {
         await verifyAdmin()
         const validatedData = BookSchema.parse(input)
-        
+
         const existingBook = await prisma.book.findUnique({ where: { id } })
-        
+
         if (!existingBook) {
-            throw new Error('Livre introuvable')
+            throw new Error('Produit introuvable')
         }
 
         const role = await getAdminRole()
         const userId = await getAdminUser()
-        
+
         if (role === 'SELLER' && existingBook.sellerId !== userId) {
-            throw new Error('Non autorisé - Ce livre ne vous appartient pas')
+            throw new Error('Non autorisé - Ce produit ne vous appartient pas')
         }
 
         const cleanIsbn = validatedData.isbn?.trim() ? validatedData.isbn.trim() : null
@@ -336,7 +329,7 @@ export async function updateBook(
             if (existingWithIsbn) {
                 return {
                     success: false,
-                    error: `Cet ISBN (${cleanIsbn}) est déjà attribué au livre "${existingWithIsbn.title}".`
+                    error: `Cet EAN (${cleanIsbn}) est déjà attribué au produit "${existingWithIsbn.title}".`
                 }
             }
         }
@@ -354,9 +347,9 @@ export async function updateBook(
             try {
                 const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
                 syncJumiaStockForBooksBackground([existingBook.id]).catch(console.error)
-                
+
                 const { sendTelegramMessage } = await import('@/lib/telegram')
-                await sendTelegramMessage(`🔄 <b>Stock Jumia Mis à Jour (Édition)</b>\n\n📖 Livre: ${validatedData.title || existingBook.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${validatedData.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
+                await sendTelegramMessage(`🔄 <b>Stock Jumia Mis à Jour (Édition)</b>\n\n📖 Produit: ${validatedData.title || existingBook.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${validatedData.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
             } catch (err) {
                 console.error("Erreur sync jumia:", err)
             }
@@ -374,14 +367,14 @@ export async function updateBook(
             action: 'UPDATE',
             entity: 'BOOK',
             entityId: id,
-            details: `Livre mis à jour: ${validatedData.title}`
+            details: `Produit mis à jour: ${validatedData.title}`
         })
 
         try {
             const { submitBookToIndexNow } = await import('@/lib/indexnow')
             submitBookToIndexNow(id)
         } catch (idxErr) {
-            console.warn('[IndexNow] Erreur notification mise à jour livre:', idxErr)
+            console.warn('[IndexNow] Erreur notification mise à jour produit:', idxErr)
         }
 
         if (validatedData.image) {
@@ -392,7 +385,7 @@ export async function updateBook(
                     await indexCoverBuffer(imgBuffer, validatedData.title, validatedData.author || undefined)
                 }
             } catch (cacheErr) {
-                console.warn('[GeminiCache] Erreur indexation auto couverture mise à jour livre:', cacheErr)
+                console.warn('[GeminiCache] Erreur indexation auto couverture mise à jour produit:', cacheErr)
             }
         }
 
@@ -401,25 +394,25 @@ export async function updateBook(
             bookId: id,
         }
     } catch (error: any) {
-        console.error('Erreur lors de la mise à jour du livre:', error)
+        console.error('Erreur lors de la mise à jour du produit:', error)
 
         if (error?.code === 'P2002') {
             const target = String(error.meta?.target || '')
             if (target.includes('isbn')) {
                 return {
                     success: false,
-                    error: 'Cet ISBN est déjà attribué à un autre livre dans le catalogue.'
+                    error: 'Cet EAN est déjà attribué à un autre produit dans le catalogue.'
                 }
             }
             if (target.includes('sellerSku')) {
                 return {
                     success: false,
-                    error: 'Ce SKU vendeur est déjà attribué à un autre livre.'
+                    error: 'Ce SKU vendeur est déjà attribué à un autre produit.'
                 }
             }
             return {
                 success: false,
-                error: 'Une valeur unique existe déjà pour un autre livre.'
+                error: 'Une valeur unique existe déjà pour un autre produit.'
             }
         }
 
@@ -432,7 +425,7 @@ export async function updateBook(
 
         return {
             success: false,
-            error: error.message || 'Une erreur est survenue lors de la mise à jour du livre',
+            error: error.message || 'Une erreur est survenue lors de la mise à jour du produit',
         }
     }
 }
@@ -447,16 +440,16 @@ export async function updateBookQuick(
     try {
         await verifyAdmin()
         const existingBook = await prisma.book.findUnique({ where: { id } })
-        
+
         if (!existingBook) {
-            throw new Error('Livre introuvable')
+            throw new Error('Produit introuvable')
         }
 
         const role = await getAdminRole()
         const userId = await getAdminUser()
-        
+
         if (role === 'SELLER' && existingBook.sellerId !== userId) {
-            throw new Error('Non autorisé - Ce livre ne vous appartient pas')
+            throw new Error('Non autorisé - Ce produit ne vous appartient pas')
         }
         const updated = await prisma.book.update({
             where: { id },
@@ -471,9 +464,9 @@ export async function updateBookQuick(
             try {
                 const { syncJumiaStockForBooksBackground } = await import('@/lib/actions/jumia')
                 syncJumiaStockForBooksBackground([existingBook.id]).catch(console.error)
-                
+
                 const { sendTelegramMessage } = await import('@/lib/telegram')
-                await sendTelegramMessage(`⚡ <b>Stock Jumia Mis à Jour (Édition Rapide)</b>\n\n📖 Livre: ${updated.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${updated.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
+                await sendTelegramMessage(`⚡ <b>Stock Jumia Mis à Jour (Édition Rapide)</b>\n\n📖 Produit: ${updated.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${updated.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
             } catch (err) {
                 console.error("Erreur sync jumia:", err)
             }
@@ -497,27 +490,27 @@ export async function updateBookQuick(
         return { success: true, bookId: id }
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour rapide:', error)
-        return { success: false, error: 'Impossible de mettre à jour le livre' }
+        return { success: false, error: 'Impossible de mettre à jour le produit' }
     }
 }
 
 /**
- * Supprimer un livre
+ * Supprimer un produit
  */
 export async function deleteBook(id: string): Promise<BookResult> {
     try {
         await verifyAdmin()
-        
+
         const existingBook = await prisma.book.findUnique({ where: { id } })
         if (!existingBook) {
-            throw new Error('Livre introuvable')
+            throw new Error('Produit introuvable')
         }
 
         const role = await getAdminRole()
         const userId = await getAdminUser()
-        
+
         if (role === 'SELLER' && existingBook.sellerId !== userId) {
-            throw new Error('Non autorisé - Ce livre ne vous appartient pas')
+            throw new Error('Non autorisé - Ce produit ne vous appartient pas')
         }
 
         await prisma.book.delete({
@@ -538,16 +531,16 @@ export async function deleteBook(id: string): Promise<BookResult> {
             bookId: id,
         }
     } catch (error: any) {
-        console.error('Erreur lors de la suppression du livre:', error)
+        console.error('Erreur lors de la suppression du produit:', error)
         return {
             success: false,
-            error: error.message || 'Impossible de supprimer le livre',
+            error: error.message || 'Impossible de supprimer le produit',
         }
     }
 }
 
 /**
- * Activer/Désactiver un livre
+ * Activer/Désactiver un produit
  */
 export async function toggleBookStatus(
     id: string,
@@ -578,13 +571,13 @@ export async function toggleBookStatus(
         console.error('Erreur lors du changement de statut:', error)
         return {
             success: false,
-            error: error.message || 'Impossible de changer le statut du livre',
+            error: error.message || 'Impossible de changer le statut du produit',
         }
     }
 }
 
 /**
- * Approuver un livre (Admin)
+ * Approuver un produit (Admin)
  */
 export async function approveBook(id: string): Promise<BookResult> {
     try {
@@ -606,23 +599,23 @@ export async function approveBook(id: string): Promise<BookResult> {
 
         return { success: true, bookId: id }
     } catch (error: any) {
-        return { success: false, error: 'Impossible d\'approuver le livre' }
+        return { success: false, error: 'Impossible d\'approuver le produit' }
     }
 }
 
 /**
- * Rejeter un livre (Admin)
+ * Rejeter un produit (Admin)
  */
 export async function rejectBook(id: string): Promise<BookResult> {
     try {
         await verifyAdmin()
-        
+
         const book = await prisma.book.findUnique({
             where: { id },
             include: { customerSeller: true, seller: true }
         })
 
-        if (!book) return { success: false, error: 'Livre introuvable' }
+        if (!book) return { success: false, error: 'Produit introuvable' }
 
         await prisma.book.delete({
             where: { id },
@@ -638,12 +631,12 @@ export async function rejectBook(id: string): Promise<BookResult> {
 
         return { success: true, bookId: id }
     } catch (error: any) {
-        return { success: false, error: 'Impossible de rejeter le livre' }
+        return { success: false, error: 'Impossible de rejeter le produit' }
     }
 }
 
 /**
- * Récupérer tous les auteurs pour l'admin
+ * Récupérer tous les marques pour l'admin
  */
 export async function fetchAllAuthors() {
     try {
@@ -656,7 +649,7 @@ export async function fetchAllAuthors() {
 }
 
 /**
- * Récupérer les livres avec pagination pour le client (Server Action)
+ * Récupérer les produits avec pagination pour le client (Server Action)
  */
 export async function fetchBooks(filters: BookFilters) {
     try {
@@ -669,7 +662,7 @@ export async function fetchBooks(filters: BookFilters) {
 }
 
 /**
- * Supprimer plusieurs livres en masse
+ * Supprimer plusieurs produits en masse
  */
 export async function bulkDeleteBooks(ids: string[]) {
     try {
@@ -684,18 +677,18 @@ export async function bulkDeleteBooks(ids: string[]) {
         await createAuditLog({
             action: 'BULK_DELETE',
             entity: 'BOOK',
-            details: `${ids.length} livres supprimés`,
+            details: `${ids.length} produits supprimés`,
         })
 
         return { success: true }
     } catch (error: any) {
         console.error('Erreur lors de la suppression en masse:', error)
-        return { success: false, error: 'Impossible de supprimer les livres sélectionnés' }
+        return { success: false, error: 'Impossible de supprimer les produits sélectionnés' }
     }
 }
 
 /**
- * Récupérer tous les livres actifs pour le catalogue PDF ou Image (avec support entrepôt)
+ * Récupérer tous les produits actifs pour le catalogue PDF ou Image (avec support entrepôt)
  */
 export async function getAllBooksForCatalog(warehouseId?: string) {
     try {
@@ -744,16 +737,16 @@ export async function getAllBooksForCatalog(warehouseId?: string) {
             data: books
         }
     } catch (error: any) {
-        console.error('Erreur lors de la récupération des livres pour le catalogue:', error)
+        console.error('Erreur lors de la récupération des produits pour le catalogue:', error)
         return {
             success: false,
-            error: 'Impossible de récupérer les livres'
+            error: 'Impossible de récupérer les produits'
         }
     }
 }
 
 /**
- * Vider toute la bibliothèque (Supprimer tous les livres)
+ * Vider toute la bibliothèque (Supprimer tous les produits)
  */
 export async function deleteAllBooks(): Promise<BookResult> {
     try {
@@ -771,22 +764,22 @@ export async function deleteAllBooks(): Promise<BookResult> {
 
         return { success: true, bookId: 'all' }
     } catch (error: any) {
-        console.error('Erreur lors de la suppression de tous les livres:', error)
+        console.error('Erreur lors de la suppression de tous les produits:', error)
         return { success: false, error: 'Impossible de vider la bibliothèque' }
     }
 }
 
 /**
- * Mettre à jour l'ordre d'affichage des livres
+ * Mettre à jour l'ordre d'affichage des produits
  */
 export async function updateBookOrder(orderedIds: string[], pageOffset: number = 0) {
     try {
         await verifyAdmin()
-        
+
         const MANUAL_ORDER_BASE = -1000000
         // Mise à jour groupée de l'ordre avec une base négative pour passer devant le par défaut (0)
         await prisma.$transaction(
-            orderedIds.map((id, index) => 
+            orderedIds.map((id, index) =>
                 prisma.book.update({
                     where: { id },
                     data: { displayOrder: MANUAL_ORDER_BASE + pageOffset + index }
@@ -796,7 +789,7 @@ export async function updateBookOrder(orderedIds: string[], pageOffset: number =
 
         revalidatePath('/admin/books')
         revalidatePath('/')
-        
+
         return { success: true }
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour de l\'ordre:', error)
@@ -825,7 +818,7 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
         await createAuditLog({
             action: 'BULK_UPDATE_PRICE',
             entity: 'BOOK',
-            details: `Prix mis à jour pour ${ids.length} livres: ${newPrice} درهم`,
+            details: `Prix mis à jour pour ${ids.length} produits: ${newPrice} درهم`,
         })
 
         return { success: true }
@@ -836,7 +829,7 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
 }
 
 /**
- * Mettre à jour la langue de plusieurs livres.
+ * Mettre à jour la langue de plusieurs produits.
  */
 export async function bulkUpdateBookLanguages(ids: string[], language: string) {
     try {
@@ -849,7 +842,7 @@ export async function bulkUpdateBookLanguages(ids: string[], language: string) {
 
         const uniqueIds = [...new Set(ids.filter(id => typeof id === 'string' && id.trim()))]
         if (uniqueIds.length === 0 || uniqueIds.length > 500) {
-            return { success: false, error: 'Sélection de livres invalide' }
+            return { success: false, error: 'Sélection de produits invalide' }
         }
 
         const role = await getAdminRole()
@@ -870,7 +863,7 @@ export async function bulkUpdateBookLanguages(ids: string[], language: string) {
         await createAuditLog({
             action: 'BULK_UPDATE_LANGUAGE',
             entity: 'BOOK',
-            details: `Langue mise à jour pour ${result.count} livre(s) : ${language}`,
+            details: `Langue mise à jour pour ${result.count} produit(s) : ${language}`,
         })
 
         return { success: true, count: result.count }
@@ -969,7 +962,7 @@ export async function bulkUpdateBookStock(ids: string[], newStock: number, wareh
         await createAuditLog({
             action: 'BULK_UPDATE_STOCK',
             entity: 'BOOK',
-            details: `Stock mis à jour pour ${ids.length} livres: ${stockValue} (${warehouseName})`,
+            details: `Stock mis à jour pour ${ids.length} produits: ${stockValue} (${warehouseName})`,
         })
 
         return { success: true }
@@ -1009,7 +1002,7 @@ export interface AiBookUpdateData {
 }
 
 /**
- * Mettre à jour des livres en masse depuis la réponse IA (ChatGPT)
+ * Mettre à jour des produits en masse depuis la réponse IA (ChatGPT)
  */
 export async function bulkUpdateBooksFromAi(booksData: AiBookUpdateData[]) {
     try {
@@ -1077,18 +1070,18 @@ export async function bulkUpdateBooksFromAi(booksData: AiBookUpdateData[]) {
         await createAuditLog({
             action: 'BULK_AI_UPDATE',
             entity: 'BOOK',
-            details: `Mise à jour IA (ChatGPT) pour ${updatedCount} livre(s)`,
+            details: `Mise à jour IA (ChatGPT) pour ${updatedCount} produit(s)`,
         })
 
         return { success: true, count: updatedCount }
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour bulk IA:', error)
-        return { success: false, error: error.message || 'Impossible de mettre à jour les livres depuis l\'IA' }
+        return { success: false, error: error.message || 'Impossible de mettre à jour les produits depuis l\'IA' }
     }
 }
 
 /**
- * Générer automatiquement des SKU uniques pour les livres sans SKU
+ * Générer automatiquement ou modifier des SKU uniques pour les produits, packs et accessoires
  */
 export async function bulkGenerateSkus(ids?: string[]): Promise<{
     success: boolean
@@ -1101,51 +1094,116 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
         const role = await getAdminRole()
         const userId = await getAdminUser()
 
-        const where: any = {
-            OR: [
+        const isBulkAllMissing = !ids || ids.length === 0
+
+        const bookWhere: any = {}
+        if (isBulkAllMissing) {
+            bookWhere.OR = [
                 { sellerSku: null },
                 { sellerSku: '' }
             ]
-        }
-        if (ids && ids.length > 0) {
-            where.id = { in: ids }
+        } else {
+            bookWhere.id = { in: ids }
         }
         if (role === 'SELLER' && userId) {
-            where.sellerId = userId
+            bookWhere.sellerId = userId
         }
 
-        const booksWithoutSku = await prisma.book.findMany({
-            where,
-            select: { id: true, title: true }
-        })
+        const packWhere: any = isBulkAllMissing
+            ? { OR: [{ sellerSku: null }, { sellerSku: '' }] }
+            : { id: { in: ids } }
 
-        if (booksWithoutSku.length === 0) {
+        const extraWhere: any = isBulkAllMissing
+            ? { OR: [{ sellerSku: null }, { sellerSku: '' }] }
+            : { id: { in: ids } }
+
+        const [booksToProcess, packsToProcess, extrasToProcess, existingBookSkus, existingPackSkus, existingExtraSkus] = await Promise.all([
+            prisma.book.findMany({
+                where: bookWhere,
+                select: { id: true, title: true, sellerSku: true }
+            }),
+            isBulkAllMissing
+                ? Promise.resolve([])
+                : prisma.pack.findMany({ where: packWhere, select: { id: true, name: true, sellerSku: true } }),
+            isBulkAllMissing
+                ? Promise.resolve([])
+                : prisma.extraProduct.findMany({ where: extraWhere, select: { id: true, name: true, sellerSku: true } }),
+            prisma.book.findMany({ where: { sellerSku: { not: null } }, select: { sellerSku: true } }),
+            prisma.pack.findMany({ where: { sellerSku: { not: null } }, select: { sellerSku: true } }),
+            prisma.extraProduct.findMany({ where: { sellerSku: { not: null } }, select: { sellerSku: true } }),
+        ])
+
+        const totalItems = booksToProcess.length + packsToProcess.length + extrasToProcess.length
+        if (totalItems === 0) {
             return { success: true, count: 0, updatedMap: {} }
+        }
+
+        const usedSkus = new Set(
+            [
+                ...existingBookSkus.map(b => b.sellerSku?.toUpperCase()),
+                ...existingPackSkus.map(p => p.sellerSku?.toUpperCase()),
+                ...existingExtraSkus.map(e => e.sellerSku?.toUpperCase()),
+            ].filter((s): s is string => Boolean(s))
+        )
+
+        function generateUniqueSku(id: string, currentSku?: string | null): string {
+            const cleanCurrent = (currentSku || '').trim().toUpperCase()
+            const idHex = id.replace(/-/g, '').toUpperCase()
+
+            // 1er essai: 8 premiers caractères de l'ID
+            let candidate = idHex.substring(0, 8)
+
+            // Si c'est identique au SKU actuel OU déjà utilisé par un autre produit:
+            if (candidate === cleanCurrent || usedSkus.has(candidate)) {
+                candidate = idHex.substring(8, 16)
+            }
+            if (candidate === cleanCurrent || usedSkus.has(candidate)) {
+                candidate = idHex.substring(16, 24)
+            }
+            if (candidate === cleanCurrent || usedSkus.has(candidate)) {
+                candidate = idHex.substring(24, 32)
+            }
+
+            // Si toujours en collision ou identique : suffixe aléatoire de 4 chars
+            while (candidate === cleanCurrent || usedSkus.has(candidate)) {
+                const rand = Math.random().toString(36).substring(2, 6).toUpperCase()
+                candidate = (idHex.substring(0, 4) + rand).toUpperCase()
+            }
+
+            usedSkus.add(candidate)
+            return candidate
         }
 
         const updatedMap: Record<string, string> = {}
 
-        // SKUs deja utilises pour eviter les doublons
-        const allExistingSkus = await prisma.book.findMany({
-            where: { sellerSku: { not: null } },
-            select: { sellerSku: true }
-        })
-        const usedSkus = new Set(allExistingSkus.map(b => b.sellerSku?.toUpperCase()))
-
-        for (let i = 0; i < booksWithoutSku.length; i++) {
-            const b = booksWithoutSku[i]
-            // SKU = 8 premiers chars UUID sans tirets en majuscules (ex: D8EC428A)
-            let generatedSku = b.id.replace(/-/g, '').substring(0, 8).toUpperCase()
-            // Collision rare : prendre les 8 suivants
-            if (usedSkus.has(generatedSku)) {
-                generatedSku = b.id.replace(/-/g, '').substring(8, 16).toUpperCase()
-            }
+        // 1. Mettre à jour les produits
+        for (const b of booksToProcess) {
+            const newSku = generateUniqueSku(b.id, b.sellerSku)
             await prisma.book.update({
                 where: { id: b.id },
-                data: { sellerSku: generatedSku }
+                data: { sellerSku: newSku }
             })
-            updatedMap[b.id] = generatedSku
-            usedSkus.add(generatedSku)
+            updatedMap[b.id] = newSku
+        }
+
+        // 2. Mettre à jour les packs
+        for (const p of packsToProcess) {
+            const newSku = generateUniqueSku(p.id, p.sellerSku)
+            await prisma.pack.update({
+                where: { id: p.id },
+                data: { sellerSku: newSku }
+            })
+            updatedMap[p.id] = newSku
+        }
+
+        // 3. Mettre à jour les accessoires
+        for (const e of extrasToProcess) {
+            const newSku = generateUniqueSku(e.id, e.sellerSku)
+            await prisma.extraProduct.update({
+                where: { id: e.id },
+                data: { sellerSku: newSku }
+            })
+            updatedMap[e.id] = newSku
         }
 
         revalidatePath('/admin/books')
@@ -1154,10 +1212,10 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
         await createAuditLog({
             action: 'BULK_GENERATE_SKU',
             entity: 'BOOK',
-            details: `Génération automatique de SKU pour ${booksWithoutSku.length} livre(s)`,
+            details: `Génération / modification automatique de SKU pour ${totalItems} produit(s)`,
         })
 
-        return { success: true, count: booksWithoutSku.length, updatedMap }
+        return { success: true, count: totalItems, updatedMap }
     } catch (error: any) {
         console.error('Erreur lors de la génération automatique des SKU:', error)
         return { success: false, error: error.message || 'Impossible de générer les SKU' }
@@ -1172,7 +1230,7 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
             where: { id },
             data: { views: { increment: 1 } }
         })
-        
+
 
 
         return { success: true }
@@ -1180,7 +1238,7 @@ export async function incrementBookViews(id: string, userSession: string = 'Visi
         if (error.code === 'P2025') {
             return { success: false, error: 'Book not found' }
         }
-        console.error('Erreur lors de l\'incrémentation des vues du livre:', error)
+        console.error('Erreur lors de l\'incrémentation des vues du produit:', error)
         return { success: false, error: 'Impossible d\'incrémenter les vues' }
     }
 }

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_FILE="${RIWAYA_ENV_FILE:-/var/www/riwayama/.env}"
-APP_URL="${RIWAYA_APP_URL:-https://www.riwaya.store}"
+ENV_FILE="${TEKNO_ENV_FILE:-/var/www/tekno/.env}"
+APP_URL="${TEKNO_APP_URL:-https://tekno.ma}"
 
 if [[ ! -f "$ENV_FILE" ]]; then
     echo "Fichier d'environnement introuvable: $ENV_FILE" >&2

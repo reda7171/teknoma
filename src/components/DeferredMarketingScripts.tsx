@@ -25,19 +25,22 @@ export default function DeferredMarketingScripts({
     const [enabled, setEnabled] = useState(false)
 
     useEffect(() => {
-        const enable = () => setEnabled(true)
-        const options: AddEventListenerOptions = { once: true, passive: true }
-        const events: Array<keyof WindowEventMap> = ['scroll', 'pointerdown', 'touchstart', 'keydown']
-
-        events.forEach(event => window.addEventListener(event, enable, options))
-        return () => events.forEach(event => window.removeEventListener(event, enable))
+        const update = () => setEnabled(localStorage.getItem('cookie-consent') === 'accepted')
+        update()
+        window.addEventListener('tekno-consent-change', update)
+        window.addEventListener('storage', update)
+        return () => {
+            window.removeEventListener('tekno-consent-change', update)
+            window.removeEventListener('storage', update)
+        }
     }, [])
 
     if (!enabled) return null
 
+    const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim()
     return (
         <>
-            <Script
+            {gtmId && /^GTM-[A-Z0-9]+$/.test(gtmId) && <Script
                 id="gtm-script"
                 strategy="lazyOnload"
                 dangerouslySetInnerHTML={{
@@ -45,9 +48,9 @@ export default function DeferredMarketingScripts({
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MSD75KHT');`,
+})(window,document,'script','dataLayer',${JSON.stringify(gtmId)});`,
                 }}
-            />
+            />}
             <AdSense publisherId={adsenseId} isEnabled={adsenseEnabled} />
             <PixelTracker />
             <FacebookPixel pixelId={facebookPixelId} />

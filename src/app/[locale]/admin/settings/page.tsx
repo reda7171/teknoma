@@ -8,7 +8,7 @@ import GeminiCacheManager from '@/components/admin/GeminiCacheManager'
 import { Settings, Zap, Mail, Sparkles } from 'lucide-react'
 
 export const metadata = {
-    title: 'Paramètres du Site | Admin Riwaya',
+    title: 'Paramètres du Site | Admin Tekno Store',
     description: 'Configuration des paramètres du site'
 }
 
@@ -24,10 +24,10 @@ export default async function AdminSettingsPage({
     }
 
     const sp = await searchParams
-    const activeTab = sp?.tab === 'advanced' 
-        ? 'advanced' 
-        : sp?.tab === 'templates' 
-        ? 'templates' 
+    const activeTab = sp?.tab === 'advanced'
+        ? 'advanced'
+        : sp?.tab === 'templates'
+        ? 'templates'
         : sp?.tab === 'gemini-cache'
         ? 'gemini-cache'
         : 'general'

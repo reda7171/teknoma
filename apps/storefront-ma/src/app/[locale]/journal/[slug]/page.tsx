@@ -26,10 +26,10 @@ export default async function JournalArticlePage({ params }: { params: Promise<{
 
   const related = getEditorialArticles(locale).filter((item) => item.slug !== slug).slice(0, 2)
   const copy = locale === 'ar'
-    ? { journal: 'المجلة', recommendation: 'رواية تقترح', continue: 'واصل القراءة مع مختاراتنا', books: 'اكتشف الكتب', more: 'تابع القراءة', read: 'اقرأ المقال ←' }
+    ? { journal: 'المجلة', recommendation: 'Tekno Store تقترح', continue: 'واصل القراءة مع مختاراتنا', books: 'اكتشف الكتب', more: 'تابع القراءة', read: 'اقرأ المقال ←' }
     : locale === 'en'
-      ? { journal: 'Journal', recommendation: 'RIWAYA RECOMMENDS', continue: 'Continue with our book edit', books: 'Discover the books', more: 'Continue reading', read: 'Read the story →' }
-      : { journal: 'Journal', recommendation: 'RIWAYA RECOMMANDE', continue: 'Poursuivez avec notre sélection', books: 'Découvrir les livres', more: 'Continuer la lecture', read: 'Lire l’article →' }
+      ? { journal: 'Journal', recommendation: 'TEKNO RECOMMENDS', continue: 'Continue with our book edit', books: 'Discover the books', more: 'Continue reading', read: 'Read the story →' }
+      : { journal: 'Journal', recommendation: 'TEKNO RECOMMANDE', continue: 'Poursuivez avec notre sélection', books: 'Découvrir les livres', more: 'Continuer la lecture', read: 'Lire l’article →' }
 
   const articleJsonLd = {
     '@context': 'https://schema.org',
@@ -37,8 +37,8 @@ export default async function JournalArticlePage({ params }: { params: Promise<{
     headline: article.title,
     description: article.excerpt,
     inLanguage: locale,
-    publisher: { '@type': 'Organization', name: 'Riwaya', url: 'https://riwaya.ma' },
-    mainEntityOfPage: `https://riwaya.ma/${locale}/journal/${slug}`,
+    publisher: { '@type': 'Organization', name: 'Tekno Store', url: 'https://tekno.ma' },
+    mainEntityOfPage: `https://tekno.ma/${locale}/journal/${slug}`,
   }
 
   return (

@@ -3,7 +3,7 @@ import webpush from 'web-push'
 // Configuration VAPID (only if keys are present to avoid build errors)
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
     webpush.setVapidDetails(
-        process.env.VAPID_EMAIL || 'mailto:contact@riwaya.store',
+        process.env.VAPID_EMAIL || 'mailto:contact@tekno.ma',
         process.env.VAPID_PUBLIC_KEY,
         process.env.VAPID_PRIVATE_KEY
     )

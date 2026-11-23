@@ -132,7 +132,7 @@ export async function notifyWishlistUsersOnNewBook(bookId: string) {
         const matches = Array.from(matchedUsersMap.values())
         if (matches.length === 0) return { count: 0 }
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
         const imageUrl = book.image ? getPrimaryImage(book.image) : null
         const fullImageUrl = imageUrl ? (imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`) : null
 
@@ -200,7 +200,7 @@ export async function notifyWishlistUsersOnNewBook(bookId: string) {
                     <body>
                         <div class="card">
                             <div class="header">
-                                <h1>RIWAYA COMMUNITY</h1>
+                                <h1>Tekno Store COMMUNITY</h1>
                             </div>
                             <div class="content">
                                 <span class="badge">Alerte Wishlist &bull; ${ownerCity}</span>
@@ -208,7 +208,7 @@ export async function notifyWishlistUsersOnNewBook(bookId: string) {
                                 <p style="font-size: 14px; color: #4b5563; line-height: 1.6;">
                                     Un livre correspondant à votre liste d'envies (<strong>"${matchedTitle}"</strong>) vient d'être publié par un lecteur dans votre ville à <strong>${ownerCity}</strong>.
                                 </p>
-                                
+
                                 <div class="book-box">
                                     ${fullImageUrl ? `<img src="${fullImageUrl}" alt="${book.title}" class="book-img" />` : ''}
                                     <div class="book-info">
@@ -228,8 +228,8 @@ export async function notifyWishlistUsersOnNewBook(bookId: string) {
                                 </a>
                             </div>
                             <div class="footer">
-                                &copy; Riwaya &bull; Plateforme d'échange de livres au Maroc<br>
-                                <a href="${baseUrl}" style="color: #666;">www.riwaya.store</a>
+                                &copy; Tekno Store &bull; Plateforme d'échange de livres au Maroc<br>
+                                <a href="${baseUrl}" style="color: #666;">tekno.ma</a>
                             </div>
                         </div>
                     </body>
@@ -237,7 +237,7 @@ export async function notifyWishlistUsersOnNewBook(bookId: string) {
                     `
 
                     await transporter.sendMail({
-                        from: '"Riwaya Community" <contact@riwaya.store>',
+                        from: '"Tekno Store Community" <Contact.tekno.ma@gmail.com>',
                         to: user.email,
                         subject: `📚 Livre trouvé à ${ownerCity} : "${book.title}" est disponible pour échange !`,
                         html: emailHtml
@@ -251,7 +251,7 @@ export async function notifyWishlistUsersOnNewBook(bookId: string) {
             if (user.phone) {
                 try {
                     const cleanPhone = formatMoroccanPhone(user.phone)
-                    const waMessage = `Salam ${user.fullName || 'cher lecteur'} ! 📚\n\nBonne nouvelle : le livre *"${book.title}"* (${book.author}) que vous cherchez dans votre wishlist vient d'être mis en échange dans votre ville (*${ownerCity}*) !\n\n👉 Voir l'annonce et proposer un échange sans frais :\n${bookUrl}\n\nRiwaya Community`
+                    const waMessage = `Salam ${user.fullName || 'cher lecteur'} ! 📚\n\nBonne nouvelle : le livre *"${book.title}"* (${book.author}) que vous cherchez dans votre wishlist vient d'être mis en échange dans votre ville (*${ownerCity}*) !\n\n👉 Voir l'annonce et proposer un échange sans frais :\n${bookUrl}\n\nTekno Store Community`
                     const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMessage)}`
 
                     // Récupérer le webhook WhatsApp si configuré

@@ -58,7 +58,7 @@ export default function BookFilters({
         const newFilters = { ...activeFilters, ...updates }
         const currentUrlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
         const params = new URLSearchParams()
-        
+
         if (newFilters.search?.trim()) params.set('search', newFilters.search.trim())
         if (newFilters.status) params.set('status', newFilters.status)
         if (newFilters.type) params.set('type', newFilters.type)
@@ -70,12 +70,12 @@ export default function BookFilters({
         if (newFilters.subCategory) params.set('subCategory', newFilters.subCategory)
         if (newFilters.seoScore) params.set('seoScore', newFilters.seoScore)
         if (newFilters.linked) params.set('linked', newFilters.linked)
-        
+
         const effectiveLimit = newFilters.limit || currentUrlParams.get('limit')
         if (effectiveLimit && effectiveLimit.toString() !== '20') {
             params.set('limit', effectiveLimit.toString())
         }
-        
+
         params.set('page', '1')
         router.push(`${pathname}?${params.toString()}`)
     }
@@ -121,7 +121,7 @@ export default function BookFilters({
                         <Search className="w-4 h-4" />
                         {isOpen ? 'Fermer la recherche' : 'Recherche & Filtres'}
                     </button>
-                    
+
                     {hasActiveFilters && (
                         <button
                             onClick={clearFilters}
@@ -135,7 +135,7 @@ export default function BookFilters({
 
                 <div className="hidden md:flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    {totalCount} Livres trouvés
+                    {totalCount} Produits trouvés
                 </div>
             </div>
 
@@ -152,7 +152,7 @@ export default function BookFilters({
                             <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters({ search: localSearch }); }} className="relative">
                                 <input
                                     type="text"
-                                    placeholder="Titre, auteur, catégorie..."
+                                    placeholder="Titre, marque, catégorie..."
                                     value={localSearch}
                                     onChange={(e) => setLocalSearch(e.target.value)}
                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
@@ -191,7 +191,7 @@ export default function BookFilters({
                                             }}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                                 isActive
-                                                ? 'bg-black text-white' 
+                                                ? 'bg-black text-white'
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >
@@ -211,11 +211,11 @@ export default function BookFilters({
                             <div className="flex flex-wrap gap-2">
                                 {[
                                     { id: '', label: 'Tous' },
-                                    { id: 'book', label: 'Livres' },
-                                    { id: 'pack', label: 'Packs' },
-                                    { id: 'kids', label: 'Enfants (Kids)' },
-                                    { id: 'usb', label: 'Clés USB' },
-                                    { id: 'bookmarks', label: 'Marque-pages' }
+                                    { id: 'book', label: 'Produits unitaires' },
+                                    { id: 'pack', label: 'Packs promo' },
+                                    { id: 'accessory', label: 'Accessoires' },
+                                    { id: 'food', label: 'Alimentation' },
+                                    { id: 'care', label: 'Hygiène & Soins' }
                                 ].map((f) => {
                                     const currentTypes = activeFilters.type ? activeFilters.type.split(',') : []
                                     const isActive = f.id === '' ? currentTypes.length === 0 : currentTypes.includes(f.id)
@@ -238,7 +238,7 @@ export default function BookFilters({
                                             }}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                                 isActive
-                                                ? 'bg-black text-white' 
+                                                ? 'bg-black text-white'
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >
@@ -249,17 +249,17 @@ export default function BookFilters({
                             </div>
                         </div>
 
-                        {/* État du livre */}
+                        {/* État du produit */}
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
                                 <Package className="w-3 h-3" />
-                                État du livre
+                                État du produit
                             </label>
                             <div className="flex flex-wrap gap-2">
                                 {[
                                     { id: '', label: 'Tous' },
-                                    { id: 'new', label: 'Livres neufs' },
-                                    { id: 'old', label: "Livres d’occasion" }
+                                    { id: 'new', label: 'Produits neufs' },
+                                    { id: 'old', label: "Produits d’occasion" }
                                 ].map(filter => (
                                     <button
                                         key={filter.id}
@@ -335,8 +335,8 @@ export default function BookFilters({
                                                 handleApplyFilters({ status: newStatus.join(',') })
                                             }}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                                isActive 
-                                                ? 'bg-black text-white' 
+                                                isActive
+                                                ? 'bg-black text-white'
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >
@@ -374,8 +374,8 @@ export default function BookFilters({
                                                 handleApplyFilters({ lang: newLangs.join(',') })
                                             }}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                                isActive 
-                                                ? 'bg-black text-white' 
+                                                isActive
+                                                ? 'bg-black text-white'
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >
@@ -396,8 +396,8 @@ export default function BookFilters({
                                 <button
                                     onClick={() => handleApplyFilters({ category: '' })}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                        !activeFilters.category 
-                                        ? 'bg-black text-white' 
+                                        !activeFilters.category
+                                        ? 'bg-black text-white'
                                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                     }`}
                                 >
@@ -419,8 +419,8 @@ export default function BookFilters({
                                                 handleApplyFilters({ category: newCats.join(','), subCategory: '' })
                                             }}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                                isActive 
-                                                ? 'bg-black text-white' 
+                                                isActive
+                                                ? 'bg-black text-white'
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >
@@ -441,7 +441,7 @@ export default function BookFilters({
                                         availableSubCategories.push(...categoryTree[cat]);
                                     }
                                 });
-                                
+
                                 if (availableSubCategories.length === 0) return null;
 
                                 return (
@@ -454,8 +454,8 @@ export default function BookFilters({
                                             <button
                                                 onClick={() => handleApplyFilters({ subCategory: '' })}
                                                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                                    !activeFilters.subCategory 
-                                                    ? 'bg-black text-white' 
+                                                    !activeFilters.subCategory
+                                                    ? 'bg-black text-white'
                                                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                                 }`}
                                             >
@@ -477,8 +477,8 @@ export default function BookFilters({
                                                             handleApplyFilters({ subCategory: newSubCats.join(',') })
                                                         }}
                                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                                            isActive 
-                                                            ? 'bg-black text-white' 
+                                                            isActive
+                                                            ? 'bg-black text-white'
                                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                                         }`}
                                                     >
@@ -536,7 +536,7 @@ export default function BookFilters({
                                 ].map((f) => {
                                     const currentJumiaArray = activeFilters.jumia ? activeFilters.jumia.split(',') : [];
                                     const isActive = currentJumiaArray.includes(f.id);
-                                    
+
                                     return (
                                         <button
                                             key={f.id}
@@ -555,8 +555,8 @@ export default function BookFilters({
                                                 handleApplyFilters({ jumia: newJumiaArray.join(',') });
                                             }}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                                isActive 
-                                                ? 'bg-[#f68b1e] text-white ring-2 ring-[#f68b1e] ring-offset-1' 
+                                                isActive
+                                                ? 'bg-[#f68b1e] text-white ring-2 ring-[#f68b1e] ring-offset-1'
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >
@@ -594,8 +594,8 @@ export default function BookFilters({
                                             key={f.id}
                                             onClick={() => handleApplyFilters({ sort: f.id })}
                                             className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                                                isSelected 
-                                                ? 'bg-blue-600 text-white shadow-sm' 
+                                                isSelected
+                                                ? 'bg-blue-600 text-white shadow-sm'
                                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >

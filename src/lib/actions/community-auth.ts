@@ -86,12 +86,12 @@ export async function register(formData: FormData): Promise<AuthResult> {
                     isActive: true,
                 }
             })
-            
+
             await prisma.notification.create({
                 data: {
                     userId: user.id,
                     title: '🎁 Cadeau de bienvenue !',
-                    message: `Bienvenue sur Riwaya ! Vous avez reçu 10 Dhs dans votre wallet et un bon de réduction supplémentaire de 10 Dhs avec le code : ${couponCode}`,
+                    message: `Bienvenue sur Tekno Store ! Vous avez reçu 10 Dhs dans votre wallet et un bon de réduction supplémentaire de 10 Dhs avec le code : ${couponCode}`,
                     type: 'SYSTEM' as any,
                 }
             })
@@ -377,14 +377,14 @@ async function createSession(userId: string) {
     const timestamp = Date.now().toString()
     const payload = `${userId}:${timestamp}`
     const secret = JWT_SECRET
-    
+
     let signature = ''
     if (typeof crypto !== 'undefined' && crypto.createHmac) {
         signature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
     }
-    
+
     const token = Buffer.from(`${payload}:${signature}`).toString('base64')
-    
+
     const cookieStore = await cookies()
     cookieStore.set('community-token', token, {
         httpOnly: true,

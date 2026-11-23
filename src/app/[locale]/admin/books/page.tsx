@@ -11,6 +11,7 @@ import CheckJumiaAvailabilityButton from '@/components/admin/CheckJumiaAvailabil
 
 import { Prisma } from '@prisma/client'
 
+import { RETIRED_ACCESSORY_CATEGORIES } from '@/lib/pets-catalog'
 import BookFilters from './BookFilters'
 import { getCategoryTree } from '@/lib/actions/category-tree'
 import { getAdminRole, getAdminUser } from '@/lib/actions/auth'
@@ -131,7 +132,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     let allProducts: any[] = []
 
     // 1. Fetch Books
-    if (productTypes.includes('all') || productTypes.includes('book')) {
+    if (productTypes.includes('all') || productTypes.includes('book') || productTypes.includes('food') || productTypes.includes('care')) {
         const books = await prisma.book.findMany({
             where,
             select: {
@@ -195,7 +196,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }
         if (linkedParam === 'linked') packWhere.isSyncedWithJumia = true
         if (linkedParam === 'unlinked') packWhere.isSyncedWithJumia = false
-        
+
         if (statusParam.split(',').includes('no-image')) {
             packWhere.image = { in: ['', '/book-placeholder.png'] }
         }
@@ -266,7 +267,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
     }
 
     // 3. Fetch Accessories (Kids, USB, Bookmarks, etc)
-    const accessoryTypes = productTypes.filter(t => ['kids', 'usb', 'bookmarks'].includes(t))
+    const accessoryTypes = productTypes.filter(t => ['accessory', 'kids', 'usb', 'bookmarks'].includes(t))
     if (productTypes.includes('all') || accessoryTypes.length > 0) {
         const extraWhere: any = {}
         if (searchQuery) {
@@ -287,11 +288,11 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         }
         if (linkedParam === 'linked') extraWhere.isSyncedWithJumia = true
         if (linkedParam === 'unlinked') extraWhere.isSyncedWithJumia = false
-        
+
         if (!productTypes.includes('all') && accessoryTypes.length > 0) {
-            extraWhere.category = { in: accessoryTypes.map(t => t.toUpperCase()) }
+            extraWhere.category = accessoryTypes.includes('accessory') ? { notIn: RETIRED_ACCESSORY_CATEGORIES } : { in: accessoryTypes.map(t => t.toUpperCase()) }
         }
-        
+
         const extras = await prisma.extraProduct.findMany({
             where: extraWhere,
             include: {
@@ -304,7 +305,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
             title: e.name,
             titleFr: null,
             titleEn: null,
-            author: 'Accessoire',
+            author: 'Accessoire High-Tech',
             price: e.price,
             costPrice: e.costPrice || 0,
             stock: e.stock,
@@ -324,9 +325,9 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
         })))
     }
 
-    // NEW = livre neuf. GOOD et USED sont regroupés comme livres d’occasion.
+    // NEW = produit neuf. GOOD et USED sont regroupés comme produits d’occasion.
     // Les packs et accessoires sont considérés comme neufs et sont donc exclus
-    // du filtre « Livres d’occasion ».
+    // du filtre « Produits d’occasion ».
     if (conditionParam === 'new') {
         allProducts = allProducts.filter(product => product.productType !== 'BOOK' || product.condition === 'NEW')
     } else if (conditionParam === 'old') {
@@ -410,7 +411,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                     <div>
                         <h1 className="text-3xl font-black text-gray-900 tracking-tight">Gestion du Catalogue</h1>
                         <p className="mt-1 text-sm text-gray-500 font-medium">
-                            Gérez vos livres, stocks et publications sociales.
+                            Gérez vos produits, stocks et publications sociales.
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -459,8 +460,8 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { label: 'Total Livres', value: totalBooks, color: 'text-gray-900', isSensitive: false },
-                        { label: 'Livres Actifs', value: activeBooks, color: 'text-green-600', isSensitive: false },
+                        { label: 'Total Produits', value: totalBooks, color: 'text-gray-900', isSensitive: false },
+                        { label: 'Produits Actifs', value: activeBooks, color: 'text-green-600', isSensitive: false },
                         { label: 'Stock Total', value: totalStock, color: 'text-blue-600', isSensitive: false },
                         { label: 'Valeur Stock', value: `${stockValue.toFixed(0)} درهم`, color: 'text-purple-600', isSensitive: true }
                     ].map((stat, i) => (
@@ -481,7 +482,7 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
 
             <div className="flex flex-col gap-8">
                 {/* Search & Filters */}
-                <BookFilters 
+                <BookFilters
                     activeFilters={activeFilters}
                     totalCount={totalBooks}
                     categories={mainCategories}
@@ -491,12 +492,12 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                 {/* Table Content */}
                 <div className="w-full">
                     <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
-                        <BooksTable 
-                            books={normalizedBooks} 
-                            pageNumber={currentPage} 
-                            totalProviderPages={totalPages} 
+                        <BooksTable
+                            books={normalizedBooks}
+                            pageNumber={currentPage}
+                            totalProviderPages={totalPages}
                             activeFilters={activeFilters}
-                            limit={ITEMS_PER_PAGE} 
+                            limit={ITEMS_PER_PAGE}
                             warehouses={warehouses}
                         />
                     </div>

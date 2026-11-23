@@ -1,21 +1,21 @@
 'use client'
 
 import { useState, useEffect, useId } from 'react'
-import { 
-    X, 
-    Printer, 
-    Save, 
-    FileText, 
-    Plus, 
-    Trash2, 
-    DollarSign, 
-    CheckCircle2, 
-    AlertCircle, 
-    Share2, 
-    Calendar, 
-    User, 
-    Phone, 
-    MapPin, 
+import {
+    X,
+    Printer,
+    Save,
+    FileText,
+    Plus,
+    Trash2,
+    DollarSign,
+    CheckCircle2,
+    AlertCircle,
+    Share2,
+    Calendar,
+    User,
+    Phone,
+    MapPin,
     Building2,
     Loader2
 } from 'lucide-react'
@@ -31,8 +31,8 @@ interface OrderInvoiceModalProps {
     children?: React.ReactNode
 }
 
-export default function OrderInvoiceModal({ 
-    order, 
+export default function OrderInvoiceModal({
+    order,
     locale = 'fr',
     triggerText,
     triggerClassName,
@@ -45,10 +45,10 @@ export default function OrderInvoiceModal({
 
     // 1. Initial State from Order
     const defaultInvoiceNum = order.invoiceNumber || `FAC-${order.id.slice(0, 8).toUpperCase()}`
-    const defaultDate = order.invoiceDate 
+    const defaultDate = order.invoiceDate
         ? new Date(order.invoiceDate).toISOString().split('T')[0]
         : (order.createdAt ? new Date(order.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
-    
+
     const initialPaid = Number(order.paidAmount) || (order.isPaid ? Number(order.total) : 0)
     const initialRemaining = order.remainingAmount !== null && order.remainingAmount !== undefined
         ? Number(order.remainingAmount)
@@ -61,10 +61,10 @@ export default function OrderInvoiceModal({
     const [isPaid, setIsPaid] = useState(order.isPaid || initialRemaining <= 0)
 
     // Company info (Émetteur)
-    const [companyName, setCompanyName] = useState('Riwaya Books')
-    const [companyLogo, setCompanyLogo] = useState('/uploads/books/0dded6c73e7283c1-RIWAYA__1_.png')
+    const [companyName, setCompanyName] = useState('Tekno Store Books')
+    const [companyLogo, setCompanyLogo] = useState('/uploads/books/0dded6c73e7283c1-TEKNO__1_.png')
     const [companyPhone, setCompanyPhone] = useState('07 02 22 05 75 / 06 66 03 81 29')
-    const [companyEmail, setCompanyEmail] = useState('contact@riwaya.store')
+    const [companyEmail, setCompanyEmail] = useState('Contact.tekno.ma@gmail.com')
     const [companyAddress, setCompanyAddress] = useState('Casablanca, Maroc')
     const [companyIce, setCompanyIce] = useState('002589632000045')
 
@@ -113,7 +113,7 @@ export default function OrderInvoiceModal({
         if (!order.items || order.items.length === 0) {
             return [{
                 id: 'item-1',
-                title: 'Livre / Commande Riwaya',
+                title: 'Livre / Commande Tekno Store',
                 quantity: 1,
                 price: Number(order.total) || 0,
                 type: 'BOOK'
@@ -121,7 +121,7 @@ export default function OrderInvoiceModal({
         }
         return order.items.map((it: any) => ({
             id: it.id,
-            title: it.book?.title || it.pack?.name || it.extraProduct?.name || (it.type === 'PACK' ? 'Pack Riwaya' : 'Livre'),
+            title: it.book?.title || it.pack?.name || it.extraProduct?.name || (it.type === 'PACK' ? 'Pack Tekno Store' : 'Livre'),
             quantity: Number(it.quantity) || 1,
             price: Number(it.price) || 0,
             type: it.type || 'BOOK'
@@ -282,14 +282,14 @@ export default function OrderInvoiceModal({
                     .invoice-badge { text-align: right; }
                     .invoice-title { font-size: 24px; font-weight: 900; color: #1e3a8a; text-transform: uppercase; margin: 0; }
                     .invoice-meta { font-size: 12px; color: #475569; margin-top: 4px; font-weight: 500; }
-                    
+
                     .parties-table { width: 100%; margin-bottom: 25px; }
                     .card-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; }
                     .card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800; color: #0284c7; margin-bottom: 6px; }
-                    
+
                     table.items-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
                     table.items-table th { background: #0f172a; color: #ffffff; padding: 10px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-                    
+
                     .totals-wrapper { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 25px; }
                     .totals-table { width: 340px; border-collapse: collapse; margin-left: auto; }
                     .totals-table td { padding: 7px 12px; font-size: 13px; }
@@ -297,7 +297,7 @@ export default function OrderInvoiceModal({
                     .total-final { font-size: 16px; font-weight: 900; background: #f1f5f9; color: #0f172a; }
                     .paid-row { font-size: 13px; font-weight: 700; color: #059669; }
                     .remaining-row { font-size: 16px; font-weight: 900; color: #dc2626; background: #fee2e2; border-radius: 6px; }
-                    
+
                     .notes-box { background: #fffbeb; border: 1px dashed #f59e0b; border-radius: 10px; padding: 12px 16px; margin-bottom: 25px; font-size: 12px; color: #92400e; }
                     .footer { text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
                     .print-btn-bar { margin-bottom: 20px; display: flex; gap: 10px; justify-content: flex-end; }
@@ -313,7 +313,7 @@ export default function OrderInvoiceModal({
                     <tr>
                         <td style="vertical-align: top;">
                             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                                <img src="${companyLogo}" alt="Riwaya Logo" style="height: 42px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
+                                <img src="${companyLogo}" alt="Tekno Store Logo" style="height: 42px; width: auto; object-fit: contain; display: inline-block; vertical-align: middle;" />
                                 <div>
                                     <div class="brand" style="line-height: 1.1;">${companyName}</div>
                                     <div class="brand-sub">Librairie & Édition • Maroc</div>
@@ -420,7 +420,7 @@ export default function OrderInvoiceModal({
 
                 <div class="footer">
                     Merci pour votre confiance ! Pour toute question, contactez notre service client au ${companyPhone}.<br>
-                    Document généré électroniquement par le système de gestion Riwaya Store le ${new Date().toLocaleDateString('fr-FR')}.
+                    Document généré électroniquement par le système de gestion Tekno Store Store le ${new Date().toLocaleDateString('fr-FR')}.
                 </div>
 
                 <script>
@@ -450,9 +450,9 @@ export default function OrderInvoiceModal({
 
         const itemsSummary = items.map(it => `• ${it.quantity}x ${it.title} (${(Number(it.price) * Number(it.quantity)).toFixed(0)} DH)`).join('\n')
 
-        const message = 
+        const message =
             `Bonjour *${fullName}*,\n\n` +
-            `Voici le récapitulatif de votre commande & facture *#${invoiceNumber}* chez *Riwaya* 📚 :\n\n` +
+            `Voici le récapitulatif de votre commande & facture *#${invoiceNumber}* chez *Tekno Store* 📚 :\n\n` +
             `${itemsSummary}\n\n` +
             (Number(shippingFees) > 0 ? `🚚 Frais de livraison : ${shippingFees} DH\n` : `🚚 Livraison : Offerte\n`) +
             (Number(discount) > 0 ? `🎁 Remise : -${discount} DH\n` : '') +
@@ -712,8 +712,8 @@ export default function OrderInvoiceModal({
 
                                 <div className="space-y-2">
                                     {items.map((it, idx) => (
-                                        <div 
-                                            key={it.id || idx} 
+                                        <div
+                                            key={it.id || idx}
                                             className="grid grid-cols-12 gap-2.5 items-center p-2.5 bg-gray-50/70 border border-gray-200/70 rounded-xl hover:border-gray-300 transition-colors"
                                         >
                                             <div className="col-span-6">

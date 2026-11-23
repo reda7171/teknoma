@@ -6,7 +6,7 @@ const customReviews = [
     titleSnippet: "نامت الأعين",
     fullName: "Aicha B.",
     rating: 5,
-    comment: "Riwaya d thriller wa3ra, Maryam Al Haysi kat3rf tched lqari mn lbedya htal lkher.",
+    comment: "Tekno Store d thriller wa3ra, Maryam Al Haysi kat3rf tched lqari mn lbedya htal lkher.",
     city: "Rabat"
   },
   {
@@ -69,7 +69,7 @@ const customReviews = [
     titleSnippet: "العوسج",
     fullName: "Nour",
     rating: 4,
-    comment: "Riwaya mli2a b lghoumoud. Al Johara Al Ramal nj7at tkhl9 wahed ljew suspense makaykhelikch t7et lktab.",
+    comment: "Tekno Store mli2a b lghoumoud. Al Johara Al Ramal nj7at tkhl9 wahed ljew suspense makaykhelikch t7et lktab.",
     city: "Tanger"
   },
   {

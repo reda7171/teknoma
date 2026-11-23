@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma'
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const t = await getTranslations('Admin')
     return {
-        title: `Configuration Catégories | Admin | Riwaya`
+        title: `Configuration Catégories | Admin | Tekno Store`
     }
 }
 
@@ -26,7 +26,7 @@ export default async function AdminCategoriesPage() {
     })
 
     const counts: Record<string, number> = {}
-    
+
     // Process main category counts
     categoryCountsRaw.forEach(item => {
         if (item.category) {

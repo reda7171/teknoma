@@ -39,44 +39,9 @@ const FEATURES = [
         color: 'text-amber-600'
     },
     {
-        key: 'feature_exchange',
-        label: 'Échange de Livres',
-        description: 'Active la communauté d\'échange de livres entre membres.',
-        icon: RefreshCcw,
-        color: 'text-blue-600'
-    },
-    {
-        key: 'feature_usb',
-        label: 'Clé USB',
-        description: 'Active la page des commandes de Clés USB.',
-        icon: Usb,
-        color: 'text-teal-600'
-    },
-    {
-        key: 'feature_kids',
-        label: 'Mon Enfant',
-        description: 'Active la page de la collection livres pour enfants.',
-        icon: Baby,
-        color: 'text-pink-600'
-    },
-    {
-        key: 'feature_reading_list',
-        label: 'Suivi de Lecture',
-        description: 'Active la fonctionnalité de liste et suivi de lecture dans les profils.',
-        icon: BookOpen,
-        color: 'text-green-600'
-    },
-    {
-        key: 'feature_digital_books',
-        label: 'Livres Numériques',
-        description: 'Active la vente et le téléchargement de livres numériques (PDF).',
-        icon: Zap,
-        color: 'text-amber-600'
-    },
-    {
         key: 'feature_packs',
         label: 'Vente de Packs',
-        description: 'Active la gestion et la vente de packs de livres (ex: Pack 3 livres).',
+        description: "Active la gestion et la vente de packs et lots d'appareils et accessoires high-tech.",
         icon: Package,
         color: 'text-blue-500'
     },
@@ -107,13 +72,6 @@ const FEATURES = [
         description: 'Active l\'interface de caisse (Point of Sale) pour les ventes physiques.',
         icon: Calculator,
         color: 'text-purple-600'
-    },
-    {
-        key: 'feature_deposer_liste',
-        label: 'Déposer ma liste',
-        description: 'Active le module "Déposer ma liste scolaire" et son lien dans la barre de navigation.',
-        icon: FileText,
-        color: 'text-green-500'
     },
 ]
 
@@ -180,7 +138,7 @@ export default function AdvancedSettingsForm({ initialSettings }: AdvancedSettin
 
         try {
             const res = await fetch('/api/admin/database/backup')
-            
+
             if (!res.ok) {
                 const error = await res.json()
                 throw new Error(error.error || 'Erreur lors de la génération du backup')
@@ -188,7 +146,7 @@ export default function AdvancedSettingsForm({ initialSettings }: AdvancedSettin
 
             // Récupérer le nom du fichier depuis les headers
             const disposition = res.headers.get('Content-Disposition')
-            let filename = 'backup_riwaya.sql'
+            let filename = 'backup_tekno.sql'
             if (disposition && disposition.indexOf('filename=') !== -1) {
                 filename = disposition.split('filename=')[1].replace(/"/g, '')
             }

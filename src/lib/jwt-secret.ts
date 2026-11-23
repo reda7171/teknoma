@@ -1,4 +1,4 @@
-const FALLBACK_BUILD_SECRET = 'riwaya-build-prerender-fallback-jwt-secret-key-32-chars-min'
+const FALLBACK_BUILD_SECRET = 'tekno-build-prerender-fallback-jwt-secret-key-32-chars-min'
 
 const configuredSecret = process.env.JWT_SECRET?.trim()
 
@@ -11,4 +11,3 @@ if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSec
         console.warn('[SECURITY] JWT_SECRET non configuré ou inférieur à 32 caractères.')
     }
 }
-

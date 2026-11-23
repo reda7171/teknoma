@@ -3,7 +3,7 @@ import { MessageSquare } from 'lucide-react'
 import CommentsTable from './CommentsTable'
 
 export const metadata = {
-    title: 'Modération des Commentaires | Admin Riwaya',
+    title: 'Modération des Commentaires | Admin Tekno Store',
 }
 
 export default async function AdminCommentsPage({

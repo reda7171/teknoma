@@ -174,24 +174,24 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
     return (
         <div className="min-h-screen bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8 font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
             <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
-                
+
                 {/* Header */}
                 <div className="relative flex items-center justify-center py-4 mb-4">
-                    <Link 
-                        href={`/${locale}`} 
+                    <Link
+                        href={`/${locale}`}
                         className={`absolute ${isRtl ? 'right-0' : 'left-0'} text-gray-500 hover:text-gray-900 flex items-center gap-1 sm:gap-2 font-medium transition-colors`}
                     >
                         {isRtl ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
                         <span className="hidden sm:inline">{t.backToStore}</span>
                         <span className="sm:hidden text-sm">Retour</span>
                     </Link>
-                    <img src="/logo.png" alt="Riwaya" className="h-12 sm:h-16 w-auto object-contain" />
+                    <img src="/logo.png" alt="Tekno Store" className="h-12 sm:h-16 w-auto object-contain" />
                 </div>
 
                 <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100/60 p-6 sm:p-10 relative overflow-hidden backdrop-blur-xl">
                     {/* Decorative gradient top bar */}
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
-                    
+
                     <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="text-center sm:text-start">
                             <h1 className="text-3xl font-black text-gray-900 tracking-tight">{t.trackingTitle}</h1>
@@ -227,20 +227,20 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                     {!isCancelled && !isReturned && (
                         <div className="relative mb-12 sm:mb-16 mt-8 hidden sm:block">
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div 
+                                <div
                                     className={`h-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-1000 ease-in-out ${isRtl ? 'origin-right' : 'origin-left'}`}
-                                    style={{ 
+                                    style={{
                                         width: `${(Math.max(0, currentIndex) / (steps.length - 1)) * 100}%`,
                                         transform: isRtl ? 'scaleX(-1)' : 'none'
                                     }}
                                 ></div>
                             </div>
-                            
+
                             <div className="relative flex justify-between">
                                 {steps.map((step, index) => {
                                     const status = getStepStatus(index)
                                     const Icon = step.icon
-                                    
+
                                     return (
                                         <div key={step.id} className="flex flex-col items-center">
                                             <div className={`relative w-12 h-12 rounded-full flex items-center justify-center z-10 transition-all duration-500 shadow-sm ${
@@ -254,7 +254,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                                                 <Icon className="w-5 h-5 relative z-10" />
                                             </div>
                                             <p className={`mt-4 text-[10px] sm:text-xs font-black uppercase tracking-widest ${
-                                                status === 'inactive' ? 'text-gray-300' : 
+                                                status === 'inactive' ? 'text-gray-300' :
                                                 status === 'current' ? 'text-indigo-600 animate-pulse' : 'text-gray-900'
                                             }`}>
                                                 {step.title}
@@ -272,7 +272,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                             {steps.map((step, index) => {
                                 const status = getStepStatus(index)
                                 const Icon = step.icon
-                                
+
                                 return (
                                     <div key={step.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                                         <div className={`relative flex items-center justify-center w-10 h-10 rounded-full z-10 shrink-0 shadow-sm ${
@@ -287,7 +287,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                                         </div>
                                         <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border ${status === 'current' ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-100 bg-white'} shadow-sm transition-colors`}>
                                             <h3 className={`font-black text-xs uppercase tracking-widest ${
-                                                status === 'inactive' ? 'text-gray-400' : 
+                                                status === 'inactive' ? 'text-gray-400' :
                                                 status === 'current' ? 'text-indigo-600 animate-pulse' : 'text-gray-900'
                                             }`}>{step.title}</h3>
                                         </div>
@@ -315,7 +315,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                                     <p className="font-black text-gray-900 text-lg">{shippingCompany.name}</p>
                                 </div>
                             </div>
-                            
+
                             <div className="flex flex-col sm:items-end w-full sm:w-auto gap-2">
                                 <div>
                                     <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">{t.trackingNumber}</p>
@@ -324,9 +324,9 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                                     </p>
                                 </div>
                                 {shippingCompany.trackingUrl && (
-                                    <a 
-                                        href={shippingCompany.trackingUrl.replace('{trackingID}', order.trackingID)} 
-                                        target="_blank" 
+                                    <a
+                                        href={shippingCompany.trackingUrl.replace('{trackingID}', order.trackingID)}
+                                        target="_blank"
                                         rel="noreferrer"
                                         className="mt-2 w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-black text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors whitespace-nowrap shadow-md shadow-black/10"
                                     >
@@ -345,7 +345,7 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                             </div>
                             <h3 className="font-black text-gray-900 uppercase tracking-widest text-sm">{t.orderDetails}</h3>
                         </div>
-                        
+
                         <div className="space-y-3">
                             {order.items.map((item: any) => (
                                 <div key={item.id} className="group flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-gray-200">
@@ -403,8 +403,8 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                                 <span className="font-black text-emerald-600 text-sm">+{paidAmount.toFixed(2)} {t.dhs}</span>
                             </div>
                             <div className={`p-3 rounded-xl border flex items-center justify-between ${
-                                remainingAmount > 0 
-                                    ? 'bg-amber-50/80 border-amber-200/70 text-amber-950' 
+                                remainingAmount > 0
+                                    ? 'bg-amber-50/80 border-amber-200/70 text-amber-950'
                                     : 'bg-emerald-50 border-emerald-200 text-emerald-950'
                             }`}>
                                 <span className="font-bold">{t.remainingBalance}</span>
@@ -425,12 +425,12 @@ export default function OrderTrackingClient({ order, shippingCompany, locale }: 
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Need help? */}
                 <div className="text-center pb-8">
                     <p className="text-sm text-gray-500">
                         {t.needHelp}{' '}
-                        <a href="mailto:contact@riwaya.store" className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+                        <a href="mailto:Contact.tekno.ma@gmail.com" className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
                             {t.contactUs}
                         </a>
                     </p>

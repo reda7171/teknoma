@@ -50,8 +50,8 @@ async function getStats(role: string | null, userId: string | null) {
         prisma.book.aggregate({ where: { active: true, ...sellerBookWhere }, _sum: { stock: true } }),
         prisma.book.count({ where: { active: true, image: '', ...sellerBookWhere } }),
         prisma.order.count({ where: { isPaid: true, ...sellerOrderWhere } }),
-        role === 'SELLER' 
-            ? prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED', ...sellerOrderWhere }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }) 
+        role === 'SELLER'
+            ? prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED', ...sellerOrderWhere }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } })
             : prisma.order.groupBy({ by: ['phone'], where: { status: 'DELIVERED' }, _count: { id: true }, orderBy: { _count: { id: 'desc' } } }),
         prisma.order.groupBy({
             by: ['salesChannel'],
@@ -415,16 +415,16 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
     const currency = locale === 'ar' ? 'درهم' : 'MAD'
 
     const statCards = [
-        { name: 'Livres Actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
+        { name: 'Produits actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
         { name: 'Score SEO ≤ 80', value: stats.seoScoreLte80Count, iconName: 'Sparkles', color: 'amber', roles: ['ADMIN', 'SELLER'], href: `/${locale}/admin/books?seoScore=lte80` },
         { name: 'Solde Tokens Économisés', value: `${geminiStats.estimatedTokensSaved.toLocaleString()} tkn`, iconName: 'Cpu', color: 'amber', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
         { name: 'Économie IA ($)', value: `$${geminiStats.estimatedCostSavedUsd.toFixed(3)}`, iconName: 'Coins', color: 'emerald', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
         { name: 'Packs Actifs', value: stats.packsCount, iconName: 'Package', color: 'amber', roles: ['ADMIN'] },
         { name: 'Commandes', value: stats.ordersCount, iconName: 'ShoppingCart', color: 'green', roles: ['ADMIN', 'SELLER'] },
-        { name: 'Commandes (Store)', value: stats.salesChannels.RIWAYA_STORE?.orders || 0, iconName: 'ShoppingCart', color: 'blue', roles: ['ADMIN'] },
-        { name: 'CA (Store)', value: `${(stats.salesChannels.RIWAYA_STORE?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'blue', roles: ['ADMIN'] },
-        { name: 'Commandes (riwaya.ma)', value: stats.salesChannels.RIWAYA_MA?.orders || 0, iconName: 'ShoppingCart', color: 'teal', roles: ['ADMIN'] },
-        { name: 'CA (riwaya.ma)', value: `${(stats.salesChannels.RIWAYA_MA?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'teal', roles: ['ADMIN'] },
+        { name: 'Commandes (Store)', value: stats.salesChannels.TEKNO_STORE?.orders || 0, iconName: 'ShoppingCart', color: 'blue', roles: ['ADMIN'] },
+        { name: 'CA (Store)', value: `${(stats.salesChannels.TEKNO_STORE?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'blue', roles: ['ADMIN'] },
+        { name: 'Commandes (tekno.ma)', value: stats.salesChannels.TEKNO_MA?.orders || 0, iconName: 'ShoppingCart', color: 'teal', roles: ['ADMIN'] },
+        { name: 'CA (tekno.ma)', value: `${(stats.salesChannels.TEKNO_MA?.revenue || 0).toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'teal', roles: ['ADMIN'] },
         { name: 'Commandes Payées', value: stats.paidOrdersCount, iconName: 'DollarSign', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
         { name: 'LTV (Client)', value: `${stats.ltv.toFixed(0)} ${currency}`, iconName: 'Users', color: 'blue', roles: ['ADMIN'] },
         { name: 'En Attente', value: stats.pendingOrders, iconName: 'Clock', color: 'yellow', roles: ['ADMIN', 'SELLER'] },
@@ -436,14 +436,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         { name: 'Taux Conversion', value: `${stats.tauxConversion.toFixed(1)}%`, iconName: 'BarChart2', color: 'teal', roles: ['ADMIN', 'SELLER'] },
         { name: 'Taux Annulation', value: `${stats.tauxAnnulation.toFixed(1)}%`, iconName: 'XOctagon', color: 'gray', roles: ['ADMIN', 'SELLER'] },
         { name: "Cmd Aujourd'hui", value: stats.ordersToday, iconName: 'CalendarDays', color: 'teal', roles: ['ADMIN', 'SELLER'] },
-        { name: "Livres Vendus (Auj)", value: stats.booksSoldToday, iconName: 'BookOpen', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
+        { name: "Produits vendus (Auj)", value: stats.booksSoldToday, iconName: 'BookOpen', color: 'emerald', roles: ['ADMIN', 'SELLER'] },
         { name: 'En Livraison', value: stats.shippedOrders, iconName: 'Truck', color: 'cyan', roles: ['ADMIN', 'SELLER'] },
         { name: 'Confirmées', value: stats.confirmedOrders, iconName: 'CheckCircle', color: 'green', roles: ['ADMIN', 'SELLER'] },
         { name: 'CA du mois', value: `${stats.revenueMois.toFixed(0)} ${currency}`, iconName: 'TrendingUp', color: 'orange', roles: ['ADMIN', 'SELLER'] },
         { name: 'Retours', value: stats.returnedCount, iconName: 'RefreshCw', color: 'rose', roles: ['ADMIN', 'SELLER'] },
         { name: 'Stock Total', value: stats.stockTotal, iconName: 'Archive', color: 'amber', roles: ['ADMIN', 'SELLER'] },
         { name: 'Sans Image', value: stats.booksNoImage, iconName: 'ImageOff', color: 'red', roles: ['ADMIN', 'SELLER'] },
-        { name: 'Livres SKU (Jumia)', value: jumiaStats.booksWithSku, iconName: 'Link2', color: 'orange', roles: ['ADMIN'] },
+        { name: 'Produits SKU (Jumia)', value: jumiaStats.booksWithSku, iconName: 'Link2', color: 'orange', roles: ['ADMIN'] },
         { name: 'Synchro Jumia', value: jumiaStats.syncedBooks, iconName: 'CheckCircle', color: 'green', roles: ['ADMIN'] },
         { name: 'Commandes (Jumia)', value: jumiaRemoteStats?.total || 0, iconName: 'ShoppingCart', color: 'orange', roles: ['ADMIN'] },
         { name: 'En Attente (Jumia)', value: jumiaRemoteStats?.pending || 0, iconName: 'Clock', color: 'yellow', roles: ['ADMIN'] },
@@ -496,14 +496,14 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
         <DashboardPrivacyProvider>
             <div className="space-y-12">
 
-                {/* Header section style Riwaya */}
+                {/* Header section style Tekno Store */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                     <div>
                         <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
                             Tableau<span className="text-blue-600">.</span>
                         </h1>
                         <p className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-                            Centre de commande global Riwaya
+                            Centre de commande global Tekno Store
                         </p>
                     </div>
 
@@ -589,7 +589,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                             <div>
                                 <h3 className="text-[10px] font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 italic">
                                     <BookOpen className="w-4 h-4 text-blue-600" />
-                                    Livres Vedettes
+                                    Produits vedettes
                                 </h3>
                                 <div className="space-y-4">
                                     {topPerformers.books.map((book: any, index: number) => (
@@ -761,11 +761,11 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                 </div>
                 <div className="p-6 md:p-10">
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-                        {/* Livres avec SKU */}
+                        {/* Produits avec SKU */}
                         <div className="flex flex-col items-center justify-center p-6 bg-orange-50/50 rounded-2xl border border-orange-100 group hover:shadow-md transition-all">
                             <Link2 className="w-6 h-6 text-orange-500 mb-2" />
                             <span className="text-3xl font-black text-black tracking-tighter">{jumiaStats.booksWithSku}</span>
-                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Livres avec SKU</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 mt-1 text-center">Produits avec SKU</span>
                         </div>
                         {/* Synced */}
                         <div className="flex flex-col items-center justify-center p-6 bg-green-50/50 rounded-2xl border border-green-100 group hover:shadow-md transition-all">

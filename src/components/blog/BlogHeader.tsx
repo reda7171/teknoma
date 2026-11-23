@@ -1,8 +1,8 @@
 'use client'
 
 import { Link, usePathname } from '@/i18n/routing'
-import { 
-    BookOpen, Search, Menu, X, Home, Book, Users, Package, FileText, Newspaper, 
+import {
+    BookOpen, Search, Menu, X, Home, Book, Users, Package, FileText, Newspaper,
     Monitor, Baby, Usb, UsersRound
 } from 'lucide-react'
 import Image from 'next/image'
@@ -75,13 +75,13 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                 if ((url.includes('vendeur') || label.includes('vendeur')) && features.seller !== true) return false
                 if ((url.includes('reading') || url.includes('lecture') || label.includes('lecture')) && features.readingList !== true) return false
                 if ((url.includes('deposer') || label.includes('deposer')) && features.deposerListe !== true) return false
-                
+
                 return true
             })
-            .map(item => ({ 
-                href: item.url, 
-                label: t.has(item.label as any) ? t(item.label as any) : item.label, 
-                isJournal: item.url.includes('/blog') 
+            .map(item => ({
+                href: item.url,
+                label: t.has(item.label as any) ? t(item.label as any) : item.label,
+                isJournal: item.url.includes('/blog')
             }))
         : defaultNavItems
 
@@ -95,10 +95,10 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100">
             <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
                 <div className="flex items-center justify-between h-16 md:h-20">
-                    
+
                     {/* Mobile: Menu on the left */}
                     <div className="flex items-center md:hidden w-1/3">
-                        <button 
+                        <button
                             onClick={() => setMobileMenuOpen(true)}
                             className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center transition-colors hover:bg-gray-50"
                             aria-label="Menu principal"
@@ -111,9 +111,9 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                     <div className="flex justify-center md:justify-start w-1/3 md:w-auto shrink-0 md:ltr:mr-12 md:rtl:ml-12">
                         <Link href="/" className="flex items-center gap-2 group" dir="ltr">
                             {siteLogo ? (
-                                <Image 
-                                    src={siteLogo} 
-                                    alt="Riwaya Logo"
+                                <Image
+                                    src={siteLogo}
+                                    alt="Tekno Store Logo"
                                     width={96}
                                     height={32}
                                     sizes="96px"
@@ -127,7 +127,7 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
                                         <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-white" />
                                     </div>
                                     <span className="text-xl md:text-2xl font-black text-black tracking-tighter">
-                                        riwaya<span className="text-[#10b981]">.</span>
+                                        Tekno Store<span className="text-[#10b981]">.</span>
                                     </span>
                                 </>
                             )}
@@ -170,21 +170,21 @@ export default function BlogHeader({ navigation, features = {}, siteLogo = null 
 
             {/* Mobile Menu Drawer */}
             {mobileMenuOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 z-[55] transition-opacity md:hidden"
                     onClick={() => setMobileMenuOpen(false)}
                 />
             )}
-            <div 
+            <div
                 className={`fixed inset-y-0 right-0 rtl:right-auto rtl:left-0 w-[80%] max-w-sm bg-white z-[60] transform transition-transform duration-300 ease-in-out shadow-2xl md:hidden ${
                     mobileMenuOpen ? 'translate-x-0' : 'translate-x-full rtl:-translate-x-full'
                 }`}
             >
                 <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                    <span className="text-lg font-black tracking-tighter">riwaya<span className="text-[#10b981]">.</span></span>
+                    <span className="text-lg font-black tracking-tighter">Tekno Store<span className="text-[#10b981]">.</span></span>
                     <div className="flex items-center gap-2">
                         <LanguageSwitcher />
-                        <button 
+                        <button
                             onClick={() => setMobileMenuOpen(false)}
                             className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full"
                         >

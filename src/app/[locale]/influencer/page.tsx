@@ -10,7 +10,7 @@ export default async function InfluencerDashboard() {
     }
 
     const { user, stats, orders } = data
-    
+
     const totalRevenue = stats.reduce((sum, s) => sum + s.revenue, 0)
     const totalCommission = stats.reduce((sum, s) => sum + s.commission, 0)
     const totalOrders = stats.reduce((sum, s) => sum + s.ordersCount, 0)
@@ -26,7 +26,7 @@ export default async function InfluencerDashboard() {
                             Bonjour, <span className="text-indigo-600">{user.fullName}</span> 👋
                         </h1>
                         <p className="text-gray-500 font-medium mt-2 italic">
-                            Voici vos performances d'affiliation actuelles sur Riwaya.
+                            Voici vos performances d'affiliation actuelles sur Tekno Store.
                         </p>
                     </div>
                 </div>

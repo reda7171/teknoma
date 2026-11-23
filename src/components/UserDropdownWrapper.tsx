@@ -9,8 +9,8 @@ export default async function UserDropdownWrapper() {
     ])
 
     const features = {
-        readingList: featureSettings['feature_reading_list'] !== 'false',
-        exchange: featureSettings['feature_exchange'] !== 'false',
+        readingList: false,
+        exchange: false,
     }
 
     return <UserDropdown user={user} features={features} />

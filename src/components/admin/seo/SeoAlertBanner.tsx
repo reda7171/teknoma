@@ -12,7 +12,7 @@ interface SeoAlertBannerProps {
     locale: string
 }
 
-const STORAGE_KEY = 'riwaya_seo_alert_dismissed'
+const STORAGE_KEY = 'tekno_seo_alert_dismissed'
 
 export default function SeoAlertBanner({
     totalBooks,

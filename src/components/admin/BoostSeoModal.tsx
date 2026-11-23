@@ -79,12 +79,12 @@ export default function BoostSeoModal({
     const category = book?.category || ''
 
     // Construction du prompt calibré pour 100% de score SEO
-    const promptText = `Act as an elite e-commerce book SEO expert for the online bookstore "Riwaya".
+    const promptText = `Act as an elite e-commerce book SEO expert for the online bookstore "Tekno Store".
 Optimize the metadata and descriptions for this book to guarantee a 100% SEO Score based on the following strict rules:
 
 TARGET 100% SEO CHECKLIST:
 1. Arabic Title (title_ar): Catchy, searchable, between 5 and 70 characters.
-2. French Title (title_fr): Minimum 5 characters. CRITICAL: Use the phonetic transcription (transliteration) in Latin characters if original is Arabic (e.g., "سلسلة روايات بساتين عربستان" -> "Silsilat riwayat basatin arabistan").
+2. French Title (title_fr): Minimum 5 characters. CRITICAL: Use the phonetic transcription (transliteration) in Latin characters if original is Arabic (e.g., "سلسلة روايات بساتين عربستان" -> "Silsilat teknot basatin arabistan").
 3. English Title (title_en): Minimum 5 characters.
 4. Author (author): Full verified name (min 2 chars).
 5. Short Arabic Description (description_ar): Minimum 100 characters (compelling, rich in natural search terms).

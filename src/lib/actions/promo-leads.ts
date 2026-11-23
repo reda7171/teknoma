@@ -31,7 +31,7 @@ export async function submitPromoLead(data: SubmitPromoLeadInput) {
         }
 
         const source = data.source || 'cart_popup'
-        const promoCode = 'RIWAYA10'
+        const promoCode = 'TEKNO10'
 
         // Vérifier si ce numéro ou cet email existe déjà
         let existing = null
@@ -65,7 +65,7 @@ export async function submitPromoLead(data: SubmitPromoLeadInput) {
             })
         }
 
-        // S'assurer que le coupon RIWAYA10 existe et est actif
+        // S'assurer que le coupon TEKNO10 existe et est actif
         const coupon = await prisma.coupon.findUnique({ where: { code: promoCode } })
         if (!coupon) {
             await prisma.coupon.create({
@@ -92,9 +92,9 @@ export async function submitPromoLead(data: SubmitPromoLeadInput) {
                         }).catch(() => null)
 
                         const template = templateSetting?.value ||
-                            "Salam ! Merci pour votre intérêt pour nos livres sur Riwaya.store.\nVoici votre code promo de -{discount}% immédiat : *{promoCode}*.\nUtilisez-le dès maintenant pour finaliser votre commande : {siteUrl}/fr/cart"
+                            "Salam ! Merci pour votre intérêt pour nos livres sur Tekno Store.\nVoici votre code promo de -{discount}% immédiat : *{promoCode}*.\nUtilisez-le dès maintenant pour finaliser votre commande : {siteUrl}/fr/cart"
 
-                        const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+                        const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                         const message = template
                             .replaceAll('{promoCode}', promoCode)
                             .replaceAll('{discount}', '10')

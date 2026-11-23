@@ -11,6 +11,7 @@ import { useUIStore } from '@/store/ui';
 import { getWithYouCities } from '@/lib/actions/delivery';
 import { printReceipt, printZReport } from '@/lib/utils/printReceipt';
 import { getCurrentPosSession, openPosSession, closePosSession } from '@/lib/actions/pos-sessions';
+import { isRetiredAccessoryCategory } from '@/lib/pets-catalog';
 
 const InlineNumpad = ({ value, onChange, onClose, title }: { value: number | '', onChange: (val: number | '') => void, onClose: () => void, title: string }) => {
   const [localVal, setLocalVal] = useState(value === 0 ? '' : value.toString());
@@ -112,7 +113,7 @@ interface POSClientProps {
   favoriteCategories?: string;
   showSearch?: boolean;
   defaultGridCols?: number;
-  defaultTab?: 'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS';
+  defaultTab?: 'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES' | 'CARE' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS';
   allowOutOfStock?: boolean;
   requireCustomer?: boolean;
   enableSessions?: boolean;
@@ -143,7 +144,9 @@ export default function POSClient({
   const [localAccessories, setLocalAccessories] = useState<any[]>(accessories);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES' | 'CARE' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS'>(
+    defaultTab === 'ACCESSORIES_LIBRARY' ? 'ACCESSORIES' : defaultTab === 'ACCESSORIES_KIDS' ? 'CARE' : defaultTab
+  );
   const [gridCols, setGridCols] = useState(defaultGridCols);
   
   useEffect(() => {
@@ -388,8 +391,9 @@ export default function POSClient({
 
   const filteredBooks = localBooks.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()) || (b.isbn && b.isbn.includes(searchTerm)));
   const filteredPacks = localPacks.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  const filteredAccessoriesLibrary = localAccessories.filter(a => a.category === 'LIBRARY' && a.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  const filteredAccessoriesKids = localAccessories.filter(a => a.category === 'KIDS' && a.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const allActiveAccessories = localAccessories.filter(a => !isRetiredAccessoryCategory(a.category) && a.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredAccessoriesLibrary = allActiveAccessories.filter(a => !['CARE', 'HYGIÈNE ET SOINS', 'SOINS', 'FOOD', 'ALIMENTATION'].includes((a.category || '').toUpperCase()));
+  const filteredAccessoriesKids = allActiveAccessories.filter(a => ['CARE', 'HYGIÈNE ET SOINS', 'SOINS', 'FOOD', 'ALIMENTATION'].includes((a.category || '').toUpperCase()));
 
   const handleBarcodeScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim() !== '') {
@@ -409,15 +413,15 @@ export default function POSClient({
       addToCart(scannedBook, 'BOOK');
       showNotification(`${scannedBook.title} ajouté au panier`, 'success');
     } else {
-      showNotification(`Aucun livre trouvé avec le code-barres ${isbn}`, 'error');
+      showNotification(`Aucun produit trouvé avec le code-barres ${isbn}`, 'error');
     }
   };
 
   const displayedProducts = [
     ...(activeTab === 'ALL' || activeTab === 'BOOKS' ? filteredBooks.map(b => ({ ...b, type: 'BOOK' as const })) : []),
     ...(activeTab === 'ALL' || activeTab === 'PACKS' ? filteredPacks.map(p => ({ ...p, type: 'PACK' as const })) : []),
-    ...(activeTab === 'ALL' || activeTab === 'ACCESSORIES_LIBRARY' ? filteredAccessoriesLibrary.map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })) : []),
-    ...(activeTab === 'ALL' || activeTab === 'ACCESSORIES_KIDS' ? filteredAccessoriesKids.map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })) : [])
+    ...(activeTab === 'ALL' || activeTab === 'ACCESSORIES' || (activeTab as string) === 'ACCESSORIES_LIBRARY' ? (filteredAccessoriesLibrary.length > 0 ? filteredAccessoriesLibrary : allActiveAccessories).map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })) : []),
+    ...(activeTab === 'ALL' || activeTab === 'CARE' || (activeTab as string) === 'ACCESSORIES_KIDS' ? filteredAccessoriesKids.map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })) : [])
   ];
 
   const addToCart = (product: any, type: 'BOOK' | 'PACK' | 'ACCESSORY') => {
@@ -754,7 +758,7 @@ export default function POSClient({
                   <button 
                     onClick={() => setGridCols(Math.max(2, gridCols - 1))} 
                     className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-xl text-gray-400 hover:text-black transition-colors" 
-                    title="Agrandir (Moins de livres)"
+                    title="Agrandir (Moins de produits)"
                   >
                     <ZoomIn className="w-4 h-4" />
                   </button>
@@ -762,7 +766,7 @@ export default function POSClient({
                   <button 
                     onClick={() => setGridCols(Math.min(10, gridCols + 1))} 
                     className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-xl text-gray-400 hover:text-black transition-colors" 
-                    title="Réduire (Plus de livres)"
+                    title="Réduire (Plus de produits)"
                   >
                     <ZoomOut className="w-4 h-4" />
                   </button>
@@ -787,7 +791,7 @@ export default function POSClient({
                   <Search className="w-4 h-4 text-gray-300 absolute left-4 md:left-5 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-black" />
                   <input
                     type="text"
-                    placeholder="RECHERCHER OU SCANNER ISBN..."
+                    placeholder="RECHERCHER OU SCANNER EAN / SKU..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyDown={handleBarcodeScan}
@@ -810,16 +814,16 @@ export default function POSClient({
               <div className="flex gap-2 md:gap-3">
                 {[
                     { id: 'ALL', label: 'TOUT LE CATALOGUE' },
-                    { id: 'BOOKS', label: 'LIVRES UNITAIRES' },
+                    { id: 'BOOKS', label: 'PRODUITS UNITAIRES' },
                     { id: 'PACKS', label: 'PACKS PROMO' },
-                    { id: 'ACCESSORIES_LIBRARY', label: 'ACCESSOIRES LECTURE' },
-                    { id: 'ACCESSORIES_KIDS', label: 'ACCESSOIRES ENFANTS' }
+                    { id: 'ACCESSORIES', label: 'ACCESSOIRES ANIMAUX' },
+                    { id: 'CARE', label: 'HYGIÈNE & SOINS' }
                 ].map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`px-4 py-3 md:px-8 md:py-4 rounded-[1rem] md:rounded-2xl font-black text-[8px] md:text-[9px] uppercase tracking-[0.2em] transition-all whitespace-nowrap border ${
-                      activeTab === tab.id 
+                      activeTab === tab.id || (tab.id === 'ACCESSORIES' && (activeTab as string) === 'ACCESSORIES_LIBRARY') || (tab.id === 'CARE' && (activeTab as string) === 'ACCESSORIES_KIDS')
                         ? 'bg-black text-white border-black shadow-xl shadow-black/20 scale-105' 
                         : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
                     }`}

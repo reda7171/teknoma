@@ -1,5 +1,5 @@
 export async function POST(request: Request) {
-  const backend = process.env.RIWAYA_BACKEND_URL
+  const backend = process.env.TEKNO_BACKEND_URL
   if (!backend) return Response.json({ success: false, error: 'Checkout non configuré.' }, { status: 503 })
   const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || ''
   try {

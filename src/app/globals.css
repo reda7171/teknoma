@@ -1,13 +1,22 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Shared Tekno Store storefront controls. */
+.pet-button { display: inline-flex; align-items: center; justify-content: center; gap: .75rem; border-radius: 999px; background: #17351d; color: #fffdf8; padding: .95rem 1.5rem; font-size: .875rem; font-weight: 700; transition: background .2s, transform .2s; }
+.pet-button:hover { background: #284b2c; transform: translateY(-1px); }
+.pet-field { display: flex; flex-direction: column; gap: .6rem; color: #17351d; font-size: .875rem; font-weight: 600; }
+.pet-field input, .pet-field select, .pet-field textarea { width: 100%; min-width: 0; border: 1px solid #17351d33; border-radius: .8rem; background: #fffdf8; padding: .85rem 1rem; font-weight: 400; color: #17351d; }
+.pets-store :is(a, button, input, select, textarea, summary):focus-visible, .pet-header :is(a, button, input):focus-visible, .pet-footer a:focus-visible { outline: 3px solid #a07738; outline-offset: 4px; }
+.pets-store [id] { scroll-margin-top: 2rem; }
+@media (prefers-reduced-motion: reduce) { .pet-button { transition: none; } .pet-button:hover { transform: none; } }
+
 :root {
   --background: #FFFFFF;
   --foreground: #111111;
-  --pixio-beige: #FCF5EB;
-  --pixio-cream: #FDFBF7;
+  --pixio-beige: #F0E3CE;
+  --pixio-cream: #F7F0DF;
   --pixio-pink: #FDE2E4;
-  --pixio-yellow: #FEF9E7;
+  --pixio-yellow: #DBC38D;
 }
 
 .font-cairo-var {

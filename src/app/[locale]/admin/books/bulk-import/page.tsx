@@ -254,7 +254,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'template_livres_riwaya.csv'
+        a.download = 'template_livres_tekno.csv'
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -306,7 +306,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                 </Link>
                 <h1 className="text-3xl font-bold text-gray-900">Importation & Mise à jour</h1>
                 <p className="mt-2 text-sm text-gray-600">
-                    Importez de nouveaux livres ou mettez à jour votre stock en masse
+                    Importez de nouveaux produits ou mettez à jour votre stock en masse
                 </p>
             </div>
 
@@ -323,7 +323,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                     className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-lg transition-all ${importType === 'new' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                     <Plus className="w-4 h-4" />
-                    Nouveaux Livres
+                    Nouveaux Produits
                 </button>
                 <button
                     onClick={() => {
@@ -414,8 +414,8 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                     <ol className="list-decimal list-inside space-y-2 text-sm">
                         <li>Utilisez un fichier <strong>TSV</strong> (Tab-Separated Values)</li>
                         <li>Format requis : une ligne d&apos;en-tête, puis <strong>Nom[TAB]stock</strong></li>
-                        <li>Exemple : <code>Livre Cadeaux [TAB] 40</code></li>
-                        <li>Le système cherchera le livre par son nom exact pour mettre à jour son stock.</li>
+                        <li>Exemple : <code>Produit Cadeaux [TAB] 40</code></li>
+                        <li>Le système cherchera le produit par son nom exact pour mettre à jour son stock.</li>
                         <li>Uploadez votre fichier <strong>.tsv</strong></li>
                     </ol>
                 )}
@@ -690,7 +690,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                         {/* Footer de validation */}
                         <div className="p-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-500 flex items-center justify-between">
                             <span>
-                                Vérification préalable réussie. Les images externes seront servies au format WebP/AVIF via le CDN Riwaya.
+                                Vérification préalable réussie. Les images externes seront servies au format WebP/AVIF via le CDN Tekno Store.
                             </span>
                             <span className="font-semibold text-gray-700">
                                 5 lignes vérifiées
@@ -721,7 +721,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                             <>
                                 <Upload className="w-5 h-5 mr-2" />
                                 {previewData?.totalRows
-                                    ? `${t('ConfirmImport')} (${previewData.totalRows} ${importType === 'new' ? 'livres' : 'lignes'})`
+                                    ? `${t('ConfirmImport')} (${previewData.totalRows} ${importType === 'new' ? 'produits' : 'lignes'})`
                                     : importType === 'new'
                                     ? t('ConfirmImport')
                                     : 'Mettre à jour le stock'}
@@ -745,7 +745,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                                 </h3>
                                 <p className="text-xs text-gray-500 mt-0.5">
                                     {progress.total > 0
-                                        ? `${progress.current} sur ${progress.total} livre(s) traité(s)`
+                                        ? `${progress.current} sur ${progress.total} produit(s) traité(s)`
                                         : 'Traitement du fichier en cours...'}
                                 </p>
                             </div>
@@ -770,7 +770,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                         <div className="flex items-center gap-1.5 text-gray-600 truncate max-w-md">
                             <BookOpen className="w-4 h-4 text-gray-400 flex-shrink-0" />
                             <span className="truncate font-medium">
-                                {progress.title ? `Livre : ${progress.title}` : 'Lecture des lignes...'}
+                                {progress.title ? `Produit : ${progress.title}` : 'Lecture des lignes...'}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -807,7 +807,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
 
                             {result.imported !== undefined && result.failed !== undefined && (
                                 <div className="mt-2 text-sm">
-                                    <p className="text-green-700">✓ {result.imported} livre(s) importé(s)</p>
+                                    <p className="text-green-700">✓ {result.imported} produit(s) importé(s)</p>
                                     {result.failed > 0 && (
                                         <p className="text-red-700">✗ {result.failed} échec(s)</p>
                                     )}
@@ -892,7 +892,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
 
                             {result.success && result.imported && result.imported > 0 && (
                                 <p className="mt-3 text-sm text-green-700">
-                                    Redirection vers la liste des livres dans 3 secondes...
+                                    Redirection vers la liste des produits dans 3 secondes...
                                 </p>
                             )}
                         </div>

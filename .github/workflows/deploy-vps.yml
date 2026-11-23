@@ -1,0 +1,56 @@
+name: Deploy Tekno Store VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      pull_only:
+        description: Download the image only for initial database setup
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: tekno-vps
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull and deploy the Tekno Store image
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          SUDO_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+          PULL_ONLY: ${{ inputs.pull_only }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 2222
+          command_timeout: 20m
+          envs: GHCR_TOKEN,GHCR_USER,SUDO_PASSWORD,PULL_ONLY
+          script: |
+            set -eu
+            cd /var/www/tekno
+            test "$(pwd -P)" = /var/www/tekno
+            test -f docker-compose.vps.yml
+            printf '%s\n' "$SUDO_PASSWORD" | sudo -S -p '' -v
+            sudo install -d -m 700 /var/www/tekno/.docker
+            trap 'sudo docker --config /var/www/tekno/.docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+            printf '%s' "$GHCR_TOKEN" | sudo docker --config /var/www/tekno/.docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            sudo docker --config /var/www/tekno/.docker pull ghcr.io/reda7171/tekno-app:latest
+            if [ "$PULL_ONLY" = true ]; then exit 0; fi
+            test "$(sudo docker inspect --format '{{.State.Health.Status}}' tekno_db)" = healthy
+            sudo docker compose -f docker-compose.vps.yml config -q
+            sudo docker compose -f docker-compose.vps.yml up -d --no-deps app
+            for attempt in $(seq 1 40); do
+              if curl --fail --silent --output /dev/null http://127.0.0.1:3100/fr; then break; fi
+              sleep 3
+            done
+            curl --fail --silent --output /dev/null http://127.0.0.1:3100/fr
+            sudo docker compose -f docker-compose.vps.yml ps

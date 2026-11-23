@@ -37,13 +37,13 @@ export default function FollowUpClient({ locale }: { locale: string }) {
 
         switch (type) {
             case 'pending':
-                message = `Bonjour ${name}, c'est l'équipe Riwaya 👋. Nous avons bien reçu votre commande sur notre site. Pouvez-vous nous confirmer que tout est correct pour lancer la livraison ?`
+                message = `Bonjour ${name}, c'est l'équipe Tekno Store 👋. Nous avons bien reçu votre commande sur notre site. Pouvez-vous nous confirmer que tout est correct pour lancer la livraison ?`
                 break
             case 'abandoned':
-                message = `Bonjour ${name}, c'est Riwaya 👋. Nous avons remarqué que vous avez laissé des articles dans votre panier. Avez-vous rencontré un problème lors de votre commande ? Nous sommes là pour vous aider !`
+                message = `Bonjour ${name}, c'est Tekno Store 👋. Nous avons remarqué que vous avez laissé des articles dans votre panier. Avez-vous rencontré un problème lors de votre commande ? Nous sommes là pour vous aider !`
                 break
             case 'review':
-                message = `Bonjour ${name}, c'est Riwaya 👋. Vous avez récemment reçu votre commande. Nous espérons que vous en êtes satisfait ! Pouvez-vous nous laisser un petit avis sur le site ? Ça nous aiderait énormément.`
+                message = `Bonjour ${name}, c'est Tekno Store 👋. Vous avez récemment reçu votre commande. Nous espérons que vous en êtes satisfait ! Pouvez-vous nous laisser un petit avis sur le site ? Ça nous aiderait énormément.`
                 break
         }
 
@@ -52,17 +52,17 @@ export default function FollowUpClient({ locale }: { locale: string }) {
 
     const handleFollowUp = async (order: any, type: 'pending' | 'abandoned' | 'review') => {
         window.open(getWhatsAppLink(order.phone, type, order.fullName || ''), '_blank')
-        
+
         if (type !== 'abandoned') { // Cart has no order.id for now since we disabled it
             await incrementFollowUp(order.id)
             setData(prev => {
                 if (!prev) return prev
                 return {
                     ...prev,
-                    pendingOrders: type === 'pending' 
+                    pendingOrders: type === 'pending'
                         ? prev.pendingOrders.map(o => o.id === order.id ? { ...o, followUpCount: (o.followUpCount || 0) + 1 } : o)
                         : prev.pendingOrders,
-                    deliveredOrders: type === 'review' 
+                    deliveredOrders: type === 'review'
                         ? prev.deliveredOrders.map(o => o.id === order.id ? { ...o, followUpCount: (o.followUpCount || 0) + 1 } : o)
                         : prev.deliveredOrders,
                 }
@@ -115,7 +115,7 @@ export default function FollowUpClient({ locale }: { locale: string }) {
                                             </span>
                                         ) : null}
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => handleFollowUp(order, 'pending')}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-green-600 transition-colors"
                                     >
@@ -154,7 +154,7 @@ export default function FollowUpClient({ locale }: { locale: string }) {
                                 <div className="flex items-center justify-between mt-2">
                                     <p className="text-[10px] text-gray-400 font-medium">{format(new Date(cart.createdAt), 'dd MMM yyyy', { locale: fr })}</p>
                                     {cart.phone && (
-                                        <button 
+                                        <button
                                             onClick={() => handleFollowUp(cart, 'abandoned')}
                                             className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-green-600 transition-colors"
                                         >
@@ -202,7 +202,7 @@ export default function FollowUpClient({ locale }: { locale: string }) {
                                             </span>
                                         ) : null}
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => handleFollowUp(order, 'review')}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500 text-white rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-green-600 transition-colors"
                                     >

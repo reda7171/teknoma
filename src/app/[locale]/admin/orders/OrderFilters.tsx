@@ -71,7 +71,7 @@ export default function OrderFilters({
                         <Search className="w-4 h-4" />
                         {isOpen ? 'Fermer la recherche' : 'Recherche & Filtres'}
                     </button>
-                    
+
                     {hasActiveFilters && (
                         <button
                             onClick={() => {
@@ -197,8 +197,8 @@ export default function OrderFilters({
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all font-bold text-sm"
                             >
                                 <option value="">Tous les canaux</option>
-                                <option value="RIWAYA_STORE">Riwaya Store</option>
-                                <option value="RIWAYA_MA">Riwaya.ma</option>
+                                <option value="TEKNO_STORE">Tekno Store Store</option>
+                                <option value="TEKNO_MA">tekno.ma</option>
                                 <option value="ADMIN_POS">Caisse / POS</option>
                                 <option value="MOBILE_APP">Application mobile</option>
                                 <option value="ADMIN_IMPORT">Import administratif</option>
@@ -271,8 +271,8 @@ export default function OrderFilters({
                                 <Link
                                     href={`/${locale}/admin/orders`}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                        !currentStatus 
-                                        ? 'bg-black text-white shadow-lg' 
+                                        !currentStatus
+                                        ? 'bg-black text-white shadow-lg'
                                         : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                     }`}
                                 >
@@ -283,8 +283,8 @@ export default function OrderFilters({
                                         key={key}
                                         href={`/${locale}/admin/orders?status=${key}`}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                            currentStatus === key 
-                                            ? 'bg-blue-600 text-white shadow-lg' 
+                                            currentStatus === key
+                                            ? 'bg-blue-600 text-white shadow-lg'
                                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                         }`}
                                     >

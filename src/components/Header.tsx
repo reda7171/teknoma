@@ -206,7 +206,6 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
         { href: '/', label: t('Home') },
         { href: '/books', label: t('Books') },
         { href: '/authors', label: t('Authors') },
-        { href: '/quotes', label: t('Quotes') },
         ...(features.packs === true ? [{ href: '/packs', label: t('Packs') }] : []),
         ...(features.deposerListe === true ? [{ href: '/deposer-liste', label: t('DeposerListe') }] : []),
         { href: '/blog', label: t('Journal'), isJournal: true },
@@ -256,8 +255,8 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                 <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
                     <div className="flex items-center justify-between h-20">
                         {/* Logo - Dynamique ou Style Pixio */}
-                        <Link 
-                            href="/" 
+                        <Link
+                            href="/"
                             onClick={(e) => {
                                 const path = window.location.pathname;
                                 if (path === '/' || path === '/fr' || path === '/ar' || path === '/en') {
@@ -265,14 +264,14 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }
                             }}
-                            className="flex items-center gap-2 group shrink-0 lg:ltr:mr-8 lg:rtl:ml-8 xl:ltr:mr-16 xl:rtl:ml-16" 
+                            className="flex items-center gap-2 group shrink-0 lg:ltr:mr-8 lg:rtl:ml-8 xl:ltr:mr-16 xl:rtl:ml-16"
                             dir="ltr"
                         >
                             {siteLogo ? (
                                 <div className="relative group-hover:scale-105 transition-transform duration-300">
                                     <Image
                                         src={siteLogo}
-                                        alt="Riwaya Logo"
+                                        alt="Tekno Store Logo"
                                         width={96}
                                         height={32}
                                         sizes="96px"
@@ -311,7 +310,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                         <BookOpen className="w-5 h-5 text-white" />
                                     </div>
                                     <span className={`text-2xl lg:text-3xl font-black tracking-tighter text-black flex items-center ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
-                                        {(locale === 'ar' ? ['ر', 'و', 'ا', 'ية'] : 'riwaya'.split('')).map((char, i) => (
+                                        {'Tekno Store'.split('').map((char, i) => (
                                             <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
                                                 {char}
                                             </span>
@@ -332,7 +331,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 if (item.isCategoryMenu) {
                                     return (
                                         <div key="categories" className="relative group/category">
-                                            <button 
+                                            <button
                                                 className={`font-black text-[13px] rtl:text-[15px] uppercase tracking-widest rtl:tracking-normal transition-colors relative flex items-center gap-1.5 px-3 py-2 -mx-3 ${isActive ? 'text-black' : 'text-gray-900 hover:text-black'}`}
                                                 aria-label={item.label}
                                             >
@@ -349,7 +348,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                                     {locale === 'ar' ? 'استكشف مجموعاتنا' : locale === 'en' ? 'Explore our collections' : 'Explorez nos collections'}
                                                                 </h3>
                                                                 <p className="mt-1 text-xs font-medium text-gray-400">
-                                                                    {locale === 'ar' ? 'مختارات موضوعية من مكتبة رواية' : locale === 'en' ? 'Curated selections from Riwaya' : 'Sélections thématiques de la librairie Riwaya'}
+                                                                    {locale === 'ar' ? 'مختارات موضوعية من Tekno Store' : locale === 'en' ? 'Curated selections from Tekno Store' : 'Sélections thématiques de la librairie Tekno Store'}
                                                                 </p>
                                                             </div>
                                                             <LayoutGrid className="w-8 h-8 text-gray-200" />
@@ -468,7 +467,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                     <ChevronDown className="w-3 h-3 ml-1 transition-transform group-hover/kids:rotate-180" />
                                                     <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : vibrantBg}`} />
                                                 </Link>
-                                                
+
                                                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white shadow-2xl shadow-black/10 rounded-2xl border border-pink-100 opacity-0 invisible group-hover/kids:opacity-100 group-hover/kids:visible group-hover/kids:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex flex-col overflow-hidden">
                                                     <Link href="/mon-enfant" className="px-4 py-3 text-sm font-bold text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors border-b border-pink-50 flex items-center gap-2">
                                                         <Baby className="w-4 h-4" />
@@ -511,7 +510,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                                 <ChevronDown className="w-3 h-3 ml-1 transition-transform group-hover/books:rotate-180" />
                                                 <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : 'bg-blue-700'}`} />
                                             </Link>
-                                            
+
                                             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white shadow-2xl shadow-black/10 rounded-2xl border border-blue-100 opacity-0 invisible group-hover/books:opacity-100 group-hover/books:visible group-hover/books:translate-y-0 translate-y-2 transition-all duration-300 z-50 flex flex-col overflow-hidden">
                                                 <Link href="/books" className="px-4 py-3 text-sm font-bold text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors border-b border-blue-50 flex items-center gap-2">
                                                     <Book className="w-4 h-4" />
@@ -541,8 +540,8 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                 )
                             })}
                             {features.seller === true && !user && (
-                                <Link 
-                                    href="/devenir-vendeur" 
+                                <Link
+                                    href="/devenir-vendeur"
                                     className="hidden xl:inline-flex bg-gradient-to-r from-[#FFDC50] to-yellow-400 text-black px-5 py-2 rounded-full text-[13px] rtl:text-[15px] font-black tracking-widest rtl:tracking-normal uppercase hover:scale-105 active:scale-95 shadow-[0_4px_14px_rgba(255,220,80,0.4)] hover:shadow-[0_6px_20px_rgba(255,220,80,0.6)] transition-all duration-300 relative overflow-hidden group items-center"
                                 >
                                     <span className="relative z-10">{locale === 'ar' ? 'كن بائعاً' : locale === 'en' ? 'Become a seller' : 'Devenir vendeur'}</span>
@@ -631,7 +630,7 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
             >
                 <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-100">
                     <span className={`text-2xl font-black tracking-tighter flex items-center cursor-pointer group ${locale === 'ar' ? 'font-[family-name:var(--font-cairo)]' : ''}`}>
-                        {(locale === 'ar' ? ['ر', 'و', 'ا', 'ية'] : 'riwaya'.split('')).map((char, i) => (
+                        {'Tekno Store'.split('').map((char, i) => (
                             <span key={i} className="inline-block animate-bounce" style={{ animationDelay: `${i * 100}ms` }}>
                                 {char}
                             </span>

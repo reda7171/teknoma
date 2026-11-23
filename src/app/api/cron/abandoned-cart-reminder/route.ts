@@ -45,7 +45,7 @@ export async function GET(req: Request) {
             where: { key: 'whatsapp_template_abandoned_cart' }
         })
         const template = templateSetting?.value || DEFAULT_WHATSAPP_TEMPLATES.whatsapp_template_abandoned_cart
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.riwaya.store'
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tekno.ma'
 
         let remindedCount = 0
         const logs: Array<{ id: string; phone: string; status: string }> = []
@@ -93,7 +93,7 @@ export async function GET(req: Request) {
             const message = template
                 .replace(/\{customerName\}/g, customerName)
                 .replace(/\{itemsList\}/g, itemsList)
-                .replace(/\{promoCode\}/g, 'RIWAYA10')
+                .replace(/\{promoCode\}/g, 'TEKNO10')
                 .replace(/\{cartUrl\}/g, `${siteUrl}/fr/cart`)
                 .replace(/\{siteUrl\}/g, siteUrl)
                 .replace(/\{total\}/g, `${cart.total.toFixed(2)} DH`)

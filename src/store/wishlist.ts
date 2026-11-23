@@ -39,7 +39,7 @@ export const useWishlistStore = create<WishlistStore>()(
             clearWishlist: () => set({ items: [] }),
         }),
         {
-            name: 'riwaya-wishlist',
+            name: 'tekno-wishlist',
             skipHydration: true, // On gère l'hydratation manuellement dans les composants pour éviter le mismatch
         }
     )

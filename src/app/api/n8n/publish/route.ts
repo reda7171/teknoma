@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         // URL du webhook n8n (Priorité à la DB, puis .env)
         const dbWebhookUrl = await getSetting('n8n_webhook_url')
         let N8N_WEBHOOK_URL = dbWebhookUrl || process.env.N8N_WEBHOOK_URL
-        
+
         if (process.env.NODE_ENV === 'development' && N8N_WEBHOOK_URL) {
             N8N_WEBHOOK_URL = N8N_WEBHOOK_URL.replace('http://n8n:', 'http://167.86.108.246:');
         }
@@ -90,10 +90,10 @@ export async function POST(req: NextRequest) {
                 baseUrl = `${protocol}://${host}`;
             } else {
                 const port = host.split(':')[1] || '3000';
-                baseUrl = `${protocol}://167.86.108.246${port ? `:${port}` : ''}`; 
+                baseUrl = `${protocol}://167.86.108.246${port ? `:${port}` : ''}`;
             }
         }
-        
+
         baseUrl = baseUrl.replace(/\/$/, '');
 
         // Si base64 fourni, sauvegarder le fichier côté serveur pour obtenir une URL publique
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
                     const uploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives')
                     await mkdir(uploadDir, { recursive: true })
                     await writeFile(path.default.join(uploadDir, fileName), buffer)
-                    const pubUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
+                    const pubUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
                     resolvedCustomImageUrl = `${pubUrl}/api/uploads/creatives/${fileName}`
                 }
             } catch (e) {
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
         }
 
         let imageUrl = resolvedCustomImageUrl || item?.image || '';
-        
+
         if (imageUrl && (imageUrl.includes('localhost') || imageUrl.includes('127.0.0.1'))) {
             try {
                 const urlObj = new URL(imageUrl);
@@ -141,15 +141,15 @@ export async function POST(req: NextRequest) {
                 const urlObj = new URL(imageUrl);
                 const path = await import('path');
                 const { copyFile, mkdir } = await import('fs/promises');
-                
+
                 const localPath = path.default.join(process.cwd(), 'public', decodeURIComponent(urlObj.pathname).replace('/api/uploads/', '/uploads/'));
                 const ext = path.default.extname(localPath) || '.jpg';
                 const safeFileName = `safe_${Date.now()}_${Math.random().toString(36).substring(7)}${ext}`;
                 const safeUploadDir = path.default.join(process.cwd(), 'public', 'uploads', 'creatives');
-                
+
                 await mkdir(safeUploadDir, { recursive: true });
                 await copyFile(localPath, path.default.join(safeUploadDir, safeFileName));
-                
+
                 imageUrl = `${urlObj.origin}/api/uploads/creatives/${safeFileName}`;
                 void('[N8N PUBLISH] Created safe ASCII image copy:', imageUrl);
             } catch (e) {
@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
 
         const isVideo = imageUrl && (imageUrl.toLowerCase().endsWith('.mp4') || imageUrl.toLowerCase().endsWith('.mov') || imageUrl.toLowerCase().endsWith('.webm'));
 
-        const title = body.packName || body.title || (item ? (itemType === 'BOOK' ? item.title : item.name) : 'Riwaya');
+        const title = body.packName || body.title || (item ? (itemType === 'BOOK' ? item.title : item.name) : 'Tekno Store');
         const price = body.price || item?.price || 0;
 
         const jumiaSku = body.sellerSku || (item as any)?.sellerSku || '';
@@ -177,19 +177,19 @@ export async function POST(req: NextRequest) {
             ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(jumiaSku)}`
             : (item?.title ? `https://www.jumia.ma/catalog/?q=${encodeURIComponent(item.title)}` : '');
 
-        const storeDomain = domain === 'riwaya.ma'
-            ? 'https://riwaya.ma'
-            : (domain === 'riwaya.store'
-                ? 'https://riwaya.store'
+        const storeDomain = domain === 'tekno.ma'
+            ? 'https://tekno.ma'
+            : (domain === 'tekno.ma'
+                ? 'https://tekno.ma'
                 : (domain === 'jumia.ma'
                     ? (jumiaLink || 'https://www.jumia.ma')
-                    : (baseUrl.includes('localhost') ? 'https://riwaya.store' : baseUrl)));
+                    : (baseUrl.includes('localhost') ? 'https://tekno.ma' : baseUrl)));
 
         // Texte à publier avec lien intégré
         let finalCaption = body.customCaption || (itemType === 'BOOK' ? (item?.description || title) : (item?.description ? `${title}\n\n${item.description}` : title));
-        
-        if (finalCaption === 'Riwaya' || !finalCaption) {
-            finalCaption = `📚 Découvrez notre sélection de livres sur Riwaya !\n\n🔗 ${domain === 'jumia.ma' ? jumiaLink : storeDomain}`;
+
+        if (finalCaption === 'Tekno Store' || !finalCaption) {
+            finalCaption = `📚 Découvrez notre sélection de livres sur Tekno Store !\n\n🔗 ${domain === 'jumia.ma' ? jumiaLink : storeDomain}`;
         } else if (!finalCaption.includes('http')) {
             if (domain === 'jumia.ma') {
                 finalCaption += `\n\n🛒 Commander sur Jumia : ${jumiaLink}`;
@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
                 }
             }
         } else if (domain && domain !== 'jumia.ma') {
-            finalCaption = finalCaption.replace(/https?:\/\/(www\.)?riwaya\.(store|ma)/gi, storeDomain);
+            finalCaption = finalCaption.replace(/https?:\/\/(www\.)?tekno\.(store|ma)/gi, storeDomain);
         }
 
         // Construire le payload envoyé à n8n
@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
             itemId: item?.id || 'marketing',
             itemType,
             title: title,
-            author: itemType === 'BOOK' ? item?.author : 'Riwaya',
+            author: itemType === 'BOOK' ? item?.author : 'Tekno Store',
             price: price,
             category: itemType === 'BOOK' ? item?.category : 'Promotion',
             language: itemType === 'BOOK' ? item?.language : 'fr',
@@ -221,13 +221,13 @@ export async function POST(req: NextRequest) {
             packUrl: itemType === 'PACK' ? `${storeDomain}/fr/packs` : '',
             itemUrl: domain === 'jumia.ma' ? (jumiaLink || '') : (item ? (itemType === 'BOOK' ? `${storeDomain}/fr/books/${item.id}` : `${storeDomain}/fr/packs`) : storeDomain),
             jumiaUrl: jumiaLink || '',
-            domain: domain || (storeDomain.includes('riwaya.ma') ? 'riwaya.ma' : (domain === 'jumia.ma' ? 'jumia.ma' : 'riwaya.store')),
+            domain: domain || (storeDomain.includes('tekno.ma') ? 'tekno.ma' : (domain === 'jumia.ma' ? 'jumia.ma' : 'tekno.ma')),
             caption: finalCaption,
             description: body.customCaption || item?.description || '',
             longDescription: item?.longDescription || '',
             format,
             scheduleAt: scheduleAt || '',
-            source: 'riwaya-admin',
+            source: 'tekno-admin',
             facebook_access_token: facebookAccessToken,
             instagram_account_id: instagramAccountId,
             threads_account_id: threadsAccountId,
@@ -240,7 +240,7 @@ export async function POST(req: NextRequest) {
             pinterest_board_id: pinterestBoardId,
             postId: body.postId || ''
         }
-        
+
         let platformsArray = ['facebook']
         if (platform === 'both' || platform === 'all') {
             platformsArray = ['facebook', 'instagram', 'tiktok', 'threads', 'pinterest']
@@ -350,7 +350,7 @@ export async function POST(req: NextRequest) {
 
         // Envoyer au webhook n8n
         void('[N8N PUBLISH] Sending payload to:', N8N_WEBHOOK_URL);
-        
+
         // Timeout de 60 secondes (n8n publie sur les réseaux sociaux, ça prend du temps)
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000);
@@ -368,9 +368,9 @@ export async function POST(req: NextRequest) {
             if (fetchError.name === 'AbortError') {
                 return NextResponse.json({ error: 'Le serveur n8n ne répond pas (Timeout 10s)' }, { status: 504 })
             }
-            return NextResponse.json({ 
+            return NextResponse.json({
                 error: `Impossible de contacter n8n (${N8N_WEBHOOK_URL}). Vérifiez que le serveur n8n est allumé et accessible.`,
-                details: fetchError.message 
+                details: fetchError.message
             }, { status: 502 })
         } finally {
             clearTimeout(timeoutId);
@@ -385,21 +385,21 @@ export async function POST(req: NextRequest) {
         const n8nData = await n8nRes.json().catch(() => ({}))
 
         // Envoyer la notification Telegram
-        const platformLabel = platform === 'all' 
-            ? 'toutes les plateformes' 
-            : platform === 'tiktok' 
-                ? 'TikTok' 
+        const platformLabel = platform === 'all'
+            ? 'toutes les plateformes'
+            : platform === 'tiktok'
+                ? 'TikTok'
                 : platform === 'pinterest'
                     ? 'Pinterest'
-                    : platform === 'both' || platform === 'all' 
-                        ? 'Toutes les plateformes' 
+                    : platform === 'both' || platform === 'all'
+                        ? 'Toutes les plateformes'
                         : platform.charAt(0).toUpperCase() + platform.slice(1);
 
         const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const messageText = scheduleAt 
+        const messageText = scheduleAt
             ? `📅 <b>Publication Programmée</b>\n\nUn post pour <b>${safeTitle}</b> a été programmé sur <b>${platformLabel}</b> via n8n.\n🕒 <b>Date:</b> ${new Date(scheduleAt).toLocaleString('fr-FR')}`
             : `🚀 <b>Nouvelle Publication</b>\n\nUn post pour <b>${safeTitle}</b> a été envoyé à n8n pour publication immédiate sur <b>${platformLabel}</b>.`;
-            
+
         if (imageUrl && !isVideo) {
             sendTelegramPhoto(imageUrl, messageText).catch(console.error);
         } else {

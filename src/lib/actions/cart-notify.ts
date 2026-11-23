@@ -17,7 +17,7 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
         const ip = await getIpIdentifier()
         const isAdmin = await isAuthenticated()
         const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
-        
+
         const cleanTitle = productTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const cleanItemsText = cartItemsText ? cartItemsText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''
 
@@ -42,11 +42,11 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
             }
             // On envoie une notification asynchrone
             let message = `🛒 <b>Nouveau Produit Ajouté</b>${adminTag}\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`
-            
+
             if (discount) {
                 message += `\n🎯 <b>Réduction active:</b> ${discount} درهم`
             }
-            
+
             if (cartTotal !== undefined) {
                 message += `\n\n💳 <b>Total du panier actuel:</b> ${cartTotal.toFixed(2)} درهم`
             }
@@ -61,7 +61,7 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
                 replyMarkup
             )
         }
-        
+
         return { success: true }
     } catch (error) {
         console.error('Erreur notifyAddToCart:', error)
@@ -74,7 +74,7 @@ export async function notifyRemoveFromCart(productTitle: string, price: number, 
         const ip = await getIpIdentifier()
         const isAdmin = await isAuthenticated()
         const adminTag = isAdmin ? ' (Action effectuée par Admin 👨‍💻)' : ''
-        
+
         const cleanTitle = (productTitle || 'Produit inconnu').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
         const { getSetting } = await import('@/lib/actions/site-settings')
@@ -100,7 +100,7 @@ export async function notifyRemoveFromCart(productTitle: string, price: number, 
                 replyMarkup
             )
         }
-        
+
         return { success: true }
     } catch (error) {
         console.error('Erreur notifyRemoveFromCart:', error)
@@ -137,7 +137,7 @@ export async function notifyClearCart(totalValue: number, totalItems: number, se
                 replyMarkup
             )
         }
-        
+
         return { success: true }
     } catch (error) {
         console.error('Erreur notifyClearCart:', error)
@@ -157,7 +157,7 @@ export async function notifyCheckoutInitiated(totalValue: number, totalItems: nu
         if (shouldNotify) {
             await sendTelegramMessage(`🚀 <b>Passage en Caisse Initié</b>${adminTag}\n\nUn client se dirige vers la page de paiement :\n📦 <b>Articles:</b> ${totalItems}\n💰 <b>Valeur:</b> ${totalValue.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`)
         }
-        
+
         return { success: true }
     } catch (error) {
         console.error('Erreur notifyCheckoutInitiated:', error)
@@ -183,12 +183,12 @@ export async function notifyWhatsAppClick(message: string, assignedAgentName?: s
         }
         const assignedLine = agentDisplay
             ? `\n👤 <b>Admin en charge :</b> ${agentDisplay}`
-            : '\n👤 <b>Admin en charge :</b> Standard Riwaya'
-        
+            : '\n👤 <b>Admin en charge :</b> Standard Tekno Store'
+
         const cleanMessage = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const { getSetting } = await import('@/lib/actions/site-settings')
         const shouldNotify = await getSetting('telegram_notify_cart') === 'true'
-        
+
         if (shouldNotify) {
             await sendTelegramMessage(`💬 <b>Nouveau Contact WhatsApp Initié</b>${adminTag}${assignedLine}\n\n<b>Message :</b>\n<pre>${cleanMessage}</pre>\n\n🌍 <b>IP:</b> ${ip || 'Inconnue'}`)
         }

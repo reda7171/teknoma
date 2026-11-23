@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, ChevronRight, 
-    Sparkles, 
-    Image as ImageIcon, 
-    Trash2, 
-    Download, 
-    Eye, 
+import { ChevronLeft, ChevronRight,
+    Sparkles,
+    Image as ImageIcon,
+    Trash2,
+    Download,
+    Eye,
     RefreshCcw,
     Search,
     Filter,
@@ -58,14 +58,14 @@ export default function MarketingPage() {
     const [activeTab, setActiveTab] = useState<'creatives' | 'media'>('creatives')
     const [activeMediaTab, setActiveMediaTab] = useState<'books' | 'authors' | 'blog'>('books')
     const [mediaItems, setMediaItems] = useState<{books: any[], authors: any[], blogPosts: any[]}>({ books: [], authors: [], blogPosts: [] })
-    
+
     // Watermark
     const [isWatermarking, setIsWatermarking] = useState<Record<string, boolean>>({})
     const [watermarkModalOpen, setWatermarkModalOpen] = useState(false)
     const [watermarkImageUrl, setWatermarkImageUrl] = useState('')
     const [watermarkGravity, setWatermarkGravity] = useState('southeast')
     const [watermarkStatus, setWatermarkStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-    
+
     const fetchMedia = async () => {
         try {
             const res = await fetch('/api/admin/marketing/media')
@@ -131,7 +131,7 @@ export default function MarketingPage() {
     const [bulkPreviewOpen, setBulkPreviewOpen] = useState(false)
     const [slideIndex, setSlideIndex] = useState(0)
     const [captions, setCaptions] = useState<Record<string, string>>({})
-    const [publishProgress, setPublishProgress] = useState<Record<string, 'idle' | 'loading' | 'ok' | 'error'>>({}) 
+    const [publishProgress, setPublishProgress] = useState<Record<string, 'idle' | 'loading' | 'ok' | 'error'>>({})
 
     // FB Ads Modal
     const [isFbAdModalOpen, setIsFbAdModalOpen] = useState(false)
@@ -317,12 +317,12 @@ export default function MarketingPage() {
 
     const filteredAssets = assets.filter(asset => {
         const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesFilter = 
-            filter === 'all' || 
+        const matchesFilter =
+            filter === 'all' ||
             (filter === 'creative' && asset.name.includes('creative')) ||
             (filter === 'pack' && asset.name.includes('pack')) ||
             (filter === 'desc' && asset.name.includes('desc'))
-        
+
         return matchesSearch && matchesFilter
     })
 
@@ -341,8 +341,8 @@ export default function MarketingPage() {
                         if (isMobile) setIsMobileMenuOpen(false)
                     }}
                     className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
-                        filter === btn.id 
-                            ? 'bg-black text-white shadow-lg shadow-black/10' 
+                        filter === btn.id
+                            ? 'bg-black text-white shadow-lg shadow-black/10'
                             : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                     }`}
                 >
@@ -379,7 +379,7 @@ export default function MarketingPage() {
                         {selectionMode ? `Sélection (${selectedAssets.length})` : 'Sélectionner'}
                     </button>
 
-                    <button 
+                    <button
                         onClick={() => setIsUploadModalOpen(true)}
                         className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 md:px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
                     >
@@ -422,7 +422,7 @@ export default function MarketingPage() {
                         </div>
                     )}
 
-                    <button 
+                    <button
                         onClick={fetchAssets}
                         className="hidden md:flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm active:scale-95"
                     >
@@ -437,7 +437,7 @@ export default function MarketingPage() {
                 <div className="bg-white border-b border-gray-200 shadow-sm px-4 py-3 flex items-center gap-3">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input 
+                        <input
                             type="text"
                             placeholder="Rechercher créatives..."
                             value={searchTerm}
@@ -451,7 +451,7 @@ export default function MarketingPage() {
                     >
                         <Filter className="w-5 h-5" />
                     </button>
-                    <button aria-label="Action RefreshCcw" 
+                    <button aria-label="Action RefreshCcw"
                         onClick={fetchAssets}
                         className="p-2 bg-gray-100 rounded-xl text-gray-900"
                     >
@@ -464,7 +464,7 @@ export default function MarketingPage() {
             <div className="hidden lg:flex bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex-row gap-4 items-center">
                 <div className="relative flex-1">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input 
+                    <input
                         type="text"
                         placeholder="Rechercher une créative..."
                         value={searchTerm}
@@ -475,10 +475,10 @@ export default function MarketingPage() {
                 <FilterButtons />
             </div>
 
-            
+
             {/* TABS */}
             <div className="flex items-center gap-4 mb-6 border-b border-slate-200">
-                <button 
+                <button
                     onClick={() => setActiveTab('creatives')}
                     className={`pb-4 px-2 font-bold transition-all border-b-2 ${activeTab === 'creatives' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
                 >
@@ -487,7 +487,7 @@ export default function MarketingPage() {
                         Créatives Marketing
                     </div>
                 </button>
-                <button 
+                <button
                     onClick={() => setActiveTab('media')}
                     className={`pb-4 px-2 font-bold transition-all border-b-2 ${activeTab === 'media' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
                 >
@@ -528,7 +528,7 @@ export default function MarketingPage() {
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.books.map(book => {
                                     const basePath = book.image.startsWith('/') ? book.image : `/uploads/books/${book.image}`
-                                    const imgUrl = book.image.startsWith('http') ? book.image : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${basePath}` : basePath)
+                                    const imgUrl = book.image.startsWith('http') ? book.image : (process.env.NODE_ENV === 'development' ? `https://tekno.ma${basePath}` : basePath)
                                     return (
                                         <div key={book.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-[3/4] relative bg-slate-900">
@@ -555,7 +555,7 @@ export default function MarketingPage() {
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.authors.map(author => {
                                     const basePath = author.image.startsWith('/') ? author.image : `/uploads/${author.image}`
-                                    const imgUrl = author.image.startsWith('http') ? author.image : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${basePath}` : basePath)
+                                    const imgUrl = author.image.startsWith('http') ? author.image : (process.env.NODE_ENV === 'development' ? `https://tekno.ma${basePath}` : basePath)
                                     return (
                                         <div key={author.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-square relative bg-slate-900">
@@ -582,7 +582,7 @@ export default function MarketingPage() {
                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                 {mediaItems.blogPosts.map(post => {
                                     const basePath = post.coverImage.startsWith('/') ? post.coverImage : `/uploads/${post.coverImage}`
-                                    const imgUrl = post.coverImage.startsWith('http') ? post.coverImage : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${basePath}` : basePath)
+                                    const imgUrl = post.coverImage.startsWith('http') ? post.coverImage : (process.env.NODE_ENV === 'development' ? `https://tekno.ma${basePath}` : basePath)
                                     return (
                                         <div key={post.id} className="group relative bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all">
                                             <div className="aspect-video relative bg-slate-900">
@@ -601,7 +601,7 @@ export default function MarketingPage() {
                     )}
                 </div>
             )}
-            
+
             {/* === ONGLET CRÉATIVES === */}
             {activeTab === 'creatives' && <>
 {/* Mobile Drawer */}
@@ -644,7 +644,7 @@ export default function MarketingPage() {
                     {filteredAssets.map((asset) => {
                         const isSelected = selectedAssets.includes(asset.name)
                         return (
-                        <div 
+                        <div
                             key={asset.name}
                             className={`group relative bg-white rounded-3xl border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 ${
                                 isSelected ? 'border-indigo-500 ring-2 ring-indigo-400' : 'border-slate-100'
@@ -661,7 +661,7 @@ export default function MarketingPage() {
                             )}
                             {/* Image Preview */}
                             <div className="aspect-[4/5] relative bg-slate-900 overflow-hidden">
-                                <Image 
+                                <Image
                                     src={(() => {
                                         const url = asset.url || asset.name;
                                         if (!url) return '';
@@ -671,7 +671,7 @@ export default function MarketingPage() {
                                         if (url.startsWith('/uploads')) path = url;
                                         else if (url.startsWith('uploads')) path = `/${url}`;
                                         else path = `/uploads/books/${url}`;
-                                        return process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${path}` : path;
+                                        return process.env.NODE_ENV === 'development' ? `https://tekno.ma${path}` : path;
                                     })()}
                                     alt={asset.name}
                                     fill
@@ -679,7 +679,7 @@ export default function MarketingPage() {
                                 />
                                 {/* Overlay Actions */}
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                    <a 
+                                    <a
                                         href={(() => {
                                             const url = asset.url || asset.name;
                                             if (!url) return '';
@@ -689,7 +689,7 @@ export default function MarketingPage() {
                                             if (url.startsWith('/uploads')) path = url;
                                             else if (url.startsWith('uploads')) path = `/${url}`;
                                             else path = `/uploads/books/${url}`;
-                                            return process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${path}` : path;
+                                            return process.env.NODE_ENV === 'development' ? `https://tekno.ma${path}` : path;
                                         })()}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -699,7 +699,7 @@ export default function MarketingPage() {
                                         <Eye className="w-5 h-5" />
                                     </a>
                                     {(asset.bookId || asset.packId) && (
-                                        <button 
+                                        <button
                                             onClick={(e) => {
                                                 e.stopPropagation()
                                                 setSelectedAdAsset(asset)
@@ -711,7 +711,7 @@ export default function MarketingPage() {
                                             <Megaphone className="w-5 h-5" />
                                         </button>
                                     )}
-                                    <button 
+                                    <button
                                         onClick={(e) => {
                                             e.stopPropagation()
                                             handleDelete(asset.name)
@@ -740,56 +740,56 @@ export default function MarketingPage() {
                                         </span>
                                     </div>
                                 </div>
-                                
+
                                 <p className="text-[11px] font-bold text-slate-900 truncate mb-4" title={asset.name}>
                                     {asset.name.split('-').slice(1).join('-') || asset.name}
                                 </p>
 
                                 {/* Partage via n8n */}
                                 <div className="pt-3 border-t border-slate-100 grid grid-cols-7 gap-1">
-                                    <button 
+                                    <button
                                         onClick={() => handleSinglePreview(asset.name)}
                                         title="Prévisualiser"
                                         className="flex items-center justify-center p-2 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all"
                                     >
                                         <Eye className="w-4 h-4" />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handlePublish(asset, 'facebook')}
                                         title="Publier sur Facebook"
                                         className="flex items-center justify-center p-2 bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all"
                                     >
                                         <Facebook className="w-4 h-4" />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handlePublish(asset, 'instagram')}
                                         title="Publier sur Instagram"
                                         className="flex items-center justify-center p-2 bg-slate-50 hover:bg-pink-50 text-slate-400 hover:text-pink-600 rounded-xl transition-all"
                                     >
                                         <Instagram className="w-4 h-4" />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handlePublish(asset, 'threads')}
                                         title="Publier sur Threads"
                                         className="flex items-center justify-center p-2 bg-slate-50 hover:bg-black text-slate-400 hover:text-white rounded-xl transition-all"
                                     >
                                         <AtSign className="w-4 h-4" />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handlePublish(asset, 'tiktok')}
                                         title="Publier sur TikTok"
                                         className="flex items-center justify-center p-2 bg-slate-50 hover:bg-slate-900 text-slate-400 hover:text-white rounded-xl transition-all"
                                     >
                                         <Music className="w-4 h-4" />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handlePublish(asset, 'pinterest')}
                                         title="Publier sur Pinterest"
                                         className="flex items-center justify-center p-2 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl transition-all"
                                     >
                                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.618 0 12.017 0z"/></svg>
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handlePublish(asset, 'all')}
                                         title="Publier sur Tout"
                                         className="flex items-center justify-center p-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-all shadow-sm active:scale-90"
@@ -820,7 +820,7 @@ export default function MarketingPage() {
                             <div className="space-y-6">
                                 <div>
                                     <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Nom de la créative (Facultatif)</label>
-                                    <input 
+                                    <input
                                         type="text"
                                         placeholder="Ex: Pub Facebook Promo Ramadan"
                                         value={uploadName}
@@ -841,8 +841,8 @@ export default function MarketingPage() {
                                                 key={type.id}
                                                 onClick={() => setUploadType(type.id as any)}
                                                 className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
-                                                    uploadType === type.id 
-                                                        ? 'bg-indigo-50 border-indigo-600 text-indigo-600' 
+                                                    uploadType === type.id
+                                                        ? 'bg-indigo-50 border-indigo-600 text-indigo-600'
                                                         : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
                                                 }`}
                                             >
@@ -855,8 +855,8 @@ export default function MarketingPage() {
 
                                 <div className="pt-4">
                                     <label className="relative group cursor-pointer">
-                                        <input 
-                                            type="file" 
+                                        <input
+                                            type="file"
                                             accept="image/*"
                                             onChange={handleUpload}
                                             disabled={uploading}
@@ -877,7 +877,7 @@ export default function MarketingPage() {
                     </div>
                 </div>
             )}
-            
+
             {/* Modal Filigrane */}
             {watermarkModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -927,8 +927,8 @@ export default function MarketingPage() {
                                                         key={pos.id}
                                                         onClick={() => setWatermarkGravity(pos.id)}
                                                         className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all h-24 ${
-                                                            watermarkGravity === pos.id 
-                                                                ? 'bg-indigo-50 border-indigo-600 text-indigo-600' 
+                                                            watermarkGravity === pos.id
+                                                                ? 'bg-indigo-50 border-indigo-600 text-indigo-600'
                                                                 : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
                                                         }`}
                                                     >
@@ -939,7 +939,7 @@ export default function MarketingPage() {
                                             </div>
                                         </div>
 
-                                        <button 
+                                        <button
                                             onClick={handleWatermark}
                                             className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest rounded-2xl transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
                                         >
@@ -978,7 +978,7 @@ export default function MarketingPage() {
                             <div className="relative flex-1 bg-slate-900 flex items-center justify-center min-h-[300px]">
                                 {current && (
                                     <Image
-                                        src={current.url.startsWith('http') ? current.url : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${current.url.startsWith('/') ? current.url : `/${current.url}`}` : (current.url.startsWith('/') ? current.url : `/${current.url}`))}
+                                        src={current.url.startsWith('http') ? current.url : (process.env.NODE_ENV === 'development' ? `https://tekno.ma${current.url.startsWith('/') ? current.url : `/${current.url}`}` : (current.url.startsWith('/') ? current.url : `/${current.url}`))}
                                         alt={current.name}
                                         fill
                                         className="object-contain"
@@ -1029,7 +1029,7 @@ export default function MarketingPage() {
                                                 i === slideIndex ? 'border-indigo-500' : 'border-transparent'
                                             }`}
                                         >
-                                            <Image src={a.url.startsWith('http') ? a.url : (process.env.NODE_ENV === 'development' ? `https://www.riwaya.store${a.url.startsWith('/') ? a.url : `/${a.url}`}` : (a.url.startsWith('/') ? a.url : `/${a.url}`))} alt={a.name} fill className="object-cover" />
+                                            <Image src={a.url.startsWith('http') ? a.url : (process.env.NODE_ENV === 'development' ? `https://tekno.ma${a.url.startsWith('/') ? a.url : `/${a.url}`}` : (a.url.startsWith('/') ? a.url : `/${a.url}`))} alt={a.name} fill className="object-cover" />
                                             {s === 'ok' && <div className="absolute inset-0 bg-green-500/60 flex items-center justify-center"><span className="text-white text-xs font-black">✓</span></div>}
                                             {s === 'error' && <div className="absolute inset-0 bg-red-500/60 flex items-center justify-center"><span className="text-white text-xs font-black">✕</span></div>}
                                             {s === 'loading' && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="w-3 h-3 text-white animate-spin" /></div>}
@@ -1078,7 +1078,7 @@ export default function MarketingPage() {
             })()}
 
             {/* Modal Lancement FB Ad */}
-            <LaunchFacebookAdModal 
+            <LaunchFacebookAdModal
                 isOpen={isFbAdModalOpen}
                 onClose={() => {
                     setIsFbAdModalOpen(false)

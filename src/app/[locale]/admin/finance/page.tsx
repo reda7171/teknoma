@@ -53,7 +53,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style Tekno Store */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-6xl font-black text-black tracking-tighter mb-2 italic">
@@ -63,9 +63,9 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                         Rapports de rentabilité et gestion des flux
                     </p>
                 </div>
-                
+
                 <div className="flex flex-col md:flex-row items-center gap-4">
-                    <ArchivePeriodButton 
+                    <ArchivePeriodButton
                         stats={{
                             netProfit,
                             revenue: grossRevenue,
@@ -115,7 +115,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
             {/* Partenaires (Reda & Amine) Premium Layout */}
             <div className="bg-black rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-                
+
                 <div className="relative z-10 space-y-8">
                     <div className="flex items-center gap-4">
                         <div className="w-2 h-8 bg-emerald-500 rounded-full" />
@@ -182,7 +182,7 @@ export default async function FinancePage(props: { params: Promise<{ locale: str
                                         {new Date(archive.createdAt).toLocaleDateString('fr-FR')}
                                     </span>
                                 </div>
-                                
+
                                 <div className="space-y-3 mb-6">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500 font-medium">Commandes</span>

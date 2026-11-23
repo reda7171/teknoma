@@ -1,0 +1,61 @@
+name: tekno
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: tekno_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD required}
+      MYSQL_DATABASE: tekno_db
+      MYSQL_USER: tekno_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
+    command: --innodb-buffer-pool-size=128M --max-connections=60
+    mem_limit: 768m
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [CMD-SHELL, 'MYSQL_PWD="$$MYSQL_PASSWORD" mysqladmin ping -h 127.0.0.1 -u "$$MYSQL_USER" --silent']
+      interval: 5s
+      timeout: 5s
+      retries: 40
+
+  redis:
+    image: redis:alpine
+    container_name: tekno_redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
+    mem_limit: 128m
+    volumes:
+      - redis_data:/data
+
+  app:
+    image: ghcr.io/reda7171/tekno-app:latest
+    container_name: tekno_app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: mysql://tekno_user:${DB_PASSWORD:?DB_PASSWORD required}@db:3306/tekno_db?connect_timeout=15&pool_timeout=15&connection_limit=10
+      NODE_OPTIONS: --max-old-space-size=1024
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '127.0.0.1:3100:3000'
+    mem_limit: 1536m
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./public/uploads:/app/public/uploads
+      - ./backups:/app/backups
+    healthcheck:
+      test: [CMD-SHELL, 'wget -q -O /dev/null http://127.0.0.1:3000/fr || exit 1']
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+
+volumes:
+  mysql_data:
+  redis_data:

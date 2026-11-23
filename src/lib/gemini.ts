@@ -10,7 +10,7 @@ const GEMINI_CANDIDATE_MODELS = [
   "gemini-3.8-flash",
 ].filter(Boolean) as string[];
 
-const SYSTEM_INSTRUCTION_DEFAULT = `Tu es l'assistant intelligent de Riwaya, une librairie en ligne au Maroc.
+const SYSTEM_INSTRUCTION_DEFAULT = `Tu es l'assistant intelligent de Tekno Store, une boutique High-Tech en ligne au Maroc (smartphones, ordinateurs portables, Mac et accessoires).
 Tes réponses doivent être chaleureuses, utiles et professionnelles.
 
 INFOS CLÉS :
@@ -19,13 +19,13 @@ INFOS CLÉS :
 - Paiement : Uniquement Paiement à la Livraison (Cash on Delivery - COD).
 
 CAPACITÉS :
-- Tu as accès au catalogue de livres et aux commandes.
-- Si tu donnes des infos sur un livre, utilise un ton enthousiaste.
-- Si l'utilisateur cherche un livre, aide-le à le trouver.
+- Tu as accès au catalogue de produits high-tech et aux commandes.
+- Si tu donnes des infos sur un produit, utilise un ton enthousiaste.
+- Si l'utilisateur cherche un produit, aide-le à le trouver.
 
 RÈGLES :
 - Réponds en français ou en arabe selon la langue de l'utilisateur.
-- Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu es "l'Assistant Riwaya".
+- Ne mentionne jamais que tu es une IA ou un modèle de langage. Tu es "l'Assistant Tekno Store".
 - Sois concis.`;
 
 export async function executeWithModelFallback<T>(
@@ -64,7 +64,7 @@ export async function getGeminiModel(preferredModel?: string) {
   const apiKey = (await getSetting("gemini_api_key")) || process.env.GEMINI_API_KEY || "";
   if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
   const genAI = new GoogleGenerativeAI(apiKey);
-  return genAI.getGenerativeModel({ 
+  return genAI.getGenerativeModel({
     model: preferredModel || process.env.GEMINI_MODEL || "gemini-3.7-flash",
     systemInstruction: SYSTEM_INSTRUCTION_DEFAULT
   });
@@ -77,9 +77,9 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
     // Gestion rapide des salutations pour économiser des ressources
     const greetings = ['bonjour', 'salut', 'salam', 'hello', 'hey', 'صباح', 'مرحبا'];
     if (greetings.some(g => msg === g || msg.startsWith(g + ' '))) {
-      const welcome = locale === 'ar' 
-        ? "مرحباً! ✨ أنا المساعد الذكي لـ **رواية**. كيف يمكنني مساعدتك اليوم؟" 
-        : "Bonjour ! ✨ Je suis l'assistant intelligent de **Riwaya**. Comment puis-je vous aider aujourd'hui ?";
+      const welcome = locale === 'ar'
+        ? "مرحباً! ✨ أنا المساعد الذكي لـ **Tekno Store**. كيف يمكنني مساعدتك اليوم؟"
+        : "Bonjour ! ✨ Je suis l'assistant intelligent de **Tekno Store**. Comment puis-je vous aider aujourd'hui ?";
       return { text: welcome, type: undefined, data: undefined };
     }
 
@@ -107,12 +107,12 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
     } else if (msg.length > 3) {
       // Recherche de livres
       const books = await prisma.book.findMany({
-        where: { 
+        where: {
           OR: [
             { title: { contains: message } },
             { author: { contains: message } }
           ],
-          active: true 
+          active: true
         },
         take: 5,
         select: { id: true, title: true, author: true, price: true, image: true }
@@ -125,8 +125,8 @@ export async function chatWithDatabase(message: string, locale: string = 'fr') {
       }
     }
 
-    const prompt = context 
-      ? `CONTEXTE : ${context}\n\nCONSIGNE : Réponds au message suivant de manière concise en utilisant le contexte si pertinent.\nMESSAGE : ${message}` 
+    const prompt = context
+      ? `CONTEXTE : ${context}\n\nCONSIGNE : Réponds au message suivant de manière concise en utilisant le contexte si pertinent.\nMESSAGE : ${message}`
       : message;
 
     const { text } = await executeWithModelFallback(async (model) => {
@@ -166,7 +166,7 @@ Réponds UNIQUEMENT au format JSON strict avec la structure suivante, sans texte
   "seoDescription": "Une meta-description SEO accrocheuse d'environ 150 caractères.",
   "seoKeywords": "mot-clé 1, mot-clé 2, mot-clé 3, mot-clé 4"
 }`;
-    
+
     return await executeWithModelFallback(async (model) => {
       const result = await model.generateContent(prompt);
       const text = result.response.text().trim().replace(/```json|```/gi, '');
@@ -200,7 +200,7 @@ Réponds UNIQUEMENT au format JSON strict (sans \`\`\`json) sous forme d'un tabl
     "reason": "Une courte phrase accrocheuse expliquant pourquoi ce livre est recommandé."
   }
 ]`;
-    
+
     return await executeWithModelFallback(async (model) => {
       const result = await model.generateContent(prompt);
       const text = result.response.text().trim().replace(/```json|```/gi, '');

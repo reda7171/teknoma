@@ -3,7 +3,7 @@ import JumiaConfigForm from './JumiaConfigForm'
 import { ShoppingBag } from 'lucide-react'
 
 export const metadata = {
-    title: 'Configuration Jumia | Riwaya Admin'
+    title: 'Configuration Jumia | Tekno Store Admin'
 }
 
 export default async function JumiaConfigPage() {
@@ -25,7 +25,7 @@ export default async function JumiaConfigPage() {
             </div>
 
             <div className="bg-white rounded-[3rem] p-10 shadow-xl shadow-black/5 border border-gray-100">
-                <JumiaConfigForm 
+                <JumiaConfigForm
                     initialEnabled={jumiaEnabled === 'true'}
                     initialEmail={jumiaEmail || ''}
                     initialApiKey={jumiaApiKey || ''}

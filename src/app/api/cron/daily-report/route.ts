@@ -19,8 +19,19 @@ export async function GET(req: Request) {
         const yesterdayEnd = new Date(yesterday)
         yesterdayEnd.setHours(23, 59, 59, 999)
 
+        // Charger les tarifs de livraison depuis CityDelivery
+        const cityDeliveryPrices = await (prisma as any).cityDelivery.findMany({
+            where: { active: true },
+            select: { city: true, price: true }
+        })
+        const cityPriceMap = new Map<string, number>()
+        for (const cd of cityDeliveryPrices) {
+            const key = cd.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+            cityPriceMap.set(key, cd.price)
+        }
+
         // Stats web (commandes site)
-        const [totalYesterday, revenueYesterday, byStatus] = await Promise.all([
+        const [totalYesterday, revenueYesterday, byStatus, ordersForFees] = await Promise.all([
             prisma.order.count({ where: { createdAt: { gte: yesterday, lte: yesterdayEnd } } }),
             prisma.order.aggregate({
                 where: { createdAt: { gte: yesterday, lte: yesterdayEnd }, status: { not: 'CANCELLED' } },
@@ -30,8 +41,27 @@ export async function GET(req: Request) {
                 by: ['status'],
                 where: { createdAt: { gte: yesterday, lte: yesterdayEnd } },
                 _count: { status: true }
+            }),
+            prisma.order.findMany({
+                where: { createdAt: { gte: yesterday, lte: yesterdayEnd }, status: { not: 'CANCELLED' } },
+                select: { city: true }
             })
         ])
+
+        // Calculer les frais de livraison depuis CityDelivery
+        let totalDeliveryFees = 0
+        for (const order of ordersForFees) {
+            const cleanCity = (order.city || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+            let fee = cityPriceMap.get(cleanCity)
+            if (fee === undefined) {
+                for (const [key, price] of cityPriceMap) {
+                    if (key.includes(cleanCity) || cleanCity.includes(key)) { fee = price; break }
+                }
+            }
+            totalDeliveryFees += fee ?? 30
+        }
+        const caBrut = revenueYesterday._sum.total || 0
+        const caNet = caBrut - totalDeliveryFees
 
         const statusEmojis: Record<string, string> = {
             PENDING: '⏳', CONFIRMED: '✅', SHIPPED: '🚚',
@@ -58,8 +88,8 @@ export async function GET(req: Request) {
         } catch {}
 
         const dateStr = yesterday.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
-        const msg = `☀️ <b>Rapport Quotidien Riwaya</b>\n📅 ${dateStr}\n\n` +
-            `🌐 <b>Site Web</b>\n📦 Commandes: <b>${totalYesterday}</b>\n💰 CA: <b>${(revenueYesterday._sum.total || 0).toFixed(2)} درهم</b>` +
+        const msg = `☀️ <b>Rapport Quotidien Tekno Store</b>\n📅 ${dateStr}\n\n` +
+            `🌐 <b>Site Web</b>\n📦 Commandes: <b>${totalYesterday}</b>\n💰 CA Brut: <b>${caBrut.toFixed(2)} درهم</b>\n🚚 Frais Livraison: <b>-${totalDeliveryFees.toFixed(2)} درهم</b>\n💵 CA Net: <b>${caNet.toFixed(2)} درهم</b>` +
             (statusLines ? `\n\n📊 <b>Détail :</b>\n${statusLines}` : '') +
             jumiaSection
 

@@ -4,12 +4,12 @@ set -e
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 echo "=== [$DATE] Redémarrage / Vérification du conteneur WAHA ==="
 
-ENV_FILE="/var/www/riwayama/.env"
+ENV_FILE="/var/www/tekno/.env"
 if [ -f "$ENV_FILE" ]; then
     export $(grep -E '^(TELEGRAM_BOT_TOKEN|TELEGRAM_CHAT_ID|WAHA_API_KEY)=' "$ENV_FILE" | xargs 2>/dev/null || true)
 fi
 
-cd /var/www/riwayama
+cd /var/www/tekno
 
 echo "Lancement ou rechargement du service WAHA..."
 if command -v docker &> /dev/null; then
@@ -35,7 +35,7 @@ else
 fi
 
 if [ "$WAHA_STATUS" != "ONLINE" ] && [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
-    MSG="⚠️ <b>Alerte Passerelle WAHA</b>%0AStatut : <b>${WAHA_STATUS}</b> (HTTP ${HTTP_CODE})%0AVérifiez le conteneur riwaya_whatsapp."
+    MSG="⚠️ <b>Alerte Passerelle WAHA</b>%0AStatut : <b>${WAHA_STATUS}</b> (HTTP ${HTTP_CODE})%0AVérifiez le conteneur tekno_whatsapp."
     curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
         -d "chat_id=${TELEGRAM_CHAT_ID}" \
         -d "text=${MSG}" \

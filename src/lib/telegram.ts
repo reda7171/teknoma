@@ -65,35 +65,34 @@ export interface TelegramOrderNotification {
     notes?: string | null
     address?: string | null
     items?: {
+        id?: string
         quantity: number
         price?: number
         type?: string
-        book?: { title: string; titleEn?: string | null; titleFr?: string | null; language?: string | null } | null
-        pack?: { name: string; nameFr?: string | null; nameEn?: string | null } | null
-        extraProduct?: { name: string } | null
-        digitalProduct?: { title: string } | null
-        gift?: { name: string } | null
+        isMissing?: boolean
+        book?: { id?: string; title: string; titleEn?: string | null; titleFr?: string | null; language?: string | null; stock?: number } | null
+        pack?: { id?: string; name: string; nameFr?: string | null; nameEn?: string | null } | null
+        extraProduct?: { id?: string; name: string; stock?: number } | null
+        digitalProduct?: { id?: string; title: string } | null
+        gift?: { id?: string; name: string } | null
         [key: string]: any
     }[]
     [key: string]: any
 }
 
-// Envoyer une notification de nouvelle commande avec boutons de changement de statut
-export async function sendOrderNotification(order: TelegramOrderNotification) {
-    const botToken = await getTelegramToken()
-    const chatId = await getTelegramChatId()
+/**
+ * Formate la liste des articles avec le libellé [MANQUANT] si en rupture ou signalé
+ */
+export function formatOrderItemsList(items?: any[]): { itemsList: string; hasMissing: boolean; missingCount: number } {
+    if (!items || items.length === 0) {
+        return { itemsList: '', hasMissing: false, missingCount: 0 }
+    }
 
-    if (!botToken || !chatId) return
+    let hasMissing = false
+    let missingCount = 0
 
-    const orderSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_notify_orders' } })
-    if (orderSetting?.value === 'false') return
-
-    const ip = await getClientIp()
-    const location = await getLocationFromIp(ip)
-    const shortId = order.id.slice(0, 8).toUpperCase()
-    const channelLabel = getSalesChannelLabel(order.salesChannel)
-    const itemsList = order.items
-        ?.map(i => {
+    const itemsList = items
+        .map(i => {
             let rawTitle = 'Article'
             if (i.book) {
                 const lang = (i.book.language || '').toLowerCase().trim()
@@ -115,9 +114,78 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
             }
             const typeBadge = i.type === 'PACK' ? '📦' : i.type === 'DIGITAL' ? '💻' : i.type === 'ACCESSORY' ? '🎁' : '📖'
             const price = i.price !== undefined ? ` (${i.price} MAD)` : ''
-            return `  • ${typeBadge} ${escapeHtml(rawTitle)} x${i.quantity}${price}`
+
+            const isItemMissing = Boolean(
+                i.isMissing ||
+                (i.book && i.book.stock !== undefined && i.book.stock <= 0) ||
+                (i.extraProduct && i.extraProduct.stock !== undefined && i.extraProduct.stock <= 0)
+            )
+
+            if (isItemMissing) {
+                hasMissing = true
+                missingCount++
+            }
+
+            const missingBadge = isItemMissing ? ' ⚠️ <b>[MANQUANT]</b>' : ''
+            return `  • ${typeBadge} ${escapeHtml(rawTitle)} x${i.quantity}${price}${missingBadge}`
         })
-        .join('\n') || ''
+        .join('\n')
+
+    return { itemsList, hasMissing, missingCount }
+}
+
+export function buildOrderKeyboard(orderId: string, whatsappUrl: string, activeShippingCompanies: string[] = [], hasMissing = false) {
+    const shippingButtons = activeShippingCompanies.map(compName => {
+        const cmd = compName.toLowerCase().includes('olivraison') ? 'so' : 'sw'
+        return { text: `🚀 Expédier ${compName}`, callback_data: `${cmd}:${orderId}` }
+    })
+
+    const inline_keyboard: any[][] = [
+        [
+            { text: '💬 WhatsApp Confirm', url: whatsappUrl }
+        ],
+        [
+            { text: '✅ Confirmer', callback_data: `os:${orderId}:CONFIRMED` },
+            { text: '🚚 En livraison', callback_data: `os:${orderId}:SHIPPED` }
+        ]
+    ]
+
+    if (shippingButtons.length > 0) {
+        inline_keyboard.push(shippingButtons)
+    }
+
+    inline_keyboard.push(
+        [
+            { text: '📦 Livrée', callback_data: `os:${orderId}:DELIVERED` },
+            { text: '🔄 Retournée', callback_data: `os:${orderId}:RETURNED` }
+        ],
+        [
+            { text: hasMissing ? '⚠️ Manquant (Modifier)' : '⚠️ Déclarer Manquant', callback_data: `toggle_missing:${orderId}` },
+            { text: '✨ Générer Visuel', callback_data: `gen_creative:${orderId}` }
+        ],
+        [
+            { text: '❌ Annuler', callback_data: `os:${orderId}:CANCELLED` }
+        ]
+    )
+
+    return { inline_keyboard }
+}
+
+// Envoyer une notification de nouvelle commande avec boutons de changement de statut
+export async function sendOrderNotification(order: TelegramOrderNotification) {
+    const botToken = await getTelegramToken()
+    const chatId = await getTelegramChatId()
+
+    if (!botToken || !chatId) return
+
+    const orderSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_notify_orders' } })
+    if (orderSetting?.value === 'false') return
+
+    const ip = await getClientIp()
+    const location = await getLocationFromIp(ip)
+    const shortId = order.id.slice(0, 8).toUpperCase()
+    const channelLabel = getSalesChannelLabel(order.salesChannel)
+    const { itemsList, hasMissing, missingCount } = formatOrderItemsList(order.items)
 
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_order' } })
     let text = templateSetting?.value || `🛒 <b>Nouvelle Commande #{{shortId}}</b>\n\n🏪 <b>Canal:</b> {{channel}}\n👤 <b>Client:</b> {{fullName}}\n📱 <b>Source:</b> {{source}}\n📞 <b>Téléphone:</b> {{phone}}\n📍 <b>Ville (Saisie):</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n💰 <b>Total:</b> {{total}} MAD\n{{comment}}\n{{itemsList}}\n🌐 <b>IP:</b> {{ip}}\n\n🔗 <a href="{{orderUrl}}">Voir la commande</a>`
@@ -140,6 +208,10 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
         text += `\n\n🏪 <b>Canal:</b> ${escapeHtml(channelLabel)}`
     }
 
+    if (hasMissing) {
+        text = `🚨 <b>COMMANDE AVEC ${missingCount} ARTICLE(S) MANQUANT(S) !</b>\n\n` + text
+    }
+
     try {
         const { resolveActiveWhatsAppAgent } = await import('@/lib/whatsapp-presence')
         const activeAgent = await resolveActiveWhatsAppAgent()
@@ -158,7 +230,7 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     }
 
     const whatsappTemplateSetting = await prisma.siteSettings.findUnique({ where: { key: 'whatsapp_template_order' } })
-    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Riwaya a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
+    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Tekno Store a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
     whatsappText = whatsappText.replace(/\{\{fullName\}\}/g, order.fullName)
                                .replace(/\{\{shortId\}\}/g, shortId)
                                .replace(/\{\{city\}\}/g, order.city)
@@ -172,45 +244,11 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     });
 
     const activeShippingCompanies = orderData?.shippingCompany ? [orderData.shippingCompany] : [];
-    const shippingButtons = activeShippingCompanies.map(compName => {
-        // Map the company to its corresponding command
-        // This is a naive mapping based on ID. We can refine it later if needed.
-        const cmd = compName.toLowerCase().includes('olivraison') ? 'so' : 'sw';
-        return { text: `🚀 Expédier ${compName}`, callback_data: `${cmd}:${order.id}` };
-    });
-
-    const inline_keyboard = [
-        [
-            { text: '💬 WhatsApp Confirm', url: whatsappUrl }
-        ],
-        [
-            { text: '✅ Confirmer', callback_data: `os:${order.id}:CONFIRMED` },
-            { text: '🚚 En livraison', callback_data: `os:${order.id}:SHIPPED` }
-        ]
-    ];
-
-    if (shippingButtons.length > 0) {
-        inline_keyboard.push(shippingButtons);
-    }
-
-    inline_keyboard.push(
-        [
-            { text: '📦 Livrée', callback_data: `os:${order.id}:DELIVERED` },
-            { text: '🔄 Retournée', callback_data: `os:${order.id}:RETURNED` }
-        ],
-        [
-            { text: '✨ Générer Visuel', callback_data: `gen_creative:${order.id}` }
-        ],
-        [
-            { text: '❌ Annuler', callback_data: `os:${order.id}:CANCELLED` }
-        ]
-    );
-
-    const keyboard = { inline_keyboard };
+    const keyboard = buildOrderKeyboard(order.id, whatsappUrl, activeShippingCompanies, hasMissing);
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
 
-    const promises = chatIds.map(id => 
+    const promises = chatIds.map(id =>
         fetch(`${TELEGRAM_API}${botToken}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -233,12 +271,12 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
 export async function sendTelegramPhoto(photoUrl: string, caption: string, chatId?: string, botToken?: string, keyboard?: any) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
-    
+
     if (!token || !id) return null
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
-    
-    const promises = chatIds.map(cid => 
+
+    const promises = chatIds.map(cid =>
         fetch(`${TELEGRAM_API}${token}/sendPhoto`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -269,7 +307,7 @@ export async function sendTelegramDocument(
 ) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
-    
+
     if (!token || !id) return null
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
@@ -320,11 +358,11 @@ export async function sendTelegramDocument(
 export async function sendTelegramMediaGroup(media: { type: 'photo', media: string, caption?: string }[], chatId?: string, botToken?: string) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
-    
+
     if (!token || !id || media.length === 0) return null
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
-    
+
     let isLocalFile = false
     for (const m of media) {
         if (!m.media.startsWith('http')) {
@@ -358,7 +396,7 @@ export async function sendTelegramMediaGroup(media: { type: 'photo', media: stri
                     }
                 }
             }
-            
+
             if (mediaArray.length === 0) return null
             formData.append('media', JSON.stringify(mediaArray))
 
@@ -371,7 +409,7 @@ export async function sendTelegramMediaGroup(media: { type: 'photo', media: stri
         const results = await Promise.all(promises)
         return results[0]
     } else {
-        const promises = chatIds.map(cid => 
+        const promises = chatIds.map(cid =>
             fetch(`${TELEGRAM_API}${token}/sendMediaGroup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -459,7 +497,7 @@ export async function sendUserRegistrationNotification(user: {
     const ip = await getClientIp()
     const location = await getLocationFromIp(ip)
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_register' } })
-    
+
     const headersList = await headers()
     const session = headersList.get('user-agent') || 'Inconnu'
 
@@ -477,7 +515,7 @@ export async function sendUserRegistrationNotification(user: {
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
 
-    const promises = chatIds.map(id => 
+    const promises = chatIds.map(id =>
         fetch(`${TELEGRAM_API}${botToken}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -508,7 +546,7 @@ export async function sendTelegramMessage(text: string, forceChatId?: string, fo
 
     const chatIds = String(chatId).split(',').map(id => id.trim()).filter(id => id.length > 0)
 
-    const promises = chatIds.map(id => 
+    const promises = chatIds.map(id =>
         fetch(`${TELEGRAM_API}${token}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -589,11 +627,11 @@ export async function sendLowStockNotification(book: { id: string, title: string
 export async function sendTelegramDocumentBuffer(documentBuffer: Buffer, filename: string, caption: string, chatId?: string, botToken?: string) {
     const token = botToken || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_bot_token' } }))?.value || process.env.TELEGRAM_BOT_TOKEN
     const id = chatId || (await prisma.siteSettings.findUnique({ where: { key: 'telegram_chat_id' } }))?.value
-    
+
     if (!token || !id) return null
 
     const chatIds = String(id).split(',').map(i => i.trim()).filter(i => i.length > 0)
-    
+
     const promises = chatIds.map(cid => {
         const formData = new FormData()
         formData.append('chat_id', cid)
@@ -630,4 +668,3 @@ export async function sendTelegramAlert(text: string) {
     )
     return Promise.all(promises)
 }
-

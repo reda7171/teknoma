@@ -75,7 +75,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     const [rotations, setRotations] = useState<Record<string, number>>({})
     const [shadows, setShadows] = useState<Record<string, boolean>>({})
     const [logoScale, setLogoScale] = useState(1)
-    const [logoVariant, setLogoVariant] = useState<'riwaya' | 'jumia'>('riwaya')
+    const [logoVariant, setLogoVariant] = useState<'tekno' | 'jumia'>('tekno')
     const [showLogo, setShowLogo] = useState(true)
     const [showFreeDelivery, setShowFreeDelivery] = useState(pack?.isFreeDelivery || false)
     const [showPlus, setShowPlus] = useState(false)
@@ -92,7 +92,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     // State for editable texts
     const [editableTexts, setEditableTexts] = useState({
         badge: 'Pack Spécial',
-        logo: 'RIWAYA',
+        logo: 'Tekno Store',
         name: pack?.name || 'Nom du Pack',
         description: pack?.description || (pack?.books ? `${pack.books.length} Livres exceptionnels` : 'Livres exceptionnels'),
         limited: 'Offre Limitée',
@@ -322,7 +322,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
     // Persist settings to localStorage
     useEffect(() => {
         if (isOpen) {
-            const saved = localStorage.getItem('riwaya_pack_editor_settings')
+            const saved = localStorage.getItem('tekno_pack_editor_settings')
             if (saved) {
                 try {
                     const data = JSON.parse(saved)
@@ -370,7 +370,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 whatsappNumber: editableTexts.whatsapp,
                 layerOrder
             }
-            localStorage.setItem('riwaya_pack_editor_settings', JSON.stringify(settings))
+            localStorage.setItem('tekno_pack_editor_settings', JSON.stringify(settings))
         }
     }, [positions, theme, imageScale, plusScale, rotations, shadows, logoScale, showLogo, showPlus, showPrice, showWhatsapp, whatsappScale, editableTexts.whatsapp, isOpen])
 
@@ -392,7 +392,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 .then(data => {
                     if (data.success && data.settings?.contact_phone) {
                         setEditableTexts(prev => {
-                            const saved = localStorage.getItem('riwaya_pack_editor_settings')
+                            const saved = localStorage.getItem('tekno_pack_editor_settings')
                             const hasSavedWhatsapp = saved && JSON.parse(saved).whatsappNumber
                             if (!hasSavedWhatsapp && !pack?.whatsappNumber) {
                                 return { ...prev, whatsapp: data.settings.contact_phone }
@@ -404,7 +404,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 .catch(console.error)
 
             const titles = pack.books.map(b => `• ${b.title}`).join('\n')
-            const packUrl = pack.id ? `https://riwaya.store/fr/packs/${pack.id}` : 'https://riwaya.store/fr/packs'
+            const packUrl = pack.id ? `https://tekno.ma/fr/packs/${pack.id}` : 'https://tekno.ma/fr/packs'
 
             setCaption(
                 `🎁 ${pack.name}\n\n` +
@@ -412,7 +412,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 `Livres inclus :\n${titles}\n\n` +
                 `💰 ${pack.price} درهم\n\n` +
                 `اطلب الآن 🛒 ${packUrl}\n\n` +
-                `#riwaya #livres #packs #maroc #lecture #livresaddict #casablanca #rabat #booktokmaroc #culturemaroc #bibliophile #offre_speciale`
+                `#tekno #livres #packs #maroc #lecture #livresaddict #casablanca #rabat #booktokmaroc #culturemaroc #bibliophile #offre_speciale`
             )
         }
     }, [isOpen, pack?.name, pack?.books?.length, pack?.price, pack?.description, pack?.id])
@@ -424,7 +424,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
         try {
             const url = img.src;
             if (url.startsWith('data:')) return url;
-            
+
             // Essai via canvas d'abord (car l'image est déjà chargée dans le DOM)
             try {
                 const canvas = document.createElement('canvas');
@@ -496,7 +496,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
             restoreImages(originals)
 
             try {
-                const keywords = ['Riwaya', 'Pack', pack.name, ...pack.books.map(b => b.title), ...pack.books.map(b => b.author)]
+                const keywords = ['Tekno Store', 'Pack', pack.name, ...pack.books.map(b => b.title), ...pack.books.map(b => b.author)]
                 dataUrl = injectXMPToPNG(dataUrl, pack.name, keywords.filter(Boolean))
             } catch (err) {
                 console.error("XMP injection failed:", err)
@@ -536,7 +536,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
             const baseUrl = window.location.origin
             const productUrl = `${baseUrl}/fr/packs`
             const text = caption || `${editableTexts.name}\n${editableTexts.description}`
-            const tags = `#riwaya #pack #lecture #maroc #culture #promo`
+            const tags = `#tekno #pack #lecture #maroc #culture #promo`
 
             const newWindow = window.open()
             if (newWindow) {
@@ -570,7 +570,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                     <div class="post-header">
                                         <div class="avatar">R</div>
                                         <div class="author-info">
-                                            <div class="author-name">Riwaya</div>
+                                            <div class="author-name">Tekno Store</div>
                                             <div class="post-time">À l'instant • 🌐</div>
                                         </div>
                                     </div>
@@ -872,11 +872,11 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                 rot = (i % 2 === 0 ? 5 : -5);
             } else if (layoutIdx === 8) {
                 // Arc
-                const angleRange = Math.PI / 1.5; 
+                const angleRange = Math.PI / 1.5;
                 const angle = n > 1 ? (i / (n - 1) - 0.5) * angleRange : 0;
                 const radius = 200;
                 x = Math.sin(angle) * radius;
-                y = -Math.cos(angle) * radius + 150; 
+                y = -Math.cos(angle) * radius + 150;
                 rot = angle * 180 / Math.PI;
             } else if (layoutIdx === 9) {
                 // Chevron
@@ -1014,7 +1014,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                         <div
                             ref={posterRef}
                             className={`relative shrink-0 ${format === 'story' ? 'w-[360px] h-[640px]' : 'w-[500px] h-[500px]'} ${bgImage ? '' : currentTheme.bg} overflow-hidden flex flex-col p-8 transition-all duration-300`}
-                            style={{ 
+                            style={{
                                 boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)',
                             }}
                             onClick={(e) => {
@@ -1024,9 +1024,9 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                         >
                             {/* Custom Background Image Layer */}
                             {bgImage && (
-                                <div 
+                                <div
                                     className={`absolute inset-0 z-0 cursor-move ${dragging === 'bg' ? '' : 'transition-transform'}`}
-                                    style={{ 
+                                    style={{
                                         backgroundImage: `url(${bgImage})`,
                                         backgroundSize: 'cover',
                                         backgroundPosition: 'center',
@@ -1087,13 +1087,13 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                         >
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
-                                                src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo-riwaya.png?v=riwaya2'}
-                                                alt={logoVariant === 'jumia' ? 'Jumia Logo' : 'Riwaya Logo'}
+                                                src={logoVariant === 'jumia' ? '/logo-jumia.png?v=jumia_v3' : '/logo.png?v=tekno2'}
+                                                alt={logoVariant === 'jumia' ? 'Jumia Logo' : 'Tekno Store Logo'}
                                                 crossOrigin="anonymous"
                                                 className={`object-contain filter brightness-0 invert transition-transform origin-top-right select-none ${
                                                     logoVariant === 'jumia' ? 'h-7 sm:h-8 max-w-[140px]' : 'h-9 sm:h-11 max-w-[120px]'
                                                 }`}
-                                                style={{ 
+                                                style={{
                                                     transform: `scale(${logoScale})`,
                                                     transformOrigin: 'top right'
                                                 }}
@@ -1178,9 +1178,9 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                                     if (raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
                                                     // Si chemin local /uploads/..., garder le chemin relatif pour éviter les blocages CORS
                                                     if (raw.startsWith('/')) return raw;
-                                                    // Si URL absolue du même domaine riwaya.store, convertir en chemin relatif
-                                                    if (raw.includes('riwaya.store/')) {
-                                                        const parts = raw.split('riwaya.store');
+                                                    // Si URL absolue du même domaine tekno.ma, convertir en chemin relatif
+                                                    if (raw.includes('tekno.ma/')) {
+                                                        const parts = raw.split('tekno.ma');
                                                         return parts[1] || raw;
                                                     }
                                                     // Si URL externe, passer par le proxy pour contourner CORS
@@ -1453,7 +1453,7 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                 theme, imageScale, plusScale, rotations, shadows,
                                 logoScale, showLogo, showPlus, showPrice, layerOrder, customTexts
                             }
-                            localStorage.setItem('riwaya_pack_editor_settings', JSON.stringify(settings))
+                            localStorage.setItem('tekno_pack_editor_settings', JSON.stringify(settings))
                             onClose()
                         }}
                         className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition p-2 hover:bg-gray-100 rounded-full"
@@ -1568,10 +1568,10 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                             </label>
                             <div className="space-y-3">
                                 <label className="flex items-center justify-center gap-3 w-full px-4 py-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all group">
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        className="hidden" 
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
                                         onChange={(e) => {
                                             const file = e.target.files?.[0]
                                             if (file) {
@@ -1593,15 +1593,15 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                                 <span>Opacité du fond</span>
                                                 <span>{Math.round(bgOpacity * 100)}%</span>
                                             </label>
-                                            <input 
-                                                type="range" 
-                                                min="0" max="1" step="0.05" 
+                                            <input
+                                                type="range"
+                                                min="0" max="1" step="0.05"
                                                 value={bgOpacity}
                                                 onChange={(e) => setBgOpacity(parseFloat(e.target.value))}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                             />
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={() => setBgImage(null)}
                                             className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition"
                                         >
@@ -1695,20 +1695,20 @@ export default function PackCreativeModal({ isOpen, onClose, pack, format = 'pos
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setLogoVariant('riwaya')
+                                            setLogoVariant('tekno')
                                             setLogoScale(1)
                                             positionsRef.current['logo'] = { x: 0, y: 0 }
                                             if (dragElemsRef.current['logo']) dragElemsRef.current['logo']!.style.transform = 'translate(0px, 0px)'
                                             setPositions(prev => ({ ...prev, logo: { x: 0, y: 0 } }))
                                         }}
                                         className={`py-2 px-3 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center justify-center gap-2 ${
-                                            logoVariant === 'riwaya'
+                                            logoVariant === 'tekno'
                                                 ? 'bg-black text-white border-black shadow-md'
                                                 : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                                         }`}
                                     >
-                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'riwaya' ? 'bg-amber-400' : 'bg-gray-400'}`} />
-                                        Riwaya
+                                        <span className={`w-2 h-2 rounded-full ${logoVariant === 'tekno' ? 'bg-amber-400' : 'bg-gray-400'}`} />
+                                        Tekno Store
                                     </button>
                                     <button
                                         type="button"

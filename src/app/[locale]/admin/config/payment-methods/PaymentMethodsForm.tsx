@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Save, Banknote, RefreshCw, CreditCard, Wallet, CircleDollarSign, Landmark, Plus, Trash2, Eye, EyeOff, Upload, Loader2 } from 'lucide-react'
-import { updateSetting } from '@/lib/actions/site-settings'
+import { updateSetting, updateMultipleSettings } from '@/lib/actions/site-settings'
 import { useUIStore } from '@/store/ui'
 
 interface PaymentSettings {
@@ -43,9 +43,33 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
     const [uploadingIndex, setUploadingIndex] = useState<number | null>(null)
     const [uploadingQrIndex, setUploadingQrIndex] = useState<number | null>(null)
     const [showPaypalSecret, setShowPaypalSecret] = useState(false)
+    const [testingPaypal, setTestingPaypal] = useState(false)
+    const [paypalTest, setPaypalTest] = useState<{ message: string; webhookReady: boolean; canRegisterWebhook: boolean } | null>(null)
     const [showStripeSecret, setShowStripeSecret] = useState(false)
     const [showCmiKey, setShowCmiKey] = useState(false)
     const showNotification = useUIStore(state => state.showNotification)
+
+    const testPaypal = async (action: 'test' | 'register' = 'test') => {
+        setTestingPaypal(true)
+        setPaypalTest(null)
+        try {
+            const saved = await updateMultipleSettings([
+                { key: 'payment_paypal_enabled', value: String(settings.paypalEnabled), category: 'config' },
+                { key: 'payment_paypal_mode', value: settings.paypalMode, category: 'config' },
+                { key: 'payment_paypal_client_id', value: settings.paypalClientId.trim(), category: 'config' },
+                { key: 'payment_paypal_client_secret', value: settings.paypalClientSecret.trim(), category: 'config' },
+            ])
+            if (!saved.success) throw new Error(saved.error || 'Enregistrement impossible')
+            const response = await fetch('/api/admin/paypal/test', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }),
+            })
+            const result = await response.json()
+            if (!response.ok) throw new Error(result.error || 'Test PayPal impossible')
+            setPaypalTest(result)
+        } catch (error) {
+            showNotification(error instanceof Error ? error.message : 'Test PayPal impossible', 'error')
+        } finally { setTestingPaypal(false) }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -53,7 +77,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
 
         try {
             await updateSetting('payment_cod_enabled', String(settings.codEnabled), 'config', 'Paiement à la livraison')
-            
+
             await updateSetting('payment_paypal_enabled', String(settings.paypalEnabled), 'config', 'Paiement PayPal')
             await updateSetting('payment_paypal_client_id', settings.paypalClientId, 'config', 'Client ID PayPal')
             await updateSetting('payment_paypal_client_secret', settings.paypalClientSecret, 'config', 'Client Secret PayPal')
@@ -67,10 +91,10 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
             await updateSetting('payment_cmi_client_id', settings.cmiClientId, 'config', 'Client ID CMI')
             await updateSetting('payment_cmi_store_key', settings.cmiStoreKey, 'config', 'Store Key CMI')
             await updateSetting('payment_cmi_mode', settings.cmiMode, 'config', 'Mode CMI')
-            
+
             await updateSetting('payment_bank_transfer_enabled', String(settings.bankTransferEnabled), 'config', 'Virement bancaire')
             await updateSetting('payment_bank_transfer_accounts', JSON.stringify(bankAccounts), 'config', 'Comptes bancaires')
-            
+
             showNotification('Méthodes de paiement mises à jour avec succès', 'success')
         } catch (error) {
             console.error('Erreur lors de la mise à jour des paiements:', error)
@@ -104,12 +128,12 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
         try {
             const formData = new FormData()
             formData.append('file', file)
-            
+
             const res = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             })
-            
+
             const data = await res.json()
             if (data.success && data.url) {
                 updateBankAccount(index, 'logo', data.url)
@@ -134,12 +158,12 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
         try {
             const formData = new FormData()
             formData.append('file', file)
-            
+
             const res = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             })
-            
+
             const data = await res.json()
             if (data.success && data.url) {
                 updateBankAccount(index, 'qrCode', data.url)
@@ -170,9 +194,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                     </div>
                     <div className="ml-auto">
                         <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                className="sr-only peer" 
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
                                 checked={settings.codEnabled}
                                 onChange={(e) => setSettings({ ...settings, codEnabled: e.target.checked })}
                             />
@@ -194,9 +218,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                     </div>
                     <div className="ml-auto">
                         <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                className="sr-only peer" 
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
                                 checked={settings.paypalEnabled}
                                 onChange={(e) => setSettings({ ...settings, paypalEnabled: e.target.checked })}
                             />
@@ -245,7 +269,21 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                         </div>
                     </div>
                 )}
-                
+
+                {settings.paypalEnabled && (
+                    <div className="space-y-3">
+                        <button type="button" disabled={testingPaypal || isLoading} onClick={() => testPaypal()}
+                            className="px-4 py-3 rounded-xl bg-blue-600 text-white font-bold disabled:opacity-50">
+                            {testingPaypal ? 'Vérification en cours…' : 'Enregistrer et tester PayPal'}
+                        </button>
+                        {paypalTest && <div role="status" className="p-4 rounded-xl bg-blue-50 text-sm text-blue-900 space-y-3">
+                            <p>{paypalTest.message}</p>
+                            {!paypalTest.webhookReady && paypalTest.canRegisterWebhook && <button type="button" disabled={testingPaypal}
+                                onClick={() => testPaypal('register')} className="underline font-bold">Connecter le webhook PayPal</button>}
+                        </div>}
+                        <p className="text-xs text-slate-500">Le test enregistre les paramètres PayPal. Aucun paiement n’est encaissé.</p>
+                    </div>
+                )}
                 <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-800">
                     <strong>Documentation PayPal :</strong> Vous pouvez créer une application et obtenir votre Client ID et Secret Key depuis le <a href="https://developer.paypal.com/dashboard" target="_blank" rel="noreferrer" className="underline font-bold">Portail Développeur PayPal</a>. Assurez-vous d'activer les paiements en direct si vous choisissez le mode Production.
                 </div>
@@ -263,9 +301,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                     </div>
                     <div className="ml-auto">
                         <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                className="sr-only peer" 
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
                                 checked={settings.stripeEnabled}
                                 onChange={(e) => setSettings({ ...settings, stripeEnabled: e.target.checked })}
                             />
@@ -303,9 +341,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                         </div>
                     </div>
                 )}
-                
+
                 <div className="mt-4 p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-sm text-indigo-800">
-                    <strong>Documentation Stripe :</strong> Pour recevoir les confirmations de paiement en temps réel, veuillez ajouter l'URL de Webhook <code>https://riwaya.store/api/webhooks/stripe</code> dans votre tableau de bord Stripe. N'oubliez pas d'ajouter la clé secrète du Webhook dans votre fichier <code>.env</code> (<code>STRIPE_WEBHOOK_SECRET</code>).
+                    <strong>Documentation Stripe :</strong> Pour recevoir les confirmations de paiement en temps réel, veuillez ajouter l'URL de Webhook <code>https://tekno.ma/api/webhooks/stripe</code> dans votre tableau de bord Stripe. N'oubliez pas d'ajouter la clé secrète du Webhook dans votre fichier <code>.env</code> (<code>STRIPE_WEBHOOK_SECRET</code>).
                 </div>
             </div>
 
@@ -321,9 +359,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                     </div>
                     <div className="ml-auto">
                         <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                className="sr-only peer" 
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
                                 checked={settings.cmiEnabled}
                                 onChange={(e) => setSettings({ ...settings, cmiEnabled: e.target.checked })}
                             />
@@ -372,9 +410,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                         </div>
                     </div>
                 )}
-                
+
                 <div className="mt-4 p-4 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-800">
-                    <strong>Documentation CMI :</strong> Le système génère automatiquement l'empreinte SHA-512 pour sécuriser vos paiements. Si CMI vous demande de leur fournir une "Callback URL", donnez-leur : <code>https://riwaya.store/api/webhooks/cmi</code>.
+                    <strong>Documentation CMI :</strong> Le système génère automatiquement l'empreinte SHA-512 pour sécuriser vos paiements. Si CMI vous demande de leur fournir une "Callback URL", donnez-leur : <code>https://tekno.ma/api/webhooks/cmi</code>.
                 </div>
             </div>
 
@@ -390,9 +428,9 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                     </div>
                     <div className="ml-auto">
                         <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                className="sr-only peer" 
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
                                 checked={settings.bankTransferEnabled}
                                 onChange={(e) => setSettings({ ...settings, bankTransferEnabled: e.target.checked })}
                             />
@@ -414,7 +452,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                                 Ajouter un compte
                             </button>
                         </div>
-                        
+
                         {bankAccounts.length === 0 ? (
                             <div className="text-center p-8 bg-slate-50 rounded-xl border border-slate-200 border-dashed text-slate-500 text-sm">
                                 Aucun compte bancaire configuré. Cliquez sur "Ajouter un compte" pour commencer.
@@ -483,11 +521,11 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                                                     />
                                                     <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center" title="Parcourir les images">
                                                         {uploadingIndex === index ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                                        <input 
-                                                            type="file" 
-                                                            className="hidden" 
-                                                            accept="image/*" 
-                                                            onChange={(e) => handleLogoUpload(index, e)} 
+                                                        <input
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            onChange={(e) => handleLogoUpload(index, e)}
                                                             disabled={uploadingIndex === index}
                                                         />
                                                     </label>
@@ -512,11 +550,11 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                                                     />
                                                     <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors flex items-center justify-center" title="Parcourir les images">
                                                         {uploadingQrIndex === index ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                                        <input 
-                                                            type="file" 
-                                                            className="hidden" 
-                                                            accept="image/*" 
-                                                            onChange={(e) => handleQrUpload(index, e)} 
+                                                        <input
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            onChange={(e) => handleQrUpload(index, e)}
                                                             disabled={uploadingQrIndex === index}
                                                         />
                                                     </label>
@@ -527,7 +565,7 @@ export default function PaymentMethodsForm({ initialSettings }: { initialSetting
                                 </div>
                             ))
                         )}
-                        
+
                         <div className="mt-4 p-4 bg-teal-50 border border-teal-100 rounded-xl text-sm text-teal-800">
                             <strong>Fonctionnement :</strong> Lors du paiement, le client verra ces coordonnées pour effectuer le virement. La commande sera en attente jusqu'à ce que vous confirmiez la réception du paiement.
                         </div>

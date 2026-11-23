@@ -18,15 +18,15 @@ const formatAdminDate = (value: Date | string) => new Intl.DateTimeFormat('fr-FR
 }).format(new Date(value))
 
 const getNotificationLinks = (order: any) => {
-    const trackingLink = `https://riwaya.store/fr/track/${order.id}`
+    const trackingLink = `https://tekno.ma/fr/track/${order.id}`
     let text = ''
 
     switch (order.status) {
         case 'PENDING':
-            text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Riwaya ! Vous pouvez suivre son avancement ici : ${trackingLink}`
+            text = `Bonjour ${order.fullName}, nous avons bien reçu votre commande sur Tekno Store ! Vous pouvez suivre son avancement ici : ${trackingLink}`
             break
         case 'CONFIRMED':
-            text = `Bonjour ${order.fullName}, votre commande Riwaya est confirmée et en cours de préparation. Suivi : ${trackingLink}`
+            text = `Bonjour ${order.fullName}, votre commande Tekno Store est confirmée et en cours de préparation. Suivi : ${trackingLink}`
             break
         case 'SHIPPED':
             text = `Bonne nouvelle ${order.fullName}, votre commande a été expédiée${order.shippingCompanyName ? ` avec ${order.shippingCompanyName}` : ''}${order.trackingID ? ` (Suivi: ${order.trackingID})` : ''} ! Lien : ${trackingLink}`
@@ -35,12 +35,12 @@ const getNotificationLinks = (order: any) => {
             text = `Bonjour ${order.fullName}, votre commande a été livrée ! Bonne lecture et n'hésitez pas à nous laisser un avis.`
             break
         default:
-            text = `Bonjour ${order.fullName}, voici le lien de suivi de votre commande Riwaya : ${trackingLink}`
+            text = `Bonjour ${order.fullName}, voici le lien de suivi de votre commande Tekno Store : ${trackingLink}`
     }
 
     const phone = order.phone.replace(/^0+/, '').replace(/\s+/g, '')
     const waLink = `https://wa.me/212${phone}?text=${encodeURIComponent(text)}`
-    const mailLink = order.email ? `mailto:${order.email}?subject=${encodeURIComponent('Suivi de votre commande Riwaya')}&body=${encodeURIComponent(text)}` : null
+    const mailLink = order.email ? `mailto:${order.email}?subject=${encodeURIComponent('Suivi de votre commande Tekno Store')}&body=${encodeURIComponent(text)}` : null
 
     return { waLink, mailLink }
 }
@@ -51,7 +51,7 @@ const getCompanyReturnWaLink = (order: any) => {
     const formattedDate = formatAdminDate(order.createdAt)
     const trackingText = order.trackingID ? `N° Suivi : ${order.trackingID}` : `Commande #${order.id.slice(0, 8)}`
 
-    const message = `Bonjour ${companyName},\n\nJe vous contacte concernant le colis en retour de notre commande Riwaya :\n- ${trackingText}\n- Client : ${order.fullName} (${order.city})\n- Date commande : ${formattedDate} (il y a ${daysSince} jours)\n- Montant : ${order.total} DH\n\nCe colis est marqué en retour depuis plus d'une semaine. Pourriez-vous s'il vous plaît nous confirmer où se trouve le colis et quand il nous sera retourné à notre dépôt ?\n\nMerci de votre collaboration.\nL'équipe Riwaya.`
+    const message = `Bonjour ${companyName},\n\nJe vous contacte concernant le colis en retour de notre commande Tekno Store :\n- ${trackingText}\n- Client : ${order.fullName} (${order.city})\n- Date commande : ${formattedDate} (il y a ${daysSince} jours)\n- Montant : ${order.total} DH\n\nCe colis est marqué en retour depuis plus d'une semaine. Pourriez-vous s'il vous plaît nous confirmer où se trouve le colis et quand il nous sera retourné à notre dépôt ?\n\nMerci de votre collaboration.\nL'équipe Tekno Store.`
 
     if (order.shippingCompanySupportPhone) {
         let clean = order.shippingCompanySupportPhone.replace(/\D/g, '')
@@ -419,8 +419,8 @@ export default function OrdersTableClient({
                                             <div className="mt-1">
                                                 <span className="inline-flex rounded-md bg-gray-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-gray-600">
                                                     {{
-                                                        RIWAYA_STORE: 'Store',
-                                                        RIWAYA_MA: 'Riwaya.ma',
+                                                        TEKNO_STORE: 'Store',
+                                                        TEKNO_MA: 'tekno.ma',
                                                         ADMIN_POS: 'POS',
                                                         MOBILE_APP: 'Mobile',
                                                         ADMIN_IMPORT: 'Import'

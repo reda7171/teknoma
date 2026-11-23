@@ -74,9 +74,9 @@ const TEMPLATE_CONFIG: Record<TemplateKey, {
         label: 'Lead Panier (Code Promo -10%)',
         description: 'Envoyé immédiatement dès que le client saisit son numéro dans le pop-up panier.',
         variables: [
-            { code: '{promoCode}', label: 'Code promo', sample: 'RIWAYA10' },
+            { code: '{promoCode}', label: 'Code promo', sample: 'TEKNO10' },
             { code: '{discount}', label: 'Pourcentage', sample: '10' },
-            { code: '{siteUrl}', label: 'URL Boutique', sample: 'https://riwaya.store' },
+            { code: '{siteUrl}', label: 'URL Boutique', sample: 'https://tekno.ma' },
         ]
     },
     whatsapp_template_order_confirm: {
@@ -88,7 +88,7 @@ const TEMPLATE_CONFIG: Record<TemplateKey, {
             { code: '{total}', label: 'Total DH', sample: '180' },
             { code: '{itemsList}', label: 'Liste articles', sample: '• L\'Alchimiste (1x)\n• Père Riche Père Pauvre (1x)' },
             { code: '{city}', label: 'Ville', sample: 'Casablanca' },
-            { code: '{trackingUrl}', label: 'Lien suivi', sample: 'https://riwaya.store/fr/tracking?id=RW-4921' },
+            { code: '{trackingUrl}', label: 'Lien suivi', sample: 'https://tekno.ma/fr/tracking?id=RW-4921' },
         ]
     },
     whatsapp_template_abandoned_cart: {
@@ -97,8 +97,8 @@ const TEMPLATE_CONFIG: Record<TemplateKey, {
         variables: [
             { code: '{customerName}', label: 'Nom client', sample: 'Cher lecteur' },
             { code: '{itemsList}', label: 'Livres du panier', sample: '• L\'art de la guerre (1x)' },
-            { code: '{promoCode}', label: 'Code promo', sample: 'RIWAYA10' },
-            { code: '{cartUrl}', label: 'Lien panier direct', sample: 'https://riwaya.store/fr/cart' },
+            { code: '{promoCode}', label: 'Code promo', sample: 'TEKNO10' },
+            { code: '{cartUrl}', label: 'Lien panier direct', sample: 'https://tekno.ma/fr/cart' },
         ]
     },
     whatsapp_template_welcome: {
@@ -106,7 +106,7 @@ const TEMPLATE_CONFIG: Record<TemplateKey, {
         description: 'Réponse automatique immédiate envoyée à tout client qui contacte votre WhatsApp.',
         variables: [
             { code: '{customerName}', label: 'Nom client', sample: 'Cher lecteur' },
-            { code: '{siteUrl}', label: 'URL Boutique', sample: 'https://riwaya.store' },
+            { code: '{siteUrl}', label: 'URL Boutique', sample: 'https://tekno.ma' },
         ]
     }
 }
@@ -131,7 +131,7 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
     const [isRestarting, setIsRestarting] = useState(false)
     const [testPhone, setTestPhone] = useState('')
     const [testSession, setTestSession] = useState('default')
-    const [testMessage, setTestMessage] = useState('Salam ! Test de connexion WhatsApp depuis Riwaya.store réussi avec succès.')
+    const [testMessage, setTestMessage] = useState('Salam ! Test de connexion WhatsApp depuis tekno.ma réussi avec succès.')
     const [isSendingTest, setIsSendingTest] = useState(false)
     const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
     const [isDisconnecting, setIsDisconnecting] = useState(false)
@@ -717,7 +717,7 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                             className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono leading-relaxed"
                         />
                         <p className="text-[11px] text-gray-400 mt-1.5">
-                            Astuce WhatsApp : mettez les mots importants entre astérisques pour les mettre en gras (ex : *RIWAYA10*).
+                            Astuce WhatsApp : mettez les mots importants entre astérisques pour les mettre en gras (ex : *TEKNO10*).
                         </p>
                     </div>
 
@@ -756,7 +756,7 @@ export function WhatsAppGatewayClient({ initialStatus, initialSettings, initialT
                                 Envoi automatique du Code Promo (-10%) aux Leads Panier
                             </p>
                             <p className="text-xs text-slate-500 font-medium mt-0.5">
-                                Dès qu&apos;un client saisit son numéro dans le pop-up, il reçoit instantanément le code promo RIWAYA10 sur son WhatsApp.
+                                Dès qu&apos;un client saisit son numéro dans le pop-up, il reçoit instantanément le code promo TEKNO10 sur son WhatsApp.
                             </p>
                         </div>
                         <button

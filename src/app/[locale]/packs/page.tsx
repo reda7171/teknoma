@@ -12,13 +12,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const { locale } = await params
     const t = await getTranslations({ locale, namespace: 'PacksPage' })
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riwaya.store'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
     return {
-        title: `${t('Title')} | Riwaya`,
+        title: `${t('Title')} | Tekno Store`,
         description: t('Subtitle'),
         openGraph: {
-            title: `${t('Title')} | Riwaya`,
+            title: `${t('Title')} | Tekno Store`,
             description: t('Subtitle'),
             images: ['/images/og-packs.png'],
         },

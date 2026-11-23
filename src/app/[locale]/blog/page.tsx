@@ -12,42 +12,42 @@ import type { Metadata } from 'next'
 
 export const revalidate = 3600 // Cache d'une heure (ISR)
 
-export async function generateMetadata({ 
-    params 
-}: { 
-    params: Promise<{ locale: string }> 
+export async function generateMetadata({
+    params
+}: {
+    params: Promise<{ locale: string }>
 }): Promise<Metadata> {
     const { locale } = await params
     const t = await getTranslations({ locale, namespace: 'Blog' })
-    
+
     return {
-        title: `${t('Title')} | Riwaya`,
+        title: `${t('Title')} | Tekno Store`,
         description: t('Subtitle'),
         openGraph: {
-            title: `${t('Title')} | Riwaya`,
+            title: `${t('Title')} | Tekno Store`,
             description: t('Subtitle'),
             type: 'website',
-            url: `https://riwaya.store/${locale}/blog`,
+            url: `https://tekno.ma/${locale}/blog`,
             images: [
                 {
-                    url: 'https://riwaya.store/images/og-blog.png',
+                    url: 'https://tekno.ma/images/og-blog.png',
                     width: 1200,
                     height: 630,
-                    alt: 'Blog Riwaya'
+                    alt: 'Blog Tekno Store'
                 }
             ]
         },
         alternates: {
-            canonical: `https://riwaya.store/${locale}/blog`
+            canonical: `https://tekno.ma/${locale}/blog`
         }
     }
 }
-export default async function BlogPage({ 
+export default async function BlogPage({
     params,
-    searchParams 
-}: { 
+    searchParams
+}: {
     params: Promise<{ locale: string }>,
-    searchParams: Promise<{ page?: string; category?: string }> 
+    searchParams: Promise<{ page?: string; category?: string }>
 }) {
     const { locale } = await params
     const sParams = await searchParams
@@ -62,8 +62,8 @@ export default async function BlogPage({
         getSetting('adsense_slot_sidebar')
     ])
 
-    const displayCategories = locale === 'ar' 
-        ? categories.filter(cat => /[\u0600-\u06FF]/.test(cat)) 
+    const displayCategories = locale === 'ar'
+        ? categories.filter(cat => /[\u0600-\u06FF]/.test(cat))
         : categories;
 
     return (
@@ -74,9 +74,9 @@ export default async function BlogPage({
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "Blog",
-                        "name": `${t('Title')} | Riwaya`,
+                        "name": `${t('Title')} | Tekno Store`,
                         "description": t('Subtitle'),
-                        "url": `https://riwaya.store/${locale}/blog`
+                        "url": `https://tekno.ma/${locale}/blog`
                     })
                 }}
             />
@@ -96,10 +96,10 @@ export default async function BlogPage({
 
             </div>
 
-            <AdUnit 
-                publisherId={adsenseId || ""} 
-                slot={adsenseSidebarSlot || "blog_top_horizontal"} 
-                isEnabled={adsenseEnabled === 'true'} 
+            <AdUnit
+                publisherId={adsenseId || ""}
+                slot={adsenseSidebarSlot || "blog_top_horizontal"}
+                isEnabled={adsenseEnabled === 'true'}
                 className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10"
             />
 
@@ -137,7 +137,7 @@ export default async function BlogPage({
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                            <span className="text-gray-300 font-black text-4xl opacity-20">Riwaya</span>
+                                            <span className="text-gray-300 font-black text-4xl opacity-20">Tekno Store</span>
                                         </div>
                                     )}
                                     <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors" />
@@ -151,7 +151,7 @@ export default async function BlogPage({
                                                 <Calendar className="w-3 h-3" />
                                                 <span>
                                                     {new Date(post.publishedAt).toLocaleDateString(
-                                                        locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-US' : 'fr-FR', 
+                                                        locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-US' : 'fr-FR',
                                                         {
                                                             day: 'numeric',
                                                             month: 'short',
@@ -166,7 +166,7 @@ export default async function BlogPage({
                                                 <User className="w-3 h-3" />
                                                 <span>
                                                     {(() => {
-                                                        let name = post.authorName || post.author?.fullName || (locale === 'ar' ? 'فريق رواية' : locale === 'en' ? 'Riwaya Team' : 'Équipe Riwaya');
+                                                        let name = post.authorName || post.author?.fullName || (locale === 'ar' ? 'فريق Tekno Store' : locale === 'en' ? 'Tekno Store Team' : 'Équipe Tekno Store');
                                                         if (name.toLowerCase() === 'admin') {
                                                             name = locale === 'ar' ? 'مشرف' : locale === 'en' ? 'Moderator' : 'Modérateur';
                                                         }

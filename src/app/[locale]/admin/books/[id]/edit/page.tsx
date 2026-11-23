@@ -21,7 +21,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
     const resolvedParams = use(params)
     const resolvedSearchParams = use(searchParams)
     const bookId = resolvedParams.id
-    
+
     // Construction de l'URL de retour en conservant TOUS les filtres existants
     const [returnUrl, setReturnUrl] = useState<string>(() => {
         const returnUrlParams = new URLSearchParams()
@@ -62,7 +62,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
     const [bookImage, setBookImage] = useState<string>('')
     const [isMediaModalOpen, setIsMediaModalOpen] = useState(false)
-    
+
     // Nouveaux states pour les champs gérés avec Gemini
     const [description, setDescription] = useState<string>('')
     const [descriptionFr, setDescriptionFr] = useState<string>('')
@@ -176,7 +176,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 setSelectedMainCategory(result.data.category || '')
                 setSelectedSubCategory(result.data.subCategory || '')
                 setSeoKeywordsState((result.data as any).seoKeywords || '')
-                
+
                 const initialSku = result.data.sellerSku || ''
                 setSellerSkuValue(initialSku)
                 setHasSkuParasiteChars(hasInvisibleUnicode(initialSku))
@@ -201,7 +201,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                     const warehouses = await whRes.json()
                     const invRes = await fetch(`/api/admin/inventory?bookId=${bookId}`)
                     const inventory = await invRes.json()
-                    
+
                     const stocks = warehouses.map((w: any) => {
                         const inv = inventory.find((i: any) => i.warehouseId === w.id)
                         return {
@@ -217,11 +217,11 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 }
 
             } else {
-                setError(result.error || 'Livre introuvable')
+                setError(result.error || 'Produit introuvable')
             }
         } catch (err: any) {
             console.error(err)
-            setError(err.message || 'Livre introuvable')
+            setError(err.message || 'Produit introuvable')
         }
         setLoadingData(false)
     }
@@ -275,7 +275,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         bookId: id,
                         warehouseId: ws.warehouseId,
                         quantity: delta,
-                        note: 'Mise à jour depuis édition livre'
+                        note: 'Mise à jour depuis édition produit'
                     })
                 })
             }
@@ -325,7 +325,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                 router.refresh()
             } else {
                 setLoading(false)
-                // Recharger les données du livre sans quitter la page
+                // Recharger les données du produit sans quitter la page
                 await loadBook(id)
             }
         } else {
@@ -336,12 +336,12 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
     async function handleConfirmJumiaPush(pushLang: JumiaPushLanguage) {
         if (!bookId) return
-        
+
         setIsPushingJumia(true)
         try {
             const res = await publishBooksToJumia([bookId], pushLang)
             if (res.success) {
-                alert(res.message || 'Livre publié avec succès sur Jumia !')
+                alert(res.message || 'Produit publié avec succès sur Jumia !')
                 setIsJumiaModalOpen(false)
                 await loadBook(bookId)
             } else {
@@ -356,7 +356,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
     async function handleSyncQuantity() {
         if (!bookId) return
-        
+
         setIsSyncingQuantity(true)
         try {
             const res = await syncBooksQuantityToJumia([bookId])
@@ -380,7 +380,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         if (currentLang === 'ar') { textToImprove = description; targetLang = 'AR'; }
         else if (currentLang === 'fr') { textToImprove = descriptionFr; targetLang = 'FR'; }
         else if (currentLang === 'en') { textToImprove = descriptionEn; targetLang = 'EN'; }
-        
+
         if (!textToImprove) {
             alert('Veuillez d\'abord écrire une description à améliorer.');
             return;
@@ -415,7 +415,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         if (currentLang === 'ar') { textToImprove = longDescription; targetLang = 'AR'; }
         else if (currentLang === 'fr') { textToImprove = longDescriptionFr; targetLang = 'FR'; }
         else if (currentLang === 'en') { textToImprove = longDescriptionEn; targetLang = 'EN'; }
-        
+
         if (!textToImprove) {
             alert('Veuillez d\'abord écrire une description longue à améliorer.');
             return;
@@ -446,17 +446,17 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
     const generateHighlightsAI = async () => {
         const titleInput = (document.getElementById('title') as HTMLInputElement)?.value || book?.title;
-        if (!titleInput) return alert('Veuillez saisir un titre pour le livre');
-        
+        if (!titleInput) return alert('Veuillez saisir un titre pour le produit');
+
         const el = document.getElementById('jumiaHighlights') as HTMLTextAreaElement;
         let textToImprove = el?.value?.trim();
-        
+
         if (!textToImprove) {
-            textToImprove = `<ul><li>Titre: ${titleInput}</li><li>Format: Livre papier</li></ul>`;
+            textToImprove = `<ul><li>Titre: ${titleInput}</li><li>Format: Produit papier</li></ul>`;
             el.value = textToImprove;
             return;
         }
-        
+
         setIsGeneratingHighlights(true);
         try {
             const res = await fetch('/api/admin/translate', {
@@ -480,15 +480,15 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
 
     const generateContentAI = async () => {
         const titleInput = (document.getElementById('title') as HTMLInputElement)?.value || book?.title;
-        if (!titleInput) return alert('Veuillez saisir un titre pour le livre');
-        
+        if (!titleInput) return alert('Veuillez saisir un titre pour le produit');
+
         const el = document.getElementById('jumiaPackageContent') as HTMLInputElement;
         let textToImprove = el?.value?.trim();
-        
+
         if (!textToImprove) {
-            textToImprove = `1 x Livre : ${titleInput}`;
+            textToImprove = `1 x Produit : ${titleInput}`;
         }
-        
+
         setIsGeneratingContent(true);
         try {
             const res = await fetch('/api/admin/translate', {
@@ -529,10 +529,10 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Retour à la liste
                     </Link>
-                    <h1 className="text-3xl font-bold text-gray-900">Livre introuvable</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Produit introuvable</h1>
                 </div>
                 <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-600">{error || 'Ce livre n\'existe pas'}</p>
+                    <p className="text-sm text-red-600">{error || 'Ce produit n\'existe pas'}</p>
                 </div>
             </div>
         )
@@ -545,7 +545,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         const author = selectedAuthor
 
         const title = titleAr || titleFr || titleEn || 'Titre inconnu'
-        const auth = author || 'Auteur inconnu'
+        const auth = author || 'Marque inconnue'
 
         const prompt = `Act as a professional bookseller. I am updating a book in my online store.
 Title: ${title}
@@ -553,7 +553,7 @@ Author: ${auth}
 
 CRITICAL INSTRUCTION FOR TITLES:
 For title_fr and title_en, DO NOT translate the Arabic title literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
-Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat riwayat basatin arabistan" (NOT "Série de romans...").
+Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat teknot basatin arabistan" (NOT "Série de romans...").
 
 Please provide the following information in JSON format (so I can easily copy-paste or read it):
 {
@@ -564,7 +564,7 @@ Please provide the following information in JSON format (so I can easily copy-pa
   "description_fr": "Short engaging description in French (max 3 paragraphs)",
   "description_en": "Short engaging description in English (max 3 paragraphs)",
   "longDescription_ar": "Detailed description in Arabic with semantic <h2> headings (e.g. <h2>لماذا يجب قراءة هذا الكتاب؟</h2>, <h2>ملخص وأهم المحاور</h2>)",
-  "longDescription_fr": "Detailed description in French with semantic <h2> headings (e.g. <h2>Pourquoi lire ce livre ?</h2>, <h2>Résumé et thèmes clés</h2>)",
+  "longDescription_fr": "Detailed description in French with semantic <h2> headings (e.g. <h2>Pourquoi lire ce produit ?</h2>, <h2>Résumé et thèmes clés</h2>)",
   "longDescription_en": "Detailed description in English with semantic <h2> headings (e.g. <h2>Why read this book?</h2>, <h2>Key themes & summary</h2>)",
   "category": "Main category of the book",
   "subCategory": "Sub-category",
@@ -621,7 +621,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
             seoKeywords: data.seoKeywords || prev?.seoKeywords,
         }))
 
-        setToastMessage('Score SEO optimisé à 100% avec succès ! N\'oubliez pas d\'enregistrer le livre.')
+        setToastMessage('Score SEO optimisé à 100% avec succès ! N\'oubliez pas d\'enregistrer le produit.')
         setTimeout(() => setToastMessage(null), 8000)
     }
 
@@ -632,7 +632,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                 setToastMessage('Le presse-papier est vide.')
                 return
             }
-            
+
             const jsonStr = text.replace(/```json\n?/, '').replace(/```/, '').trim()
             let data
             try {
@@ -660,7 +660,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                 </Link>
                 <div className="flex flex-col items-center justify-center min-h-[350px] gap-3 bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                    <p className="text-sm font-medium text-gray-500">Chargement des données du livre...</p>
+                    <p className="text-sm font-medium text-gray-500">Chargement des données du produit...</p>
                 </div>
             </div>
         )
@@ -677,8 +677,8 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                     Retour à la liste
                 </Link>
                 <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-red-700">
-                    <p className="font-bold">Livre introuvable</p>
-                    <p className="text-sm mt-1">{error || 'Le livre demandé n\'existe pas ou a été supprimé.'}</p>
+                    <p className="font-bold">Produit introuvable</p>
+                    <p className="text-sm mt-1">{error || 'Le produit demandé n\'existe pas ou a été supprimé.'}</p>
                 </div>
             </div>
         )
@@ -698,7 +698,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-bold text-gray-900">Modifier le livre</h1>
+                            <h1 className="text-3xl font-bold text-gray-900">Modifier le produit</h1>
                             {isLinked !== null && (
                                 isLinked ? (
                                     <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700 whitespace-nowrap">
@@ -713,7 +713,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             )}
                         </div>
                         <p className="mt-2 text-sm text-gray-600">
-                            Modifiez les informations du livre "{book.title}"
+                            Modifiez les informations du produit "{book.title}"
                         </p>
                     </div>
                     <div className="flex flex-col sm:flex-row items-center gap-2">
@@ -754,7 +754,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                 </div>
             </div>
 
-            {/* Statistiques clés du livre */}
+            {/* Statistiques clés du produit */}
             {book && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                     <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
@@ -863,37 +863,37 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
             <form key={book.id} onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex justify-end mb-4 gap-6">
                     <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                            type="radio" 
-                            name="lang_toggle" 
-                            checked={currentLang === 'ar'} 
-                            onChange={() => setCurrentLang('ar')} 
+                        <input
+                            type="radio"
+                            name="lang_toggle"
+                            checked={currentLang === 'ar'}
+                            onChange={() => setCurrentLang('ar')}
                             className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                         />
                         <span className={`text-sm font-medium ${currentLang === 'ar' ? 'text-orange-500' : 'text-gray-500'}`}>Arabic</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                            type="radio" 
-                            name="lang_toggle" 
-                            checked={currentLang === 'fr'} 
-                            onChange={() => setCurrentLang('fr')} 
+                        <input
+                            type="radio"
+                            name="lang_toggle"
+                            checked={currentLang === 'fr'}
+                            onChange={() => setCurrentLang('fr')}
                             className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                         />
                         <span className={`text-sm font-medium ${currentLang === 'fr' ? 'text-orange-500' : 'text-gray-500'}`}>French</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                            type="radio" 
-                            name="lang_toggle" 
-                            checked={currentLang === 'en'} 
-                            onChange={() => setCurrentLang('en')} 
+                        <input
+                            type="radio"
+                            name="lang_toggle"
+                            checked={currentLang === 'en'}
+                            onChange={() => setCurrentLang('en')}
                             className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                         />
                         <span className={`text-sm font-medium ${currentLang === 'en' ? 'text-orange-500' : 'text-gray-500'}`}>English</span>
                     </label>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Titre */}
                     <div className="md:col-span-2">
@@ -944,18 +944,18 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                         />
                     </div>
 
-                    {/* Auteur */}
+                    {/* Marque */}
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <label htmlFor="author" className="block text-sm font-medium text-gray-700">
-                                Auteur <span className="text-red-500">*</span>
+                                Marque <span className="text-red-500">*</span>
                             </label>
                             <button
                                 type="button"
                                 onClick={() => setIsNewAuthor(!isNewAuthor)}
                                 className="text-xs text-blue-600 hover:text-blue-800 font-bold"
                             >
-                                {isNewAuthor ? "Choisir existant" : "+ Nouvel auteur"}
+                                {isNewAuthor ? "Choisir existant" : "+ Nouvelle marque"}
                             </button>
                         </div>
                         {isNewAuthor ? (
@@ -967,7 +967,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                                 defaultValue={selectedAuthor}
                                 onChange={(e) => setSelectedAuthor(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Saisir le nom du nouvel auteur"
+                                placeholder="Saisir le nom du nouvel marque"
                             />
                         ) : (
                             <select aria-label="Sélection author"
@@ -985,23 +985,23 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                                 }}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             >
-                                <option value="" disabled>Sélectionner un auteur</option>
+                                <option value="" disabled>Sélectionner une marque</option>
                                 {authors.map(a => (
                                     <option key={a} value={a}>{a}</option>
                                 ))}
-                                {/* Assurer que l'auteur actuel est dans la liste s'il a été supprimé des autres livres */}
+                                {/* Assurer que l'marque actuel est dans la liste s'il a été supprimé des autres produits */}
                                 {selectedAuthor && !authors.includes(selectedAuthor) && selectedAuthor !== 'NEW' && (
                                     <option value={selectedAuthor}>{selectedAuthor}</option>
                                 )}
-                                <option value="NEW" className="font-bold text-blue-600">+ Ajouter un nouvel auteur...</option>
+                                <option value="NEW" className="font-bold text-blue-600">+ Ajouter une nouvelle marque...</option>
                             </select>
                         )}
                     </div>
 
-                    {/* ISBN */}
+                    {/* EAN */}
                     <div>
                         <label htmlFor="isbn" className="block text-sm font-medium text-gray-700 mb-2">
-                            ISBN
+                            EAN
                         </label>
                         <input
                             type="text"
@@ -1132,7 +1132,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1">Associer depuis un Lot d'Achats</label>
-                                <select aria-label="Champ de sélection" 
+                                <select aria-label="Champ de sélection"
                                     className="w-full px-3 py-2 border border-orange-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-500"
                                     onChange={(e) => {
                                         if (e.target.value) setSelectedCost(e.target.value)
@@ -1141,7 +1141,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                                     <option value="0">-- Choisir un lot ou saisir manuellement --</option>
                                     {lots.map(lot => (
                                         <option key={lot.id} value={lot.unitCost || 0}>
-                                            {lot.title} ({new Date(lot.date).toLocaleDateString('fr-FR')}) {lot.unitCost ? `- ${lot.unitCost} درهم/livre` : ''}
+                                            {lot.title} ({new Date(lot.date).toLocaleDateString('fr-FR')}) {lot.unitCost ? `- ${lot.unitCost} درهم/produit` : ''}
                                         </option>
                                     ))}
                                 </select>
@@ -1233,10 +1233,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                         </div>
                     </div>
 
-                    {/* Langue du Livre */}
+                    {/* Langue du Produit */}
                     <fieldset>
                         <legend className="block text-sm font-medium text-gray-700 mb-2">
-                            Langue du Livre
+                            Langue du Produit
                         </legend>
                         <div className="flex flex-wrap gap-4">
                             <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
@@ -1254,10 +1254,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                         </div>
                     </fieldset>
 
-                    {/* État du Livre */}
+                    {/* État du Produit */}
                     <fieldset>
                         <legend className="block text-sm font-medium text-gray-700 mb-2">
-                            État du Livre
+                            État du Produit
                         </legend>
                         <div className="flex flex-wrap gap-4">
                             <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
@@ -1324,10 +1324,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                         </select>
                     </div>
 
-                    {/* Livre Original */}
+                    {/* Produit Original */}
                     <div>
                         <label htmlFor="isOriginal" className="block text-sm font-medium text-gray-700 mb-2">
-                            Type de Livre
+                            Type de Produit
                         </label>
                         <select aria-label="Sélection isOriginal"
                             id="isOriginal"
@@ -1335,7 +1335,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             defaultValue={book.isOriginal ? 'true' : 'false'}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
                         >
-                            <option value="true" className="text-green-600 font-medium">✅ Livre Original</option>
+                            <option value="true" className="text-green-600 font-medium">✅ Produit Original</option>
                             <option value="false" className="text-red-600 font-medium">❌ Copie / Reproduction</option>
                         </select>
                     </div>
@@ -1366,9 +1366,9 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                                 defaultChecked={book.isAffiliate}
                                 className="w-5 h-5 text-orange-600 rounded border-gray-300 focus:ring-orange-500"
                             />
-                            <span className="font-bold text-orange-900">Ce livre est un produit d'affiliation (ex: Amazon)</span>
+                            <span className="font-bold text-orange-900">Ce produit est un produit d'affiliation (ex: Amazon)</span>
                         </label>
-                        
+
                         <div>
                             <label htmlFor="affiliateLink" className="block text-sm font-medium text-gray-700 mb-2">
                                 Lien d'affiliation (URL complète)
@@ -1399,7 +1399,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             name="jumiaHighlights"
                             rows={3}
                             defaultValue={book.jumiaHighlights || ''}
-                            placeholder={`<ul><li>Titre: ${book.title}</li><li>Auteur: ${book.author}</li><li>Type: Livre</li></ul>`}
+                            placeholder={`<ul><li>Titre: ${book.title}</li><li>Marque: ${book.author}</li><li>Type: Produit</li></ul>`}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <p className="mt-1 text-sm text-gray-500">
@@ -1422,11 +1422,11 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             id="jumiaPackageContent"
                             name="jumiaPackageContent"
                             defaultValue={book.jumiaPackageContent || ''}
-                            placeholder={`1 x Livre : ${book.title}`}
+                            placeholder={`1 x Produit : ${book.title}`}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <p className="mt-1 text-sm text-gray-500">
-                            Exemple: "1 x Livre" ou "1 x Livre avec marque-page". Laisser vide pour la valeur par défaut.
+                            Exemple: "1 x Produit" ou "1 x Produit avec accessoire". Laisser vide pour la valeur par défaut.
                         </p>
                     </div>
 
@@ -1472,7 +1472,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             onChange={(e) => setDescription(e.target.value)}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description courte du livre en arabe..."
+                            placeholder="Description courte du produit en arabe..."
                         />
                         <textarea
                             name="description_fr"
@@ -1481,7 +1481,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             onChange={(e) => setDescriptionFr(e.target.value)}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description courte du livre en français..."
+                            placeholder="Description courte du produit en français..."
                         />
                         <textarea
                             name="description_en"
@@ -1490,7 +1490,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             onChange={(e) => setDescriptionEn(e.target.value)}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description courte du livre en anglais..."
+                            placeholder="Description courte du produit en anglais..."
                         />
                     </div>
 
@@ -1499,7 +1499,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                         <div className="flex justify-between items-center mb-2">
                             <label className="block text-sm font-medium text-gray-700">
                                 Description longue
-                                <span className="ml-2 text-xs text-gray-400 font-normal">(optionnel — affichée sur la page du livre)</span>
+                                <span className="ml-2 text-xs text-gray-400 font-normal">(optionnel — affichée sur la page du produit)</span>
                             </label>
                             <button type="button" onClick={improveLongDescription} disabled={isGeneratingLong} className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:opacity-50 flex items-center gap-1 transition-all bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100">
                                 {isGeneratingLong ? <Loader2 className="w-4 h-4 animate-spin"/> : '✨ DEEPL (Améliorer)'}
@@ -1512,7 +1512,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             onChange={(e) => setLongDescription(e.target.value)}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre en arabe..."
+                            placeholder="Description détaillée, caract?ristiques, composition et conseils d’utilisation en arabe..."
                         />
                         <textarea
                             name="longDescription_fr"
@@ -1521,7 +1521,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             onChange={(e) => setLongDescriptionFr(e.target.value)}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre en français..."
+                            placeholder="Description détaillée, caract?ristiques, composition et conseils d’utilisation en français..."
                         />
                         <textarea
                             name="longDescription_en"
@@ -1623,7 +1623,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             Synch quantity
                         </button>
                     </div>
-                    
+
                     {/* Droite : Annuler / Enregistrer / Enregistrer et Fermer */}
                     <div className="flex items-center gap-3">
                         <Link

@@ -31,7 +31,7 @@ export default async function AdminReviewsPage({
 
     return (
         <div className="space-y-12">
-            {/* Header section style Riwaya */}
+            {/* Header section style Tekno Store */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-gray-100">
                 <div>
                     <h1 className="text-5xl lg:text-7xl font-black text-black tracking-tighter mb-2 italic">
@@ -41,7 +41,7 @@ export default async function AdminReviewsPage({
                         Modération & Gestion de la réputation narrative
                     </p>
                 </div>
-                
+
                 {/* Tabs de Navigation Principale */}
                 <div className="flex bg-gray-100 p-1.5 rounded-[2rem] shadow-inner w-fit">
                     <Link

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { normalizeImage } from '@/lib/utils'
 
 export const metadata = {
-  title: 'Commande Fournisseur | Admin Riwaya',
+  title: 'Commande Fournisseur | Admin Tekno Store',
 }
 
 export default async function SupplierOrderPage({

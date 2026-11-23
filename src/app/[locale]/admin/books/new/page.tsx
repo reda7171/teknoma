@@ -24,7 +24,7 @@ function hasInvisibleUnicode(val: string): boolean {
 function BookFormContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
-    
+
     const prefillTitle = searchParams.get('title') || ''
     const prefillAuthor = searchParams.get('author') || ''
     const prefillDescription = searchParams.get('description') || ''
@@ -173,7 +173,7 @@ function BookFormContent() {
             // Show Jumia popup instead of routing immediately
             setSavedBookId(result.bookId)
             setShowJumiaModal(true)
-            
+
         } else {
             setError(result.error)
             setLoading(false)
@@ -188,7 +188,7 @@ function BookFormContent() {
             try {
                 const res = await publishBooksToJumia([savedBookId]);
                 if (res.success) {
-                    alert(res.message || 'Livre publié avec succès sur Jumia');
+                    alert(res.message || 'Produit publié avec succès sur Jumia');
                 } else {
                     alert(res.message || 'Erreur lors de la publication');
                 }
@@ -216,7 +216,7 @@ function BookFormContent() {
         const author = (document.querySelector('input[name="author"]') as HTMLInputElement)?.value || ''
 
         const title = titleAr || titleFr || titleEn || 'Titre inconnu'
-        const auth = author || 'Auteur inconnu'
+        const auth = author || 'Marque inconnue'
 
         const prompt = `Act as a professional bookseller. I am adding a book to my online store.
 Title: ${title}
@@ -224,7 +224,7 @@ Author: ${auth}
 
 CRITICAL INSTRUCTION FOR TITLES:
 For title_fr and title_en, DO NOT translate the Arabic title literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
-Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat riwayat basatin arabistan" (NOT "Série de romans...").
+Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat teknot basatin arabistan" (NOT "Série de romans...").
 
 Please provide the following information in JSON format (so I can easily copy-paste or read it):
 {
@@ -257,7 +257,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                 alert('Presse-papier vide')
                 return
             }
-            
+
             const jsonStr = text.replace(/```json\n?/, '').replace(/```/, '').trim()
             let data
             try {
@@ -312,9 +312,9 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Retour à la liste
                     </Link>
-                    <h1 className="text-3xl font-bold text-gray-900">Ajouter un livre</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Ajouter un produit</h1>
                     <p className="mt-2 text-sm text-gray-600">
-                        Remplissez les informations du nouveau livre
+                        Remplissez les informations du nouveau produit
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-2">
@@ -348,31 +348,31 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
             <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex justify-end mb-4 gap-6">
                     <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                            type="radio" 
-                            name="lang_toggle" 
-                            checked={currentLang === 'ar'} 
-                            onChange={() => setCurrentLang('ar')} 
+                        <input
+                            type="radio"
+                            name="lang_toggle"
+                            checked={currentLang === 'ar'}
+                            onChange={() => setCurrentLang('ar')}
                             className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                         />
                         <span className={`text-sm font-medium ${currentLang === 'ar' ? 'text-orange-500' : 'text-gray-500'}`}>Arabic</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                            type="radio" 
-                            name="lang_toggle" 
-                            checked={currentLang === 'fr'} 
-                            onChange={() => setCurrentLang('fr')} 
+                        <input
+                            type="radio"
+                            name="lang_toggle"
+                            checked={currentLang === 'fr'}
+                            onChange={() => setCurrentLang('fr')}
                             className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                         />
                         <span className={`text-sm font-medium ${currentLang === 'fr' ? 'text-orange-500' : 'text-gray-500'}`}>French</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                            type="radio" 
-                            name="lang_toggle" 
-                            checked={currentLang === 'en'} 
-                            onChange={() => setCurrentLang('en')} 
+                        <input
+                            type="radio"
+                            name="lang_toggle"
+                            checked={currentLang === 'en'}
+                            onChange={() => setCurrentLang('en')}
                             className="w-4 h-4 text-orange-500 focus:ring-orange-500"
                         />
                         <span className={`text-sm font-medium ${currentLang === 'en' ? 'text-orange-500' : 'text-gray-500'}`}>English</span>
@@ -411,10 +411,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         />
                     </div>
 
-                    {/* Auteur */}
+                    {/* Marque */}
                     <div className="relative" ref={authorInputRef}>
                         <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-2">
-                            Auteur <span className="text-red-500">*</span>
+                            Marque <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -428,10 +428,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                             }}
                             onFocus={() => setIsAuthorDropdownOpen(true)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Sélectionner ou saisir un auteur..."
+                            placeholder="Sélectionner ou saisir une marque..."
                             autoComplete="off"
                         />
-                        
+
                         {isAuthorDropdownOpen && (
                             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                                 {filteredAuthors.length > 0 ? (
@@ -453,22 +453,22 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                                     <div className="px-4 py-3 text-sm text-gray-500">
                                         {selectedAuthor ? (
                                             <span>
-                                                Nouvel auteur: <span className="font-bold text-blue-600">{selectedAuthor}</span> sera créé
+                                                Nouvelle marque: <span className="font-bold text-blue-600">{selectedAuthor}</span> sera créé
                                             </span>
                                         ) : (
-                                            "Aucun auteur trouvé"
+                                            "Aucune marque trouvé"
                                         )}
                                     </div>
                                 )}
                             </div>
                         )}
-                        <p className="text-xs text-gray-500 mt-1">Saisissez pour chercher ou ajouter un nouvel auteur.</p>
+                        <p className="text-xs text-gray-500 mt-1">Saisissez pour chercher ou ajouter une nouvelle marque.</p>
                     </div>
 
-                    {/* ISBN */}
+                    {/* EAN */}
                     <div>
                         <label htmlFor="isbn" className="block text-sm font-medium text-gray-700 mb-2">
-                            ISBN
+                            EAN
                         </label>
                         <input
                             type="text"
@@ -597,7 +597,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 mb-1">Associer depuis un Lot d'Achats</label>
-                                <select aria-label="Champ de sélection" 
+                                <select aria-label="Champ de sélection"
                                     className="w-full px-3 py-2 border border-orange-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-orange-500"
                                     onChange={(e) => {
                                         if (e.target.value) setSelectedCost(e.target.value)
@@ -606,7 +606,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                                     <option value="0">-- Choisir un lot ou saisir manuellement --</option>
                                     {lots.map(lot => (
                                         <option key={lot.id} value={lot.unitCost || 0}>
-                                            {lot.title} ({new Date(lot.date).toLocaleDateString('fr-FR')}) {lot.unitCost ? `- ${lot.unitCost} درهم/livre` : ''}
+                                            {lot.title} ({new Date(lot.date).toLocaleDateString('fr-FR')}) {lot.unitCost ? `- ${lot.unitCost} درهم/produit` : ''}
                                         </option>
                                     ))}
                                 </select>
@@ -693,10 +693,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         </div>
                     </div>
 
-                    {/* Langue du Livre */}
+                    {/* Langue du Produit */}
                     <fieldset>
                         <legend className="block text-sm font-medium text-gray-700 mb-2">
-                            Langue du Livre
+                            Langue du Produit
                         </legend>
                         <div className="flex flex-wrap gap-4">
                             <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
@@ -714,10 +714,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         </div>
                     </fieldset>
 
-                    {/* État du Livre */}
+                    {/* État du Produit */}
                     <fieldset>
                         <legend className="block text-sm font-medium text-gray-700 mb-2">
-                            État du Livre
+                            État du Produit
                         </legend>
                         <div className="flex flex-wrap gap-4">
                             <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
@@ -735,17 +735,17 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         </div>
                     </fieldset>
 
-                    {/* Livre Original */}
+                    {/* Produit Original */}
                     <div>
                         <label htmlFor="isOriginal" className="block text-sm font-medium text-gray-700 mb-2">
-                            Type de Livre
+                            Type de Produit
                         </label>
                         <select aria-label="Sélection isOriginal"
                             id="isOriginal"
                             name="isOriginal"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
                         >
-                            <option value="true" className="text-green-600 font-medium">✅ Livre Original</option>
+                            <option value="true" className="text-green-600 font-medium">✅ Produit Original</option>
                             <option value="false" className="text-red-600 font-medium">❌ Copie / Reproduction</option>
                         </select>
                     </div>
@@ -758,9 +758,9 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                                 value="true"
                                 className="w-5 h-5 text-orange-600 rounded border-gray-300 focus:ring-orange-500"
                             />
-                            <span className="font-bold text-orange-900">Ce livre est un produit d'affiliation (ex: Amazon)</span>
+                            <span className="font-bold text-orange-900">Ce produit est un produit d'affiliation (ex: Amazon)</span>
                         </label>
-                        
+
                         <div>
                             <label htmlFor="affiliateLink" className="block text-sm font-medium text-gray-700 mb-2">
                                 Lien d'affiliation (URL complète)
@@ -794,7 +794,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                             rows={4}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée du livre en arabe..."
+                            placeholder="Description détaillée du produit en arabe..."
                         />
                         <textarea
                             name="description_fr"
@@ -802,7 +802,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                             rows={4}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée du livre en français..."
+                            placeholder="Description détaillée du produit en français..."
                         />
                         <textarea
                             name="description_en"
@@ -810,7 +810,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                             rows={4}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée du livre en anglais..."
+                            placeholder="Description détaillée du produit en anglais..."
                         />
                     </div>
 
@@ -818,21 +818,21 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Description longue
-                            <span className="ml-2 text-xs text-gray-400 font-normal">(optionnel — affichée sur la page du livre)</span>
+                            <span className="ml-2 text-xs text-gray-400 font-normal">(optionnel — affichée sur la page du produit)</span>
                         </label>
                         <textarea
                             name="longDescription_ar"
                             rows={8}
                             style={{ display: currentLang === 'ar' ? 'block' : 'none', direction: 'rtl' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre en arabe..."
+                            placeholder="Description détaillée, caract?ristiques, composition et conseils d’utilisation en arabe..."
                         />
                         <textarea
                             name="longDescription_fr"
                             rows={8}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée, biographie de l'auteur, contexte du livre en français..."
+                            placeholder="Description détaillée, caract?ristiques, composition et conseils d’utilisation en français..."
                         />
                         <textarea
                             name="longDescription_en"
@@ -881,7 +881,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         id="jumiaHighlights"
                         name="jumiaHighlights"
                         rows={3}
-                        placeholder="<ul><li>Titre: ...</li><li>Auteur: ...</li></ul>"
+                        placeholder="<ul><li>Titre: ...</li><li>Marque: ...</li></ul>"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <p className="mt-1 text-sm text-gray-500">
@@ -898,11 +898,11 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         type="text"
                         id="jumiaPackageContent"
                         name="jumiaPackageContent"
-                        placeholder="1 x Livre"
+                        placeholder="1 x Produit"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <p className="mt-1 text-sm text-gray-500">
-                        Exemple: "1 x Livre" ou "1 x Livre avec marque-page". Laisser vide pour la valeur par défaut.
+                        Exemple: "1 x Produit" ou "1 x Produit avec accessoire". Laisser vide pour la valeur par défaut.
                     </p>
                 </div>
 
@@ -940,15 +940,15 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
                         <div className="p-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Livre enregistré avec succès</h3>
-                            <p className="text-gray-600 mb-6">Voulez-vous publier ce livre sur Jumia maintenant ?</p>
-                            
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Produit enregistré avec succès</h3>
+                            <p className="text-gray-600 mb-6">Voulez-vous publier ce produit sur Jumia maintenant ?</p>
+
                             <div className="space-y-4 mb-6">
                                 <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                    <input 
-                                        type="radio" 
-                                        name="pushJumia" 
-                                        value="yes" 
+                                    <input
+                                        type="radio"
+                                        name="pushJumia"
+                                        value="yes"
                                         checked={pushToJumiaChoice === 'yes'}
                                         onChange={() => setPushToJumiaChoice('yes')}
                                         className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
@@ -956,10 +956,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                                     <span className="ml-3 font-medium text-gray-900">Oui, publier sur Jumia</span>
                                 </label>
                                 <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                    <input 
-                                        type="radio" 
-                                        name="pushJumia" 
-                                        value="no" 
+                                    <input
+                                        type="radio"
+                                        name="pushJumia"
+                                        value="no"
                                         checked={pushToJumiaChoice === 'no'}
                                         onChange={() => setPushToJumiaChoice('no')}
                                         className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"

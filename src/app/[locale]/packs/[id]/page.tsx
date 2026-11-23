@@ -32,7 +32,7 @@ export async function generateMetadata({
 
     if (!pack) {
         return {
-            title: 'Pack introuvable | Riwaya',
+            title: 'Pack introuvable | Tekno Store',
         }
     }
 
@@ -63,10 +63,10 @@ export async function generateMetadata({
     ]
 
     const ogTitle = locale === 'ar'
-        ? `باقة "${displayName}" — ${displayPrice} درهم ${hasDiscount ? `(وفر ${savingsPercent}%)` : ''} | مكتبة رواية`
+        ? `باقة "${displayName}" — ${displayPrice} درهم ${hasDiscount ? `(وفر ${savingsPercent}%)` : ''} | مكتبة Tekno Store`
         : locale === 'en'
-            ? `Pack "${displayName}" — ${displayPrice} MAD ${hasDiscount ? `(Save ${savingsPercent}%)` : ''} | Riwaya`
-            : `Pack "${displayName}" — ${displayPrice} DH ${hasDiscount ? `(Économisez ${savingsPercent}%)` : ''} | Riwaya`
+            ? `Pack "${displayName}" — ${displayPrice} MAD ${hasDiscount ? `(Save ${savingsPercent}%)` : ''} | Tekno Store`
+            : `Pack "${displayName}" — ${displayPrice} DH ${hasDiscount ? `(Économisez ${savingsPercent}%)` : ''} | Tekno Store`
 
     const ogDescription = displayDescription || (locale === 'ar'
         ? `⚡ السعر: ${displayPrice} درهم مغربي ${hasDiscount ? `عوض ${totalOriginalPrice} درهم` : ''}. باقة من ${pack.books.length} كتب مختارة مع الدفع عند الاستلام والتوصيل السريع بالمغرب.`
@@ -80,10 +80,10 @@ export async function generateMetadata({
         || process.env.FACEBOOK_CLIENT_ID
 
     return {
-        title: `${displayName} - Pack de ${pack.books.length} Livres | Riwaya`,
+        title: `${displayName} - Pack de ${pack.books.length} Livres | Tekno Store`,
         description: displayDescription || (locale === 'ar'
-            ? `اشتري باقة "${displayName}" على رواية. ${pack.books.length} كتب مختارة : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `وفر ${savingsPercent}%. ` : ''}السعر: ${displayPrice} درهم. توصيل سريع بالمغرب.`
-            : `Achetez le pack "${displayName}" sur Riwaya. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} DH). ` : ''}Prix: ${displayPrice} DH. Livraison rapide au Maroc.`),
+            ? `اشتري باقة "${displayName}" على Tekno Store. ${pack.books.length} كتب مختارة : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `وفر ${savingsPercent}%. ` : ''}السعر: ${displayPrice} درهم. توصيل سريع بالمغرب.`
+            : `Achetez le pack "${displayName}" sur Tekno Store. ${pack.books.length} livres sélectionnés : ${bookTitles.slice(0, 100)}... ${hasDiscount ? `Économisez ${savingsPercent}% (${savings} DH). ` : ''}Prix: ${displayPrice} DH. Livraison rapide au Maroc.`),
         keywords,
         openGraph: {
             title: ogTitle,
@@ -175,11 +175,11 @@ export default async function PackDetailPage({
             '@type': 'Product',
             name: displayName,
             sku: pack.id,
-            description: displayDescription || `Pack de ${pack.books.length} livres sélectionné par Riwaya.`,
+            description: displayDescription || `Pack de ${pack.books.length} livres sélectionné par Tekno Store.`,
             image: packImageUrl,
             brand: {
                 '@type': 'Brand',
-                name: 'Riwaya',
+                name: 'Tekno Store',
             },
             aggregateRating: {
                 '@type': 'AggregateRating',
@@ -485,9 +485,9 @@ export default async function PackDetailPage({
                                     {displayName}<span className="text-gray-200">.</span>
                                 </h1>
 
-                                <PackCustomizerClient 
-                                    pack={pack as any} 
-                                    whatsappPhone={whatsappPhone || undefined} 
+                                <PackCustomizerClient
+                                    pack={pack as any}
+                                    whatsappPhone={whatsappPhone || undefined}
                                     priceData={{
                                         totalOriginalPrice,
                                         hasDiscount,

@@ -88,9 +88,9 @@ export async function POST(req: NextRequest) {
 
         const rawBase = process.env.NEXT_PUBLIC_APP_URL || ''
         const appBaseUrl = rawBase.includes('127.0.0.1') || rawBase.includes('localhost')
-            ? 'https://riwaya.store'
-            : (rawBase || 'https://riwaya.store')
-            
+            ? 'https://tekno.ma'
+            : (rawBase || 'https://tekno.ma')
+
         let absoluteImage = mediaUrl || ''
         if (absoluteImage && !absoluteImage.startsWith('http')) {
             absoluteImage = `${appBaseUrl}${absoluteImage.startsWith('/') ? '' : '/'}${absoluteImage}`
@@ -102,16 +102,16 @@ export async function POST(req: NextRequest) {
             batch: platforms.map((platform: string) => ({
                 itemId: post.id,
                 itemType: 'OTHER',
-                title: 'Riwaya',
+                title: 'Tekno Store',
                 image: absoluteImage,
                 isVideo,
                 isPack: false,
-                caption: content || 'Riwaya Post',
+                caption: content || 'Tekno Store Post',
                 description: content || '',
                 format: 'post',
                 platform: platform,
                 scheduleAt: '',
-                source: 'riwaya-admin',
+                source: 'tekno-admin',
                 postId: post.id,
                 facebook_access_token: facebookAccessToken,
                 instagram_account_id: instagramAccountId,
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
 
         // 4. Envoyer à n8n avec timeout
         void(`[Planning API] Envoi à n8n (${n8nWebhookUrl}) - batch de ${payload.batch.length} items`)
-        
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
 

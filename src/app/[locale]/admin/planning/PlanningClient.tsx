@@ -82,13 +82,13 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
 
     const getCaption = (book: SuggestedBook | null, lang: string) => {
         if (!book) return '';
-        const link = `https://riwaya.store/${lang === 'ar' ? 'ar' : lang === 'en' ? 'en' : 'fr'}/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
+        const link = `https://tekno.ma/${lang === 'ar' ? 'ar' : lang === 'en' ? 'en' : 'fr'}/${book.type === 'pack' ? 'packs' : 'book'}/${book.id}`;
         if (lang === 'ar') {
-            return `📚 اكتشف "${book.title}" ${book.type === 'pack' ? '' : `للكاتب ${book.author}`} !\n\nمتوفر الآن.\n\n🔗 ${link}\n\n#كتاب #قراءة #رواية`;
+            return `📚 اكتشف "${book.title}" ${book.type === 'pack' ? '' : `للكاتب ${book.author}`} !\n\nمتوفر الآن.\n\n🔗 ${link}\n\n#كتاب #قراءة #Tekno Store`;
         } else if (lang === 'en') {
-            return `📚 Discover "${book.title}" ${book.type === 'pack' ? '' : `by ${book.author}`} !\n\nAvailable now.\n\n🔗 ${link}\n\n#book #reading #riwaya`;
+            return `📚 Discover "${book.title}" ${book.type === 'pack' ? '' : `by ${book.author}`} !\n\nAvailable now.\n\n🔗 ${link}\n\n#book #reading #tekno`;
         } else {
-            return `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #riwaya`;
+            return `📚 Découvrez "${book.title}" ${book.type === 'pack' ? '' : `par ${book.author}`} !\n\nDisponible dès maintenant.\n\n🔗 ${link}\n\n#livre #lecture #tekno`;
         }
     }
 
@@ -619,10 +619,10 @@ export default function PlanningClient({ initialPosts, availableBooks = [] }: { 
         else if (!url.startsWith('/uploads')) path = `/uploads/books/${url}`;
 
         if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-            return `https://riwaya.store${path}`;
+            return `https://tekno.ma${path}`;
         }
         if (process.env.NODE_ENV === 'development') {
-            return `https://riwaya.store${path}`;
+            return `https://tekno.ma${path}`;
         }
         return path;
     }

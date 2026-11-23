@@ -53,7 +53,7 @@ export async function getOrders() {
 
     try {
         const conditions: any[] = []
-        
+
         if (user?.email) conditions.push({ email: user.email })
         if (userEmail && userEmail !== user?.email) conditions.push({ email: userEmail })
         if (user?.phone) conditions.push({ phone: user.phone })
@@ -171,9 +171,9 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
             const accessoryIds = data.items.filter(i => i.type === 'ACCESSORY').map(i => i.productId)
 
             const [books, packs, accessories] = await Promise.all([
-                bookIds.length > 0 ? tx.book.findMany({ where: { id: { in: bookIds } }, select: { id: true, costPrice: true, sellerId: true } }) : [],
+                bookIds.length > 0 ? tx.book.findMany({ where: { id: { in: bookIds } }, select: { id: true, costPrice: true, sellerId: true, stock: true } }) : [],
                 packIds.length > 0 ? tx.pack.findMany({ where: { id: { in: packIds } }, select: { id: true, costPrice: true, shippingFees: true, books: true, extraProducts: true } }) : [],
-                accessoryIds.length > 0 ? tx.extraProduct.findMany({ where: { id: { in: accessoryIds } }, select: { id: true, costPrice: true } }) : []
+                accessoryIds.length > 0 ? tx.extraProduct.findMany({ where: { id: { in: accessoryIds } }, select: { id: true, costPrice: true, stock: true } }) : []
             ])
 
             const bookMap = new Map(books.map(b => [b.id, b]))
@@ -182,15 +182,19 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
 
             let hasFreeShippingItem = false
 
-            // Récupérer les prix de revient (costPrice) et sellerId pour chaque article
+            // Récupérer les prix de revient (costPrice), sellerId et vérifier si le produit est en rupture (manquant)
             const itemsWithCost = data.items.map(item => {
                 let costPrice = 0
                 let sellerId: string | null = null
-                
+                let isMissing = false
+
                 if (item.type === 'BOOK') {
                     const book = bookMap.get(item.productId)
                     costPrice = book?.costPrice || 0
                     sellerId = book?.sellerId || null
+                    if (book && book.stock <= 0) {
+                        isMissing = true
+                    }
                 } else if (item.type === 'PACK') {
                     const pack = packMap.get(item.productId)
                     costPrice = pack?.costPrice || 0
@@ -200,13 +204,16 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 } else if (item.type === 'ACCESSORY') {
                     const ext = accessoryMap.get(item.productId)
                     costPrice = ext?.costPrice || 0
+                    if (ext && (ext as any).stock <= 0) {
+                        isMissing = true
+                    }
                 }
-                return { ...item, costPrice, sellerId }
+                return { ...item, costPrice, sellerId, isMissing }
             })
 
             // Logique de livraison synchronisée avec le client
             let shippingFees = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30
-            
+
             // Add serverPromo3For4Discount to discount if it wasn't already included or just force the server-side value
             // Since discount might already include it from the frontend, we should ensure we don't double count.
             // Wait, the client sends `totalDiscountAmount` which already includes promo3for4Discount.
@@ -226,10 +233,10 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 if (creditsToUse > 0) {
                     total = total - creditsToUse
                     discount = discount + creditsToUse
-                    sanitizedData.comment = sanitizedData.comment 
+                    sanitizedData.comment = sanitizedData.comment
                         ? `${sanitizedData.comment}\n[Payé avec solde: ${creditsToUse} DH]`
                         : `[Payé avec solde: ${creditsToUse} DH]`
-                    
+
                     // Décrémenter les crédits de l'utilisateur
                     await tx.user.update({
                         where: { id: userForCredits.id },
@@ -391,7 +398,8 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                             warehouseId: item.warehouseId || null,
                             quantity: item.quantity,
                             price: item.price,
-                            costPrice: item.costPrice
+                            costPrice: item.costPrice,
+                            isMissing: Boolean(item.isMissing)
                         }))
                     }
                 }
@@ -408,10 +416,10 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'lax',
-                    maxAge: 60 * 60 * 24 * 30 // 30 jours 
+                    maxAge: 60 * 60 * 24 * 30 // 30 jours
                 })
             }
-            
+
             // Sauvegarder l'ID de la commande pour éviter l'erreur 404 sur la page de succès
             cookieStore.set('lastOrderId', order.id, {
                 httpOnly: true,
@@ -438,12 +446,12 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                 const { getSetting } = await import('@/lib/actions/site-settings')
                 const fbPixelId = await getSetting('facebook_pixel_id')
                 const fbAccessToken = await getSetting('facebook_access_token') || process.env.FACEBOOK_ACCESS_TOKEN
-                
+
                 let fbPromise = Promise.resolve()
                 if (fbPixelId && fbAccessToken) {
                     const crypto = require('crypto')
                     const hash = (str: string) => crypto.createHash('sha256').update(str.toLowerCase().trim()).digest('hex')
-                    
+
                     const eventData = {
                         data: [{
                             event_name: 'Purchase',
@@ -489,7 +497,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
 
                 let autoEmailPromise = Promise.resolve()
                 if (fullOrder.email) {
-                    const articlesList = (fullOrder.items || []).map((i: any) => 
+                    const articlesList = (fullOrder.items || []).map((i: any) =>
                         `• ${i.quantity}x ${i.book?.title || i.pack?.name || 'Article'} (${i.price} DH)`
                     ).join('<br/>')
 
@@ -503,7 +511,7 @@ export async function createOrder(input: z.infer<typeof OrderSchema>, salesChann
                         ville: fullOrder.city,
                         telephone: fullOrder.phone,
                         articles: articlesList,
-                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'}/track/${fullOrder.id}`
+                        tracking_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'}/track/${fullOrder.id}`
                     }).then(() => {}).catch(console.error)
                 }
 
@@ -561,7 +569,7 @@ export async function getOrderById(orderId: string) {
                 lastOrderId = cookieStore?.get('lastOrderId')?.value
                 guestEmail = cookieStore?.get('userEmail')?.value
             } catch {}
-            
+
             // Allow access if this is the order they just placed
             if (lastOrderId && lastOrderId === order.id) {
                 return order
@@ -602,7 +610,7 @@ export async function updateOrderEmail(orderId: string, email: string) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 30 // 30 jours 
+            maxAge: 60 * 60 * 24 * 30 // 30 jours
         })
 
         return { success: true }

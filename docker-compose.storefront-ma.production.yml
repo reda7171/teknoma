@@ -4,23 +4,23 @@ services:
       context: .
       dockerfile: Dockerfile.storefront-ma
       args:
-        NEXT_PUBLIC_SITE_URL: https://riwaya.ma
-        RIWAYA_MA_INDEXABLE: "false"
-    image: riwaya-storefront-ma:production
-    container_name: riwaya_storefront_ma_production
+        NEXT_PUBLIC_SITE_URL: https://tekno.ma
+        TEKNO_MA_INDEXABLE: "false"
+    image: tekno-storefront-ma:production
+    container_name: tekno_storefront_ma_production
     restart: unless-stopped
     ports:
       - "127.0.0.1:3002:3001"
     environment:
       PORT: 3001
       HOSTNAME: 0.0.0.0
-      NEXT_PUBLIC_SITE_URL: https://riwaya.ma
-      RIWAYA_BACKEND_URL: http://riwaya_app:3000
-      RIWAYA_MA_INDEXABLE: "false"
+      NEXT_PUBLIC_SITE_URL: https://tekno.ma
+      TEKNO_BACKEND_URL: http://tekno_app:3000
+      TEKNO_MA_INDEXABLE: "false"
     networks:
-      - riwaya_network
+      - tekno_network
 
 networks:
-  riwaya_network:
+  tekno_network:
     external: true
-    name: riwayama_riwaya_network
+    name: tekno_tekno_network

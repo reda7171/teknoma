@@ -34,7 +34,7 @@ function merchantReturnsXml(baseUrl: string) {
 
 export async function GET() {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
 
         const packs = await prisma.pack.findMany({
             where: { active: true, name: { not: '' } },
@@ -59,9 +59,9 @@ export async function GET() {
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`
         xml += `<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">\n`
         xml += `  <channel>\n`
-        xml += `    <title>Riwaya - Packs de Livres (Google Shopping)</title>\n`
+        xml += `    <title>Tekno Store - Packs de Livres (Google Shopping)</title>\n`
         xml += `    <link>${baseUrl}/packs</link>\n`
-        xml += `    <description>Catalogue officiel des packs et coffrets de livres Riwaya avec paiement à la livraison partout au Maroc.</description>\n`
+        xml += `    <description>Catalogue officiel des packs et coffrets de livres Tekno Store avec paiement à la livraison partout au Maroc.</description>\n`
 
         for (const pack of packs) {
             if (!pack.name.trim()) continue
@@ -69,12 +69,12 @@ export async function GET() {
             const mainImage = `${baseUrl}/api/merchant-pack-image/${pack.id}?v=1500`
 
             const bookListText = pack.books
-                .map(pb => `${pb.book.title} (${pb.book.author || 'Riwaya'})`)
+                .map(pb => `${pb.book.title} (${pb.book.author || 'Tekno Store'})`)
                 .join(', ')
 
             const title = `Pack ${pack.name} (${pack.books.length} Livres)`
-            const rawDescription = pack.description || 
-                `Pack promotionnel exclusif de ${pack.books.length} livres sélectionnés par Riwaya : ${bookListText}. Paiement Cash on Delivery (COD) et livraison rapide partout au Maroc.`
+            const rawDescription = pack.description ||
+                `Pack promotionnel exclusif de ${pack.books.length} livres sélectionnés par Tekno Store : ${bookListText}. Paiement Cash on Delivery (COD) et livraison rapide partout au Maroc.`
 
             const totalOriginalPrice = Math.round(
                 pack.originalPrice || pack.books.reduce((acc, pb) => acc + (pb.book?.price || 0), 0)
@@ -119,7 +119,7 @@ export async function GET() {
                 xml += `      <g:sale_price>${salePrice.toFixed(2)} MAD</g:sale_price>\n`
             }
 
-            xml += `      <g:brand>Riwaya</g:brand>\n`
+            xml += `      <g:brand>Tekno Store</g:brand>\n`
             xml += `      <g:identifier_exists>no</g:identifier_exists>\n`
             xml += `      <g:is_bundle>yes</g:is_bundle>\n`
             xml += `      <g:google_product_category>784</g:google_product_category>\n` // Media > Books

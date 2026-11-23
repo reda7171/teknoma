@@ -88,7 +88,7 @@ export async function POST(req: Request) {
                 orderBy: { createdAt: 'desc' },
                 select: { code: true }
             });
-            couponCode = activeCoupon?.code || 'RIWAYA10';
+            couponCode = activeCoupon?.code || 'TEKNO10';
         }
 
         // Sending via Hostinger Mail API
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
                 const personalizedSubject = replaceTags(subject);
 
                 await transporter.sendMail({
-                    from: '"Riwaya" <contact@riwaya.store>',
+                    from: '"Tekno Store" <Contact.tekno.ma@gmail.com>',
                     to: recipient.email,
                     subject: personalizedSubject,
                     html: personalizedHtml,
@@ -133,8 +133,8 @@ export async function POST(req: Request) {
             message += ` Note: limité à ${MAX_PER_BATCH} destinataires en temps réel.`;
         }
 
-        return NextResponse.json({ 
-            success: true, 
+        return NextResponse.json({
+            success: true,
             message,
             stats: { total: recipients.length, success: successCount, failed: failCount }
         });

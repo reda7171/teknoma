@@ -17,9 +17,9 @@ export async function GET() {
         if (!hasAdminRole(admin, ['ADMIN'])) return NextResponse.json({ error: 'Acc\u00e8s interdit' }, { status: 403 })
 
         const dbUrl = process.env.DATABASE_URL || ''
-        
+
         let user, password, host, port, dbname;
-        
+
         try {
             const url = new URL(dbUrl)
             user = url.username
@@ -32,13 +32,13 @@ export async function GET() {
         }
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-        const filename = `backup_riwaya_${timestamp}.sql`
-        const tempPath = path.join(os.tmpdir(), `riwaya-${randomUUID()}.sql`)
+        const filename = `backup_tekno_${timestamp}.sql`
+        const tempPath = path.join(os.tmpdir(), `tekno-${randomUUID()}.sql`)
 
         // On utilise spawn pour éviter les problèmes d'échappement du shell
         return new Promise<NextResponse>((resolve) => {
             const writeStream = fs.createWriteStream(tempPath)
-            
+
             const mysqldump = spawn('mysqldump', [
                 '--skip-ssl',
                 '-h', host,
@@ -61,18 +61,18 @@ export async function GET() {
                     console.error('Mysqldump error:', errorData)
                     // Nettoyer le fichier vide/incomplet
                     if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath)
-                    
+
                     let errorMessage = 'Erreur lors de l\'exécution de mysqldump.'
                     const isWindows = process.platform === 'win32'
-                    
+
                     if (errorData.includes('not recognized') || errorData.includes('ENOENT')) {
-                        errorMessage += ' L\'utilitaire "mysqldump" est introuvable. ' + 
-                            (isWindows 
-                                ? 'Veuillez installer MySQL et ajouter le dossier "bin" à votre PATH.' 
+                        errorMessage += ' L\'utilitaire "mysqldump" est introuvable. ' +
+                            (isWindows
+                                ? 'Veuillez installer MySQL et ajouter le dossier "bin" à votre PATH.'
                                 : 'Veuillez installer "mysql-client" sur votre serveur.')
                     }
 
-                    resolve(NextResponse.json({ 
+                    resolve(NextResponse.json({
                         error: errorMessage,
                         details: errorData || `Process exited with code ${code}`
                     }, { status: 500 }))
@@ -95,13 +95,13 @@ export async function GET() {
             mysqldump.on('error', (err: NodeJS.ErrnoException) => {
                 console.error('Spawn error:', err)
                 if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath)
-                
+
                 let errorMessage = 'Erreur lors du lancement de mysqldump.'
                 if (err.code === 'ENOENT') {
                     errorMessage += ' L\'utilitaire "mysqldump" est introuvable.'
                 }
 
-                resolve(NextResponse.json({ 
+                resolve(NextResponse.json({
                     error: errorMessage,
                     details: err.message
                 }, { status: 500 }))

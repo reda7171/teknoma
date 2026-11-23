@@ -57,7 +57,7 @@ export function autoClassifyBook(input: ClassificationInput): ClassificationResu
         if (text.match(/قرآن|مصحف|تفسير|حديث|فقه|سنة|إسلام|سيرة|عقيدة|صلاة|دعاء|رمضان|نبوي|شرع/)) {
             return { category: 'Religion & Spiritualité', subCategory: 'القرآن وعلومه', autoClassified: true }
         }
-        if (text.match(/خوف|رواية|قصة|أدب|شعر|حكايات|بساتين|أسامة المسلم|نجيب محفوظ|غسان كنفاني|محمود درويش|أحمد مراد/)) {
+        if (text.match(/خوف|Tekno Store|قصة|أدب|شعر|حكايات|بساتين|أسامة المسلم|نجيب محفوظ|غسان كنفاني|محمود درويش|أحمد مراد/)) {
             return { category: 'Romans & Littérature', subCategory: 'روايات عربية', autoClassified: true }
         }
         if (text.match(/تطوير الذات|نجاح|عادات|إغواء|سطوة|قوة|ثقة|تحفيز|ذكاء|أموال|روبرت غرين|ديل كارنيجي/)) {

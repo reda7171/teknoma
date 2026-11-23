@@ -53,7 +53,7 @@ export async function GET(req: Request) {
 
         const now = new Date()
         const lastCheckDate = new Date(now.getTime() - 72 * 60 * 60 * 1000) // Look back 3 days to catch delayed orders
-        
+
         // Format pour l'API Jumia Vendor (attendu : YYYY-MM-DD HH:MM:SS ou ISO 8601)
         // L'utilisation d'une date sans fuseau horaire explicite provoque un décalage de 1h avec Jumia (GMT+1).
         // On convertit en heure locale Maroc ou on passe directement l'ISO sans Z.
@@ -69,7 +69,7 @@ export async function GET(req: Request) {
             const ordersPage = response?.orders || response?.data?.orders || []
             allOrders = allOrders.concat(ordersPage)
             currentToken = response?.nextToken || response?.data?.nextToken
-            
+
             // Si on ne récupère plus de commandes, on arrête
             if (ordersPage.length === 0) break
         } while (currentToken)
@@ -80,24 +80,24 @@ export async function GET(req: Request) {
         for (const order of newOrders) {
             const amount = order.totalAmountLocal?.value || '0'
             let imageUrl: string | undefined = undefined
-            
+
             const orderId = order.number || order.orderNumber;
             const orderInternalId = String(order.id || orderId)
             const syncTargets: Array<{ sellerSku: string; stock: number }> = []
-            
+
             let itemsText = ""
             try {
                 // L'API Jumia nécessite l'ID interne (UUID) pour récupérer les items, pas le numéro public
                 const itemsResponse = await jumia.getOrderItems(orderInternalId)
-                
+
                 // Jumia renvoie selon le cas des packages `orderItems` ou un
                 // conteneur `items`, comme celui consommé par la page admin.
                 const allItems = extractOrderItems(itemsResponse)
-                
+
                 if (allItems.length > 0) {
                     const firstItem = allItems[0]
                     imageUrl = firstItem.product?.imageUrl || firstItem.product?.productMainImage || firstItem.imageUrl || firstItem.productMainImage || firstItem.productImage || undefined
-                    
+
                     itemsText = `\n\n📦 <b>Articles de la commande (${allItems.length})</b>\n\n`
                     for (const item of allItems) {
                         const rawProductName = item.product?.name || item.Name || item.name || item.productName || 'Article inconnu'
@@ -179,21 +179,21 @@ export async function GET(req: Request) {
                                 const packStock = pack?.books.length
                                     ? Math.min(...pack.books.map(packBook => packBook.book.stock))
                                     : undefined
-                                const riwayaStock = book?.stock ?? extraProduct?.stock ?? packStock ?? 'Produit non lié'
+                                const teknoStock = book?.stock ?? extraProduct?.stock ?? packStock ?? 'Produit non lié'
 
-                                if (typeof riwayaStock === 'number') {
-                                    syncTargets.push({ sellerSku: String(sellerSku), stock: riwayaStock })
+                                if (typeof teknoStock === 'number') {
+                                    syncTargets.push({ sellerSku: String(sellerSku), stock: teknoStock })
                                 }
 
                                 itemsText += `📊 <b>Stock Jumia:</b> ${escapeHtml(String(jumiaStock))}\n`
-                                if (typeof riwayaStock === 'number') {
-                                    itemsText += `🏪 <b>Stock Riwaya avant:</b> ${riwayaStock + Number(quantity)}\n`
-                                    itemsText += `🏪 <b>Stock Riwaya après:</b> ${riwayaStock}\n\n`
+                                if (typeof teknoStock === 'number') {
+                                    itemsText += `🏪 <b>Stock Tekno Store avant:</b> ${teknoStock + Number(quantity)}\n`
+                                    itemsText += `🏪 <b>Stock Tekno Store après:</b> ${teknoStock}\n\n`
                                 } else {
-                                    itemsText += `🏪 <b>Stock Riwaya:</b> ${escapeHtml(String(riwayaStock))}\n\n`
+                                    itemsText += `🏪 <b>Stock Tekno Store:</b> ${escapeHtml(String(teknoStock))}\n\n`
                                 }
                             } catch (stockError) {
-                                console.error("Erreur récupération stocks Jumia/Riwaya", stockError)
+                                console.error("Erreur récupération stocks Jumia/Tekno Store", stockError)
                                 itemsText += `📊 <b>Stocks:</b> information indisponible\n\n`
                             }
                         } else {
@@ -206,11 +206,11 @@ export async function GET(req: Request) {
             }
 
             const customerName = `${order.shippingAddress?.firstName || order.CustomerFirstName || ''} ${order.shippingAddress?.lastName || order.CustomerLastName || ''}`.trim() || 'Client Jumia'
-            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${escapeHtml(orderId.toString())}</b>\n📅 Date: ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}\n👤 Client: <b>${escapeHtml(customerName)}</b>\n📝 Statut: <b>${escapeHtml(order.status || order.Status || 'N/A')}</b>\n💰 Total: <b>${formatAmount(amount)} درهم</b>${itemsText}\n🔄 <b>Voulez-vous synchroniser le stock Riwaya vers Jumia ?</b>`
+            const text = `🟠 <b>Nouvelle Commande Jumia !</b>\n\n🆔 Commande: <b>${escapeHtml(orderId.toString())}</b>\n📅 Date: ${new Date(order.createdAt || order.CreatedAt).toLocaleString('fr-FR')}\n👤 Client: <b>${escapeHtml(customerName)}</b>\n📝 Statut: <b>${escapeHtml(order.status || order.Status || 'N/A')}</b>\n💰 Total: <b>${formatAmount(amount)} درهم</b>${itemsText}\n🔄 <b>Voulez-vous synchroniser le stock Tekno Store vers Jumia ?</b>`
             const syncButtonLabel = syncTargets.length === 1
                 ? `✅ Oui, mettre à ${syncTargets[0].stock}`
                 : '✅ Oui, synchroniser ces articles'
-            
+
             const replyMarkup = {
                 inline_keyboard: [
                     [

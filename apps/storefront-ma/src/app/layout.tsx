@@ -16,25 +16,25 @@ const tajawal = localFont({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://riwaya.ma'),
-  title: { default: 'Riwaya — Librairie premium au Maroc', template: '%s | Riwaya' },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tekno.ma'),
+  title: { default: 'Tekno Store — Librairie premium au Maroc', template: '%s | Tekno Store' },
   description: 'Une sélection exigeante de livres en français, arabe et anglais, livrée partout au Maroc.',
-  applicationName: 'Riwaya',
+  applicationName: 'Tekno Store',
   category: 'books',
-  robots: process.env.RIWAYA_MA_INDEXABLE === 'true'
+  robots: process.env.TEKNO_MA_INDEXABLE === 'true'
     ? { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } }
     : { index: false, follow: false },
-  openGraph: { type: 'website', siteName: 'Riwaya', locale: 'fr_MA' },
-  twitter: { card: 'summary_large_image', title: 'Riwaya — Librairie premium au Maroc' },
+  openGraph: { type: 'website', siteName: 'Tekno Store', locale: 'fr_MA' },
+  twitter: { card: 'summary_large_image', title: 'Tekno Store — Librairie premium au Maroc' },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const structuredData = {
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'Organization', '@id': 'https://riwaya.ma/#organization', name: 'Riwaya', url: 'https://riwaya.ma' },
-      { '@type': 'WebSite', '@id': 'https://riwaya.ma/#website', url: 'https://riwaya.ma', name: 'Riwaya', publisher: { '@id': 'https://riwaya.ma/#organization' }, inLanguage: ['fr', 'ar', 'en'] },
-      { '@type': 'BookStore', '@id': 'https://riwaya.ma/#bookstore', name: 'Riwaya', url: 'https://riwaya.ma', areaServed: { '@type': 'Country', name: 'Morocco' }, currenciesAccepted: 'MAD', paymentAccepted: 'Cash on delivery' },
+      { '@type': 'Organization', '@id': 'https://tekno.ma/#organization', name: 'Tekno Store', url: 'https://tekno.ma' },
+      { '@type': 'WebSite', '@id': 'https://tekno.ma/#website', url: 'https://tekno.ma', name: 'Tekno Store', publisher: { '@id': 'https://tekno.ma/#organization' }, inLanguage: ['fr', 'ar', 'en'] },
+      { '@type': 'BookStore', '@id': 'https://tekno.ma/#bookstore', name: 'Tekno Store', url: 'https://tekno.ma', areaServed: { '@type': 'Country', name: 'Morocco' }, currenciesAccepted: 'MAD', paymentAccepted: 'Cash on delivery' },
     ],
   }
   return (

@@ -26,20 +26,20 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
     const [loading, setLoading] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
 
-    const filteredBooks = books.filter(b => 
+    const filteredBooks = books.filter(b =>
         b.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         b.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (b.customerSeller?.fullName && b.customerSeller.fullName.toLowerCase().includes(searchTerm.toLowerCase()))
     )
 
     const handleApprove = async (id: string, title: string) => {
-        if (!confirm(`T'es sur que tu veux approuver ce livre: "${title}" ?`)) return
+        if (!confirm(`T'es sur que tu veux approuver ce produit: "${title}" ?`)) return
         setLoading(id)
-        
+
         try {
             const result = await approveBook(id)
             if (result.success) {
-                showNotification(`Le livre "${title}" a été approuvé.`, 'success')
+                showNotification(`Le produit "${title}" a été approuvé.`, 'success')
             } else {
                 showNotification(result.error || 'Erreur lors de l\'approbation.', 'error')
             }
@@ -51,13 +51,13 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
     }
 
     const handleReject = async (id: string, title: string) => {
-        if (!confirm(`T'es sur que tu veux rejeter ce livre: "${title}" ?`)) return
+        if (!confirm(`T'es sur que tu veux rejeter ce produit: "${title}" ?`)) return
         setLoading(id)
-        
+
         try {
             const result = await rejectBook(id)
             if (result.success) {
-                showNotification(`Le livre "${title}" a été rejeté.`, 'info')
+                showNotification(`Le produit "${title}" a été rejeté.`, 'info')
             } else {
                 showNotification(result.error || 'Erreur lors du rejet.', 'error')
             }
@@ -74,9 +74,9 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                     <Check className="w-8 h-8 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Aucun livre en attente</h3>
+                <h3 className="text-xl font-bold text-gray-900">Aucun produit en attente</h3>
                 <p className="mt-2 text-gray-500 text-center max-w-sm">
-                    Tous les livres soumis par les vendeurs ont été traités.
+                    Tous les produits soumis par les vendeurs ont été traités.
                 </p>
             </div>
         )
@@ -90,7 +90,7 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Rechercher un livre ou vendeur..."
+                        placeholder="Rechercher un produit ou vendeur..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-black"
@@ -103,7 +103,7 @@ export default function PendingBooksTable({ books }: { books: PendingBook[] }) {
                 <table className="w-full">
                     <thead>
                         <tr className="bg-gray-50 border-b border-gray-200">
-                            <th className="px-6 py-4 text-left text-xs text-gray-500 font-semibold uppercase tracking-wider">Livre</th>
+                            <th className="px-6 py-4 text-left text-xs text-gray-500 font-semibold uppercase tracking-wider">Produit</th>
                             <th className="px-6 py-4 text-left text-xs text-gray-500 font-semibold uppercase tracking-wider">Vendeur</th>
                             <th className="px-6 py-4 text-left text-xs text-gray-500 font-semibold uppercase tracking-wider">Prix</th>
                             <th className="px-6 py-4 text-left text-xs text-gray-500 font-semibold uppercase tracking-wider">Date</th>

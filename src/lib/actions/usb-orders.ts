@@ -43,7 +43,7 @@ export async function createUsbOrder(input: z.infer<typeof UsbOrderSchema>) {
         const order = await (prisma.order as any).create({
             data: {
                 fullName: sanitized.fullName,
-                email: `usb_${Date.now()}@riwaya.store`, // Email temporaire (pas requis pour USB)
+                email: `usb_${Date.now()}@tekno.ma`, // Email temporaire (pas requis pour USB)
                 phone: sanitized.phone,
                 address: sanitized.address,
                 city: sanitized.city,

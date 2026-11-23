@@ -10,7 +10,7 @@ export function getTrustedAppOrigin(request: Request) {
         return requestUrl.origin
     }
 
-    const configured = process.env.NEXT_PUBLIC_APP_URL || 'https://www.riwaya.store'
+    const configured = process.env.NEXT_PUBLIC_APP_URL || 'https://tekno.ma'
     const origin = new URL(configured).origin
     if (new URL(origin).protocol !== 'https:') {
         throw new Error('NEXT_PUBLIC_APP_URL doit utiliser HTTPS')

@@ -1,5 +1,5 @@
-// Service Worker Riwaya — Cache stratégique pour PWA
-const CACHE_NAME = 'riwaya-v2'
+// Service Worker Tekno Store — Cache stratégique pour PWA
+const CACHE_NAME = 'tekno-v2'
 const OFFLINE_URL = '/offline.html'
 
 // Ressources pré-cachées au moment de l'installation
@@ -114,7 +114,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   if (!event.data) return
   const data = event.data.json()
-  self.registration.showNotification(data.title || 'Riwaya', {
+  self.registration.showNotification(data.title || 'Tekno Store', {
     body: data.body || '',
     icon: '/android-chrome-192x192.png',
     badge: '/favicon-32x32.png',

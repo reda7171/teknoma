@@ -37,7 +37,7 @@ export async function GET(req: Request) {
         const monthlyRevenue = Array(12).fill(0)
         const monthlyTotalOrders = Array(12).fill(0)
         const monthlyCanceledOrders = Array(12).fill(0)
-        
+
         let jumiaOrdersCurrentMonth = 0
         let jumiaTotalCurrentMonth = 0
         let jumiaRevenueCurrentMonth = 0
@@ -47,10 +47,10 @@ export async function GET(req: Request) {
             if (o.createdAt && o.status) {
                 const month = new Date(o.createdAt).getMonth()
                 monthlyTotalOrders[month]++
-                
+
                 const isExcluded = !isJumiaRevenueOrder(o)
                 let amount = 0
-                
+
                 if (isExcluded) {
                     monthlyCanceledOrders[month]++
                 } else {
@@ -150,7 +150,7 @@ export async function GET(req: Request) {
         pdfMake.setFonts(fonts)
         const docDef: any = {
             content: [
-                { text: 'Rapport Mensuel Consolidé - Riwaya', style: 'header' },
+                { text: 'Rapport Mensuel Consolidé - Tekno Store', style: 'header' },
                 { text: `Généré le ${new Date().toLocaleString('fr-FR')} pour le mois de ${now.toLocaleString('fr-FR', { month: 'long' })}`, margin: [0, 0, 0, 20] },
                 { text: 'KPIs Principaux (Mois en cours)', style: 'subheader' },
                 {
@@ -174,8 +174,8 @@ export async function GET(req: Request) {
 
         const pdfDoc = pdfMake.createPdf(docDef)
         const pdfBuffer = await pdfDoc.getBuffer()
-        
-        await sendTelegramDocument(pdfBuffer, `Rapport_Riwaya_${now.getFullYear()}_${now.getMonth()+1}.pdf`, `📊 <b>Rapport Automatique Mensuel</b>\n📈 Voici votre rapport consolidé incluant les KPIs et graphiques de ce mois.`)
+
+        await sendTelegramDocument(pdfBuffer, `Rapport_Tekno Store_${now.getFullYear()}_${now.getMonth()+1}.pdf`, `📊 <b>Rapport Automatique Mensuel</b>\n📈 Voici votre rapport consolidé incluant les KPIs et graphiques de ce mois.`)
 
         return NextResponse.json({ success: true, message: 'Rapport PDF généré et envoyé' })
     } catch (error: any) {

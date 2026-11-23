@@ -2,22 +2,22 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Riwaya - Librairie en Ligne au Maroc',
-        short_name: 'Riwaya',
-        description: 'Découvrez et achetez des livres au Maroc. Livraison rapide et paiement à la livraison.',
+        name: 'Tekno Store — High-Tech, Smartphones, PC & Mac au Maroc',
+        short_name: 'Tekno Store',
+        description: 'Vente de smartphones, PC portables, Mac et accessoires technologiques au Maroc avec paiement à la livraison.',
         start_url: '/',
         display: 'standalone',
-        background_color: '#0a0a0a',
-        theme_color: '#FFD700',
+        background_color: '#f7f0df',
+        theme_color: '#17351d',
         orientation: 'portrait-primary',
-        categories: ['books', 'shopping', 'education'],
+        categories: ['shopping', 'lifestyle'],
         lang: 'fr-MA',
         dir: 'auto',
         icons: [
             {
-                src: '/favicon.ico',
+                src: '/logo.png',
                 sizes: 'any',
-                type: 'image/x-icon',
+                type: 'image/svg+xml',
             },
             {
                 src: '/icon-192.png',

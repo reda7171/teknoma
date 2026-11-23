@@ -92,29 +92,29 @@ export default function GoogleReviewsOptIn({ orderId, email, estimatedDeliveryDa
                     <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden animate-in fade-in zoom-in duration-300">
                         {/* Décoration */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                        
-                        <button aria-label="Fermer" 
+
+                        <button aria-label="Fermer"
                             onClick={handleDecline}
                             className="absolute top-4 right-4 rtl:left-4 rtl:right-auto text-gray-400 hover:text-black transition-colors"
                         >
                             <X className="w-6 h-6" />
                         </button>
-                        
+
                         <div className="relative z-10 flex flex-col items-center text-center mt-4">
                             <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
                                 <CheckCircle className="w-8 h-8 text-indigo-500" />
                             </div>
-                            
+
                             <h3 className="text-2xl font-black text-black mb-2 tracking-tight">Votre avis compte !</h3>
                             <p className="text-gray-500 text-sm mb-8 font-medium">
-                                Voulez-vous évaluer votre expérience d'achat sur Riwaya ? Entrez votre email pour recevoir notre questionnaire Google Avis.
+                                Voulez-vous évaluer votre expérience d'achat sur Tekno Store ? Entrez votre email pour recevoir notre questionnaire Google Avis.
                             </p>
-                            
+
                             <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
                                 <div className="relative">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input 
-                                        type="email" 
+                                    <input
+                                        type="email"
                                         required
                                         value={inputEmail}
                                         onChange={(e) => setInputEmail(e.target.value)}
@@ -123,17 +123,17 @@ export default function GoogleReviewsOptIn({ orderId, email, estimatedDeliveryDa
                                         dir="ltr"
                                     />
                                 </div>
-                                
-                                <button 
-                                    type="submit" 
+
+                                <button
+                                    type="submit"
                                     disabled={isSubmitting || !inputEmail}
                                     className="w-full bg-black text-white font-black py-4 rounded-xl hover:bg-gray-900 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Oui, je participe"}
                                 </button>
-                                
-                                <button 
-                                    type="button" 
+
+                                <button
+                                    type="button"
                                     onClick={handleDecline}
                                     className="text-gray-400 hover:text-black text-xs font-bold tracking-widest uppercase mt-2 transition-colors"
                                 >

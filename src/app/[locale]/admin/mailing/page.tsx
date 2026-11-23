@@ -19,7 +19,7 @@ export default function MailingPage() {
     const [htmlContent, setHtmlContent] = useState('')
     const [audience, setAudience] = useState('TEST_ONLY')
     const [targetedEmails, setTargetedEmails] = useState('')
-    const [couponCode, setCouponCode] = useState('RIWAYA10')
+    const [couponCode, setCouponCode] = useState('TEKNO10')
     const [isHtmlMode, setIsHtmlMode] = useState(false)
     const [isSending, setIsSending] = useState(false)
     const [result, setResult] = useState<any>(null)
@@ -76,7 +76,7 @@ export default function MailingPage() {
             toast.error('Veuillez remplir l\'objet et le contenu du mail.')
             return
         }
-        
+
         if (audience === 'TARGETED_CLIENTS' && !targetedEmails.trim()) {
             toast.error('Veuillez saisir au moins une adresse e-mail.')
             return
@@ -98,7 +98,7 @@ export default function MailingPage() {
                     html: htmlContent,
                     audience,
                     targetedEmails: audience === 'TARGETED_CLIENTS' ? targetedEmails : undefined,
-                    couponCode: couponCode.trim() || 'RIWAYA10'
+                    couponCode: couponCode.trim() || 'TEKNO10'
                 })
             })
 
@@ -107,7 +107,7 @@ export default function MailingPage() {
 
             toast.success(data.message)
             setResult(data)
-            
+
         } catch (error: any) {
             toast.error(error.message || 'Une erreur est survenue')
         } finally {
@@ -149,8 +149,8 @@ export default function MailingPage() {
                 <button
                     onClick={() => setActiveTab('send')}
                     className={`flex items-center gap-2 px-4 py-3 font-semibold text-sm transition-colors border-b-2 ${
-                        activeTab === 'send' 
-                        ? 'border-pixio-yellow text-slate-900' 
+                        activeTab === 'send'
+                        ? 'border-pixio-yellow text-slate-900'
                         : 'border-transparent text-slate-500 hover:text-slate-700'
                     }`}
                 >
@@ -160,8 +160,8 @@ export default function MailingPage() {
                 <button
                     onClick={() => setActiveTab('list')}
                     className={`flex items-center gap-2 px-4 py-3 font-semibold text-sm transition-colors border-b-2 ${
-                        activeTab === 'list' 
-                        ? 'border-pixio-yellow text-slate-900' 
+                        activeTab === 'list'
+                        ? 'border-pixio-yellow text-slate-900'
                         : 'border-transparent text-slate-500 hover:text-slate-700'
                     }`}
                 >
@@ -171,8 +171,8 @@ export default function MailingPage() {
                 <button
                     onClick={() => setActiveTab('templates')}
                     className={`flex items-center gap-2 px-4 py-3 font-semibold text-sm transition-colors border-b-2 ${
-                        activeTab === 'templates' 
-                        ? 'border-pixio-yellow text-slate-900' 
+                        activeTab === 'templates'
+                        ? 'border-pixio-yellow text-slate-900'
                         : 'border-transparent text-slate-500 hover:text-slate-700'
                     }`}
                 >
@@ -192,7 +192,7 @@ export default function MailingPage() {
                                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                                         Charger un template prédéfini (optionnel)
                                     </label>
-                                    <select 
+                                    <select
                                         value={selectedTemplateId}
                                         onChange={handleTemplateChange}
                                         className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-pixio-yellow focus:border-pixio-yellow transition-colors"
@@ -209,7 +209,7 @@ export default function MailingPage() {
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">
                                     Objet de l'e-mail
                                 </label>
-                                <input 
+                                <input
                                     type="text"
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
@@ -222,7 +222,7 @@ export default function MailingPage() {
                                 <label className="block text-sm font-semibold text-slate-700">
                                     Contenu de l'e-mail
                                 </label>
-                                <button 
+                                <button
                                     onClick={() => setIsHtmlMode(!isHtmlMode)}
                                     className="text-xs font-medium text-pixio-yellow hover:underline"
                                 >
@@ -250,14 +250,14 @@ export default function MailingPage() {
                             </div>
                             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                                 {isHtmlMode ? (
-                                    <textarea 
+                                    <textarea
                                         value={htmlContent}
                                         onChange={(e) => setHtmlContent(e.target.value)}
                                         className="w-full h-64 p-4 font-mono text-sm bg-slate-900 text-slate-300 focus:outline-none"
                                         placeholder="<h1>Votre code HTML ici</h1>"
                                     />
                                 ) : (
-                                    <ReactQuill 
+                                    <ReactQuill
                                         theme="snow"
                                         value={htmlContent}
                                         onChange={setHtmlContent}
@@ -291,11 +291,11 @@ export default function MailingPage() {
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">
                                     Code Coupon (remplace {"{{coupon_code}}"})
                                 </label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={couponCode}
                                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                    placeholder="Ex: RIWAYA10"
+                                    placeholder="Ex: TEKNO10"
                                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-pixio-yellow uppercase font-mono font-bold text-sm tracking-wider"
                                 />
                                 <p className="text-[11px] text-slate-500 mt-1">
@@ -309,9 +309,9 @@ export default function MailingPage() {
                                 </label>
                                 <div className="space-y-2">
                                     <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-                                        <input 
-                                            type="radio" 
-                                            name="audience" 
+                                        <input
+                                            type="radio"
+                                            name="audience"
                                             value="TEST_ONLY"
                                             checked={audience === 'TEST_ONLY'}
                                             onChange={(e) => setAudience(e.target.value)}
@@ -322,11 +322,11 @@ export default function MailingPage() {
                                             <p className="text-xs text-slate-500">M'envoyer l'e-mail à moi-même pour vérifier.</p>
                                         </div>
                                     </label>
-                                    
+
                                     <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-                                        <input 
-                                            type="radio" 
-                                            name="audience" 
+                                        <input
+                                            type="radio"
+                                            name="audience"
                                             value="ALL_CUSTOMERS"
                                             checked={audience === 'ALL_CUSTOMERS'}
                                             onChange={(e) => setAudience(e.target.value)}
@@ -339,9 +339,9 @@ export default function MailingPage() {
                                     </label>
 
                                     <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-                                        <input 
-                                            type="radio" 
-                                            name="audience" 
+                                        <input
+                                            type="radio"
+                                            name="audience"
                                             value="NEWSLETTER_SUBSCRIBERS"
                                             checked={audience === 'NEWSLETTER_SUBSCRIBERS'}
                                             onChange={(e) => setAudience(e.target.value)}
@@ -353,9 +353,9 @@ export default function MailingPage() {
                                         </div>
                                     </label>
                                     <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-                                        <input 
-                                            type="radio" 
-                                            name="audience" 
+                                        <input
+                                            type="radio"
+                                            name="audience"
                                             value="TARGETED_CLIENTS"
                                             checked={audience === 'TARGETED_CLIENTS'}
                                             onChange={(e) => setAudience(e.target.value)}
@@ -364,17 +364,17 @@ export default function MailingPage() {
                                         <div className="w-full">
                                             <p className="font-medium text-slate-800">Clients ciblés</p>
                                             <p className="text-xs text-slate-500 mb-2">Entrez des adresses e-mails manuellement.</p>
-                                            
+
                                             {audience === 'TARGETED_CLIENTS' && (
                                                 <div className="mt-2 space-y-3" onClick={(e) => e.stopPropagation()}>
-                                                    <textarea 
+                                                    <textarea
                                                         value={targetedEmails}
                                                         onChange={(e) => setTargetedEmails(e.target.value)}
                                                         placeholder="email1@test.com, email2@test.com..."
                                                         className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-pixio-yellow focus:border-pixio-yellow transition-colors"
                                                         rows={2}
                                                     />
-                                                    
+
                                                     <div className="border border-slate-200 rounded-lg overflow-hidden flex flex-col">
                                                         <div className="bg-slate-50 px-3 py-2 border-b border-slate-200 text-xs font-semibold text-slate-600">
                                                             Ou sélectionner parmi la base :
@@ -388,7 +388,7 @@ export default function MailingPage() {
                                                                         const isSelected = targetedEmails.includes(user.email)
                                                                         return (
                                                                             <label key={idx} className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded cursor-pointer transition-colors">
-                                                                                <input 
+                                                                                <input
                                                                                     type="checkbox"
                                                                                     checked={isSelected}
                                                                                     onChange={(e) => {

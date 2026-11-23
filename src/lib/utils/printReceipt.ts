@@ -111,7 +111,7 @@ export function printReceipt(data: ReceiptData) {
         </head>
         <body>
             <div class="header">
-                <h1>RIWAYA</h1>
+                <h1>Tekno Store</h1>
                 <p>La passion de lire</p>
                 <div class="divider"></div>
                 <p>Ticket de caisse</p>
@@ -139,7 +139,7 @@ export function printReceipt(data: ReceiptData) {
                     <span>-${data.discount.toFixed(2)} DH</span>
                 </div>
                 ` : ''}
-                
+
                 <div class="total-line">
                     <span>TOTAL</span>
                     <span>${data.total.toFixed(2)} DH</span>
@@ -154,14 +154,14 @@ export function printReceipt(data: ReceiptData) {
 
             <!-- QR Code -->
             <div class="qr-container">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://riwaya.store/order/' + data.orderId)}" alt="QR Code" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://tekno.ma/order/' + data.orderId)}" alt="QR Code" />
             </div>
 
             <div class="footer">
                 <p>Merci de votre visite !</p>
-                <p>www.riwaya.store</p>
+                <p>tekno.ma</p>
             </div>
-            
+
             <script>
                 window.onload = function() {
                     setTimeout(function() {
@@ -261,9 +261,9 @@ export function printZReport(data: ZReportData) {
                     <span>${new Date(data.closedAt).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</span>
                 </div>
                 ${data.userName ? `<div class="line"><span>Caissier :</span><span>${data.userName}</span></div>` : ''}
-                
+
                 <div class="divider"></div>
-                
+
                 <div class="line">
                     <span>Fonds de tiroir initial:</span>
                     <span>${data.startingFloat.toFixed(2)} DH</span>
@@ -272,7 +272,7 @@ export function printZReport(data: ZReportData) {
                     <span>Ventes espèces:</span>
                     <span>${(data.expectedCash - data.startingFloat).toFixed(2)} DH</span>
                 </div>
-                
+
                 <div class="divider"></div>
 
                 <div class="line bold large">
@@ -283,7 +283,7 @@ export function printZReport(data: ZReportData) {
                     <span>Cash Compté:</span>
                     <span>${data.actualCash.toFixed(2)} DH</span>
                 </div>
-                
+
                 <div class="divider"></div>
 
                 <div class="line bold ${data.difference < 0 ? 'large' : ''}">
@@ -295,7 +295,7 @@ export function printZReport(data: ZReportData) {
             <div class="footer">
                 <p>Document interne</p>
             </div>
-            
+
             <script>
                 window.onload = function() {
                     setTimeout(function() {

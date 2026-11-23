@@ -76,14 +76,14 @@ export default function AdminLayout({
     const [userRole, setUserRole] = useState<string | null>(null)
     const [pendingJumiaCount, setPendingJumiaCount] = useState(0)
     const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
-        'Configuration': false 
+        'Configuration': false
     })
 
     useEffect(() => {
         getSettingsByCategory('features')
             .then(setFeatureSettings)
             .catch(console.error)
-            
+
         getAdminRole().then(setUserRole).catch(console.error)
 
         import('@/app/[locale]/admin/jumia-orders/actions').then(({ getPendingJumiaOrdersCount }) => {
@@ -112,11 +112,11 @@ export default function AdminLayout({
         exchange: false,
         usb: false,
         kids: false,
-        readingList: featureSettings['feature_reading_list'] !== 'false',
-        digital: featureSettings['feature_digital_books'] !== 'false',
+        readingList: false,
+        digital: false,
         packs: featureSettings['feature_packs'] !== 'false',
         pos: featureSettings['feature_pos'] !== 'false',
-        deposer_liste: featureSettings['feature_deposer_liste'] !== 'false',
+        deposer_liste: false,
     }), [featureSettings])
 
     const allNavigation = useMemo(() => [
@@ -134,16 +134,9 @@ export default function AdminLayout({
             href: `/${lang}/admin/books`,
             icon: BookOpen,
             children: [
-                { name: 'Livres Physiques', href: `/${lang}/admin/books`, icon: BookOpen },
-                { name: 'Google Books API', href: `/${lang}/admin/google-books`, icon: Search },
-                { name: 'Livres Numériques', href: `/${lang}/admin/digital-products`, icon: Download, featureKey: 'feature_digital_books' },
+                { name: 'Produits High-Tech', href: `/${lang}/admin/books`, icon: BookOpen },
                 { name: 'Catalogue Jumia', href: `/${lang}/admin/jumia-products`, icon: ShoppingBag },
                 { name: 'Packs & Lots', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },
-                { name: 'Auteurs & Éditeurs', href: `/${lang}/admin/authors`, icon: Users },
-                { name: 'Marque-pages', href: `/${lang}/admin/accessories/bookmarks`, icon: Bookmark },
-                { name: 'Bibliothèques', href: `/${lang}/admin/accessories/library`, icon: Library },
-                { name: 'Clés USB', href: `/${lang}/admin/accessories/usb`, icon: Usb },
-                { name: 'Produits enfants', href: `/${lang}/admin/accessories/kids`, icon: Sparkles },
                 { name: 'Entrepôts', href: `/${lang}/admin/warehouses`, icon: Package },
                 { name: 'Inventaire Multi-Entrepôts', href: `/${lang}/admin/inventory`, icon: Package },
             ]
@@ -162,8 +155,6 @@ export default function AdminLayout({
                 { name: 'Centre d\'Appels', href: `/${lang}/admin/call-center`, icon: Headset },
                 { name: 'Relances (Follow-up)', href: `/${lang}/admin/follow-up`, icon: MessageCircle },
                 { name: 'Réservations', href: `/${lang}/admin/reservations`, icon: Bookmark },
-                { name: 'Listes Scolaires', href: `/${lang}/admin/school-lists`, icon: FileText, featureKey: 'feature_deposer_liste' },
-                { name: 'Échanges', href: `/${lang}/admin/exchanges`, icon: Repeat },
                 { name: 'Achats Fournisseurs', href: `/${lang}/admin/supplier-order`, icon: ShoppingBag },
             ]
         },
@@ -179,16 +170,14 @@ export default function AdminLayout({
             ]
         },
         {
-            name: 'Communauté & Avis',
+            name: 'Avis & Actualités',
             href: `/${lang}/admin/reviews`,
             icon: MessageSquare,
             children: [
                 { name: 'Avis Clients', href: `/${lang}/admin/reviews`, icon: MessageSquare },
                 { name: 'Commentaires', href: `/${lang}/admin/comments`, icon: MessageCircle },
-                { name: 'Demandes de Livres', href: `/${lang}/admin/requested-books`, icon: Search },
                 { name: 'Signalements', href: `/${lang}/admin/reports`, icon: AlertCircle },
                 { name: 'Blog & Actualités', href: `/${lang}/admin/posts`, icon: FileText },
-                { name: 'Citations (Quotes)', href: `/${lang}/admin/quotes`, icon: Quote },
             ]
         },
         {
@@ -281,11 +270,11 @@ export default function AdminLayout({
                 return item
             })
         }
-        
+
         if (userRole === 'SELLER') {
-            filteredNav = filteredNav.filter(item => 
-                item.name === 'Tableau de Bord' || 
-                item.name === 'Catalogue' || 
+            filteredNav = filteredNav.filter(item =>
+                item.name === 'Tableau de Bord' ||
+                item.name === 'Catalogue' ||
                 item.name === 'Ventes & Opérations'
             )
             filteredNav = filteredNav.map(item => {
@@ -310,7 +299,7 @@ export default function AdminLayout({
                 return item
             })
         }
-        
+
         return filteredNav
     }, [allNavigation, features, userRole])
 
@@ -366,14 +355,14 @@ export default function AdminLayout({
             <div className={`flex items-center ${isCollapsed ? 'justify-center flex-col py-4 gap-4' : 'justify-between px-5 md:px-8'} h-16 md:h-20 shrink-0`}>
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center shrink-0">
-                        <span className="text-white text-lg font-black italic">R</span>
+                        <span className="text-white text-lg font-black italic">T</span>
                     </div>
-                    {!isCollapsed && <h1 className="text-lg font-black text-slate-900 tracking-tight">Riwaya<span className="text-blue-600">.</span></h1>}
+                    {!isCollapsed && <h1 className="text-lg font-black text-slate-900 tracking-tight">Tekno Store<span className="text-blue-600">.</span></h1>}
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                     {!isCollapsed && <OrderNotifications />}
-                    
+
                     {/* Bouton fermer sur mobile */}
                     <button
                         onClick={() => setSidebarOpen(false)}
@@ -399,12 +388,12 @@ export default function AdminLayout({
             <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-3 md:px-4'} pb-6 space-y-1 overflow-y-auto custom-scrollbar`} suppressHydrationWarning>
                 {!isCollapsed && <div className="mb-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">Menu Principal</div>}
                 {isCollapsed && <div className="h-4"></div>}
-                
+
                 {navigation.map((item) => {
                     // @ts-ignore
                     const hasChildren = item.children && item.children.length > 0
                     const isExact = pathname === item.href
-                    const isParent = hasChildren 
+                    const isParent = hasChildren
                         // @ts-ignore
                         ? item.children.some(child => {
                             if (child.href === `/${lang}/admin`) return pathname === child.href
@@ -511,7 +500,7 @@ export default function AdminLayout({
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-bold text-slate-900 truncate">Administrateur</p>
-                                <p className="text-[10px] text-slate-500 font-medium truncate">contact@riwaya.store</p>
+                                <p className="text-[10px] text-slate-500 font-medium truncate">Contact.tekno.ma@gmail.com</p>
                             </div>
                         </div>
 
@@ -559,7 +548,7 @@ export default function AdminLayout({
             )}
 
             {/* Sidebar mobile (drawer) */}
-            <aside 
+            <aside
                 role="dialog"
                 aria-modal="true"
                 aria-label="Menu d'administration"
@@ -584,7 +573,7 @@ export default function AdminLayout({
                             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
                                 <span className="text-white text-sm font-black italic">R</span>
                             </div>
-                            <span className="text-base font-black text-slate-900">Riwaya<span className="text-blue-600">.</span></span>
+                            <span className="text-base font-black text-slate-900">Tekno Store<span className="text-blue-600">.</span></span>
                         </div>
                         <div className="flex items-center gap-2">
                             <WhatsAppStatusButton isCollapsed={true} />
@@ -601,4 +590,3 @@ export default function AdminLayout({
         </div>
     )
 }
-
