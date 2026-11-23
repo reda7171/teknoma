@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { useCartStore } from '@/store/cart'
 import { useLocale } from 'next-intl'
@@ -26,8 +26,10 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
     const [mounted, setMounted] = useState(false)
     const [activePhone, setActivePhone] = useState(phone)
     const [activeAgentName, setActiveAgentName] = useState(agentName)
-    const { items, getTotalItems } = useCartStore()
+    const [pageTitle, setPageTitle] = useState('')
+    const { items, getTotalItems, getTotalPrice } = useCartStore()
     const totalItems = getTotalItems()
+    const totalPrice = Math.round(getTotalPrice())
 
     // Position state
     const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -44,6 +46,24 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
             .catch(() => {})
     }
 
+    // Capture dynamic product or pack title from DOM on route change
+    const inspectPageTitle = useCallback(() => {
+        if (typeof document === 'undefined') return ''
+        const h1 = document.querySelector('main h1') || document.querySelector('h1')
+        const text = h1?.textContent?.trim()
+        if (text && text.length > 2 && text.length < 120) {
+            setPageTitle(text)
+            return text
+        }
+        const docTitle = document.title ? document.title.split('|')[0].replace(/ - Tekno.*/i, '').trim() : ''
+        if (docTitle && docTitle.length > 2 && docTitle.length < 120) {
+            setPageTitle(docTitle)
+            return docTitle
+        }
+        setPageTitle('')
+        return ''
+    }, [])
+
     useEffect(() => {
         setMounted(true)
         syncAgent()
@@ -51,29 +71,140 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
         return () => clearInterval(interval)
     }, [])
 
+    useEffect(() => {
+        // Inspect title on path change with slight delay to ensure client navigation rendered DOM
+        const timer = setTimeout(() => {
+            inspectPageTitle()
+        }, 150)
+        return () => clearTimeout(timer)
+    }, [pathname, inspectPageTitle])
+
     const phoneNumber = normalizePhone(activePhone || phone)
 
-    // Traductions du message WhatsApp
-    const messages: Record<string, string> = {
-        fr: 'Bonjour Tekno Store, je suis intéressé par ces produits :\n{books}\nCombien le prix total avec livraison ?',
-        en: 'Hello Tekno Store, I am interested in these products:\n{books}\nHow much is the total price with delivery?',
-        ar: 'مرحباً Tekno Store، أنا مهتم بهذه المنتجات:\n{books}\nكم السعر الإجمالي مع التوصيل؟',
-    }
+    // Build context-aware pre-filled WhatsApp message based on current page
+    const generateMessage = (): string => {
+        const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://tekno.ma'
+        const title = pageTitle || inspectPageTitle()
+        const path = pathname || ''
 
-    let finalMessage = ''
-    if (items.length > 0) {
-        const baseMsg = messages[locale] || messages.fr
-        const booksList = items.map(item => `- ${item.title} (x${item.quantity})`).join('\n')
-        finalMessage = baseMsg.replace('{books}', booksList)
-    } else {
-        const emptyMessages: Record<string, string> = {
-            fr: 'Bonjour Tekno Store, je souhaite découvrir vos produits pour animaux et en savoir plus.',
-            en: 'Hello Tekno Store, I would like to discover your pet products and know more.',
-            ar: 'مرحباً Tekno Store، أود التعرف على منتجاتكم للحيوانات الأليفة ومعرفة المزيد.',
+        // 1. Page Produit (/products/[id], /books/[id])
+        if (path.includes('/products/') || path.includes('/books/')) {
+            const modelLabel = title ? `le modèle "${title}"` : 'ce produit'
+            const modelLabelAr = title ? `منتج "${title}"` : 'هذا المنتج'
+            const modelLabelEn = title ? `the model "${title}"` : 'this product'
+
+            if (locale === 'ar') {
+                return `مرحباً Tekno Store، أود الحصول على معلومات بخصوص ${modelLabelAr} (${currentUrl}). هل هو متوفر في المخزون؟`
+            }
+            if (locale === 'en') {
+                return `Hello Tekno Store, I would like information about ${modelLabelEn} (${currentUrl}). Is it available in stock?`
+            }
+            return `Bonjour Tekno Store, je souhaite des informations sur ${modelLabel} (${currentUrl}). Est-il disponible en stock ?`
         }
-        finalMessage = emptyMessages[locale] || emptyMessages.fr
+
+        // 2. Page Pack (/packs/[id])
+        if (path.includes('/packs/')) {
+            const packLabel = title ? `le pack "${title}"` : 'ce pack promotionnel'
+            const packLabelAr = title ? `عرض الباقة "${title}"` : 'هذه الباقة الترويجية'
+            const packLabelEn = title ? `the pack "${title}"` : 'this promotional pack'
+
+            if (locale === 'ar') {
+                return `مرحباً Tekno Store، أنا مهتم بـ ${packLabelAr} (${currentUrl}). هل يمكن تزويدي بمزيد من التفاصيل؟`
+            }
+            if (locale === 'en') {
+                return `Hello Tekno Store, I am interested in ${packLabelEn} (${currentUrl}). Could you provide more details?`
+            }
+            return `Bonjour Tekno Store, je suis intéressé par ${packLabel} (${currentUrl}). Pouvez-vous me donner plus de détails ?`
+        }
+
+        // 3. Panier (/cart)
+        if (path.includes('/cart')) {
+            if (items.length > 0) {
+                const list = items.map(item => `• ${item.title} (x${item.quantity})`).join('\n')
+                if (locale === 'ar') {
+                    return `مرحباً Tekno Store، هذه تفاصيل سلة مشترياتي:\n${list}\nالمجموع: ${totalPrice} درهم.\nما هي مدة وإجراءات التوصيل؟`
+                }
+                if (locale === 'en') {
+                    return `Hello Tekno Store, here is my cart summary:\n${list}\nTotal: ${totalPrice} MAD.\nWhat is the delivery time and process?`
+                }
+                return `Bonjour Tekno Store, voici le récapitulatif de mon panier :\n${list}\nTotal: ${totalPrice} MAD.\nQuel est le délai de livraison ?`
+            }
+            if (locale === 'ar') {
+                return `مرحباً Tekno Store، لدي سؤال بخصوص طريقة الطلب والتوصيل والدفع عند الاستلام (COD).`
+            }
+            if (locale === 'en') {
+                return `Hello Tekno Store, I have a question regarding ordering, shipping, and Cash on Delivery (COD).`
+            }
+            return `Bonjour Tekno Store, j'ai une question sur vos modalités de commande et le paiement à la livraison (COD).`
+        }
+
+        // 4. Checkout / Caisse (/checkout)
+        if (path.includes('/checkout')) {
+            if (locale === 'ar') {
+                return `مرحباً Tekno Store، أحتاج مساعدة لإتمام وتأكيد طلبي والدفع عند الاستلام.`
+            }
+            if (locale === 'en') {
+                return `Hello Tekno Store, I need assistance completing my order with Cash on Delivery (COD).`
+            }
+            return `Bonjour Tekno Store, j'ai besoin d'aide pour finaliser ma commande avec paiement à la livraison (COD).`
+        }
+
+        // 5. Suivi de commande (/tracking, /orders, /track)
+        if (path.includes('/tracking') || path.includes('/orders') || path.includes('/track')) {
+            if (locale === 'ar') {
+                return `مرحباً Tekno Store، أود متابعة حالة توصيل طلبي.`
+            }
+            if (locale === 'en') {
+                return `Hello Tekno Store, I would like to check the tracking status of my order.`
+            }
+            return `Bonjour Tekno Store, je souhaite suivre l'état de livraison de ma commande.`
+        }
+
+        // 6. Espace Pro & B2B (/b2b)
+        if (path.includes('/b2b')) {
+            if (locale === 'ar') {
+                return `مرحباً Tekno Store، أود الحصول على عرض أسعار للشركات (B2B) للأجهزة والمعدات الذكية.`
+            }
+            if (locale === 'en') {
+                return `Hello Tekno Store, I would like a B2B quotation for IT equipment and bulk orders.`
+            }
+            return `Bonjour Tekno Store, je souhaite obtenir un devis pro / B2B pour du matériel high-tech.`
+        }
+
+        // 7. Devenir Vendeur (/devenir-vendeur, /seller)
+        if (path.includes('/devenir-vendeur') || path.includes('/seller')) {
+            if (locale === 'ar') {
+                return `مرحباً Tekno Store، أود الاستفسار عن شروط الانضمام كبائع شريك في منصتكم.`
+            }
+            if (locale === 'en') {
+                return `Hello Tekno Store, I would like information about becoming a partner seller on your marketplace.`
+            }
+            return `Bonjour Tekno Store, je souhaite des renseignements pour devenir vendeur partenaire sur votre marketplace.`
+        }
+
+        // 8. Panier non vide depuis une autre page (Accueil, etc.)
+        if (items.length > 0) {
+            const list = items.map(item => `• ${item.title} (x${item.quantity})`).join('\n')
+            if (locale === 'ar') {
+                return `مرحباً Tekno Store، أنا مهتم بهذه المنتجات:\n${list}\nالمجموع: ${totalPrice} درهم. هل هي متوفرة للتوصيل؟`
+            }
+            if (locale === 'en') {
+                return `Hello Tekno Store, I am interested in these items:\n${list}\nTotal: ${totalPrice} MAD. Are they available for delivery?`
+            }
+            return `Bonjour Tekno Store, je suis intéressé par ces produits :\n${list}\nTotal: ${totalPrice} MAD. Sont-ils disponibles pour livraison ?`
+        }
+
+        // 9. Message général par défaut (Accueil, Contact, Catalogue général)
+        if (locale === 'ar') {
+            return `مرحباً Tekno Store، أود الحصول على استشارة لاختيار هاتف ذكي، حاسوب أو إكسسوارات عالية الجودة مع الضمان.`
+        }
+        if (locale === 'en') {
+            return `Hello Tekno Store, I would like advice on choosing a smartphone, laptop, or accessories with official warranty.`
+        }
+        return `Bonjour Tekno Store, je souhaite des conseils pour choisir un smartphone, un PC portable ou un accessoire avec garantie officielle.`
     }
 
+    const finalMessage = generateMessage()
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(finalMessage)}`
 
     const dragOriginRef = useRef({ x: 0, y: 0 })
@@ -143,20 +274,46 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
 
     if (!mounted) return null
     if (pathname?.includes('/admin')) return null
-    // Masquer sur les pages produit (déjà un bouton WhatsApp sur la page)
-    if (pathname?.match(/\/(books|packs|mon-enfant|fourniture-bureau|blog)\/[^/]+$/)) return null
 
+    // Libellé de l'info-bulle contextuelle
     let tooltipText = ''
-    if (activeAgentName) {
+    const isProductPage = Boolean(pathname?.includes('/products/') || pathname?.includes('/books/'))
+    const isPackPage = Boolean(pathname?.includes('/packs/'))
+
+    if (isProductPage) {
+        if (locale === 'ar') {
+            tooltipText = 'استفسار عن هذا الجهاز؟ راسلنا'
+        } else if (locale === 'en') {
+            tooltipText = 'Questions about this model? Chat now'
+        } else {
+            tooltipText = 'Une question sur ce modèle ? Écrivez-nous'
+        }
+    } else if (isPackPage) {
+        if (locale === 'ar') {
+            tooltipText = 'عرض الباقة : استفسر الآن'
+        } else if (locale === 'en') {
+            tooltipText = 'Special pack: Chat with us'
+        } else {
+            tooltipText = 'Offre pack : demandez conseil'
+        }
+    } else if (totalItems > 0) {
+        if (locale === 'ar') {
+            tooltipText = `${totalItems} منتج في سلتك`
+        } else if (locale === 'en') {
+            tooltipText = `${totalItems} item(s) in your cart`
+        } else {
+            tooltipText = `${totalItems} article(s) dans votre panier`
+        }
+    } else if (activeAgentName) {
         if (locale === 'ar') {
             tooltipText = `${activeAgentName} متواجد لمساعدتك`
         } else if (locale === 'en') {
-            tooltipText = `${activeAgentName} is here to help you`
+            tooltipText = `${activeAgentName} is online · Quick reply`
         } else {
-            tooltipText = `${activeAgentName} peut vous aider`
+            tooltipText = `${activeAgentName} est en ligne · Réponse rapide`
         }
     } else {
-        tooltipText = locale === 'ar' ? 'تواصل معنا على واتساب' : 'Besoin d’aide ? Contactez-nous'
+        tooltipText = locale === 'ar' ? 'تواصل معنا على واتساب' : locale === 'en' ? 'Need help? Chat with us' : 'Besoin d’aide ? Contactez-nous'
     }
 
     return (
@@ -186,16 +343,14 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
                 </span>
             )}
 
-            {/* Afficher la bulle d'aide uniquement lorsque le panier contient un article. */}
-            {totalItems > 0 && (
-                <div className="absolute bottom-full right-0 mb-3 flex items-center drop-shadow-md cursor-pointer select-none md:bottom-auto md:right-full md:top-1/2 md:mb-0 md:mr-3.5 md:-translate-y-1/2 rtl:md:right-auto rtl:md:left-full rtl:md:mr-0 rtl:md:ml-3.5">
-                    <div className="relative bg-slate-950 text-white text-[11px] font-black px-3.5 py-2 rounded-2xl whitespace-nowrap flex items-center gap-2 border border-slate-800 shadow-2xl hover:bg-slate-900 transition-colors">
-                        <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse shrink-0" />
-                        <span>{tooltipText}</span>
-                        <div className="absolute -bottom-1 right-5 w-2 h-2 bg-slate-950 rotate-45 border-r border-b border-slate-800 md:bottom-auto md:right-[-0.25rem] md:top-1/2 md:-translate-y-1/2 md:border-b-0 md:border-t md:border-r rtl:md:right-auto rtl:md:-left-1 rtl:md:border-t-0 rtl:md:border-r-0 rtl:md:border-b rtl:md:border-l" />
-                    </div>
+            {/* Bulle d'information contextuelle */}
+            <div className="absolute bottom-full right-0 mb-3 flex items-center drop-shadow-md cursor-pointer select-none md:bottom-auto md:right-full md:top-1/2 md:mb-0 md:mr-3.5 md:-translate-y-1/2 rtl:md:right-auto rtl:md:left-full rtl:md:mr-0 rtl:md:ml-3.5 pointer-events-none">
+                <div className="relative bg-slate-950 text-white text-[11px] font-bold px-3.5 py-2 rounded-2xl whitespace-nowrap flex items-center gap-2 border border-slate-800 shadow-2xl transition-colors">
+                    <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse shrink-0" />
+                    <span>{tooltipText}</span>
+                    <div className="absolute -bottom-1 right-5 w-2 h-2 bg-slate-950 rotate-45 border-r border-b border-slate-800 md:bottom-auto md:right-[-0.25rem] md:top-1/2 md:-translate-y-1/2 md:border-b-0 md:border-t md:border-r rtl:md:right-auto rtl:md:-left-1 rtl:md:border-t-0 rtl:md:border-r-0 rtl:md:border-b rtl:md:border-l" />
                 </div>
-            )}
+            </div>
         </a>
     )
 }
