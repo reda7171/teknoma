@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Loader2, X, BookOpen } from 'lucide-react'
+import { Search, Loader2, X, Smartphone, Package } from 'lucide-react'
 import Image from 'next/image'
 
 export interface SelectedBookData {
@@ -20,7 +20,7 @@ interface BookSearchModalProps {
     title?: string
 }
 
-export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Rechercher un livre' }: BookSearchModalProps) {
+export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Rechercher un produit' }: BookSearchModalProps) {
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
@@ -41,7 +41,7 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
         try {
             const res = await fetch(`/api/books/search?q=${encodeURIComponent(query)}`)
             const data = await res.json()
-            
+
             if (!res.ok) {
                 throw new Error(data.error || 'Erreur lors de la recherche.')
             }
@@ -65,7 +65,7 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
         const info = book.volumeInfo
         const cover = info.imageLinks?.thumbnail?.replace('http:', 'https:')
         let isbn = undefined
-        
+
         if (info.industryIdentifiers) {
             const isbn13 = info.industryIdentifiers.find((i: any) => i.type === 'ISBN_13')
             const isbn10 = info.industryIdentifiers.find((i: any) => i.type === 'ISBN_10')
@@ -74,13 +74,13 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
 
         onSelect({
             title: info.title || '',
-            author: info.authors ? info.authors.join(', ') : 'Auteur inconnu',
+            author: info.authors ? info.authors.join(', ') : 'Marque',
             isbn: isbn,
             cover: cover,
             description: info.description || '',
             language: info.language || 'fr'
         })
-        
+
         // Reset and close
         setQuery('')
         setResults([])
@@ -90,19 +90,19 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="bg-pixio-cream w-full max-w-5xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 animate-in zoom-in-95 duration-300">
-                
+            <div className="bg-white w-full max-w-5xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 animate-in zoom-in-95 duration-300">
+
                 {/* Header */}
-                <div className="flex items-center justify-between p-8 pb-6 border-b border-gray-100/50 bg-white/50 backdrop-blur-md z-10">
+                <div className="flex items-center justify-between p-8 pb-6 border-b border-gray-100 bg-white/80 backdrop-blur-md z-10">
                     <h2 className="text-2xl font-black text-black tracking-tight flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center">
-                            <Search className="w-5 h-5 text-amber-600" />
+                        <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center">
+                            <Search className="w-5 h-5 text-[#1976D2]" />
                         </div>
                         {title}
                     </h2>
-                    <button aria-label="Fermer" 
+                    <button aria-label="Fermer"
                         onClick={onClose}
-                        className="w-10 h-10 bg-white rounded-full shadow-sm hover:bg-black hover:text-white transition-all flex items-center justify-center group"
+                        className="w-10 h-10 bg-gray-50 rounded-full shadow-sm hover:bg-black hover:text-white transition-all flex items-center justify-center group"
                     >
                         <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                     </button>
@@ -117,10 +117,10 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Modèle, Marque, ou N° Série/IMEI..."
-                                className="w-full pl-14 pr-4 py-5 bg-white border-2 border-transparent rounded-[2rem] focus:border-black outline-none transition-all text-lg font-bold shadow-sm group-hover:shadow-md rtl:text-base rtl:placeholder:text-sm"
+                                className="w-full pl-14 pr-4 py-5 bg-gray-50 border-2 border-transparent rounded-[2rem] focus:bg-white focus:border-black outline-none transition-all text-lg font-bold shadow-sm group-hover:shadow-md rtl:text-base rtl:placeholder:text-sm"
                                 autoFocus
                             />
-                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 w-6 h-6 group-focus-within:text-black transition-colors" />
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6 group-focus-within:text-black transition-colors" />
                             <button
                                 type="submit"
                                 disabled={loading || !query.trim()}
@@ -156,8 +156,8 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
                     )}
 
                     {!loading && results.length === 0 && searchSource !== null && !error && (
-                        <div className="py-20 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-gray-100 shadow-sm">
-                            <BookOpen className="w-12 h-12 mb-4 text-gray-200" />
+                        <div className="py-20 flex flex-col items-center justify-center text-center bg-gray-50 rounded-[2rem] border border-gray-100 shadow-sm">
+                            <Smartphone className="w-12 h-12 mb-4 text-gray-300" />
                             <p className="text-xl font-black text-black tracking-tight mb-2">Aucun produit trouvé</p>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Essayez d'autres mots-clés ou le numéro de série / IMEI exact.</p>
                         </div>
@@ -169,36 +169,36 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
                             const cover = info.imageLinks?.thumbnail?.replace('http:', 'https:')
 
                             return (
-                                <div 
-                                    key={book.id} 
+                                <div
+                                    key={book.id}
                                     onClick={() => handleSelect(book)}
                                     className="bg-white rounded-[2rem] p-4 border border-gray-100 hover:border-black transition-all group hover:shadow-xl hover:-translate-y-1 cursor-pointer flex flex-col relative"
                                 >
                                     <div className="w-full aspect-[2/3] bg-gray-50 rounded-xl mb-4 overflow-hidden relative shadow-inner">
                                         {cover ? (
-                                            <Image 
-                                                src={cover} 
-                                                alt={info.title} 
+                                            <Image
+                                                src={cover}
+                                                alt={info.title}
                                                 fill
-                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                                className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                                                 sizes="(max-width: 768px) 50vw, 25vw"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 p-2 text-center">
-                                                <BookOpen className="w-8 h-8 opacity-20 mb-2" />
-                                                <span className="text-[9px] font-black uppercase tracking-widest text-gray-300">Sans couverture</span>
+                                                <Smartphone className="w-8 h-8 opacity-20 mb-2" />
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Sans photo</span>
                                             </div>
                                         )}
                                     </div>
-                                    
-                                    <h3 className="font-black text-base text-black leading-tight mb-1 line-clamp-2 group-hover:text-amber-600 transition-colors" title={info.title}>
+
+                                    <h3 className="font-black text-base text-black leading-tight mb-1 line-clamp-2 group-hover:text-[#1976D2] transition-colors" title={info.title}>
                                         {info.title}
                                     </h3>
-                                    
+
                                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 line-clamp-1" title={info.authors?.join(', ')}>
-                                        {info.authors?.join(', ') || 'Auteur inconnu'}
+                                        {info.authors?.join(', ') || 'Marque'}
                                     </p>
-                                    
+
                                     <button className="w-full mt-auto bg-gray-50 text-black text-[10px] font-black uppercase tracking-widest py-3 rounded-xl group-hover:bg-black group-hover:text-white transition-colors">
                                         Sélectionner
                                     </button>
