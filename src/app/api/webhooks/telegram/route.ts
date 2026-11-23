@@ -632,7 +632,7 @@ export async function POST(req: Request) {
                                 where: lowStockWhere,
                                 orderBy: { jumiaStock: 'asc' },
                                 take: 20,
-                                select: { name: true, sellerSku: true, jumiaStock: true, stock: true }
+                                select: { name: true, sellerSku: true, jumiaStock: true }
                             }),
                             prisma.extraProduct.findMany({
                                 where: lowStockWhere,
@@ -643,9 +643,9 @@ export async function POST(req: Request) {
                         ])
 
                         const products = [
-                            ...books.map(product => ({ name: product.title, ...product })),
-                            ...packs.map(product => ({ name: product.name, ...product })),
-                            ...accessories.map(product => ({ name: product.name, ...product }))
+                            ...books.map(product => ({ name: product.title, sellerSku: product.sellerSku, jumiaStock: product.jumiaStock, stock: String(product.stock) })),
+                            ...packs.map(product => ({ name: product.name, sellerSku: product.sellerSku, jumiaStock: product.jumiaStock, stock: 'Pack' })),
+                            ...accessories.map(product => ({ name: product.name, sellerSku: product.sellerSku, jumiaStock: product.jumiaStock, stock: String(product.stock) }))
                         ].sort((a, b) => (a.jumiaStock ?? 0) - (b.jumiaStock ?? 0)).slice(0, 30)
 
                         if (products.length === 0) {

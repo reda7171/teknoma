@@ -449,11 +449,11 @@ export async function sendTelegramMediaGroup(media: { type: 'photo', media: stri
 }
 
 // Répondre à un callback (bouton pressé)
-export async function answerCallbackQuery(callbackQueryId: string, text: string, token: string) {
+export async function answerCallbackQuery(callbackQueryId: string, text: string, token: string, showAlert = false) {
     await fetch(`${TELEGRAM_API}${token}/answerCallbackQuery`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ callback_query_id: callbackQueryId, text })
+        body: JSON.stringify({ callback_query_id: callbackQueryId, text, show_alert: showAlert })
     })
 }
 
