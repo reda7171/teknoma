@@ -6,10 +6,10 @@ import { getTranslations } from 'next-intl/server'
 import SellerBlogClient from './SellerBlogClient'
 
 export default async function SellerBlogPage({ params }: { params: Promise<{ locale: string }> }) {
-    const locale = (await params).locale
-    const [t, _session, posts] = await Promise.all([
+    const { locale } = await params
+    await requireSellerSession(locale)
+    const [t, posts] = await Promise.all([
         getTranslations('Seller.Blog'),
-        requireSellerSession(locale),
         getSellerPosts()
     ])
 

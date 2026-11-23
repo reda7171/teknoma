@@ -5,10 +5,10 @@ import { requireSellerSession } from '@/lib/server/seller-auth'
 import { getTranslations } from 'next-intl/server'
 
 export default async function SellerDashboardPage({ params }: { params: Promise<{ locale: string }> }) {
-    const locale = (await params).locale
-    const [t, session, data] = await Promise.all([
+    const { locale } = await params
+    const session = await requireSellerSession(locale)
+    const [t, data] = await Promise.all([
         getTranslations('Seller.Dashboard'),
-        requireSellerSession(locale),
         getSellerDashboardData()
     ])
 
@@ -26,7 +26,7 @@ export default async function SellerDashboardPage({ params }: { params: Promise<
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-4xl font-black text-black tracking-tighter capitalize">
-                        {t('Title')}, {user?.fullName}! 👋
+                        {t('Title')}, {user?.fullName || user?.email?.split('@')[0]}! 👋
                     </h1>
                     <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-2">
                         {t('Subtitle')}
@@ -39,8 +39,8 @@ export default async function SellerDashboardPage({ params }: { params: Promise<
                     >
                         Importer CSV / Excel
                     </Link>
-                    <Link 
-                        href="/seller/books/new" 
+                    <Link
+                        href="/seller/books/new"
                         className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all active:scale-95"
                     >
                         {t('NewBook')}
