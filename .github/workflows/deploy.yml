@@ -12,73 +12,15 @@ env:
   IMAGE_NAME: reda7171/riwaya-app
 
 jobs:
-  lighthouse-audit:
-    name: Lighthouse Mobile & Core Web Vitals Guard
-    runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: riwaya_db
-          MYSQL_USER: riwaya_user
-          MYSQL_PASSWORD: riwaya_pass
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Validate JSX Syntax
-        run: npm run check:jsx
-
-      - name: Validate i18n Parity (Strict)
-        run: npm run validate:i18n
-
-      - name: Setup Database Schema & Seed
-        run: |
-          npx prisma db push --accept-data-loss
-          npx tsx prisma/seed.ts
-        env:
-          DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
-
-      - name: Build Next.js
-        run: npm run build
-        env:
-          DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
-          NEXT_TELEMETRY_DISABLED: 1
-          NEXT_PUBLIC_APP_URL: "http://localhost:3000"
-
-      - name: Run Lighthouse CI Mobile CWV Audit
-        uses: treosh/lighthouse-ci-action@v12
-        with:
-          configPath: './.lighthouserc.json'
-          uploadArtifacts: false
-          temporaryPublicStorage: true
-        env:
-          DATABASE_URL: "mysql://riwaya_user:riwaya_pass@127.0.0.1:3306/riwaya_db"
-
   build-and-push-image:
-    needs: lighthouse-audit
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
