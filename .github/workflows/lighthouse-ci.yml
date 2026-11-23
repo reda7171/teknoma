@@ -1,10 +1,7 @@
 name: Lighthouse CI Performance, Accessibility, SEO & Contrast
 
 on:
-  pull_request:
-    branches:
-      - main
-      - master
+  workflow_dispatch:
 
 jobs:
   lighthouse-audit:
