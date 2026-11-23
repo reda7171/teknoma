@@ -142,7 +142,7 @@ export default function NewAccessoryPage({ params }: { params: Promise<{ locale:
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold"
-                                placeholder="Ex: Gamelle pour chat"
+                                placeholder="Ex: Chargeur 67W GaN Anker, Coque iPhone 16 Pro"
                             />
                         </div>
 

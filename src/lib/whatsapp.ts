@@ -153,7 +153,7 @@ export async function notifyAdminOnSellerLogin(seller: {
     city?: string | null
 }, ip?: string) {
     try {
-        const adminPhone = '212666038129'
+        const adminPhone = '212769686055'
         const dateStr = new Date().toLocaleString('fr-FR', { timeZone: 'Africa/Casablanca' })
         const adminUrl = 'http://localhost:3000/fr/admin/vendeurs'
 

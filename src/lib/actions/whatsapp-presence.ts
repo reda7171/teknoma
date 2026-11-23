@@ -154,8 +154,8 @@ export async function getActiveWhatsAppAgentAction() {
             return { phone: active.phone, agentName: active.name }
         }
         const defaultSetting = await prisma.siteSettings.findUnique({ where: { key: 'contact_whatsapp' } })
-        return { phone: defaultSetting?.value || '212702220575', agentName: null }
+        return { phone: defaultSetting?.value || '212769686055', agentName: null }
     } catch {
-        return { phone: '212702220575', agentName: null }
+        return { phone: '212769686055', agentName: null }
     }
 }

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, X, Trash2 } from 'lucide-react'
 
 const CATEGORIES = [
-    { value: 'BOOKS_PURCHASE', label: 'Achat livres', color: 'bg-blue-100 text-blue-700' },
+    { value: 'BOOKS_PURCHASE', label: 'Achat stock tech', color: 'bg-blue-100 text-blue-700' },
     { value: 'TRANSPORT', label: 'Transport', color: 'bg-amber-100 text-amber-700' },
     { value: 'ADS', label: 'Publicité', color: 'bg-pink-100 text-pink-700' },
     { value: 'MARKETING', label: 'Marketing', color: 'bg-purple-100 text-purple-700' },
@@ -76,7 +76,7 @@ export function AddTransactionModal({ onClose }: { onClose: () => void }) {
                             type="text"
                             value={form.title}
                             onChange={e => setForm({ ...form, title: e.target.value })}
-                            placeholder={type === 'EXPENSE' ? 'Ex: Achat 50 livres fournisseur' : 'Ex: Virement client'}
+                            placeholder={type === 'EXPENSE' ? 'Ex: Achat lot chargeurs Anker / smartphones' : 'Ex: Virement client'}
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-black outline-none text-sm font-bold"
                             required
                         />

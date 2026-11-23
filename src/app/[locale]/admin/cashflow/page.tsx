@@ -6,7 +6,7 @@ import { DeleteExpenseButton } from '@/components/admin/CashflowActions'
 export const metadata = { title: 'Cashflow | Admin Tekno Store' }
 
 const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
-    BOOKS_PURCHASE: { label: 'Achat livres', color: 'bg-blue-100 text-blue-700' },
+    BOOKS_PURCHASE: { label: 'Achat stock tech', color: 'bg-blue-100 text-blue-700' },
     TRANSPORT: { label: 'Transport', color: 'bg-amber-100 text-amber-700' },
     ADS: { label: 'Publicité', color: 'bg-pink-100 text-pink-700' },
     MARKETING: { label: 'Marketing', color: 'bg-purple-100 text-purple-700' },

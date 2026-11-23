@@ -139,17 +139,17 @@ export default function PetTestimonials({
   const reviews = REVIEWS[locale] || REVIEWS.fr
 
   return (
-    <section className="bg-[#fbf9f3] py-16 sm:py-20 border-b border-[#17351d]/10">
+    <section className="bg-white py-16 sm:py-20 border-b border-gray-200">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="mb-12 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#c59a55]/40 bg-[#f7f0df] px-3.5 py-1 text-xs font-bold text-[#82602d]">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3.5 py-1 text-xs font-bold text-[#1976D2]">
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" />
             <span>Avis Clients Vérifiés Tekno Store</span>
           </div>
-          <h2 className="mt-3 font-serif text-3xl font-bold tracking-tight text-[#17351d] sm:text-4xl">
+          <h2 className="mt-3 font-sans text-3xl font-bold tracking-tight text-[#1A1C1F] sm:text-4xl">
             {title}
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-[#56634e]">
+          <p className="mt-3 text-sm leading-relaxed text-gray-500">
             {subtitle}
           </p>
         </div>
@@ -158,7 +158,7 @@ export default function PetTestimonials({
           {reviews.map((rev, idx) => (
             <div
               key={idx}
-              className="relative flex flex-col justify-between rounded-3xl border border-[#17351d]/10 bg-white p-6 shadow-xs transition hover:-translate-y-1 hover:shadow-md"
+              className="relative flex flex-col justify-between rounded-3xl border border-gray-200 bg-white p-6 shadow-xs transition hover:-translate-y-1 hover:shadow-md"
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
@@ -170,7 +170,7 @@ export default function PetTestimonials({
                   <span className="text-[10px] text-gray-400 font-medium">{rev.date}</span>
                 </div>
 
-                <p className="mt-4 text-xs leading-relaxed text-[#2b3a26]">
+                <p className="mt-4 text-xs leading-relaxed text-gray-700">
                   "{rev.text}"
                 </p>
               </div>
@@ -178,12 +178,12 @@ export default function PetTestimonials({
               <div className="mt-6 border-t border-gray-100 pt-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-bold text-[#17351d]">{rev.name}</p>
-                    <p className="text-[11px] text-[#82602d] font-semibold">{rev.device}</p>
+                    <p className="text-xs font-bold text-[#1A1C1F]">{rev.name}</p>
+                    <p className="text-[11px] text-[#1976D2] font-semibold">{rev.device}</p>
                     <p className="text-[10px] text-gray-500">{rev.city}</p>
                   </div>
                 </div>
-                <div className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                <div className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-[#75C300]/15 px-2 py-0.5 text-[10px] font-bold text-[#427000]">
                   <CheckCircle2 className="h-3 w-3 text-emerald-600" />
                   <span>{rev.badge}</span>
                 </div>

@@ -248,7 +248,7 @@ export default function POSConfigForm({
                         value={favoriteCategories}
                         onChange={(e) => setFavoriteCategories(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        placeholder="Ex: Romans, Développement Personnel, Islam"
+                        placeholder="Ex: Smartphones, PC Portables, Mac & Apple, Audio, Accessoires"
                     />
                     <p className="mt-2 text-xs text-gray-500 font-medium">
                         Ces catégories s'afficheront en premier sur la page du point de vente.
@@ -296,10 +296,10 @@ export default function POSConfigForm({
                         className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     >
                         <option value="ALL">Tout le catalogue</option>
-                        <option value="BOOKS">Produits unitaires</option>
+                        <option value="SMARTPHONES">Smartphones & PC</option>
                         <option value="PACKS">Packs promo</option>
-                        <option value="ACCESSORIES">Accessoires animaux</option>
-                        <option value="CARE">Hygiène et soins</option>
+                        <option value="ACCESSORIES">Accessoires tech</option>
+                        <option value="AUDIO">Audio & Son</option>
                     </select>
                 </div>
 
