@@ -22,7 +22,7 @@ export default async function CartPage() {
 
 
     return (
-        <div className="min-h-screen bg-[#fffdf8] text-[#17351d]">
+        <div className="min-h-screen bg-[#F0EFF2] text-[#1A1C1F]">
             <Header />
 
             <main id="main-content" className="pets-store"><CartClient

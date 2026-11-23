@@ -8,5 +8,5 @@ import type {Metadata} from 'next'
 export async function generateMetadata({params}:{params:Promise<{locale:string}>}):Promise<Metadata>{const t=getPetContent((await params).locale);return {title:{absolute:t.faq+' | Tekno Store'},description:t.faqIntro}}
 export default async function Page({params}:{params:Promise<{locale:string}>}){
  const {locale}=await params,t=getPetContent(locale)
- return <><Header/><main id="main-content" className="pets-store bg-[#fffdf8] text-[#17351d]"><PetPageHero locale={locale} label={t.faq} title={t.faqTitle} intro={t.faqIntro}/><section className="mx-auto max-w-4xl px-5 py-14 sm:px-8"><PetFAQ locale={locale}/></section><PetHelpBanner locale={locale}/></main><Footer/></>
+ return <><Header/><main id="main-content" className="pets-store bg-[#F0EFF2] text-[#1A1C1F]"><PetPageHero locale={locale} label={t.faq} title={t.faqTitle} intro={t.faqIntro}/><section className="mx-auto max-w-4xl px-5 py-14 sm:px-8"><PetFAQ locale={locale}/></section><PetHelpBanner locale={locale}/></main><Footer/></>
 }

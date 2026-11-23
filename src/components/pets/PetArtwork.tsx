@@ -41,7 +41,7 @@ export default function PetArtwork() {
       </div>
 
       <div className="absolute bottom-4 right-4 flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-1.5 backdrop-blur-md">
-        <Headphones className="h-4 w-4 text-purple-400" />
+        <Headphones className="h-4 w-4 text-[#75C300]" />
         <span className="text-xs font-semibold">Audio Hi-Res</span>
       </div>
     </div>

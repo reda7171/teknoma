@@ -107,18 +107,18 @@ export default async function Products({
   return (
     <>
       <HeaderWithUser />
-      <main id="main-content" className="pets-store min-h-[65vh] bg-[#fffdf8] px-5 py-12 text-[#17351d]">
+      <main id="main-content" className="pets-store min-h-[65vh] bg-[#F0EFF2] px-5 py-12 text-[#1A1C1F]">
         <div className="mx-auto max-w-7xl">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#a07738]">Tekno Store</p>
-          <h1 className="mt-3 font-serif text-4xl md:text-5xl">{pageTitle}</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-[#68705f]">{c.intro}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-[#1976D2]">Tekno Store</p>
+          <h1 className="mt-3 font-sans font-black text-4xl md:text-5xl">{pageTitle}</h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-500">{c.intro}</p>
 
           {/* Search Bar */}
           <form className="mt-7 flex max-w-xl gap-2" action={'/' + locale + '/products'}>
             {category && <input type="hidden" name="category" value={category} />}
             {brand && <input type="hidden" name="brand" value={brand} />}
-            <label className="flex flex-1 items-center gap-2 rounded-xl border border-[#17351d]/20 bg-white px-4">
-              <Search className="h-5 w-5 shrink-0 text-[#a07738]" />
+            <label className="flex flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-white px-4">
+              <Search className="h-5 w-5 shrink-0 text-[#1976D2]" />
               <input
                 name="search"
                 aria-label={c.search}
@@ -127,15 +127,15 @@ export default async function Products({
                 className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none"
               />
             </label>
-            <button className="rounded-xl bg-[#17351d] px-5 text-sm font-bold text-white">
+            <button className="rounded-xl bg-[#1A1C1F] px-5 text-sm font-bold text-white">
               {c.searchButton}
             </button>
           </form>
 
           {/* 1-Click Brand Filter Bar */}
-          <div className="mt-8 pt-4 border-t border-[#17351d]/10">
+          <div className="mt-8 pt-4 border-t border-gray-200">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#82602d] me-2 flex items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1976D2] me-2 flex items-center gap-1.5">
                 <Cpu className="w-3.5 h-3.5" />
                 {c.brand} :
               </span>
@@ -144,8 +144,8 @@ export default async function Products({
                 className={
                   'rounded-full px-4 py-2 text-xs font-semibold transition ' +
                   (!brand
-                    ? 'bg-[#17351d] text-white shadow-xs'
-                    : 'border border-[#17351d]/20 bg-white text-[#17351d] hover:border-[#17351d]/40')
+                    ? 'bg-[#1A1C1F] text-white shadow-xs'
+                    : 'border border-gray-200 bg-white text-[#1A1C1F] hover:border-[#1976D2]')
                 }
               >
                 {c.all}
@@ -159,8 +159,8 @@ export default async function Products({
                     className={
                       'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition ' +
                       (isSelected
-                        ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/20'
-                        : 'border border-[#17351d]/20 bg-white text-[#17351d] hover:border-blue-600 hover:text-blue-600')
+                        ? 'bg-[#1976D2] text-white shadow-sm ring-2 ring-[#1976D2]/20'
+                        : 'border border-gray-200 bg-white text-[#1A1C1F] hover:border-[#1976D2] hover:text-[#1976D2]')
                     }
                   >
                     <span>{b}</span>
@@ -178,8 +178,8 @@ export default async function Products({
               className={
                 'rounded-full px-4 py-2 text-xs font-semibold transition ' +
                 (!category
-                  ? 'bg-[#17351d] text-white'
-                  : 'border border-[#17351d]/20 bg-white text-[#17351d] hover:border-[#17351d]/40')
+                  ? 'bg-[#1A1C1F] text-white'
+                  : 'border border-gray-200 bg-white text-[#1A1C1F] hover:border-[#1976D2]')
               }
             >
               {c.all}
@@ -193,8 +193,8 @@ export default async function Products({
                   className={
                     'rounded-full border px-4 py-2 text-xs font-semibold transition ' +
                     (isSelected
-                      ? 'border-[#17351d] bg-[#17351d] text-white'
-                      : 'border-[#17351d]/20 bg-white hover:border-[#17351d]/40')
+                      ? 'border-[#17351d] bg-[#1A1C1F] text-white'
+                      : 'border-gray-200 bg-white hover:border-[#1976D2]')
                   }
                 >
                   {labels[i]}
@@ -205,10 +205,10 @@ export default async function Products({
 
           {/* Results Count & Active Filters */}
           <div className="mb-5 flex items-center justify-between">
-            <p className="text-xs text-[#68705f]">
+            <p className="text-xs text-gray-500">
               {count} {c.results}
-              {brand && <span className="ms-2 font-semibold text-[#17351d]">· Marque: {brand}</span>}
-              {category && <span className="ms-2 font-semibold text-[#17351d]">· Catégorie: {category}</span>}
+              {brand && <span className="ms-2 font-semibold text-[#1A1C1F]">· Marque: {brand}</span>}
+              {category && <span className="ms-2 font-semibold text-[#1A1C1F]">· Catégorie: {category}</span>}
             </p>
             {(brand || category || search) && (
               <Link href="/products" className="text-xs font-bold text-red-600 hover:underline">
@@ -226,9 +226,9 @@ export default async function Products({
             </div>
           ) : (
             <div className="rounded-3xl border border-dashed border-[#c59a55]/50 bg-[#f7f0df] px-6 py-16 text-center">
-              <Cpu className="mx-auto h-12 w-12 text-[#a07738]" />
+              <Cpu className="mx-auto h-12 w-12 text-[#1976D2]" />
               <h2 className="mt-5 text-xl font-bold">{search ? c.out : c.empty}</h2>
-              <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-[#68705f]">{c.emptyText}</p>
+              <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-gray-500">{c.emptyText}</p>
               <Link href="/products" className="mt-5 inline-block text-sm font-bold underline">
                 {c.reset}
               </Link>

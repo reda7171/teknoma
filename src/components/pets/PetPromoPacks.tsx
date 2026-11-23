@@ -29,7 +29,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'Hub USB-C Satechi 8-en-1 Dual 4K HDMI + PD 100W',
         'Housse de transport antichoc offerte'
       ],
-      color: 'bg-[#e8ecdf]'
+      color: 'bg-white'
     },
     {
       id: 'pack-smartphone-power',
@@ -45,7 +45,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'Batterie externe MagSafe 10000mAh',
         'Câble USB-C tressé renforcé 2M inclus'
       ],
-      color: 'bg-[#f0e3ce]'
+      color: 'bg-white'
     },
     {
       id: 'pack-bureau-setup',
@@ -61,7 +61,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'Hub USB-C multi-ports Satechi HDMI 4K + Ethernet',
         'Tapis de bureau grande taille en cuir PU'
       ],
-      color: 'bg-[#eee5d5]'
+      color: 'bg-white'
     }
   ],
   en: [
@@ -79,7 +79,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'Satechi 8-in-1 Dual 4K HDMI USB-C Hub',
         'Complimentary protective laptop sleeve'
       ],
-      color: 'bg-[#e8ecdf]'
+      color: 'bg-white'
     },
     {
       id: 'pack-smartphone-power',
@@ -95,7 +95,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'MagSafe 10,000mAh Wireless Power Bank',
         'Reinforced 2M braided USB-C cable included'
       ],
-      color: 'bg-[#f0e3ce]'
+      color: 'bg-white'
     },
     {
       id: 'pack-bureau-setup',
@@ -111,7 +111,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'Satechi USB-C Multi-port 4K HDMI Hub',
         'Extended PU leather desk pad'
       ],
-      color: 'bg-[#eee5d5]'
+      color: 'bg-white'
     }
   ],
   ar: [
@@ -129,7 +129,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'محول USB-C متعدد المنافذ 8 في 1 Satechi بدقة 4K',
         'حقيبة حماية فاخرة للماك مجاناً'
       ],
-      color: 'bg-[#e8ecdf]'
+      color: 'bg-white'
     },
     {
       id: 'pack-smartphone-power',
@@ -145,7 +145,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'بطارية متنقلة MagSafe بسعة 10000mAh',
         'كابل شحن سريع USB-C معزز بطول 2 متر'
       ],
-      color: 'bg-[#f0e3ce]'
+      color: 'bg-white'
     },
     {
       id: 'pack-bureau-setup',
@@ -161,7 +161,7 @@ const PACKS_BY_LOCALE: Record<string, PackItem[]> = {
         'موزع منافذ USB-C من ساتيتشي يدعم شاشات 4K',
         'بساط مكتب كبير فاخر'
       ],
-      color: 'bg-[#eee5d5]'
+      color: 'bg-white'
     }
   ]
 }
@@ -180,17 +180,17 @@ export default function PetPromoPacks({
   const packs = PACKS_BY_LOCALE[locale] || PACKS_BY_LOCALE.fr
 
   return (
-    <section className="bg-white py-16 sm:py-20 border-b border-[#17351d]/10">
+    <section className="bg-white py-16 sm:py-20 border-b border-gray-200">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="mb-12 max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c59a55]/40 bg-[#f7f0df] px-3.5 py-1 text-xs font-bold text-[#82602d]">
-            <Zap className="h-3.5 w-3.5 text-[#96703a]" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#c59a55]/40 bg-[#f7f0df] px-3.5 py-1 text-xs font-bold text-[#1976D2]">
+            <Zap className="h-3.5 w-3.5 text-[#75C300]" />
             <span>Offres Spéciales Tekno.ma</span>
           </div>
-          <h2 className="mt-3 font-serif text-3xl font-bold tracking-tight text-[#17351d] sm:text-4xl">
+          <h2 className="mt-3 font-sans text-3xl font-bold tracking-tight text-[#1A1C1F] sm:text-4xl">
             {title}
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-[#56634e]">
+          <p className="mt-3 text-sm leading-relaxed text-gray-500">
             {subtitle}
           </p>
         </div>
@@ -199,11 +199,11 @@ export default function PetPromoPacks({
           {packs.map((pack) => (
             <div
               key={pack.id}
-              className={`relative flex flex-col justify-between rounded-3xl p-7 border border-[#17351d]/10 transition hover:-translate-y-1 hover:shadow-xl ${pack.color}`}
+              className={`relative flex flex-col justify-between rounded-3xl p-7 border border-gray-200 transition hover:-translate-y-1 hover:shadow-xl ${pack.color}`}
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[#17351d] shadow-xs">
+                  <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-[#1A1C1F] shadow-xs">
                     {pack.badge}
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
@@ -212,15 +212,15 @@ export default function PetPromoPacks({
                   </span>
                 </div>
 
-                <h3 className="mt-5 font-serif text-2xl font-bold text-[#17351d]">
+                <h3 className="mt-5 font-sans text-2xl font-bold text-[#1A1C1F]">
                   {pack.title}
                 </h3>
-                <p className="mt-1 text-xs text-[#56634e] font-medium">
+                <p className="mt-1 text-xs text-gray-500 font-medium">
                   {pack.target}
                 </p>
 
                 <div className="mt-6 flex items-baseline gap-3">
-                  <span className="text-3xl font-black text-[#17351d]">
+                  <span className="text-3xl font-black text-[#1A1C1F]">
                     {pack.price.toLocaleString('fr-FR')} <span className="text-base font-bold">MAD</span>
                   </span>
                   <span className="text-sm font-semibold text-gray-500 line-through">
@@ -228,27 +228,27 @@ export default function PetPromoPacks({
                   </span>
                 </div>
 
-                <div className="mt-6 space-y-2.5 border-t border-[#17351d]/15 pt-5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#82602d]">
+                <div className="mt-6 space-y-2.5 border-t border-gray-100 pt-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#1976D2]">
                     Équipements inclus :
                   </p>
                   {pack.items.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-xs text-[#2b3a26]">
-                      <Check className="h-4 w-4 shrink-0 text-emerald-700 mt-0.5" />
+                    <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
+                      <Check className="h-4 w-4 shrink-0 text-[#75C300] mt-0.5" />
                       <span className="leading-snug">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-8 border-t border-[#17351d]/15 pt-5">
-                <div className="mb-4 flex items-center gap-2 text-[11px] text-[#56634e]">
-                  <ShieldCheck className="h-4 w-4 text-[#96703a]" />
+              <div className="mt-8 border-t border-gray-100 pt-5">
+                <div className="mb-4 flex items-center gap-2 text-[11px] text-gray-500">
+                  <ShieldCheck className="h-4 w-4 text-[#75C300]" />
                   <span>Livraison gratuite + Garantie officielle</span>
                 </div>
                 <Link
                   href="/products"
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#17351d] py-3.5 text-center text-xs font-bold text-white transition hover:bg-[#284b2c] active:scale-95 shadow-sm"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1A1C1F] py-3.5 text-center text-xs font-bold text-white transition hover:bg-[#75C300] hover:text-[#1A1C1F] active:scale-95 shadow-sm"
                 >
                   <span>{orderNowLabel}</span>
                   <ArrowUpRight className="h-4 w-4" />

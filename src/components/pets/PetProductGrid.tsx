@@ -57,7 +57,7 @@ export default function PetProductGrid({
 
   return (
     <div className="mt-8 space-y-8">
-      {/* Category Tabs */}
+      {/* Category Tabs (MicroMagma style pills) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
         {TABS.map((tab) => {
           const label = locale === 'ar' ? tab.labelAr : locale === 'en' ? tab.labelEn : tab.labelFr
@@ -69,8 +69,8 @@ export default function PetProductGrid({
               onClick={() => setActiveTab(tab.key)}
               className={`rounded-full px-5 py-2.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 isActive
-                  ? 'bg-[#17351d] text-[#fff9eb] shadow-sm'
-                  : 'bg-[#f7f0df]/80 text-[#56634e] hover:bg-[#ebdcc0] hover:text-[#17351d]'
+                  ? 'bg-[#1A1C1F] text-[#75C300] shadow-sm'
+                  : 'bg-white border border-gray-200 text-gray-700 hover:border-[#1976D2] hover:text-[#1976D2]'
               }`}
             >
               {label}
@@ -87,13 +87,12 @@ export default function PetProductGrid({
           ))}
         </div>
       ) : (
-        <div className="rounded-3xl border border-dashed border-[#c59a55]/50 bg-[#f7f0df]/40 px-6 py-12 text-center">
-          <Cpu className="mx-auto mb-3 h-8 w-8 text-[#a07738]" />
-          <h3 className="text-base font-bold text-[#17351d]">{emptyTitle}</h3>
-          <p className="mx-auto mt-2 max-w-md text-xs leading-6 text-[#68705f]">{emptyText}</p>
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
+          <Cpu className="mx-auto mb-3 h-8 w-8 text-[#1976D2]" />
+          <h3 className="text-base font-bold text-[#1A1C1F]">{emptyTitle}</h3>
+          <p className="mx-auto mt-2 max-w-md text-xs leading-6 text-gray-500">{emptyText}</p>
         </div>
       )}
     </div>
   )
 }
-
