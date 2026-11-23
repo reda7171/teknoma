@@ -82,7 +82,7 @@ export async function generateFacebookWatermarkedImage(
         const bannerColor = config.color || '#0f172a'
         const opacity = config.opacity !== undefined ? config.opacity : 0.92
         const brandText = 'tekno.ma'
-        const customText = config.text || 'WhatsApp: +212 666-038129 • Livraison Partout au Maroc'
+        const customText = config.text || 'WhatsApp: +212 769-686055 • Livraison Partout au Maroc'
         const position = config.position || 'bottom'
         const showPrice = config.showPrice !== false
 

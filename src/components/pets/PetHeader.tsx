@@ -25,7 +25,7 @@ export default function PetHeader() {
   ]
   return <header className="pet-header border-b border-[#17351d]/10 bg-[#fffdf8] text-[#17351d]">
     <a href="#main-content" className="sr-only z-50 rounded-lg bg-white p-4 focus:not-sr-only focus:absolute">{locale === 'ar' ? 'انتقل إلى المحتوى' : locale === 'en' ? 'Skip to content' : 'Aller au contenu'}</a>
-    <div className="bg-[#17351d] px-4 py-2.5 text-center text-[11px] tracking-wide text-[#f7f0df]">{c.tag}<span className="mx-4 hidden opacity-40 sm:inline">|</span><Link href="/contact" className="hidden underline underline-offset-4 sm:inline">{c.help}</Link></div>
+    <div className="bg-[#17351d] px-4 py-2.5 text-center text-[11px] tracking-wide text-[#f7f0df] flex flex-wrap items-center justify-center gap-x-4 gap-y-1"><span>{c.tag}</span><span className="hidden opacity-40 sm:inline">|</span><a dir="ltr" href="tel:+212769686055" className="font-bold text-[#e5c993] hover:underline">📞 +212 769-686055</a><span className="hidden opacity-40 sm:inline">|</span><a dir="ltr" href="https://wa.me/212769686055" target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-300 hover:underline">WhatsApp 7j/7</a><span className="hidden opacity-40 sm:inline">|</span><Link href="/contact" className="hidden underline underline-offset-4 sm:inline">{c.help}</Link></div>
     <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8 md:py-6">
       <Link href="/" className="flex shrink-0 items-center gap-2" dir="ltr">
         <Image src="/logo.png" alt="Tekno Store" width={160} height={50} className="h-10 w-auto object-contain sm:h-12" priority />

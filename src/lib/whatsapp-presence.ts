@@ -57,7 +57,7 @@ export async function resolveActiveWhatsAppAgent() {
     if (agents.length === 0) return null
 
     const defaultSetting = await prisma.siteSettings.findUnique({ where: { key: 'contact_whatsapp' } })
-    const fallbackPhone = defaultSetting?.value || '212702220575'
+    const fallbackPhone = defaultSetting?.value || '212769686055'
 
     const presenceSettings = await prisma.siteSettings.findMany({
         where: { key: { in: agents.map(agent => `whatsapp_presence_${agent.id}`) } },

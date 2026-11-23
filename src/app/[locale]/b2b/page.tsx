@@ -262,7 +262,7 @@ export default function B2BPage() {
                             <div>
                                 <Phone className="w-8 h-8 mx-auto mb-3 text-pixio-yellow" />
                                 <div className="font-bold">Téléphone</div>
-                                <a href="tel:+212702220575" className="text-gray-300 hover:text-pixio-yellow transition-colors">
+                                <a href="tel:+212769686055" className="text-gray-300 hover:text-pixio-yellow transition-colors">
                                     +212 702-220575
                                 </a>
                             </div>

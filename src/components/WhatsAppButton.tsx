@@ -17,7 +17,7 @@ function normalizePhone(raw?: string): string {
     if (clean.startsWith('00')) clean = clean.substring(2)
     if (clean.startsWith('0')) clean = '212' + clean.substring(1)
     if (!clean.startsWith('212') && clean.length === 9) clean = '212' + clean
-    return clean || '212702220575'
+    return clean || '212769686055'
 }
 
 export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps) {
