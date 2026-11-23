@@ -1,5 +1,5 @@
 // Service Worker Tekno Store — Cache stratégique pour PWA
-const CACHE_NAME = 'tekno-v2'
+const CACHE_NAME = 'tekno-v3'
 const OFFLINE_URL = '/offline.html'
 
 // Ressources pré-cachées au moment de l'installation
