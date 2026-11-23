@@ -258,7 +258,7 @@ export default async function LocaleLayout({
     activeWhatsAppAgent
   ] = await Promise.all([
     getMessages(),
-    isFeatureEnabled('feature_chatbot'),
+    isFeatureEnabled('feature_chatbot', false),
     isFeatureEnabled('feature_whatsapp'),
     getSetting('contact_whatsapp'),
     getSetting('contact_instagram'),

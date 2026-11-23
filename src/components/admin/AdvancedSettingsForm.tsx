@@ -50,7 +50,7 @@ const FEATURES = [
         label: 'Chatbot IA',
         description: 'Active le chatbot assistant virtuel sur le site.',
         icon: MessageCircle,
-        color: 'text-purple-600'
+        color: 'text-sky-600'
     },
     {
         key: 'feature_3_for_4',
@@ -71,7 +71,7 @@ const FEATURES = [
         label: 'Point de Vente (POS)',
         description: 'Active l\'interface de caisse (Point of Sale) pour les ventes physiques.',
         icon: Calculator,
-        color: 'text-purple-600'
+        color: 'text-emerald-600'
     },
 ]
 
