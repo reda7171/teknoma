@@ -213,9 +213,7 @@ export default function BookFilters({
                                     { id: '', label: 'Tous' },
                                     { id: 'book', label: 'Produits unitaires' },
                                     { id: 'pack', label: 'Packs promo' },
-                                    { id: 'accessory', label: 'Accessoires' },
-                                    { id: 'food', label: 'Alimentation' },
-                                    { id: 'care', label: 'Hygiène & Soins' }
+                                    { id: 'accessory', label: 'Accessoires tech' }
                                 ].map((f) => {
                                     const currentTypes = activeFilters.type ? activeFilters.type.split(',') : []
                                     const isActive = f.id === '' ? currentTypes.length === 0 : currentTypes.includes(f.id)

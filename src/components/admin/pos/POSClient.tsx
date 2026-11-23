@@ -113,7 +113,7 @@ interface POSClientProps {
   favoriteCategories?: string;
   showSearch?: boolean;
   defaultGridCols?: number;
-  defaultTab?: 'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES' | 'CARE' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS';
+  defaultTab?: 'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES' | 'SMARTPHONES' | 'AUDIO';
   allowOutOfStock?: boolean;
   requireCustomer?: boolean;
   enableSessions?: boolean;
@@ -144,8 +144,8 @@ export default function POSClient({
   const [localAccessories, setLocalAccessories] = useState<any[]>(accessories);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES' | 'CARE' | 'ACCESSORIES_LIBRARY' | 'ACCESSORIES_KIDS'>(
-    defaultTab === 'ACCESSORIES_LIBRARY' ? 'ACCESSORIES' : defaultTab === 'ACCESSORIES_KIDS' ? 'CARE' : defaultTab
+  const [activeTab, setActiveTab] = useState<'ALL' | 'BOOKS' | 'PACKS' | 'ACCESSORIES' | 'SMARTPHONES' | 'AUDIO'>(
+    defaultTab === 'CARE' ? 'AUDIO' : (defaultTab as any) || 'ALL'
   );
   const [gridCols, setGridCols] = useState(defaultGridCols);
   
@@ -418,10 +418,15 @@ export default function POSClient({
   };
 
   const displayedProducts = [
-    ...(activeTab === 'ALL' || activeTab === 'BOOKS' ? filteredBooks.map(b => ({ ...b, type: 'BOOK' as const })) : []),
-    ...(activeTab === 'ALL' || activeTab === 'PACKS' ? filteredPacks.map(p => ({ ...p, type: 'PACK' as const })) : []),
-    ...(activeTab === 'ALL' || activeTab === 'ACCESSORIES' || (activeTab as string) === 'ACCESSORIES_LIBRARY' ? (filteredAccessoriesLibrary.length > 0 ? filteredAccessoriesLibrary : allActiveAccessories).map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })) : []),
-    ...(activeTab === 'ALL' || activeTab === 'CARE' || (activeTab as string) === 'ACCESSORIES_KIDS' ? filteredAccessoriesKids.map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })) : [])
+    ...(activeTab === 'ALL' ? [
+      ...filteredBooks.map(b => ({ ...b, type: 'BOOK' as const })),
+      ...filteredPacks.map(p => ({ ...p, type: 'PACK' as const })),
+      ...allActiveAccessories.map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const }))
+    ] : []),
+    ...(activeTab === 'SMARTPHONES' || activeTab === 'BOOKS' ? techHardware.map(b => ({ ...b, type: 'BOOK' as const })) : []),
+    ...(activeTab === 'PACKS' ? filteredPacks.map(p => ({ ...p, type: 'PACK' as const })) : []),
+    ...(activeTab === 'ACCESSORIES' ? techAccessories : []),
+    ...(activeTab === 'AUDIO' ? techAudio.map(b => ({ ...b, type: 'BOOK' as const })) : [])
   ];
 
   const addToCart = (product: any, type: 'BOOK' | 'PACK' | 'ACCESSORY') => {
@@ -814,16 +819,16 @@ export default function POSClient({
               <div className="flex gap-2 md:gap-3">
                 {[
                     { id: 'ALL', label: 'TOUT LE CATALOGUE' },
-                    { id: 'BOOKS', label: 'PRODUITS UNITAIRES' },
+                    { id: 'SMARTPHONES', label: 'SMARTPHONES & PC' },
                     { id: 'PACKS', label: 'PACKS PROMO' },
-                    { id: 'ACCESSORIES', label: 'ACCESSOIRES ANIMAUX' },
-                    { id: 'CARE', label: 'HYGIÈNE & SOINS' }
+                    { id: 'ACCESSORIES', label: 'ACCESSOIRES TECH' },
+                    { id: 'AUDIO', label: 'AUDIO & SON' }
                 ].map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`px-4 py-3 md:px-8 md:py-4 rounded-[1rem] md:rounded-2xl font-black text-[8px] md:text-[9px] uppercase tracking-[0.2em] transition-all whitespace-nowrap border ${
-                      activeTab === tab.id || (tab.id === 'ACCESSORIES' && (activeTab as string) === 'ACCESSORIES_LIBRARY') || (tab.id === 'CARE' && (activeTab as string) === 'ACCESSORIES_KIDS')
+                      activeTab === tab.id || (tab.id === 'SMARTPHONES' && activeTab === 'BOOKS') || (tab.id === 'AUDIO' && (activeTab as string) === 'CARE')
                         ? 'bg-black text-white border-black shadow-xl shadow-black/20 scale-105' 
                         : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-black'
                     }`}
