@@ -63,6 +63,7 @@ import OrderNotifications from '@/components/admin/OrderNotifications'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import WhatsAppAvailabilityPopup from '@/components/admin/WhatsAppAvailabilityPopup'
 import WhatsAppStatusButton from '@/components/admin/WhatsAppStatusButton'
+import GlobalImeiSearch from '@/components/admin/GlobalImeiSearch'
 
 export default function AdminLayout({
     children,
@@ -562,26 +563,52 @@ export default function AdminLayout({
             <div className={`transition-all duration-300 ${pathname?.endsWith('/admin/pos') ? 'pl-0' : sidebarCollapsed ? 'md:pl-20' : 'md:pl-64 lg:pl-72'}`}>
                 {/* Topbar mobile */}
                 {!pathname?.endsWith('/admin/pos') && (
-                    <div className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shadow-sm">
-                        <button
-                            onClick={() => setSidebarOpen(true)}
-                            aria-label="Ouvrir le menu"
-                            className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
-                        >
-                            <Menu className="w-5 h-5" />
-                        </button>
-                        <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
-                                <span className="text-white text-sm font-black italic">R</span>
+                    <div className="md:hidden sticky top-0 z-30 flex flex-col gap-2 px-4 py-3 bg-white border-b border-slate-200 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <button
+                                onClick={() => setSidebarOpen(true)}
+                                aria-label="Ouvrir le menu"
+                                className="p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+                            >
+                                <Menu className="w-5 h-5" />
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
+                                    <span className="text-white text-sm font-black italic">T</span>
+                                </div>
+                                <span className="text-base font-black text-slate-900">Tekno Store<span className="text-blue-600">.</span></span>
                             </div>
-                            <span className="text-base font-black text-slate-900">Tekno Store<span className="text-blue-600">.</span></span>
+                            <div className="flex items-center gap-2">
+                                <WhatsAppStatusButton isCollapsed={true} />
+                                <LanguageSwitcher />
+                                <OrderNotifications />
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <WhatsAppStatusButton isCollapsed={true} />
+                        <GlobalImeiSearch />
+                    </div>
+                )}
+
+                {/* Topbar desktop avec Recherche Globale IMEI */}
+                {!pathname?.endsWith('/admin/pos') && (
+                    <header className="hidden md:flex sticky top-0 z-30 items-center justify-between px-8 py-3.5 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+                        <div className="flex-1 max-w-xl">
+                            <GlobalImeiSearch />
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <WhatsAppStatusButton isCollapsed={false} />
                             <LanguageSwitcher />
                             <OrderNotifications />
+                            <a
+                                href={`/${lang}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+                            >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                Boutique
+                            </a>
                         </div>
-                    </div>
+                    </header>
                 )}
 
                 <main className={pathname?.endsWith('/admin/pos') ? "w-full h-screen" : "p-4 md:p-8 lg:p-10 w-full min-h-screen"}>
