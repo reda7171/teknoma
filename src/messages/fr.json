@@ -1078,10 +1078,10 @@
       "Condition": "État",
       "Description": "Description (optionnel)",
       "Isbn": "Numéro de série / IMEI / Code-barres",
-      "Submit": "Ajouter à ma bibliothèque",
+      "Submit": "Ajouter le produit",
       "SaveChanges": "Enregistrer les modifications",
       "Delete": "Supprimer le produit",
-      "ConfirmDelete": "Êtes-vous sûr de vouloir supprimer ce produit de votre bibliothèque ?",
+      "ConfirmDelete": "Êtes-vous sûr de vouloir supprimer ce produit ?",
       "EligibilityError": "Vous devez avoir effectué au moins une commande sur Tekno Store pour ajouter un produit au système d'échange.",
       "Conditions": {
         "NEW": "Neuf",

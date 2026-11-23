@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { addExchangeBook } from '@/lib/actions/community-books'
 import { uploadBookImage } from '@/lib/actions/upload'
 import { Link } from '@/i18n/routing'
-import { ArrowLeft, BookOpen, User, Tag, FileText, Loader2, Search } from 'lucide-react'
+import { ArrowLeft, Smartphone, User, Tag, FileText, Loader2, Search } from 'lucide-react'
 import MultiImageUpload from '@/components/community/MultiImageUpload'
 import AutocompleteInput from '@/components/community/AutocompleteInput'
 import BookSearchModal, { SelectedBookData } from '@/components/community/BookSearchModal'
@@ -130,7 +130,7 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
                             required
                             className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
                             placeholder={`${t('Title')}...`}
-                            icon={<BookOpen className="w-5 h-5 text-gray-300" />}
+                            icon={<Smartphone className="w-5 h-5 text-gray-300" />}
                         />
                     </div>
 
