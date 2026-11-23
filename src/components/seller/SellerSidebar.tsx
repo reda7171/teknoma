@@ -15,6 +15,7 @@ import {
     PenLine,
     Menu,
     X,
+    FileSpreadsheet
 } from 'lucide-react'
 
 export default function SellerSidebar({ user }: { user: any }) {
@@ -78,11 +79,19 @@ export default function SellerSidebar({ user }: { user: any }) {
                     )
                 })}
 
-                <div className="pt-4 mt-4 border-t border-gray-100">
+                <div className="pt-4 mt-4 border-t border-gray-100 space-y-1">
+                    <Link
+                        href="/seller/books/import"
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center px-4 py-3 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors ${isRtl ? 'font-black' : 'font-medium'}`}
+                    >
+                        <FileSpreadsheet className={`w-5 h-5 ${isRtl ? 'ml-3' : 'mr-3'}`} />
+                        {t('ImportBooks')}
+                    </Link>
                     <Link
                         href="/seller/books/new"
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center px-4 py-3 text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors ${isRtl ? 'font-black' : 'font-medium'}`}
+                        className={`flex items-center px-4 py-3 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors ${isRtl ? 'font-black' : 'font-medium'}`}
                     >
                         <PlusCircle className={`w-5 h-5 ${isRtl ? 'ml-3' : 'mr-3'}`} />
                         {t('NewBook')}

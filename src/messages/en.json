@@ -84,7 +84,8 @@
       "MyOrders": "My Orders",
       "MyBlog": "My Blog",
       "NewBook": "New Book",
-      "Logout": "Logout"
+      "Logout": "Logout",
+      "ImportBooks": "Import (CSV/Excel)"
     },
     "Dashboard": {
       "Title": "Hello",

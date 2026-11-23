@@ -15,10 +15,10 @@ export default async function SellerBlogPage({ params }: { params: Promise<{ loc
     let userId = await getAdminUser()
     let role = await getAdminRole()
     if (!userId || role !== 'SELLER') {
-        const commId = await getCommunityUser()
-        if (commId) {
-            const u = await prisma.user.findUnique({ where: { id: commId } })
-            if (u?.role === 'SELLER') { userId = commId; role = 'SELLER' }
+        const commUser = await getCommunityUser()
+        if (commUser && commUser.role === 'SELLER') {
+            userId = commUser.id
+            role = 'SELLER'
         }
     }
     if (!userId || role !== 'SELLER') redirect(`/${locale}/admin/login`)

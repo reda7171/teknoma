@@ -84,7 +84,8 @@
       "MyOrders": "طلباتي",
       "MyBlog": "مقالاتي",
       "NewBook": "كتاب جديد",
-      "Logout": "تسجيل الخروج"
+      "Logout": "تسجيل الخروج",
+      "ImportBooks": "استيراد (CSV/Excel)"
     },
     "Dashboard": {
       "Title": "مرحباً",

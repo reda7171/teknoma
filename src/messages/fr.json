@@ -55,7 +55,8 @@
       "MyOrders": "Mes Commandes",
       "MyBlog": "Mon Blog",
       "NewBook": "Nouveau Livre",
-      "Logout": "Déconnexion"
+      "Logout": "Déconnexion",
+      "ImportBooks": "Importer (CSV/Excel)"
     },
     "Dashboard": {
       "Title": "Salut",

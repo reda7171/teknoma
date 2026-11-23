@@ -1,5 +1,5 @@
 import { getSellerBooks } from '@/lib/actions/seller/dashboard'
-import { Plus, BookOpen } from 'lucide-react'
+import { Plus, BookOpen, FileSpreadsheet } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { normalizeImage } from '@/lib/utils'
 import SellerBookActionsClient from './SellerBookActionsClient'
@@ -14,18 +14,27 @@ export default async function SellerBooksPage() {
     return (
         <div className="space-y-12">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-4xl font-black text-black tracking-tighter uppercase">{t('Title')}</h1>
                     <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-2">{t('Subtitle')}</p>
                 </div>
-                <Link
-                    href="/seller/books/new"
-                    className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all active:scale-95 flex items-center gap-2"
-                >
-                    <Plus className="w-5 h-5" />
-                    {t('Add')}
-                </Link>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/seller/books/import"
+                        className="bg-white text-black border border-gray-200 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:bg-gray-50 transition-all active:scale-95 flex items-center gap-2"
+                    >
+                        <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                        Importer CSV / Excel
+                    </Link>
+                    <Link
+                        href="/seller/books/new"
+                        className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all active:scale-95 flex items-center gap-2"
+                    >
+                        <Plus className="w-5 h-5" />
+                        {t('Add')}
+                    </Link>
+                </div>
             </div>
 
             {/* Books Grid */}

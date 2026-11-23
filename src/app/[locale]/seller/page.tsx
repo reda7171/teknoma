@@ -15,13 +15,10 @@ export default async function SellerDashboardPage({ params }: { params: Promise<
     let role = await getAdminRole()
     
     if (!userId || role !== 'SELLER') {
-        const commUserId = await getCommunityUser()
-        if (commUserId) {
-            const commUser = await prisma.user.findUnique({ where: { id: commUserId } })
-            if (commUser && commUser.role === 'SELLER') {
-                userId = commUserId
-                role = 'SELLER'
-            }
+        const commUser = await getCommunityUser()
+        if (commUser && commUser.role === 'SELLER') {
+            userId = commUser.id
+            role = 'SELLER'
         }
     }
 
@@ -36,14 +33,14 @@ export default async function SellerDashboardPage({ params }: { params: Promise<
 
     const stats = [
         { label: t('Stats.Books'), value: data.booksCount, icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
-        { label: t('Stats.Orders'), value: data.ordersCount, icon: ShoppingBag, color: 'bg-purple-100 text-purple-600' },
+        { label: t('Stats.Orders'), value: data.ordersCount, icon: ShoppingBag, color: 'bg-amber-100 text-amber-700' },
         { label: t('Stats.Revenue'), value: `${data.totalRevenue.toFixed(2)} درهم`, icon: DollarSign, color: 'bg-green-100 text-green-600' },
     ]
 
     return (
         <div className="space-y-12">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-4xl font-black text-black tracking-tighter capitalize">
                         {t('Title')}, {user?.fullName}! 👋
@@ -52,12 +49,20 @@ export default async function SellerDashboardPage({ params }: { params: Promise<
                         {t('Subtitle')}
                     </p>
                 </div>
-                <Link 
-                    href="/seller/books/new" 
-                    className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all active:scale-95"
-                >
-                    {t('NewBook')}
-                </Link>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/seller/books/import"
+                        className="bg-white text-black border border-gray-200 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:bg-gray-50 transition-all active:scale-95"
+                    >
+                        Importer CSV / Excel
+                    </Link>
+                    <Link 
+                        href="/seller/books/new" 
+                        className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-gray-800 transition-all active:scale-95"
+                    >
+                        {t('NewBook')}
+                    </Link>
+                </div>
             </div>
 
             {/* Stats */}
