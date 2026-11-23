@@ -177,7 +177,7 @@ export default function AddBookForm({ isEligible = true }: { isEligible?: boolea
                                     value={isbn}
                                     onChange={(e) => setIsbn(e.target.value)}
                                     className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-black outline-none transition-all font-bold text-black"
-                                    placeholder="978-..."
+                                    placeholder="356938... ou N° Série"
                                 />
                             </div>
                         </div>

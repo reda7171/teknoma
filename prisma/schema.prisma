@@ -221,6 +221,7 @@ model Book {
   quotes              Quote[]
   inventories         Inventory[]
   stockMovements      StockMovement[]
+  serialNumbers       ProductSerialNumber[]
 
   @@index([category])
   @@index([subCategory])
@@ -272,6 +273,25 @@ model Inventory {
   @@index([extraProductId])
   @@index([warehouseId])
   @@map("inventory")
+}
+
+// Numéros de série & IMEI unitaires en stock
+model ProductSerialNumber {
+  id           String    @id @default(uuid())
+  productId    String
+  serialNumber String    @unique @db.VarChar(100)
+  status       String    @default("AVAILABLE") // AVAILABLE, SOLD, DEFECTIVE
+  orderId      String?
+  soldAt       DateTime?
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  product      Book      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([status])
+  @@map("product_serial_numbers")
 }
 
 // Historique des mouvements de stock
@@ -529,6 +549,7 @@ model OrderItem {
   price            Float
   costPrice        Float           @default(0)
   isMissing        Boolean         @default(false)
+  serialNumber     String?         @db.VarChar(191)
   bookId           String?
   packId           String?
   giftId           String?

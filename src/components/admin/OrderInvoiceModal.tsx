@@ -61,7 +61,7 @@ export default function OrderInvoiceModal({
     const [isPaid, setIsPaid] = useState(order.isPaid || initialRemaining <= 0)
 
     // Company info (Émetteur)
-    const [companyName, setCompanyName] = useState('Tekno Store Books')
+    const [companyName, setCompanyName] = useState('Tekno Store')
     const [companyLogo, setCompanyLogo] = useState('/uploads/books/0dded6c73e7283c1-TEKNO__1_.png')
     const [companyPhone, setCompanyPhone] = useState('07 02 22 05 75 / 06 66 03 81 29')
     const [companyEmail, setCompanyEmail] = useState('Contact.tekno.ma@gmail.com')
@@ -113,15 +113,17 @@ export default function OrderInvoiceModal({
         if (!order.items || order.items.length === 0) {
             return [{
                 id: 'item-1',
-                title: 'Livre / Commande Tekno Store',
+                title: 'Produit High-Tech Tekno Store',
                 quantity: 1,
                 price: Number(order.total) || 0,
-                type: 'BOOK'
+                type: 'BOOK',
+                serialNumber: ''
             }]
         }
         return order.items.map((it: any) => ({
             id: it.id,
-            title: it.book?.title || it.pack?.name || it.extraProduct?.name || (it.type === 'PACK' ? 'Pack Tekno Store' : 'Livre'),
+            title: it.book?.title || it.pack?.name || it.extraProduct?.name || (it.type === 'PACK' ? 'Pack Tekno Store' : 'Produit High-Tech'),
+            serialNumber: it.serialNumber || it.book?.isbn || '',
             quantity: Number(it.quantity) || 1,
             price: Number(it.price) || 0,
             type: it.type || 'BOOK'
@@ -240,6 +242,7 @@ export default function OrderInvoiceModal({
                 <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: #1e293b;">
                     <strong>${it.title}</strong>
                     <div style="font-size: 11px; color: #64748b;">Réf: ${it.id?.slice(0, 8) || `ART-${idx + 1}`}</div>
+                    ${it.serialNumber ? `<div style="margin-top: 4px; font-size: 11px; color: #0284c7; font-weight: 700; font-family: monospace;">🛡️ N° Série / IMEI : ${it.serialNumber} &bull; Garantie constructeur 12M</div>` : ''}
                 </td>
                 <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 13px; font-weight: 600;">
                     ${it.quantity}
@@ -258,7 +261,7 @@ export default function OrderInvoiceModal({
             <html lang="fr">
             <head>
                 <meta charset="utf-8">
-                <title>Facture_${invoiceNumber}_${fullName.replace(/\s+/g, '_')}</title>
+                <title>Facture_Garantie_${invoiceNumber}_${fullName.replace(/\s+/g, '_')}</title>
                 <style>
                     * { box-sizing: border-box; }
                     body {
@@ -280,7 +283,7 @@ export default function OrderInvoiceModal({
                     .brand { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #0f172a; text-transform: uppercase; }
                     .brand-sub { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
                     .invoice-badge { text-align: right; }
-                    .invoice-title { font-size: 24px; font-weight: 900; color: #1e3a8a; text-transform: uppercase; margin: 0; }
+                    .invoice-title { font-size: 22px; font-weight: 900; color: #1e3a8a; text-transform: uppercase; margin: 0; }
                     .invoice-meta { font-size: 12px; color: #475569; margin-top: 4px; font-weight: 500; }
 
                     .parties-table { width: 100%; margin-bottom: 25px; }
@@ -716,7 +719,7 @@ export default function OrderInvoiceModal({
                                             key={it.id || idx}
                                             className="grid grid-cols-12 gap-2.5 items-center p-2.5 bg-gray-50/70 border border-gray-200/70 rounded-xl hover:border-gray-300 transition-colors"
                                         >
-                                            <div className="col-span-6">
+                                            <div className="col-span-5">
                                                 <input
                                                     type="text"
                                                     value={it.title}
@@ -725,7 +728,16 @@ export default function OrderInvoiceModal({
                                                     className="w-full px-3 py-1.5 text-sm font-semibold bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
                                                 />
                                             </div>
-                                            <div className="col-span-2">
+                                            <div className="col-span-3">
+                                                <input
+                                                    type="text"
+                                                    value={it.serialNumber || ''}
+                                                    onChange={(e) => updateItem(idx, 'serialNumber', e.target.value)}
+                                                    placeholder="N° IMEI / Série"
+                                                    className="w-full px-2.5 py-1.5 text-xs font-mono font-bold bg-white border border-emerald-300 text-emerald-950 rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none placeholder:text-gray-400 placeholder:font-normal"
+                                                />
+                                            </div>
+                                            <div className="col-span-1">
                                                 <input
                                                     type="number"
                                                     min="1"
@@ -735,14 +747,14 @@ export default function OrderInvoiceModal({
                                                     className="w-full px-2 py-1.5 text-sm text-center font-bold bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
                                                 />
                                             </div>
-                                            <div className="col-span-2">
+                                            <div className="col-span-1">
                                                 <input
                                                     type="number"
                                                     step="0.5"
                                                     min="0"
                                                     value={it.price}
                                                     onChange={(e) => updateItem(idx, 'price', parseFloat(e.target.value) || 0)}
-                                                    placeholder="Prix (DH)"
+                                                    placeholder="Prix"
                                                     className="w-full px-2 py-1.5 text-sm text-right font-bold bg-white border border-gray-200 rounded-lg focus:ring-1 focus:ring-emerald-500 outline-none"
                                                 />
                                             </div>

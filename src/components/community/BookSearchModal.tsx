@@ -116,7 +116,7 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Titre, Auteur, ou ISBN..."
+                                placeholder="Modèle, Marque, ou N° Série/IMEI..."
                                 className="w-full pl-14 pr-4 py-5 bg-white border-2 border-transparent rounded-[2rem] focus:border-black outline-none transition-all text-lg font-bold shadow-sm group-hover:shadow-md rtl:text-base rtl:placeholder:text-sm"
                                 autoFocus
                             />
@@ -158,8 +158,8 @@ export default function BookSearchModal({ isOpen, onClose, onSelect, title = 'Re
                     {!loading && results.length === 0 && searchSource !== null && !error && (
                         <div className="py-20 flex flex-col items-center justify-center text-center bg-white rounded-[2rem] border border-gray-100 shadow-sm">
                             <BookOpen className="w-12 h-12 mb-4 text-gray-200" />
-                            <p className="text-xl font-black text-black tracking-tight mb-2">Aucun livre trouvé</p>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Essayez d'autres mots-clés ou l'ISBN exact.</p>
+                            <p className="text-xl font-black text-black tracking-tight mb-2">Aucun produit trouvé</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Essayez d'autres mots-clés ou le numéro de série / IMEI exact.</p>
                         </div>
                     )}
 

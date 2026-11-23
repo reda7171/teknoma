@@ -94,15 +94,15 @@ TARGET 100% SEO CHECKLIST:
 9. Long French Description (longDescription_fr): Minimum 250 characters.
 10. Long English Description (longDescription_en): Minimum 250 characters.
 11. SEO Keywords (seoKeywords): Minimum 6 to 10 high-intent keywords separated by commas (mix of Arabic, French, and English).
-12. ISBN (isbn): Provide the exact authentic official ISBN-10 or ISBN-13 of this specific book if known, or leave "${isbn || ''}" unchanged. CRITICAL: Never invent a fake or duplicate generic placeholder number.
+12. Code-barres / IMEI / S/N (isbn): Provide the authentic official barcode GTIN or model identifier if known, or leave "${isbn || ''}" unchanged. CRITICAL: Never invent a fake or duplicate generic placeholder number.
 13. Categories: Suggest main category and subcategory.
 14. Jumia Highlights (jumiaHighlights): HTML unordered list <ul><li>...</li></ul> with 3 to 5 key points.
-15. Jumia Package Content (jumiaPackageContent): e.g., "1 x Livre papier format standard".
+15. Jumia Package Content (jumiaPackageContent): e.g., "1 x Appareil, 1 x Câble, 1 x Manuel".
 
-CURRENT BOOK DATA:
+CURRENT PRODUCT DATA:
 - Current Title: ${title}
-- Current Author: ${author}
-- Current ISBN: ${isbn || 'Non renseigné'}
+- Current Brand: ${author}
+- Current Barcode / IMEI / S/N: ${isbn || 'Non renseigné'}
 - Current Category: ${category || 'Non renseignée'}
 - Current Description: ${currentDescription || book?.description || 'Aucune'}
 

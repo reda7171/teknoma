@@ -218,31 +218,30 @@ function BookFormContent() {
         const title = titleAr || titleFr || titleEn || 'Titre inconnu'
         const auth = author || 'Marque inconnue'
 
-        const prompt = `Act as a professional bookseller. I am adding a book to my online store.
-Title: ${title}
-Author: ${auth}
+        const prompt = `Act as a professional high-tech and consumer electronics specialist. I am adding a tech product (smartphone, PC portátil, Mac, audio or tech accessory) to my online store Tekno Store.
+Brand: ${auth}
+Title / Model: ${title}
 
 CRITICAL INSTRUCTION FOR TITLES:
-For title_fr and title_en, DO NOT translate the Arabic title literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
-Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat teknot basatin arabistan" (NOT "Série de romans...").
+For title_fr and title_en, ensure the exact brand and model series are preserved (e.g. "Apple iPhone 16 Pro 256 Go Titane Naturel", "Dell XPS 15 OLED Core i7 32 Go").
 
 Please provide the following information in JSON format (so I can easily copy-paste or read it):
 {
-  "author": "Author Name",
+  "author": "Brand Name (e.g., Apple, Samsung, Dell)",
   "title_ar": "Title in Arabic",
   "title_fr": "Title in French",
   "title_en": "Title in English",
   "description_ar": "Short engaging description in Arabic (max 3 paragraphs)",
   "description_fr": "Short engaging description in French (max 3 paragraphs)",
   "description_en": "Short engaging description in English (max 3 paragraphs)",
-  "longDescription_ar": "Detailed description in Arabic",
-  "longDescription_fr": "Detailed description in French",
-  "longDescription_en": "Detailed description in English",
-  "category": "Main category of the book",
+  "longDescription_ar": "Detailed technical specs description in Arabic",
+  "longDescription_fr": "Detailed technical specs description in French",
+  "longDescription_en": "Detailed technical specs description in English",
+  "category": "Main category (e.g., Smartphones, PC Portables, Mac & Apple, Audio & Son, Accessoires)",
   "subCategory": "Sub-category",
   "seoKeywords": "Comma-separated SEO keywords (ar, fr, en)",
-  "jumiaHighlights": "Key highlights of the book (bullet points)",
-  "jumiaPackageContent": "What's in the box? (e.g., 1 x Book)"
+  "jumiaHighlights": "Key highlights and specs (bullet points: processor, RAM, battery, camera)",
+  "jumiaPackageContent": "What's in the box? (e.g., 1 x Smartphone, 1 x Câble USB-C, 1 x Guide)"
 }
 Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NEVER mention price, discounts, promos, or currency (DH, MAD, درهم) in any description or highlights (Jumia strictly rejects listings mentioning price in descriptions).`
 
@@ -465,19 +464,20 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         <p className="text-xs text-gray-500 mt-1">Saisissez pour chercher ou ajouter une nouvelle marque.</p>
                     </div>
 
-                    {/* EAN */}
+                    {/* Numéro de Série / IMEI / Code-barres */}
                     <div>
                         <label htmlFor="isbn" className="block text-sm font-medium text-gray-700 mb-2">
-                            EAN
+                            Numéro de série / IMEI / Code-barres
                         </label>
                         <input
                             type="text"
                             id="isbn"
                             name="isbn"
                             defaultValue={prefillIsbn}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Ex: 9780735211292"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                            placeholder="Ex: 356938114526841 (IMEI) ou F2LW80... (S/N) ou code-barres"
                         />
+                        <p className="text-xs text-gray-500 mt-1">Identifiant unique pour la garantie constructeur 12M et la traçabilité des commandes.</p>
                     </div>
 
                     {/* Seller SKU */}
