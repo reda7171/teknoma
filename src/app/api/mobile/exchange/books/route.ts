@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, author, condition, description, image, exchangeType, latitude, longitude } = body;
+    const { title, author, condition, description, image, exchangeType, latitude, longitude, isbn, language } = body;
 
     if (!title || !author) {
       return NextResponse.json({ error: 'Titre et auteur requis' }, { status: 400 });
@@ -57,11 +57,13 @@ export async function POST(req: Request) {
     const book = await prisma.exchangeBook.create({
       data: {
         ownerId: customerId,
-        title,
-        author,
+        title: title.trim(),
+        author: author.trim(),
+        isbn: isbn ? isbn.trim() : null,
         condition: condition || 'GOOD',
-        description,
-        image,
+        description: description ? description.trim() : null,
+        image: image || null,
+        language: language || 'fr',
         exchangeType: exchangeType || 'DIRECT',
         status: 'AVAILABLE',
         latitude: latitude ? parseFloat(latitude) : null,

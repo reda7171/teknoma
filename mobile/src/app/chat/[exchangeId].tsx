@@ -13,7 +13,7 @@ export default function ChatScreen() {
   const { exchangeId } = useLocalSearchParams();
   const router = useRouter();
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
   const { customer } = useAuthStore();
 
   const [messages, setMessages] = useState<any[]>([]);

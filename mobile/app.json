@@ -50,6 +50,13 @@
           "locationAlwaysAndWhenInUsePermission": "Permettre à Riwaya d'utiliser votre position pour trouver des livres autour de vous."
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Riwaya a besoin d'accéder à vos photos pour sélectionner les clichés de vos livres.",
+          "cameraPermission": "Riwaya a besoin d'accéder à l'appareil photo pour photographier directement vos livres d'occasion."
+        }
+      ],
       "expo-font"
     ],
     "experiments": {

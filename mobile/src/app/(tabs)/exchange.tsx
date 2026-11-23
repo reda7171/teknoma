@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, RefreshControl, Modal, TextInput, Alert, ScrollView, ActivityIndicator, Platform, Keyboard, TouchableWithoutFeedback, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, RefreshControl, Modal, TextInput, ScrollView, ActivityIndicator, Platform, Keyboard, TouchableWithoutFeedback, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
 import { useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useI18nStore } from '@/store/useI18nStore';
-import { getExchangeBooks, addExchangeBook, getMyExchanges, updateExchangeStatus, requestExchange, submitRating, uploadImage, getImageUrl } from '@/services/api';
+import { getExchangeBooks, getMyExchanges, updateExchangeStatus, requestExchange, submitRating, getImageUrl } from '@/services/api';
 import { playRequestSound, playAcceptSound } from '@/utils/sounds';
 import { getDistance } from '@/utils/distance';
 import { useRouter } from 'expo-router';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { AddExchangeBookModal } from '@/components/exchange/AddExchangeBookModal';
+import { CustomAlertModal, AlertType } from '@/components/ui/CustomAlertModal';
 
 export default function ExchangeScreen() {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors[isDark ? 'dark' : 'light'];
   const { isLoggedIn, customer } = useAuthStore();
   const t = useI18nStore(state => state.t);
   const router = useRouter();
@@ -29,13 +30,8 @@ export default function ExchangeScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Modal d'ajout de livre
+  // Modal d'ajout de livre C2C
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newBook, setNewBook] = useState({ title: '', author: '', condition: 'GOOD', description: '', exchangeType: 'DIRECT' });
-  const [bookLocation, setBookLocation] = useState<{latitude: number, longitude: number} | null>(null);
-  const [locating, setLocating] = useState(false);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const [uploadingImages, setUploadingImages] = useState(false);
 
   // Modal de demande
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -45,12 +41,51 @@ export default function ExchangeScreen() {
   // Filtre de distance
   const [maxDistance, setMaxDistance] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [locating, setLocating] = useState(false);
 
   // Modal de notation (Rating)
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedExchangeId, setSelectedExchangeId] = useState<string | null>(null);
   const [ratingValue, setRatingValue] = useState(5);
   const [ratingComment, setRatingComment] = useState('');
+
+  // Custom alert modal
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    type: AlertType;
+    title: string;
+    message: string;
+    primaryButtonText?: string;
+    secondaryButtonText?: string;
+    onPrimaryPress?: () => void;
+    onSecondaryPress?: () => void;
+  }>({
+    visible: false,
+    type: 'info',
+    title: '',
+    message: '',
+  });
+
+  const showAlert = (
+    type: AlertType,
+    title: string,
+    message: string,
+    onPrimaryPress?: () => void,
+    primaryButtonText?: string,
+    secondaryButtonText?: string,
+    onSecondaryPress?: () => void
+  ) => {
+    setAlertConfig({
+      visible: true,
+      type,
+      title,
+      message,
+      primaryButtonText,
+      secondaryButtonText,
+      onPrimaryPress: onPrimaryPress || (() => setAlertConfig(prev => ({ ...prev, visible: false }))),
+      onSecondaryPress,
+    });
+  };
 
   const fetchBooks = async () => {
     try {
@@ -91,97 +126,21 @@ export default function ExchangeScreen() {
 
   const handleProtectedAction = (action: () => void) => {
     if (!isLoggedIn) {
-      Alert.alert(
+      showAlert(
+        'confirm',
         'Connexion requise',
         'Vous devez être connecté pour effectuer cette action.',
-        [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Se connecter', onPress: () => router.push('/login') }
-        ]
+        () => {
+          setAlertConfig(prev => ({ ...prev, visible: false }));
+          router.push('/login');
+        },
+        'Se connecter',
+        'Annuler',
+        () => setAlertConfig(prev => ({ ...prev, visible: false }))
       );
       return;
     }
     action();
-  };
-
-  const handleGetLocation = async () => {
-    setLocating(true);
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission refusée', 'Activez la localisation pour utiliser cette fonctionnalité.');
-        setLocating(false);
-        return;
-      }
-      let location = await Location.getCurrentPositionAsync({});
-      setBookLocation({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      Alert.alert('Succès', 'Votre position a été enregistrée pour ce livre.');
-    } catch (error) {
-      Alert.alert('Erreur', 'Impossible de récupérer votre position.');
-    } finally {
-      setLocating(false);
-    }
-  };
-
-  const handlePickImage = async () => {
-    if (selectedImages.length >= 2) {
-      Alert.alert('Limite atteinte', 'Vous ne pouvez ajouter que 2 images au maximum.');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setSelectedImages([...selectedImages, result.assets[0].uri]);
-    }
-  };
-
-  const handleAddBook = async () => {
-    Keyboard.dismiss();
-    if (!newBook.title || !newBook.author) {
-      Alert.alert('Erreur', 'Titre et auteur requis.');
-      return;
-    }
-    
-    setUploadingImages(true);
-    let uploadedUrls: string[] = [];
-    
-    try {
-      for (const uri of selectedImages) {
-        const url = await uploadImage(uri);
-        uploadedUrls.push(url);
-      }
-    } catch (e) {
-      Alert.alert('Erreur', 'Impossible de télécharger l\'image.');
-      setUploadingImages(false);
-      return;
-    }
-    
-    const imageString = uploadedUrls.length > 0 ? uploadedUrls.join(',') : null;
-
-    try {
-      await addExchangeBook({
-        ...newBook,
-        image: imageString,
-        latitude: bookLocation?.latitude,
-        longitude: bookLocation?.longitude,
-      });
-      setShowAddModal(false);
-      setNewBook({ title: '', author: '', condition: 'GOOD', description: '', exchangeType: 'DIRECT' });
-      setBookLocation(null);
-      setSelectedImages([]);
-      fetchBooks();
-      Alert.alert('Succès', 'Votre livre a été publié.');
-    } catch (e) {
-      Alert.alert('Erreur', "Impossible d'ajouter le livre.");
-    } finally {
-      setUploadingImages(false);
-    }
   };
 
   const handleSendRequest = async () => {
@@ -195,9 +154,9 @@ export default function ExchangeScreen() {
       setRequestMessage('');
       fetchRequests();
       playRequestSound();
-      Alert.alert('Succès', 'Votre demande a été envoyée !');
+      showAlert('success', 'Succès', 'Votre demande a été envoyée !');
     } catch (e: any) {
-      Alert.alert('Erreur', e.response?.data?.error || "Impossible d'envoyer la demande.");
+      showAlert('error', 'Erreur', e.response?.data?.error || "Impossible d'envoyer la demande.");
     }
   };
 
@@ -210,7 +169,7 @@ export default function ExchangeScreen() {
       fetchRequests();
       fetchBooks();
     } catch (e) {
-      Alert.alert('Erreur', "Impossible de mettre à jour le statut.");
+      showAlert('error', 'Erreur', "Impossible de mettre à jour le statut.");
     }
   };
 
@@ -231,9 +190,9 @@ export default function ExchangeScreen() {
       setShowRatingModal(false);
       setRatingValue(5);
       setRatingComment('');
-      Alert.alert('Merci !', 'Votre note a été enregistrée avec succès.');
+      showAlert('success', 'Merci !', 'Votre note a été enregistrée avec succès.');
     } catch (e: any) {
-      Alert.alert('Erreur', e.response?.data?.error || "Impossible d'envoyer la note.");
+      showAlert('error', 'Erreur', e.response?.data?.error || "Impossible d'envoyer la note.");
     }
   };
 
@@ -248,7 +207,20 @@ export default function ExchangeScreen() {
               <Text style={styles.loginBtnText}>{t('login')}</Text>
             </TouchableOpacity>
         </View>
-      </SafeAreaView>
+        {/* Modal d'alerte personnalisée */}
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        primaryButtonText={alertConfig.primaryButtonText}
+        secondaryButtonText={alertConfig.secondaryButtonText}
+        onPrimaryPress={alertConfig.onPrimaryPress || (() => setAlertConfig(prev => ({ ...prev, visible: false })))}
+        onSecondaryPress={alertConfig.onSecondaryPress}
+        onClose={() => setAlertConfig(prev => ({ ...prev, visible: false }))}
+      />
+
+    </SafeAreaView>
     );
   }
 
@@ -352,7 +324,7 @@ export default function ExchangeScreen() {
                             setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
                             setMaxDistance(dist);
                           } else {
-                            Alert.alert('Erreur', 'Localisation requise pour le filtre.');
+                            showAlert('warning', 'Localisation requise', 'Activez la localisation pour filtrer par distance.');
                           }
                           setLocating(false);
                         } else {
@@ -557,7 +529,7 @@ export default function ExchangeScreen() {
               <Text style={{ color: colors.text, fontWeight: 'bold' }}>{req.bookRequested?.title || 'Livre inconnu'}</Text>
               <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 8 }}>À {req.responder?.fullName || 'Utilisateur inconnu'}</Text>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                <Text style={{ fontWeight: 'bold', color: req.status === 'ACCEPTED' ? '#10B981' : req.status === 'COMPLETED' ? '#8B5CF6' : req.status === 'REJECTED' ? '#EF4444' : '#F59E0B' }}>
+                <Text style={{ fontWeight: 'bold', color: req.status === 'ACCEPTED' ? '#10B981' : req.status === 'COMPLETED' ? '#0274DF' : req.status === 'REJECTED' ? '#EF4444' : '#F59E0B' }}>
                   Statut: {req.status}
                 </Text>
                 {req.status === 'ACCEPTED' && (
@@ -580,81 +552,12 @@ export default function ExchangeScreen() {
         </ScrollView>
       )}
 
-      {/* MODAL ADD BOOK */}
-      <Modal visible={showAddModal} animationType="slide" transparent={true}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>{t('publish_book')}</Text>
-                <TouchableOpacity onPress={() => setShowAddModal(false)}><Ionicons name="close" size={28} color={colors.textSecondary}/></TouchableOpacity>
-              </View>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <TextInput style={[styles.input, { backgroundColor: colors.backgroundElement, color: colors.text }]} placeholder={t('title')} placeholderTextColor={colors.textSecondary} value={newBook.title} onChangeText={(t) => setNewBook({...newBook, title: t})} />
-                <TextInput style={[styles.input, { backgroundColor: colors.backgroundElement, color: colors.text }]} placeholder={t('author')} placeholderTextColor={colors.textSecondary} value={newBook.author} onChangeText={(t) => setNewBook({...newBook, author: t})} />
-                <TextInput style={[styles.input, { backgroundColor: colors.backgroundElement, color: colors.text, height: 100, textAlignVertical: 'top' }]} placeholder={t('description')} placeholderTextColor={colors.textSecondary} value={newBook.description} onChangeText={(t) => setNewBook({...newBook, description: t})} multiline />
-                
-                <View style={{ flexDirection: 'row', marginBottom: 12, gap: 8 }}>
-                  <TouchableOpacity 
-                    style={[styles.typeBtn, newBook.exchangeType === 'DIRECT' && styles.typeBtnActive, { backgroundColor: colors.backgroundElement }]}
-                    onPress={() => setNewBook({...newBook, exchangeType: 'DIRECT'})}>
-                    <Text style={[styles.typeBtnText, newBook.exchangeType === 'DIRECT' && styles.typeBtnTextActive, { color: colors.textSecondary }]}>Échange direct</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={[styles.typeBtn, newBook.exchangeType === 'CREDIT' && styles.typeBtnActive, { backgroundColor: colors.backgroundElement }]}
-                    onPress={() => setNewBook({...newBook, exchangeType: 'CREDIT'})}>
-                    <Text style={[styles.typeBtnText, newBook.exchangeType === 'CREDIT' && styles.typeBtnTextActive, { color: colors.textSecondary }]}>Pour crédits</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Images Picker */}
-                <View style={{ marginBottom: 16 }}>
-                  <Text style={{ color: colors.text, marginBottom: 8, fontWeight: '600' }}>Images ({selectedImages.length}/2)</Text>
-                  <View style={{ flexDirection: 'row', gap: 12 }}>
-                    {selectedImages.map((uri, index) => (
-                      <View key={index} style={{ position: 'relative' }}>
-                        <Image source={{ uri }} style={{ width: 80, height: 80, borderRadius: 12 }} />
-                        <TouchableOpacity 
-                          style={{ position: 'absolute', top: -8, right: -8, backgroundColor: '#EF4444', borderRadius: 12 }} 
-                          onPress={() => setSelectedImages(selectedImages.filter((_, i) => i !== index))}
-                        >
-                          <Ionicons name="close" size={20} color="#FFF" />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                    {selectedImages.length < 2 && (
-                      <TouchableOpacity 
-                        style={{ width: 80, height: 80, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.textSecondary, justifyContent: 'center', alignItems: 'center' }}
-                        onPress={handlePickImage}
-                      >
-                        <Ionicons name="camera-outline" size={32} color={colors.textSecondary} />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-                
-                <TouchableOpacity 
-                  style={[styles.locationBtn, bookLocation ? { borderColor: '#10B981', backgroundColor: '#D1FAE5' } : { borderColor: colors.backgroundSelected }]} 
-                  onPress={handleGetLocation}
-                >
-                  {locating ? <ActivityIndicator size="small" color="#10B981" /> : <Ionicons name="location" size={24} color={bookLocation ? "#10B981" : colors.textSecondary} />}
-                  <Text style={{ marginLeft: 8, color: bookLocation ? "#10B981" : colors.textSecondary, fontWeight: '500' }}>
-                    {bookLocation ? 'Position ajoutée' : t('use_location')}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={[styles.submitBtn, uploadingImages && { opacity: 0.7 }]} onPress={handleAddBook} disabled={uploadingImages}>
-                  {uploadingImages ? (
-                    <ActivityIndicator size="small" color="#FFF" />
-                  ) : (
-                    <Text style={styles.submitBtnText}>{t('publish')}</Text>
-                  )}
-                </TouchableOpacity>
-              </ScrollView>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      {/* MODAL SIMPLIFIÉ D'AJOUT DE LIVRE D'OCCASION (C2C) AVEC PRISE DE PHOTO DIRECTE */}
+      <AddExchangeBookModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={loadData}
+      />
 
       {/* MODAL REQUEST */}
       <Modal visible={showRequestModal} animationType="fade" transparent={true}>
@@ -726,12 +629,28 @@ export default function ExchangeScreen() {
         </TouchableWithoutFeedback>
       </Modal>
 
+      {/* Modal d'alerte personnalisée */}
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        primaryButtonText={alertConfig.primaryButtonText}
+        secondaryButtonText={alertConfig.secondaryButtonText}
+        onPrimaryPress={alertConfig.onPrimaryPress || (() => setAlertConfig(prev => ({ ...prev, visible: false })))}
+        onSecondaryPress={alertConfig.onSecondaryPress}
+        onClose={() => setAlertConfig(prev => ({ ...prev, visible: false }))}
+      />
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  loginCard: { padding: 24, borderRadius: 20, alignItems: 'center', width: '90%', maxWidth: 360 },
+  loginTitle: { fontSize: 20, fontWeight: '800', marginTop: 16, marginBottom: 8 },
+  loginSub: { fontSize: 13, textAlign: 'center', marginBottom: 20, lineHeight: 18 },
   loginBtn: { backgroundColor: '#0274DF', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
   loginBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
   tabContainer: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgba(150,150,150,0.1)', paddingVertical: 4 },
@@ -788,6 +707,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginTop: 16,
     marginBottom: 16
+  },
+  emptyState: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyStateText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: '600',
   },
   emptyStateTitle: {
     fontSize: 16,
