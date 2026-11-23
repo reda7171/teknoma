@@ -57,10 +57,14 @@
           "cameraPermission": "Riwaya a besoin d'accéder à l'appareil photo pour photographier directement vos livres d'occasion."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-image",
+      "expo-localization",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
-      "typedRoutes": true,
+      "typedRoutes": false,
       "reactCompiler": true
     }
   }

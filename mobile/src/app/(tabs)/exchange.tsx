@@ -10,10 +10,21 @@ import { getExchangeBooks, getMyExchanges, updateExchangeStatus, requestExchange
 import { playRequestSound, playAcceptSound } from '@/utils/sounds';
 import { getDistance } from '@/utils/distance';
 import { useRouter } from 'expo-router';
-import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { AddExchangeBookModal } from '@/components/exchange/AddExchangeBookModal';
 import { CustomAlertModal, AlertType } from '@/components/ui/CustomAlertModal';
+
+let MapView: any = View;
+let Marker: any = View;
+let Callout: any = View;
+if (Platform.OS !== 'web') {
+  try {
+    const Maps = require('react-native-maps');
+    MapView = Maps.default || Maps;
+    Marker = Maps.Marker;
+    Callout = Maps.Callout;
+  } catch {}
+}
 
 export default function ExchangeScreen() {
   const scheme = useColorScheme();

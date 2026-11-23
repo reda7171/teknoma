@@ -128,13 +128,6 @@
       "minimatch": "^11.0.5"
     }
   },
-  "browserslist": [
-    "Chrome >= 92",
-    "Safari >= 15.4",
-    "Firefox >= 90",
-    "Edge >= 92",
-    "not dead"
-  ],
   "engines": {
     "node": ">=22.12.0"
   }
