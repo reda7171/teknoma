@@ -99,7 +99,7 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             return {
                 success: false,
                 error: existing.isbn === validatedData.isbn
-                    ? `Un produit avec l'EAN ${existing.isbn} existe déjà.`
+                    ? `Un produit avec le numéro de série / IMEI / EAN ${existing.isbn} existe déjà.`
                     : `Le produit "${validatedData.title}" par ${validatedData.author} existe déjà.`
             }
         }
@@ -125,7 +125,7 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             if (existingWithIsbn) {
                 return {
                     success: false,
-                    error: `Cet EAN (${cleanIsbn}) est déjà attribué au produit "${existingWithIsbn.title}".`
+                    error: `Cet identifiant (IMEI/Série/EAN: ${cleanIsbn}) est déjà attribué au produit "${existingWithIsbn.title}".`
                 }
             }
         }
@@ -329,7 +329,7 @@ export async function updateBook(
             if (existingWithIsbn) {
                 return {
                     success: false,
-                    error: `Cet EAN (${cleanIsbn}) est déjà attribué au produit "${existingWithIsbn.title}".`
+                    error: `Cet identifiant (IMEI/Série/EAN: ${cleanIsbn}) est déjà attribué au produit "${existingWithIsbn.title}".`
                 }
             }
         }

@@ -90,9 +90,9 @@ export default function BookSeoScore({
                 tip: 'Ajoutez min. 3 mots-clés séparés par des virgules.',
             },
             {
-                label: 'Image de couverture présente',
+                label: 'Image produit présente',
                 pass: image.length > 5,
-                tip: 'Les livres avec image ont un taux de clic 3x supérieur.',
+                tip: 'Les produits avec photo ont un taux de clic 3x supérieur.',
             },
             {
                 label: 'Prix défini',
@@ -102,13 +102,13 @@ export default function BookSeoScore({
             {
                 label: 'Stock ≥ 1',
                 pass: stock >= 1,
-                tip: 'Les livres en stock sont mieux indexés par Google Shopping.',
+                tip: 'Les produits en stock sont mieux indexés par Google Shopping.',
             },
             {
-                label: 'ISBN renseigné',
-                pass: isbn.length >= 10,
-                warning: isbn.length > 0 && isbn.length < 10,
-                tip: 'L\'ISBN permet le référencement dans les bases de données de livres.',
+                label: 'Code-barres / IMEI / S/N renseigné',
+                pass: isbn.length >= 8,
+                warning: isbn.length > 0 && isbn.length < 8,
+                tip: 'Le code-barres / IMEI assure la traçabilité matérielle, la garantie et le référencement Google Shopping (GTIN).',
             },
         ]
     }, [book, description, descriptionFr, descriptionEn, longDescription, seoKeywords, bookImage])

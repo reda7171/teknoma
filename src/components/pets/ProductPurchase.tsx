@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import {useEffect,useState} from 'react'
 import {useCartStore} from '@/store/cart'
 import {getPetCopy} from '@/lib/pets'

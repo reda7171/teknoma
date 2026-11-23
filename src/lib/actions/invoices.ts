@@ -10,6 +10,7 @@ export interface InvoiceItemData {
     quantity: number
     price: number
     type?: string
+    serialNumber?: string | null
 }
 
 export interface SaveInvoiceInput {
@@ -86,7 +87,8 @@ export async function saveOrderInvoice(input: SaveInvoiceInput) {
                         where: { id: item.id, orderId: input.orderId },
                         data: {
                             quantity: Number(item.quantity) || 1,
-                            price: Number(item.price) || 0
+                            price: Number(item.price) || 0,
+                            serialNumber: item.serialNumber !== undefined ? (item.serialNumber?.trim() || null) : undefined
                         }
                     })
                 }

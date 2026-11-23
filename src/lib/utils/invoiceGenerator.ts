@@ -24,7 +24,8 @@ export interface OrderInvoiceData {
         id?: string;
         quantity: number;
         price: number;
-        book?: { title?: string } | null;
+        serialNumber?: string | null;
+        book?: { title?: string; isbn?: string | null } | null;
         pack?: { name?: string } | null;
         extraProduct?: { name?: string } | null;
         digitalProduct?: { title?: string } | null;
@@ -59,7 +60,7 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
 
     const dict = {
         fr: {
-            title: "FACTURE D'ACHAT",
+            title: "FACTURE & BON DE GARANTIE",
             orderRef: "Commande N°",
             invoiceDate: "Date de facturation :",
             seller: "Émetteur :",
@@ -109,13 +110,13 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             closeBtn: "إغلاق"
         },
         en: {
-            title: "PURCHASE INVOICE",
+            title: "INVOICE & WARRANTY CERTIFICATE",
             orderRef: "Order #",
             invoiceDate: "Invoice Date:",
             seller: "Sold by:",
             customer: "Billed to:",
-            items: "Ordered items",
-            item: "Item Description",
+            items: "Tech Hardware & Devices",
+            item: "Item Description & IMEI",
             qty: "Qty",
             unitPrice: "Unit Price",
             totalLine: "Total",
@@ -128,7 +129,7 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
             remainingBalance: "REMAINING BALANCE (COD):",
             paidStatus: "Paid in Full",
             unpaidStatus: "Cash on Delivery (COD)",
-            footer1: "Tekno Store — Online pet shop in Morocco.",
+            footer1: "Tekno Store — High-Tech, Smartphones, PC, Mac & Accessories in Morocco.",
             footer2: `Support: Contact.tekno.ma@gmail.com | ${phone}`,
             printBtn: "Print / Save as PDF",
             closeBtn: "Close"
@@ -137,12 +138,14 @@ export function generateInvoiceHtml(order: OrderInvoiceData, locale: string = 'f
     const labels = dict[locale as 'fr' | 'ar' | 'en'] || dict.fr;
 
     const itemsRows = order.items.map((it) => {
-        const title = it.book?.title || it.pack?.name || it.extraProduct?.name || it.digitalProduct?.title || it.title || it.name || 'Livre';
+        const title = it.book?.title || it.pack?.name || it.extraProduct?.name || it.digitalProduct?.title || it.title || it.name || 'Produit High-Tech';
+        const serial = it.serialNumber || it.book?.isbn;
         const lineTotal = Number(it.price) * Number(it.quantity);
         return `
             <tr>
                 <td style="padding: 12px 14px; border-bottom: 1px solid #f1f5f9; text-align: ${isAr ? 'right' : 'left'};">
                     <strong style="color: #0f172a; font-size: 13px;">${escapeHtml(title)}</strong>
+                    ${serial ? `<div style="margin-top: 3px; font-size: 11px; color: #0284c7; font-weight: 700; font-family: monospace;">🛡️ N° Série / IMEI : ${escapeHtml(serial)} &bull; Garantie constructeur 12M</div>` : ''}
                 </td>
                 <td style="padding: 12px 14px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #334155; font-size: 13px;">
                     ${it.quantity}

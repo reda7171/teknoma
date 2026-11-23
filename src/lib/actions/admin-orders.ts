@@ -1098,6 +1098,7 @@ export async function updateOrderItems(orderId: string, items: {
     quantity: number;
     price: number;
     warehouseId?: string | null;
+    serialNumber?: string | null;
     isMissing?: boolean;
 }[]) {
     try {
@@ -1184,6 +1185,7 @@ export async function updateOrderItems(orderId: string, items: {
                             quantity: newItem.quantity,
                             price: newItem.price,
                             isMissing: Boolean(newItem.isMissing),
+                            serialNumber: newItem.serialNumber !== undefined ? (newItem.serialNumber?.trim() || null) : undefined,
                         }
                     })
                 }
@@ -1252,6 +1254,7 @@ export async function updateOrderItems(orderId: string, items: {
                         price: newItem.price,
                         costPrice: costPrice,
                         isMissing: Boolean(newItem.isMissing),
+                        serialNumber: newItem.serialNumber?.trim() || null,
                         warehouseId: assignedWarehouseId,
                         bookId: newItem.type === 'BOOK' ? newItem.productId : null,
                         packId: newItem.type === 'PACK' ? newItem.productId : null,

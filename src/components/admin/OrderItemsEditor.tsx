@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Package, Plus, Minus, Trash2, Search, Loader2, Warehouse, AlertTriangle } from 'lucide-react'
+import { Package, Plus, Minus, Trash2, Search, Loader2, Warehouse, AlertTriangle, ShieldCheck } from 'lucide-react'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import Link from 'next/link'
 import { updateOrderItems, searchProductsForOrder, updateOrderItemMissing } from '@/lib/actions/admin-orders'
@@ -30,6 +30,7 @@ export default function OrderItemsEditor({
             productId: item.type === 'BOOK' ? item.bookId : item.type === 'ACCESSORY' ? item.extraProductId : item.packId,
             warehouseId: resolvedWarehouseId,
             warehouseName: resolvedWarehouseName,
+            serialNumber: item.serialNumber || '',
             isNew: false
         }
     }))
@@ -39,6 +40,12 @@ export default function OrderItemsEditor({
         const matched = (warehouses || []).find((w: any) => w.id === warehouseId)
         newItems[index].warehouseId = warehouseId || null
         newItems[index].warehouseName = matched ? matched.name : null
+        setItems(newItems)
+    }
+
+    const updateItemSerial = (index: number, serial: string) => {
+        const newItems = [...items]
+        newItems[index].serialNumber = serial
         setItems(newItems)
     }
     
@@ -119,6 +126,7 @@ export default function OrderItemsEditor({
             quantity: item.quantity,
             price: item.price,
             warehouseId: item.warehouseId || null,
+            serialNumber: item.serialNumber?.trim() || null,
             isMissing: Boolean(item.isMissing)
         }))
 
@@ -161,9 +169,9 @@ export default function OrderItemsEditor({
     const total = subtotal + shippingFees - discount
 
     const hasChanges = JSON.stringify(
-        items.map(i => ({ id: i.isNew ? undefined : i.id, q: i.quantity, p: i.productId }))
+        items.map(i => ({ id: i.isNew ? undefined : i.id, q: i.quantity, p: i.productId, s: i.serialNumber || '', w: i.warehouseId || null }))
     ) !== JSON.stringify(
-        initialItems.map(i => ({ id: i.id, q: i.quantity, p: i.type === 'BOOK' ? i.bookId : i.type === 'ACCESSORY' ? i.extraProductId : i.packId }))
+        initialItems.map(i => ({ id: i.id, q: i.quantity, p: i.type === 'BOOK' ? i.bookId : i.type === 'ACCESSORY' ? i.extraProductId : i.packId, s: i.serialNumber || '', w: i.warehouseId || null }))
     )
 
     return (
@@ -252,6 +260,26 @@ export default function OrderItemsEditor({
                                     ) : (
                                         <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-md bg-blue-50 text-blue-800 border border-blue-200">
                                             {item.warehouseName || (item.warehouseId ? 'Entrep�t assign�' : 'Entrep�t Principal (par d�faut)')}
+                                        </span>
+                                    )}
+                                </div>
+
+                                                                {/* N° Série / IMEI unitaire pour la garantie */}
+                                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                                    <span className="text-xs font-semibold text-gray-700 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                        N° Série / IMEI (Garantie 12M) :
+                                    </span>
+                                    <input
+                                        type="text"
+                                        value={item.serialNumber || ''}
+                                        placeholder={product?.isbn ? "Défaut : " + product.isbn : "Ex: 356938114526841 ou S/N"}
+                                        onChange={(e) => updateItemSerial(index, e.target.value)}
+                                        className="text-xs font-mono font-bold px-3 py-1 rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 w-64 placeholder:text-gray-400 placeholder:font-normal"
+                                    />
+                                    {item.serialNumber && (
+                                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                                            IMEI lié
                                         </span>
                                     )}
                                 </div>

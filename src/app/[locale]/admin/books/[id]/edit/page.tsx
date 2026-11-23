@@ -15,6 +15,7 @@ import BookSeoScore from '@/components/admin/BookSeoScore'
 import BookMemberships from '@/components/admin/BookMemberships'
 import JumiaPushModal, { type JumiaPushLanguage } from '@/components/admin/JumiaPushModal'
 import BoostSeoModal, { type SeoBoostData } from '@/components/admin/BoostSeoModal'
+import ProductSerialManager from '@/components/admin/ProductSerialManager'
 
 export default function EditBookPage({ params, searchParams }: { params: Promise<{ id: string, locale: string }>, searchParams: Promise<Record<string, string | string[] | undefined>> }) {
     const router = useRouter()
@@ -547,13 +548,12 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
         const title = titleAr || titleFr || titleEn || 'Titre inconnu'
         const auth = author || 'Marque inconnue'
 
-        const prompt = `Act as a professional bookseller. I am updating a book in my online store.
-Title: ${title}
-Author: ${auth}
+        const prompt = `Act as a professional high-tech and consumer electronics specialist. I am updating a tech product (smartphone, laptop, PC, Mac, audio or tech accessory) in my online store Tekno Store.
+Brand: ${auth}
+Title / Model: ${title}
 
 CRITICAL INSTRUCTION FOR TITLES:
-For title_fr and title_en, DO NOT translate the Arabic title literally. You MUST use the phonetic transcription (transliteration) in Latin characters.
-Example: "سلسلة روايات بساتين عربستان" MUST become "Silsilat teknot basatin arabistan" (NOT "Série de romans...").
+For title_fr and title_en, ensure the exact brand and model series are preserved (e.g. "Apple iPhone 16 Pro 256 Go Titane Naturel", "Dell XPS 15 OLED Core i7 32 Go").
 
 Please provide the following information in JSON format (so I can easily copy-paste or read it):
 {
@@ -563,14 +563,14 @@ Please provide the following information in JSON format (so I can easily copy-pa
   "description_ar": "Short engaging description in Arabic (max 3 paragraphs)",
   "description_fr": "Short engaging description in French (max 3 paragraphs)",
   "description_en": "Short engaging description in English (max 3 paragraphs)",
-  "longDescription_ar": "Detailed description in Arabic with semantic <h2> headings (e.g. <h2>لماذا يجب قراءة هذا الكتاب؟</h2>, <h2>ملخص وأهم المحاور</h2>)",
-  "longDescription_fr": "Detailed description in French with semantic <h2> headings (e.g. <h2>Pourquoi lire ce produit ?</h2>, <h2>Résumé et thèmes clés</h2>)",
-  "longDescription_en": "Detailed description in English with semantic <h2> headings (e.g. <h2>Why read this book?</h2>, <h2>Key themes & summary</h2>)",
-  "category": "Main category of the book",
+  "longDescription_ar": "Detailed technical specs in Arabic with semantic <h2> headings (e.g. <h2>المواصفات التقنية والأداء</h2>, <h2>الشاشة والكاميرا</h2>)",
+  "longDescription_fr": "Detailed technical specs in French with semantic <h2> headings (e.g. <h2>Performances et processeur</h2>, <h2>Autonomie et connectivité</h2>)",
+  "longDescription_en": "Detailed technical specs in English with semantic <h2> headings (e.g. <h2>Performance & Hardware</h2>, <h2>Battery & Features</h2>)",
+  "category": "Main category (e.g., Smartphones, PC Portables, Mac & Apple, Audio & Son, Accessoires)",
   "subCategory": "Sub-category",
   "seoKeywords": "Comma-separated SEO keywords (ar, fr, en)",
-  "jumiaHighlights": "Key highlights of the book (bullet points)",
-  "jumiaPackageContent": "What's in the box? (e.g., 1 x Book)"
+  "jumiaHighlights": "Key highlights and specs (bullet points: processor, RAM, storage, battery, display)",
+  "jumiaPackageContent": "What's in the box? (e.g., 1 x Appareil, 1 x Câble de charge, 1 x Manuel d'utilisation)"
 }
 Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural question headings <h2> to optimize for voice search and long-tail Moroccan queries. CRITICAL: NEVER mention price, discounts, promos, or currency (DH, MAD, درهم) in any description or highlights (Jumia strictly rejects listings mentioning price in descriptions).`
 
@@ -860,6 +860,13 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                     </div>
                 </div>
             )}
+            {/* Suivi unitaire des numéros de série et IMEI */}
+            <ProductSerialManager 
+                productId={book.id} 
+                productTitle={book.title} 
+                currentStock={book.stock} 
+            />
+
             <form key={book.id} onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex justify-end mb-4 gap-6">
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -998,19 +1005,20 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                         )}
                     </div>
 
-                    {/* EAN */}
+                    {/* Numéro de Série / IMEI / Code-barres */}
                     <div>
                         <label htmlFor="isbn" className="block text-sm font-medium text-gray-700 mb-2">
-                            EAN
+                            Numéro de série / IMEI / Code-barres
                         </label>
                         <input
                             type="text"
                             id="isbn"
                             name="isbn"
                             defaultValue={book.isbn || ''}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Ex: 9780735211292"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                            placeholder="Ex: 356938114526841 (IMEI) ou F2LW80... (S/N) ou code-barres"
                         />
+                        <p className="text-xs text-gray-500 mt-1">Identifiant unique pour la garantie constructeur 12M et la traçabilité des commandes.</p>
                     </div>
 
                     {/* Seller SKU */}
