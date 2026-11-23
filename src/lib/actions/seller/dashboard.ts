@@ -2,10 +2,22 @@
 
 import { prisma } from '@/lib/prisma'
 import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
+import { getCommunityUser } from '@/lib/actions/community-auth'
 import { revalidatePath } from 'next/cache'
 import { autoClassifyBook } from '@/lib/utils/auto-classifier'
 import { OrderStatus } from '@prisma/client'
 import ExcelJS from 'exceljs'
+
+async function getSellerUserId(): Promise<string | null> {
+    const adminId = await getAdminUser()
+    const adminRole = await getAdminRole()
+    if (adminId && adminRole === 'SELLER') return adminId
+
+    const commUser = await getCommunityUser()
+    if (commUser && commUser.role === 'SELLER') return commUser.id
+
+    return null
+}
 
 export type SellerBulkImportResult = {
     success: boolean
@@ -51,9 +63,8 @@ function getColumnValue(row: Record<string, unknown>, aliases: string[]): unknow
  * Récupère les stats du dashboard vendeur
  */
 export async function getSellerDashboardData() {
-    const userId = await getAdminUser()
-    const role = await getAdminRole()
-    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getSellerUserId()
+    if (!userId) throw new Error('Non autorisé')
 
     const [booksCount, ordersCount, recentOrders] = await Promise.all([
         prisma.book.count({ where: { sellerId: userId } }),
@@ -91,9 +102,8 @@ export async function getSellerDashboardData() {
  * Récupère les livres du vendeur
  */
 export async function getSellerBooks() {
-    const userId = await getAdminUser()
-    const role = await getAdminRole()
-    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getSellerUserId()
+    if (!userId) throw new Error('Non autorisé')
 
     return prisma.book.findMany({
         where: { sellerId: userId },
@@ -105,9 +115,8 @@ export async function getSellerBooks() {
  * Récupère les commandes du vendeur
  */
 export async function getSellerOrders() {
-    const userId = await getAdminUser()
-    const role = await getAdminRole()
-    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getSellerUserId()
+    if (!userId) throw new Error('Non autorisé')
 
     return prisma.order.findMany({
         where: { sellerId: userId },
@@ -126,9 +135,8 @@ export async function getSellerOrders() {
  * Créer un livre ( Marketplace )
  */
 export async function createSellerBook(data: any) {
-    const userId = await getAdminUser()
-    const role = await getAdminRole()
-    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getSellerUserId()
+    if (!userId) throw new Error('Non autorisé')
 
     const classification = autoClassifyBook({
         title: data.title,
@@ -162,9 +170,8 @@ export async function updateSellerOrderStatus(
     newStatus: OrderStatus,
     trackingData?: { trackingID?: string; shippingCompany?: string; deliveryNotes?: string }
 ) {
-    const userId = await getAdminUser()
-    const role = await getAdminRole()
-    if (!userId || role !== 'SELLER') throw new Error('Non autorisé')
+    const userId = await getSellerUserId()
+    if (!userId) throw new Error('Non autorisé')
 
     // Sécurité OWASP: Vérification que la commande appartient bien à ce vendeur
     const existingOrder = await prisma.order.findUnique({
@@ -214,9 +221,8 @@ export async function updateSellerOrderStatus(
  * Importer un catalogue en masse depuis un fichier Excel ou CSV pour le vendeur
  */
 export async function importSellerBooksFromExcel(formData: FormData): Promise<SellerBulkImportResult> {
-    const userId = await getAdminUser()
-    const role = await getAdminRole()
-    if (!userId || role !== 'SELLER') {
+    const userId = await getSellerUserId()
+    if (!userId) {
         return {
             success: false,
             message: 'Non autorisé',

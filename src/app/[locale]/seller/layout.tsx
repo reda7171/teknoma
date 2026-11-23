@@ -17,13 +17,9 @@ export default async function SellerLayout({
 
     if (!userId || role !== 'SELLER') {
         const commUser = await getCommunityUser()
-        if (commUser) {
-            const commId = typeof commUser === 'string' ? commUser : (commUser as any).id
-            const user = await prisma.user.findUnique({ where: { id: commId } })
-            if (user && user.role === 'SELLER') {
-                userId = commId
-                role = 'SELLER'
-            }
+        if (commUser && commUser.role === 'SELLER') {
+            userId = commUser.id
+            role = 'SELLER'
         }
     }
 

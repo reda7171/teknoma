@@ -9,14 +9,13 @@ import { revalidatePath } from 'next/cache'
  * Récupère l'ID du vendeur (admin-token ou community-token)
  */
 async function getSellerUserId(): Promise<string | null> {
-    let userId = await getAdminUser()
-    let role = await getAdminRole()
+    const userId = await getAdminUser()
+    const role = await getAdminRole()
     if (userId && role === 'SELLER') return userId
 
-    const commId = await getCommunityUser()
-    if (commId) {
-        const user = await prisma.user.findUnique({ where: { id: commId } })
-        if (user?.role === 'SELLER') return commId
+    const commUser = await getCommunityUser()
+    if (commUser && commUser.role === 'SELLER') {
+        return commUser.id
     }
     return null
 }
