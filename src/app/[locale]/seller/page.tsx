@@ -1,35 +1,18 @@
 import { getSellerDashboardData } from '@/lib/actions/seller/dashboard'
-import { BookOpen, ShoppingBag, TrendingUp, DollarSign } from 'lucide-react'
+import { BookOpen, ShoppingBag, DollarSign } from 'lucide-react'
 import { Link } from '@/i18n/routing'
-import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
-import { getCommunityUser } from '@/lib/actions/community-auth'
-import { prisma } from '@/lib/prisma'
-import { redirect } from 'next/navigation'
+import { requireSellerSession } from '@/lib/server/seller-auth'
 import { getTranslations } from 'next-intl/server'
 
 export default async function SellerDashboardPage({ params }: { params: Promise<{ locale: string }> }) {
     const locale = (await params).locale
-    const t = await getTranslations('Seller.Dashboard')
-
-    let userId = await getAdminUser()
-    let role = await getAdminRole()
-    
-    if (!userId || role !== 'SELLER') {
-        const commUser = await getCommunityUser()
-        if (commUser && commUser.role === 'SELLER') {
-            userId = commUser.id
-            role = 'SELLER'
-        }
-    }
-
-    if (!userId || role !== 'SELLER') {
-        redirect(`/${locale}/admin/login`)
-    }
-
-    const [user, data] = await Promise.all([
-        prisma.user.findUnique({ where: { id: userId as string } }),
+    const [t, session, data] = await Promise.all([
+        getTranslations('Seller.Dashboard'),
+        requireSellerSession(locale),
         getSellerDashboardData()
     ])
+
+    const user = session.user
 
     const stats = [
         { label: t('Stats.Books'), value: data.booksCount, icon: BookOpen, color: 'bg-blue-100 text-blue-600' },

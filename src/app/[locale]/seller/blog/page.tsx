@@ -1,8 +1,5 @@
 import { getSellerPosts } from '@/lib/actions/seller/blog'
-import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
-import { getCommunityUser } from '@/lib/actions/community-auth'
-import { prisma } from '@/lib/prisma'
-import { redirect } from 'next/navigation'
+import { requireSellerSession } from '@/lib/server/seller-auth'
 import { Link } from '@/i18n/routing'
 import { Clock, PenLine } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
@@ -10,20 +7,11 @@ import SellerBlogClient from './SellerBlogClient'
 
 export default async function SellerBlogPage({ params }: { params: Promise<{ locale: string }> }) {
     const locale = (await params).locale
-    const t = await getTranslations('Seller.Blog')
-
-    let userId = await getAdminUser()
-    let role = await getAdminRole()
-    if (!userId || role !== 'SELLER') {
-        const commUser = await getCommunityUser()
-        if (commUser && commUser.role === 'SELLER') {
-            userId = commUser.id
-            role = 'SELLER'
-        }
-    }
-    if (!userId || role !== 'SELLER') redirect(`/${locale}/admin/login`)
-
-    const posts = await getSellerPosts()
+    const [t, _session, posts] = await Promise.all([
+        getTranslations('Seller.Blog'),
+        requireSellerSession(locale),
+        getSellerPosts()
+    ])
 
     return (
         <div className="max-w-5xl mx-auto space-y-12">

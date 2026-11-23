@@ -1,26 +1,10 @@
 import { getSellerOrders } from '@/lib/actions/seller/dashboard'
-import { getAdminUser, getAdminRole } from '@/lib/actions/auth'
-import { getCommunityUser } from '@/lib/actions/community-auth'
-import { redirect } from 'next/navigation'
+import { requireSellerSession } from '@/lib/server/seller-auth'
 import SellerOrdersClient from './SellerOrdersClient'
 
 export default async function SellerOrdersPage({ params }: { params: Promise<{ locale: string }> }) {
     const locale = (await params).locale
-
-    let userId: string | null = await getAdminUser()
-    let role: string | null = await getAdminRole()
-
-    if (!userId || role !== 'SELLER') {
-        const commUser = await getCommunityUser()
-        if (commUser && commUser.role === 'SELLER') {
-            userId = commUser.id
-            role = 'SELLER'
-        }
-    }
-
-    if (!userId || role !== 'SELLER') {
-        redirect(`/${locale}/admin/login`)
-    }
+    await requireSellerSession(locale)
 
     const orders = await getSellerOrders()
 
