@@ -56,7 +56,7 @@
     "next": "^16.4.6",
     "next-intl": "^4.15.1",
     "nodemailer": "^10.6.0",
-    "pdfjs-dist": "^4.10.38",
+    "pdfjs-dist": "^6.5.438",
     "pdfmake": "^0.3.14",
     "pino": "^10.4.0",
     "prisma": "^6.2.1",
