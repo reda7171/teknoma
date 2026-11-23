@@ -190,22 +190,29 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     const channelLabel = getSalesChannelLabel(order.salesChannel)
     const { itemsList, hasMissing, missingCount } = formatOrderItemsList(order.items)
 
+    const numTotal = typeof order.total === 'number' ? order.total : Number(order.total) || 0
+    const totalFormatted = numTotal.toFixed(2)
+    const formattedTotalWithMad = `${totalFormatted} MAD`
+
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_order' } })
     let text = templateSetting?.value || `🛒 <b>Nouvelle Commande #{{shortId}}</b>\n\n🏪 <b>Canal:</b> {{channel}}\n👤 <b>Client:</b> {{fullName}}\n📱 <b>Source:</b> {{source}}\n📞 <b>Téléphone:</b> {{phone}}\n📍 <b>Ville (Saisie):</b> {{city}}\n🌍 <b>Pays/Ville (IP):</b> {{location}}\n💰 <b>Total:</b> {{total}} MAD\n{{comment}}\n{{itemsList}}\n🌐 <b>IP:</b> {{ip}}\n\n🔗 <a href="{{orderUrl}}">Voir la commande</a>`
     const templateHasChannel = text.includes('{{channel}}')
 
-    text = text.replace(/\{\{shortId\}\}/g, escapeHtml(shortId))
-               .replace(/\{\{fullName\}\}/g, escapeHtml(order.fullName))
-               .replace(/\{\{source\}\}/g, escapeHtml(order.source || 'Boutique'))
-               .replace(/\{\{channel\}\}/g, escapeHtml(channelLabel))
-               .replace(/\{\{phone\}\}/g, escapeHtml(order.phone))
-               .replace(/\{\{city\}\}/g, escapeHtml(order.city))
-               .replace(/\{\{location\}\}/g, escapeHtml(location))
-               .replace(/\{\{total\}\}/g, order.total.toFixed(2))
-               .replace(/\{\{comment\}\}/g, order.comment ? `📝 <b>Note:</b> ${escapeHtml(order.comment)}` : '')
-               .replace(/\{\{itemsList\}\}/g, itemsList ? `📦 <b>Articles:</b>\n${itemsList}` : '')
-               .replace(/\{\{ip\}\}/g, ip)
-               .replace(/\{\{orderUrl\}\}/g, `${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}`)
+    text = text.replace(/\{{1,2}\s*shortId\s*\}{1,2}/gi, escapeHtml(shortId))
+               .replace(/\{{1,2}\s*fullName\s*\}{1,2}/gi, escapeHtml(order.fullName))
+               .replace(/\{{1,2}\s*source\s*\}{1,2}/gi, escapeHtml(order.source || 'Boutique'))
+               .replace(/\{{1,2}\s*channel\s*\}{1,2}/gi, escapeHtml(channelLabel))
+               .replace(/\{{1,2}\s*phone\s*\}{1,2}/gi, escapeHtml(order.phone))
+               .replace(/\{{1,2}\s*city\s*\}{1,2}/gi, escapeHtml(order.city))
+               .replace(/\{{1,2}\s*location\s*\}{1,2}/gi, escapeHtml(location))
+               .replace(/\{{1,2}\s*(total|montant|prix|price)\s*\}{1,2}/gi, totalFormatted)
+               .replace(/\{{1,2}\s*comment\s*\}{1,2}/gi, order.comment ? `📝 <b>Note:</b> ${escapeHtml(order.comment)}` : '')
+               .replace(/\{{1,2}\s*itemsList\s*\}{1,2}/gi, itemsList ? `📦 <b>Articles:</b>\n${itemsList}` : '')
+               .replace(/\{{1,2}\s*ip\s*\}{1,2}/gi, ip)
+               .replace(/\{{1,2}\s*orderUrl\s*\}{1,2}/gi, `${process.env.NEXTAUTH_URL}/fr/admin/orders/${order.id}`)
+
+    // Filet de sécurité strict si {{total}} ou {total} subsiste
+    text = text.replace(/\{{1,2}\s*(total|montant|prix|price)\s*\}{1,2}/gi, totalFormatted)
 
     if (!templateHasChannel) {
         text += `\n\n🏪 <b>Canal:</b> ${escapeHtml(channelLabel)}`
@@ -235,17 +242,19 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     const whatsappTemplateSetting = await prisma.siteSettings.findUnique({ where: { key: 'whatsapp_template_order' } })
     const defaultWaTemplate = `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Riwaya d'un montant de {{total}} a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}} (Paiement à la livraison).\n\nMerci de votre confiance ! 📚✨`
     let whatsappText = whatsappTemplateSetting?.value || defaultWaTemplate
-    const formattedTotal = `${order.total.toFixed(2)} MAD`
-    whatsappText = whatsappText.replace(/\{\{fullName\}\}/g, order.fullName)
-                               .replace(/\{\{shortId\}\}/g, shortId)
-                               .replace(/\{\{city\}\}/g, order.city)
-                               .replace(/\{\{total\}\}/g, formattedTotal)
+    whatsappText = whatsappText.replace(/\{{1,2}\s*fullName\s*\}{1,2}/gi, order.fullName)
+                               .replace(/\{{1,2}\s*shortId\s*\}{1,2}/gi, shortId)
+                               .replace(/\{{1,2}\s*city\s*\}{1,2}/gi, order.city)
+                               .replace(/\{{1,2}\s*(total|montant|prix|price)\s*\}{1,2}/gi, formattedTotalWithMad)
+
+    // Filet de sécurité strict pour WhatsApp si {{total}} ou {total} subsiste
+    whatsappText = whatsappText.replace(/\{{1,2}\s*(total|montant|prix|price)\s*\}{1,2}/gi, formattedTotalWithMad)
 
     // Si l'ancien template personnalisé ne contenait pas encore la variable {{total}}
-    if (!whatsappText.includes(order.total.toFixed(2)) && !whatsappText.includes('MAD') && !whatsappText.includes('DH')) {
+    if (!whatsappText.includes(totalFormatted) && !whatsappText.includes('MAD') && !whatsappText.includes('DH')) {
         whatsappText = whatsappText.replace(
             /(\n\nMerci de votre confiance)/,
-            `\n💰 Montant total : ${formattedTotal} (Paiement à la livraison)\n$1`
+            `\n💰 Montant total : ${formattedTotalWithMad} (Paiement à la livraison)\n$1`
         )
     }
 

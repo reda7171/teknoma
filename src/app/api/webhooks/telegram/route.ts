@@ -433,7 +433,7 @@ export async function POST(req: Request) {
                     const updatedText = `✅ <b>Commande #${shortId}</b>\n\n` +
                         `👤 ${escapeHtml(order.fullName)}\n` +
                         `📍 ${escapeHtml(order.city)}\n` +
-                        `💰 ${order.total.toFixed(2)} درهم\n\n` +
+                        `💰 <b>Total :</b> ${order.total.toFixed(2)} MAD\n\n` +
                         `📌 <b>Statut :</b> ${label}`
 
                     if (message?.chat?.id && message?.message_id) {
