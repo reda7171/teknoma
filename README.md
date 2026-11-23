@@ -21,7 +21,7 @@ Plateforme e-commerce High-Tech au Maroc : Smartphones, Ordinateurs portables, M
 
 2. Configurer les variables d'environnement dans `.env` :
    ```env
-   DATABASE_URL="mysql://teknoma_user:TeknoPass2026_Secure!@167.86.108.246:3908/teknoma_db"
+   DATABASE_URL="mysql://tekno_user:votre_mot_de_passe@localhost:3306/tekno_db"
    NEXT_PUBLIC_SITE_URL="https://tekno.ma"
    NEXT_PUBLIC_CONTACT_EMAIL="Contact.tekno.ma@gmail.com"
    ```
