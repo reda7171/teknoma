@@ -43,7 +43,7 @@ export default function WhatsAppButton({ phone, agentName }: WhatsAppButtonProps
                 if (res?.phone) setActivePhone(res.phone)
                 setActiveAgentName(res?.agentName || undefined)
             })
-            .catch(() => {})
+            .catch(() => { })
     }
 
     // Capture dynamic product or pack title from DOM on route change
