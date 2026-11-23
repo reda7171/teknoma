@@ -13,6 +13,7 @@ export interface ReceiptData {
     shippingFees: number;
     discount: number;
     total: number;
+    shippingCompany?: string;
 }
 
 export function printReceipt(data: ReceiptData) {

@@ -392,8 +392,15 @@ export default function POSClient({
   const filteredBooks = localBooks.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()) || (b.isbn && b.isbn.includes(searchTerm)));
   const filteredPacks = localPacks.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
   const allActiveAccessories = localAccessories.filter(a => !isRetiredAccessoryCategory(a.category) && a.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  const filteredAccessoriesLibrary = allActiveAccessories.filter(a => !['CARE', 'HYGIÈNE ET SOINS', 'SOINS', 'FOOD', 'ALIMENTATION'].includes((a.category || '').toUpperCase()));
-  const filteredAccessoriesKids = allActiveAccessories.filter(a => ['CARE', 'HYGIÈNE ET SOINS', 'SOINS', 'FOOD', 'ALIMENTATION'].includes((a.category || '').toUpperCase()));
+  const isAudioCat = (cat: string = '') => ['AUDIO', 'SON', 'ÉCOUTEURS', 'ECOUTEURS', 'CASQUES', 'AIRPODS'].includes(cat.toUpperCase());
+  const isHardwareCat = (cat: string = '') => ['SMARTPHONES', 'SMARTPHONE', 'PC', 'PC PORTABLES', 'MAC', 'APPLE', 'TABLETTES'].includes(cat.toUpperCase());
+
+  const techHardware = filteredBooks.filter(b => isHardwareCat(b.category || '') || (!isAudioCat(b.category || '') && !b.category?.toUpperCase().includes('ACCESSOIRE')));
+  const techAudio = filteredBooks.filter(b => isAudioCat(b.category || ''));
+  const techAccessories = [
+    ...allActiveAccessories.map(a => ({ ...a, title: a.name, type: 'ACCESSORY' as const })),
+    ...filteredBooks.filter(b => (b.category || '').toUpperCase().includes('ACCESSOIRE')).map(b => ({ ...b, type: 'BOOK' as const }))
+  ];
 
   const handleBarcodeScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchTerm.trim() !== '') {
