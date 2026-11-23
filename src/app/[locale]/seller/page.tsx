@@ -1,5 +1,5 @@
 import { getSellerDashboardData } from '@/lib/actions/seller/dashboard'
-import { BookOpen, ShoppingBag, DollarSign } from 'lucide-react'
+import { BookOpen, ShoppingBag, DollarSign, TrendingUp } from 'lucide-react'
 import { Link } from '@/i18n/routing'
 import { requireSellerSession } from '@/lib/server/seller-auth'
 import { getTranslations } from 'next-intl/server'
