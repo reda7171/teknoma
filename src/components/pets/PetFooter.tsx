@@ -1,15 +1,59 @@
 import { Link } from '@/i18n/routing'
 import Image from 'next/image'
 import { getLocale } from 'next-intl/server'
-import { Mail, Truck, HeartHandshake, Package, Phone, MessageCircle, ShieldCheck, CreditCard, Banknote } from 'lucide-react'
+import { Mail, Truck, HeartHandshake, Package, Phone, MessageCircle, ShieldCheck, CreditCard, Banknote, Instagram, Facebook, Youtube, Linkedin } from 'lucide-react'
 import { getPetCopy } from '@/lib/pets'
 import { getPetContent, PET_CONTACT_EMAIL, TEKNO_PHONE, TEKNO_WHATSAPP_URL } from '@/lib/pet-content'
+import { getSetting } from '@/lib/actions/site-settings'
 import PetCookieSettings from './PetCookieSettings'
+
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .58.04.85.12V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.27 6.27 0 0 0 1.83-4.49V8.62a8.28 8.28 0 0 0 4.94 1.62V6.79a4.84 4.84 0 0 1-1-.1z" />
+    </svg>
+  )
+}
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  )
+}
 
 export default async function PetFooter() {
   const locale = await getLocale()
   const c = getPetCopy(locale)
   const t = getPetContent(locale)
+
+  const [
+    instagram,
+    facebook,
+    tiktok,
+    youtube,
+    twitter,
+    linkedin,
+    whatsappChannel
+  ] = await Promise.all([
+    getSetting('social_instagram'),
+    getSetting('social_facebook'),
+    getSetting('social_tiktok'),
+    getSetting('social_youtube'),
+    getSetting('social_twitter'),
+    getSetting('social_linkedin'),
+    getSetting('social_whatsapp_channel')
+  ])
+
+  const socials = [
+    { label: 'Instagram', href: instagram || 'https://instagram.com', icon: Instagram },
+    { label: 'Facebook', href: facebook || 'https://facebook.com', icon: Facebook },
+    { label: 'TikTok', href: tiktok || 'https://tiktok.com', icon: TikTokIcon },
+    { label: 'YouTube', href: youtube || 'https://youtube.com', icon: Youtube },
+    { label: 'X', href: twitter || 'https://x.com', icon: XIcon },
+    { label: 'LinkedIn', href: linkedin || 'https://linkedin.com', icon: Linkedin },
+  ]
 
   return (
     <footer className="bg-[#1A1C1F] text-white pt-14 pb-10">
@@ -90,6 +134,28 @@ export default async function PetFooter() {
                 <Mail className="h-4 w-4 text-gray-500" />
                 {PET_CONTACT_EMAIL}
               </a>
+            </div>
+
+            {/* Social media icons */}
+            <div className="mt-6 pt-5 border-t border-gray-800/80">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3">
+                Suivez-nous
+              </p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {socials.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Tekno Store sur ${label}`}
+                    title={label}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-900 border border-gray-800 text-gray-400 hover:text-white hover:border-[#75C300] hover:bg-[#75C300]/10 transition-all duration-200"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -180,6 +246,21 @@ export default async function PetFooter() {
         {/* Bottom copyright */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-gray-800 pt-6 text-xs text-gray-500">
           <p>© {new Date().getFullYear()} Tekno Store Maroc. Tous droits réservés.</p>
+          <div className="hidden sm:flex items-center gap-3">
+            {socials.map(({ label, href, icon: Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                title={label}
+                className="text-gray-500 hover:text-[#75C300] transition-colors"
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </a>
+            ))}
+          </div>
           <PetCookieSettings />
           <p dir="ltr" className="font-semibold text-[#75C300]">tekno.ma</p>
         </div>
