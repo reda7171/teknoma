@@ -6,6 +6,9 @@ import { getPetCopy } from '@/lib/pets'
 import { getPetContent, PET_CONTACT_EMAIL, TEKNO_PHONE, TEKNO_WHATSAPP_URL } from '@/lib/pet-content'
 import { getSetting } from '@/lib/actions/site-settings'
 import PetCookieSettings from './PetCookieSettings'
+import PetBackToTop from './PetBackToTop'
+import PetNewsletter from './PetNewsletter'
+import GoogleReviewsBadge from '@/components/GoogleReviewsBadge'
 
 function TikTokIcon({ className }: { className?: string }) {
   return (
@@ -56,43 +59,51 @@ export default async function PetFooter() {
   ]
 
   return (
-    <footer className="bg-[#1A1C1F] text-white pt-14 pb-10">
+    <footer className="bg-[#1A1C1F] text-white pt-14 pb-10 relative">
+      <GoogleReviewsBadge />
+
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        {/* Top Reassurance Strip (MicroMagma style) */}
-        <div className="grid gap-6 border-b border-gray-800 pb-10 sm:grid-cols-3">
-          <div className="flex items-center gap-4 rounded-2xl bg-gray-900/60 p-4 border border-gray-800/80">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#75C300]/15 text-[#75C300]">
-              <Truck className="h-6 w-6" />
+        {/* Top Reassurance Strip & Back to top */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 border-b border-gray-800 pb-10">
+          <div className="grid gap-6 flex-1 sm:grid-cols-3">
+            <div className="flex items-center gap-4 rounded-2xl bg-gray-900/60 p-4 border border-gray-800/80">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#75C300]/15 text-[#75C300]">
+                <Truck className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="font-bold text-sm text-white">{c.delivery}</p>
+                <p className="text-xs text-gray-400 mt-0.5">Livraison express 24/48h partout au Maroc</p>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-sm text-white">{c.delivery}</p>
-              <p className="text-xs text-gray-400 mt-0.5">Livraison express 24/48h partout au Maroc</p>
+
+            <div className="flex items-center gap-4 rounded-2xl bg-gray-900/60 p-4 border border-gray-800/80">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1976D2]/20 text-[#1976D2]">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="font-bold text-sm text-white">100% Neuf & Garanti</p>
+                <p className="text-xs text-gray-400 mt-0.5">Produits certifiés d'origine sous blister</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-2xl bg-gray-900/60 p-4 border border-gray-800/80">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#75C300]/15 text-[#75C300]">
+                <Banknote className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="font-bold text-sm text-white">Paiement à la livraison</p>
+                <p className="text-xs text-gray-400 mt-0.5">Payez en espèces ou par carte à réception</p>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-2xl bg-gray-900/60 p-4 border border-gray-800/80">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1976D2]/20 text-[#1976D2]">
-              <ShieldCheck className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="font-bold text-sm text-white">100% Neuf & Garanti</p>
-              <p className="text-xs text-gray-400 mt-0.5">Produits certifiés d'origine sous blister</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 rounded-2xl bg-gray-900/60 p-4 border border-gray-800/80">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#75C300]/15 text-[#75C300]">
-              <Banknote className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="font-bold text-sm text-white">Paiement à la livraison</p>
-              <p className="text-xs text-gray-400 mt-0.5">Payez en espèces ou par carte à réception</p>
-            </div>
+          <div className="shrink-0 flex justify-end">
+            <PetBackToTop />
           </div>
         </div>
 
         {/* Main Footer Links */}
-        <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+        <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand info */}
           <div>
             <Link href="/" className="inline-block" dir="ltr">
@@ -185,6 +196,9 @@ export default async function PetFooter() {
             <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-white">Liens Utiles</h2>
             <ul className="space-y-2.5 text-xs text-gray-400">
               {[
+                { href: '/tracking', label: locale === 'ar' ? 'تتبع طلبي' : locale === 'en' ? 'Track order' : 'Suivi de commande' },
+                { href: '/blog', label: locale === 'ar' ? 'المدونة والجديد' : locale === 'en' ? 'Blog & News' : 'Actualités & Blog' },
+                { href: '/devenir-vendeur', label: locale === 'ar' ? 'كن شريكاً معنا' : locale === 'en' ? 'Become a partner' : 'Devenir Partenaire' },
                 { href: '/services', label: c.services },
                 { href: '/about', label: t.about },
                 { href: '/faq', label: t.faq },
@@ -216,6 +230,11 @@ export default async function PetFooter() {
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Newsletter & Push alerts */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <PetNewsletter />
           </div>
         </div>
 
