@@ -123,7 +123,7 @@ export async function generateMetadata({
                 'fr': `${baseUrl}/fr/packs/${pack.id}`,
                 'ar': `${baseUrl}/ar/packs/${pack.id}`,
                 'en': `${baseUrl}/en/packs/${pack.id}`,
-                'x-default': `${baseUrl}/ar/packs/${pack.id}`,
+                'x-default': `${baseUrl}/fr/packs/${pack.id}`,
             },
         },
     }

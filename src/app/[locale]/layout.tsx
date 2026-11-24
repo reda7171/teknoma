@@ -133,7 +133,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         'fr-MA': `${siteUrl}/fr`,
         'ar-MA': `${siteUrl}/ar`,
         'en-MA': `${siteUrl}/en`,
-        'x-default': `${siteUrl}/ar`, // L'Arabe est la langue par défaut comme défini dans le middleware
+        'x-default': `${siteUrl}/fr`, // Le Français est la langue par défaut
       },
     },
     title: {
@@ -228,7 +228,7 @@ export default async function LocaleLayout({
     en: { lang: 'en', dir: 'ltr' },
   };
 
-  const { lang, dir } = localeConfig[locale] ?? localeConfig.ar;
+  const { lang, dir } = localeConfig[locale] ?? localeConfig.fr;
 
   // Ensure that the incoming `locale` is valid
   if (!routing.locales.includes(locale as any)) {
