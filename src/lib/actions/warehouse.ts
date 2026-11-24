@@ -218,13 +218,31 @@ export async function allocateOrderItemStock(
     }
 
     // R�cup�rer tous les entrep�ts actifs
-    const warehouses = await tx.warehouse.findMany({
+    let warehouses = await tx.warehouse.findMany({
         where: { active: true },
         orderBy: { createdAt: 'asc' }
     })
 
     if (!warehouses || warehouses.length === 0) {
-        throw new Error('Aucun entrep�t actif configur�')
+        const existingAny = await tx.warehouse.findFirst({
+            orderBy: { createdAt: 'asc' }
+        })
+        if (existingAny) {
+            const reactivated = await tx.warehouse.update({
+                where: { id: existingAny.id },
+                data: { active: true }
+            })
+            warehouses = [reactivated]
+        } else {
+            const defaultWarehouse = await tx.warehouse.create({
+                data: {
+                    name: 'Entrepôt Principal',
+                    location: 'Casablanca, Maroc',
+                    active: true
+                }
+            })
+            warehouses = [defaultWarehouse]
+        }
     }
 
     // Si un entrep�t pr�cis a �t� s�lectionn� manuellement par l'administrateur

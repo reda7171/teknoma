@@ -546,6 +546,22 @@ async function main() {
     }
   }
 
+  // 6. Entrepôts logistiques par défaut
+  const defaultWarehouses = [
+    { name: 'Entrepôt Principal', location: 'Casablanca, Maroc', active: true },
+    { name: 'Entrepôt Rabat', location: 'Rabat, Maroc', active: true },
+    { name: 'Entrepôt Marrakech', location: 'Marrakech, Maroc', active: true },
+  ]
+
+  for (const wh of defaultWarehouses) {
+    const existingWh = await prisma.warehouse.findFirst({ where: { name: wh.name } })
+    if (!existingWh) {
+      await prisma.warehouse.create({ data: wh })
+    } else {
+      await prisma.warehouse.update({ where: { id: existingWh.id }, data: { active: true } })
+    }
+  }
+
   console.log('Seed Tekno Store terminé avec succès !')
 }
 
