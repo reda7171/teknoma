@@ -434,7 +434,7 @@ export default function HomepageSectionsForm({ initialSettings }: HomepageSectio
                                         <div className="flex items-center gap-2.5">
                                             <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
                                             <div>
-                                                <p className="text-xs font-black text-black">Livre au centre du Hero</p>
+                                                <p className="text-xs font-black text-black">Produit au centre du Hero</p>
                                                 <p className="text-[11px] text-gray-500">
                                                     Mode automatique (plus visité) ou épinglé manuellement.
                                                 </p>

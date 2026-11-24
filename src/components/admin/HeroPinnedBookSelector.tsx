@@ -85,10 +85,10 @@ export default function HeroPinnedBookSelector({
           </div>
           <div>
             <h4 className="text-xs font-black uppercase tracking-wider text-black">
-              Livre épinglé au centre du Hero
+              Produit épinglé au centre du Hero
             </h4>
             <p className="text-[11px] text-gray-500 font-medium">
-              Fixez un livre vedette au premier plan du carrousel ou laissez l'algorithme des plus vus.
+              Fixez un produit vedette au premier plan du Hero ou laissez l'algorithme des plus populaires.
             </p>
           </div>
         </div>
@@ -166,15 +166,15 @@ export default function HeroPinnedBookSelector({
             )}
             <div className="min-w-0">
               <p className="text-[11px] font-black uppercase tracking-widest text-gray-400">
-                Livre actuellement au centre (automatique)
+                Produit actuellement au centre (automatique)
               </p>
               <p className="text-xs font-black text-black truncate mt-0.5">
-                {defaultCenterBook ? defaultCenterBook.title : 'Aucun livre détecté'}
+                {defaultCenterBook ? defaultCenterBook.title : 'Aucun produit détecté'}
               </p>
               <p className="text-[11px] text-gray-500">
                 {defaultCenterBook
                   ? `${defaultCenterBook.author} • ${defaultCenterBook.views || 0} vues`
-                  : 'Sélectionnez un livre ci-dessous'}
+                  : 'Sélectionnez un produit ci-dessous'}
               </p>
             </div>
           </div>
@@ -184,10 +184,10 @@ export default function HeroPinnedBookSelector({
         </div>
       )}
 
-      {/* Sélecteur / Recherche de livre */}
+      {/* Sélecteur / Recherche de produit */}
       <div ref={containerRef} className="relative">
         <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1.5">
-          Sélectionner un livre à épingler
+          Sélectionner un produit à épingler
         </label>
         <div className="relative">
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -199,7 +199,7 @@ export default function HeroPinnedBookSelector({
               setIsOpen(true)
             }}
             onFocus={() => setIsOpen(true)}
-            placeholder="Rechercher par titre ou par auteur..."
+            placeholder="Rechercher par titre, modèle ou marque..."
             className="w-full pl-10 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-medium text-black placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-black transition-all"
           />
           {searchQuery && (
@@ -222,7 +222,7 @@ export default function HeroPinnedBookSelector({
 
             {searchResults.length === 0 ? (
               <div className="p-4 text-center text-xs text-gray-400">
-                Aucun livre trouvé pour "{searchQuery}"
+                Aucun produit trouvé pour "{searchQuery}"
               </div>
             ) : (
               searchResults.map(book => {

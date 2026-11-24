@@ -9,6 +9,7 @@ import PetTestimonials from '@/components/pets/PetTestimonials'
 import { Link } from '@/i18n/routing'
 import { getPetCopy } from '@/lib/pets'
 import { prisma } from '@/lib/prisma'
+import { getSetting } from '@/lib/actions/site-settings'
 import {
   ArrowUpRight,
   Smartphone,
@@ -59,11 +60,28 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const { locale } = await params
   const c = getPetCopy(locale)
 
-  const products = await prisma.book.findMany({
-    where: { active: true, status: 'APPROVED' },
-    orderBy: { createdAt: 'desc' },
-    take: 12
-  })
+  const [products, pinnedSettingId] = await Promise.all([
+    prisma.book.findMany({
+      where: { active: true, status: 'APPROVED' },
+      orderBy: { createdAt: 'desc' },
+      take: 12
+    }),
+    getSetting('hero_pinned_book_id')
+  ])
+
+  let pinnedProduct = null
+  if (pinnedSettingId) {
+    pinnedProduct = await prisma.book.findUnique({
+      where: { id: pinnedSettingId, active: true },
+      select: {
+        id: true,
+        title: true,
+        author: true,
+        image: true,
+        price: true,
+      }
+    })
+  }
 
   const categories = [
     { key: 'Smartphones', label: c.smartphones, icon: Smartphone, color: 'bg-white border border-gray-200 text-[#1A1C1F]', count: 'iPhone, Galaxy & Xiaomi' },
@@ -168,7 +186,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             {/* Hero Visual Artwork with Floating Trust Cards */}
             <div className="relative mx-auto w-full max-w-md lg:max-w-lg">
               <div className="rounded-3xl border border-gray-200 bg-white p-3 shadow-2xl">
-                <PetArtwork />
+                <PetArtwork product={pinnedProduct} />
               </div>
 
               {/* Floating Reassurance Badge Left */}
@@ -279,8 +297,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <PetPromoPacks
           locale={locale}
           title={c.packSectionTitle}
-          subtitle={c.packSectionText}
-        />
+          subtitle={c.packSectionText} orderNowLabel={''} />
 
         {/* SERVICES BANNER (Carbon Black & MicroMagma Green) */}
         <section className="mx-5 mb-16 rounded-3xl bg-[#1A1C1F] px-6 py-12 text-white md:mx-auto md:max-w-7xl md:px-12 shadow-xl">

@@ -189,7 +189,7 @@ export default function HomepageContentForm({ initialSettings, books = [] }: Hom
         value,
         category: 'homepage_content',
         description: key === 'hero_pinned_book_id'
-          ? 'Livre épinglé au centre du Hero'
+          ? 'Produit épinglé au centre du Hero'
           : SECTIONS.flatMap(s => s.fields).find(f => f.key === key)?.label || key
       }))
       await updateMultipleSettings(entries)
