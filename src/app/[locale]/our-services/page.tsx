@@ -54,15 +54,6 @@ export default async function OurServicesPage({ params: { locale } }: { params: 
             link: '/livraison'
         },
         {
-            id: 'sell',
-            icon: <Store className="w-8 h-8 md:w-10 md:h-10 text-white" />,
-            title: t('services.sell.title'),
-            desc: t('services.sell.desc'),
-            color: 'bg-purple-500',
-            bg: 'bg-purple-50',
-            link: '/devenir-vendeur'
-        },
-        {
             id: 'local',
             icon: <MapPin className="w-8 h-8 md:w-10 md:h-10 text-white" />,
             title: t('services.local.title'),

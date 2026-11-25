@@ -198,7 +198,6 @@ export default async function PetFooter() {
               {[
                 { href: '/tracking', label: locale === 'ar' ? 'تتبع طلبي' : locale === 'en' ? 'Track order' : 'Suivi de commande' },
                 { href: '/blog', label: locale === 'ar' ? 'المدونة والجديد' : locale === 'en' ? 'Blog & News' : 'Actualités & Blog' },
-                { href: '/devenir-vendeur', label: locale === 'ar' ? 'كن شريكاً معنا' : locale === 'en' ? 'Become a partner' : 'Devenir Partenaire' },
                 { href: '/services', label: c.services },
                 { href: '/about', label: t.about },
                 { href: '/faq', label: t.faq },

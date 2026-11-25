@@ -539,15 +539,6 @@ export default function Header({ user, notificationDropdown, navigation, megaMen
                                     </Link>
                                 )
                             })}
-                            {features.seller === true && !user && (
-                                <Link
-                                    href="/devenir-vendeur"
-                                    className="hidden xl:inline-flex bg-gradient-to-r from-[#FFDC50] to-yellow-400 text-black px-5 py-2 rounded-full text-[13px] rtl:text-[15px] font-black tracking-widest rtl:tracking-normal uppercase hover:scale-105 active:scale-95 shadow-[0_4px_14px_rgba(255,220,80,0.4)] hover:shadow-[0_6px_20px_rgba(255,220,80,0.6)] transition-all duration-300 relative overflow-hidden group items-center"
-                                >
-                                    <span className="relative z-10">{locale === 'ar' ? 'كن بائعاً' : locale === 'en' ? 'Become a seller' : 'Devenir vendeur'}</span>
-                                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-                                </Link>
-                            )}
                         </nav>
 
                         {/* Actions */}
