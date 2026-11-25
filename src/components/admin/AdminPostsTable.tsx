@@ -152,7 +152,7 @@ export default function AdminPostsTable({ posts, locale, adminUsers = [] }: Admi
                             </th>
                             <th className="px-8 py-6">Contenu</th>
                             <th className="px-8 py-6">Auteur</th>
-                            <th className="px-8 py-6">Livre lié</th>
+                            <th className="px-8 py-6">Produits liés</th>
                             <th className="px-8 py-6 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => handleSort('seo')}>
                                 Score SEO <SortIcon column="seo" />
                             </th>

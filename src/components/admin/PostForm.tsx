@@ -643,7 +643,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
 
                     <div className="bg-white/70 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 space-y-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
-                        <h3 className="font-black text-gray-900 tracking-tight text-lg relative z-10">Livres liés</h3>
+                        <h3 className="font-black text-gray-900 tracking-tight text-lg relative z-10">Produits liés</h3>
                         <p className="text-[10px] text-gray-500 font-medium">L'article sera affiché sur la page de ces produits.</p>
 
                         <div className="space-y-3">
@@ -654,7 +654,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                     type="text"
                                     value={bookSearch}
                                     onChange={(e) => setBookSearch(e.target.value)}
-                                    placeholder="Rechercher un livre..."
+                                    placeholder="Rechercher un produit..."
                                     className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-black outline-none transition-all"
                                 />
                             </div>
@@ -666,7 +666,7 @@ export default function PostForm({ post, isEditing = false }: PostFormProps) {
                                         const book = allBooks.find(b => b.id === id)
                                         return (
                                             <div key={id} className="flex items-center gap-2 px-2 py-1 bg-black text-white rounded text-[10px] font-bold">
-                                                <span className="truncate max-w-[120px]">{book?.title || 'Livre...'}</span>
+                                                <span className="truncate max-w-[120px]">{book?.title || 'Produit...'}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedBookIds(prev => prev.filter(bid => bid !== id))}
