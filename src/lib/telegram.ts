@@ -101,7 +101,7 @@ export function formatOrderItemsList(items?: any[]): { itemsList: string; hasMis
                 } else if (lang === 'fr' && i.book.titleFr) {
                     rawTitle = i.book.titleFr
                 } else {
-                    rawTitle = i.book.title || i.book.titleEn || i.book.titleFr || 'Livre'
+                    rawTitle = i.book.title || i.book.titleEn || i.book.titleFr || 'Produit'
                 }
             } else if (i.pack) {
                 rawTitle = i.pack.name || i.pack.nameFr || i.pack.nameEn || 'Pack'
@@ -112,7 +112,7 @@ export function formatOrderItemsList(items?: any[]): { itemsList: string; hasMis
             } else if (i.gift) {
                 rawTitle = i.gift.name || 'Cadeau'
             }
-            const typeBadge = i.type === 'PACK' ? '📦' : i.type === 'DIGITAL' ? '💻' : i.type === 'ACCESSORY' ? '🎁' : '📖'
+            const typeBadge = i.type === 'PACK' ? '📦' : i.type === 'DIGITAL' ? '💻' : i.type === 'ACCESSORY' ? '🎁' : '📱'
             const price = i.price !== undefined ? ` (${i.price} MAD)` : ''
 
             const isItemMissing = Boolean(
@@ -230,7 +230,7 @@ export async function sendOrderNotification(order: TelegramOrderNotification) {
     }
 
     const whatsappTemplateSetting = await prisma.siteSettings.findUnique({ where: { key: 'whatsapp_template_order' } })
-    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Tekno Store a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📚✨`
+    let whatsappText = whatsappTemplateSetting?.value || `Bonjour {{fullName}},\n\nVotre commande #{{shortId}} sur Tekno Store a bien été reçue. Nous préparons votre colis pour une livraison rapide à {{city}}.\n\nMerci de votre confiance ! 📱✨`
     whatsappText = whatsappText.replace(/\{\{fullName\}\}/g, order.fullName)
                                .replace(/\{\{shortId\}\}/g, shortId)
                                .replace(/\{\{city\}\}/g, order.city)
@@ -601,7 +601,7 @@ export async function sendLowStockNotification(book: { id: string, title: string
     if (shouldNotify?.value === 'false') return
 
     const templateSetting = await prisma.siteSettings.findUnique({ where: { key: 'telegram_template_low_stock' } })
-    let text = templateSetting?.value || `⚠️ <b>Alerte Stock Faible</b>\n\n📖 <b>Livre:</b> {{title}}\n📦 <b>Stock restant:</b> <b>{{stock}}</b>\n\n<i>Action rapide disponible :</i>`
+    let text = templateSetting?.value || `⚠️ <b>Alerte Stock Faible</b>\n\n📱 <b>Produit:</b> {{title}}\n📦 <b>Stock restant:</b> <b>{{stock}}</b>\n\n<i>Action rapide disponible :</i>`
 
     text = text.replace(/\{\{title\}\}/g, book.title)
                .replace(/\{\{stock\}\}/g, book.stock.toString())
