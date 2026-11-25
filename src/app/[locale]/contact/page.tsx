@@ -2,6 +2,7 @@ import Header from '@/components/pets/PetHeader'
 import Footer from '@/components/pets/PetFooter'
 import PetPageHero from '@/components/pets/PetPageHero'
 import PetContactForm from '@/components/pets/PetContactForm'
+import StoreMapSection from '@/components/pets/StoreMapSection'
 import { getPetCopy } from '@/lib/pets'
 import { getPetContent, PET_CONTACT_EMAIL, TEKNO_PHONE, TEKNO_WHATSAPP_URL } from '@/lib/pet-content'
 import { Link } from '@/i18n/routing'
@@ -33,5 +34,6 @@ export default async function Contact({params,searchParams}:{params:Promise<{loc
         {[{icon:Package,title:t.shipping,text:t.returns,href:'/shipping-policy'},{icon:HeartHandshake,title:t.faq,text:t.faqIntro,href:'/faq'}].map(({icon:Icon,title,text,href}) => <Link key={href} href={href} className="flex items-center gap-4 rounded-2xl border border-gray-200 p-6"><Icon className="h-6 w-6 shrink-0 text-[#1976D2]" /><span className="flex-1"><span className="block text-sm font-bold">{title}</span><span className="mt-2 block text-xs leading-6 text-gray-500">{text}</span></span><ArrowUpRight className="h-4 w-4" /></Link>)}
       </aside><PetContactForm locale={locale} email={PET_CONTACT_EMAIL} subject={subject} />
     </div>
+    <StoreMapSection locale={locale} />
   </main><Footer /></>
 }

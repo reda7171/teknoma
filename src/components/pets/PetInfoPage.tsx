@@ -2,6 +2,7 @@ import Header from './PetHeader'
 import Footer from './PetFooter'
 import PetPageHero from './PetPageHero'
 import PetHelpBanner from './PetHelpBanner'
+import StoreMapSection from './StoreMapSection'
 import { getPetContent, getPetInfo, type InfoPageKey } from '@/lib/pet-content'
 import { Link } from '@/i18n/routing'
 import { ArrowUpRight } from 'lucide-react'
@@ -17,6 +18,7 @@ export default function PetInfoPage({ locale, page }: { locale: string; page: In
         <Link href="/contact" className="pet-button">{t.contactUs}<ArrowUpRight className="h-4 w-4" /></Link>
       </article>
     </div>
+    {page === 'about' && <StoreMapSection locale={locale} />}
     <PetHelpBanner locale={locale} />
   </main><Footer /></>
 }
