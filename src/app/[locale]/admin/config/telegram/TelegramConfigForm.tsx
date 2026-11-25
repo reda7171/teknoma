@@ -212,11 +212,11 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
                                 { id: 'notifyReviews', label: 'Avis Clients', desc: 'Modération des avis avec boutons Approuver/Supprimer', templateKey: 'templateReview', templateVars: '{{fullName}}, {{rating}}, {{comment}}' },
                                 { id: 'notifyJumiaPayout', label: 'Virements Jumia', desc: 'Alertes pour les nouveaux paiements Jumia saisis' },
                                 { id: 'notifyInvoices', label: 'Factures Saisies', desc: 'Alertes quand une facture (livraison, virement) est saisie' },
-                                { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un livre passe sous 3 unités', templateKey: 'templateLowStock', templateVars: '{{title}}, {{stock}}' },
+                                { id: 'notifyLowStock', label: 'Alerte Stock Faible', desc: 'Alertes si un produit passe sous 3 unités', templateKey: 'templateLowStock', templateVars: '{{title}}, {{stock}}' },
                                 { id: 'notifyDailySummary', label: 'Résumé Journalier', desc: 'Récapitulatif des ventes chaque soir à 22h' },
                                 { id: 'statsVisitors', label: 'Stats: Visiteurs uniques', desc: 'Inclure le trafic dans le /bilan' },
                                 { id: 'statsRegistrations', label: 'Stats: Inscriptions', desc: 'Inclure les nouveaux comptes dans le /bilan' },
-                                { id: 'statsTopViews', label: 'Stats: Livres les plus vus', desc: 'Inclure le top consultations dans le /bilan' },
+                                { id: 'statsTopViews', label: 'Stats: Produits les plus vus', desc: 'Inclure le top consultations dans le /bilan' },
                             ].map((item) => (
                                 <div key={item.id} className="flex flex-col p-5 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:shadow-lg hover:border-blue-100 group">
                                     <div className="flex items-center justify-between">

@@ -143,7 +143,7 @@ export async function POST(req: Request) {
                         data: { stock: 0 }
                     })
 
-                    await answerCallbackQuery(callbackId, `✅ Le stock du livre a été remis à zéro!`, token)
+                    await answerCallbackQuery(callbackId, `✅ Le stock du produit a été remis à zéro!`, token)
 
                     // Mettre à jour le message pour indiquer que ça a été fait
                     if (message?.chat?.id && message?.message_id) {
@@ -155,7 +155,7 @@ export async function POST(req: Request) {
                     return NextResponse.json({ ok: true })
                 }
 
-                await answerCallbackQuery(callbackId, '❌ Erreur ID livre', token)
+                await answerCallbackQuery(callbackId, '❌ Erreur ID produit', token)
                 return NextResponse.json({ ok: true })
             }
             // ─── Bouton Déclarer / Gérer Manquant ───────────────────────────
@@ -214,8 +214,8 @@ export async function POST(req: Request) {
 
                         const shortId = orderId.slice(0, 8).toUpperCase()
                         const notifText = nextMissing
-                            ? `⚠️ <b>Article Déclaré MANQUANT</b>\n\n📦 <b>Commande #${shortId}</b>\n📖 <b>${escapeHtml(rawTitle)}</b>\n🔴 Statut: <b>MANQUANT</b>\n👤 Client: ${escapeHtml(existingOrder.fullName)} (${escapeHtml(existingOrder.city)})`
-                            : `✅ <b>Article Déclaré DISPONIBLE</b>\n\n📦 <b>Commande #${shortId}</b>\n📖 <b>${escapeHtml(rawTitle)}</b>\n🟢 Statut: <b>EN STOCK</b>`
+                            ? `⚠️ <b>Article Déclaré MANQUANT</b>\n\n📦 <b>Commande #${shortId}</b>\n📱 <b>${escapeHtml(rawTitle)}</b>\n🔴 Statut: <b>MANQUANT</b>\n👤 Client: ${escapeHtml(existingOrder.fullName)} (${escapeHtml(existingOrder.city)})`
+                            : `✅ <b>Article Déclaré DISPONIBLE</b>\n\n📦 <b>Commande #${shortId}</b>\n📱 <b>${escapeHtml(rawTitle)}</b>\n🟢 Statut: <b>EN STOCK</b>`
 
                         if (message?.chat?.id) {
                             await sendTelegramMessage(notifText, message.chat.id.toString(), token)
@@ -576,7 +576,7 @@ export async function POST(req: Request) {
                 const bookId = data.split(':')[1]
                 const book = await prisma.book.findUnique({ where: { id: bookId } })
                 if (!book) {
-                    await answerCallbackQuery(callbackId, 'Livre introuvable.', token)
+                    await answerCallbackQuery(callbackId, 'Produit introuvable.', token)
                 } else {
                     await answerCallbackQuery(callbackId, 'Instructions envoyées.', token)
                     await sendTelegramMessage(`🔄 Pour mettre à jour le stock de <b>${book.title}</b> :\n\nCopiez et envoyez la commande suivante avec la nouvelle quantité :\n<code>/setstock ${book.id} [quantité]</code>`, message?.chat?.id.toString(), token)
@@ -622,7 +622,7 @@ export async function POST(req: Request) {
                             `🟠 Catalogue API Jumia : <b>${catalogProducts.length}</b>\n` +
                             (activeCount > 0 ? `✅ Actifs/approuvés détectés : <b>${activeCount}</b>\n` : '') +
                             `\n🔗 <b>Produits liés dans Tekno Store : ${linkedTotal}</b>\n` +
-                            `📚 Livres : <b>${linkedBooks}</b>\n` +
+                            `📱 Produits : <b>${linkedBooks}</b>\n` +
                             `🎁 Packs : <b>${linkedPacks}</b>\n` +
                             `🛍️ Accessoires : <b>${linkedAccessories}</b>\n\n` +
                             `📊 Écart catalogue/liaisons : <b>${catalogProducts.length - linkedTotal}</b>`,
@@ -1112,7 +1112,7 @@ export async function POST(req: Request) {
                 const [, bookId] = data.split(':')
                 try {
                     const book = await prisma.book.findUnique({ where: { id: bookId } })
-                    if (!book) throw new Error('Livre introuvable')
+                    if (!book) throw new Error('Produit introuvable')
 
                     const newPrice = Math.round(book.price * 0.9) // -10%
                     await prisma.book.update({
@@ -1123,7 +1123,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, `🏷️ Promo appliquée : ${newPrice} درهم`, token)
                     if (message?.chat?.id && message?.message_id) {
                         const updatedText = `🏷️ <b>PROMO FLASH APPLIQUÉE (-10%)</b>\n\n` +
-                                            `📖 <b>Livre:</b> ${escapeHtml(book.title)}\n` +
+                                            `📱 <b>Produit:</b> ${escapeHtml(book.title)}\n` +
                                             `💰 <b>Ancien prix:</b> ${book.price} درهم\n` +
                                             `🔥 <b>Nouveau prix:</b> ${newPrice} درهم\n` +
                                             `📦 <b>Stock:</b> ${book.stock}`
@@ -1213,7 +1213,7 @@ export async function POST(req: Request) {
                     await answerCallbackQuery(callbackId, `📦 Stock mis à jour : ${book.stock}`, token)
                     if (message?.chat?.id && message?.message_id) {
                         const updatedText = `✅ <b>RÉAPPROVISIONNEMENT EFFECTUÉ</b>\n\n` +
-                                            `📖 <b>Livre:</b> ${escapeHtml(book.title)}\n` +
+                                            `📱 <b>Produit:</b> ${escapeHtml(book.title)}\n` +
                                             `📦 <b>Nouveau stock:</b> <b>${book.stock}</b>`
                         await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
                     }
@@ -1230,10 +1230,10 @@ export async function POST(req: Request) {
                         where: { id: bookId },
                         data: { active: false }
                     })
-                    await answerCallbackQuery(callbackId, `🚫 Livre masqué du site`, token)
+                    await answerCallbackQuery(callbackId, `🚫 Produit masqué du site`, token)
                     if (message?.chat?.id && message?.message_id) {
-                        const updatedText = `🚫 <b>LIVRE MASQUÉ DU SITE</b>\n\n` +
-                                            `📖 <b>Livre:</b> ${escapeHtml(book.title)}\n` +
+                        const updatedText = `🚫 <b>PRODUIT MASQUÉ DU SITE</b>\n\n` +
+                                            `📱 <b>Produit:</b> ${escapeHtml(book.title)}\n` +
                                             `📌 Statut: <b>INACTIF</b>`
                         await editTelegramMessage(message.chat.id, message.message_id, updatedText, token)
                     }
@@ -1519,7 +1519,7 @@ export async function POST(req: Request) {
                 await answerCallbackQuery(callbackId, '✅ Avis approuvé !', token)
                 const updatedText = `✅ <b>Avis Approuvé</b>\n\n` +
                     `👤 <b>Client:</b> ${review.fullName}\n` +
-                    `📖 <b>Livre:</b> ${review.book.title}\n` +
+                    `📱 <b>Produit:</b> ${review.book.title}\n` +
                     `⭐ <b>Note:</b> ${review.rating}/5\n` +
                     `💬 <i>${review.comment}</i>`
 
@@ -1731,7 +1731,7 @@ export async function POST(req: Request) {
 
                     const books = await Promise.all(topBooks.map(async (item) => {
                         const book = await prisma.book.findUnique({ where: { id: item.bookId! }, select: { title: true } })
-                        return `🏆 <b>${book?.title || 'Livre inconnu'}</b> : ${item._count.bookId} ventes`
+                        return `🏆 <b>${book?.title || 'Produit inconnu'}</b> : ${item._count.bookId} ventes`
                     }))
 
                     const title = limit === 10 ? "TOP 10 DES VENTES" : "TOP 5 DES VENTES";
@@ -1993,7 +1993,7 @@ export async function POST(req: Request) {
                         const titlesById = new Map(viewedBooks.map(book => [book.id, book.title]))
 
                         if (rankedBookViews.length > 0) {
-                            text += `\n\n👀 <b>LIVRES LES PLUS CONSULTÉS :</b>`
+                            text += `\n\n👀 <b>PRODUITS LES PLUS CONSULTÉS :</b>`
                             for (const [bookId, viewCount] of rankedBookViews) {
                                 const title = titlesById.get(bookId)
                                 if (title) text += `\n• ${escapeHtml(title)} (<b>${viewCount}</b> vues)`
@@ -2338,15 +2338,15 @@ export async function POST(req: Request) {
                     `/2026 — Lister les commandes par mois pour l'année 2026\n` +
                     `/stockalerte — Vérifier le stock critique\n\n` +
                     `/manque — Articles signalés manquants avec les détails des commandes\n` +
-                    `/manquant [ID ou Titre] — Déclarer un article ou livre comme manquant\n\n` +
+                    `/manquant [ID ou Titre] — Déclarer un article ou produit comme manquant\n\n` +
                     `<b>🟠 Jumia</b>\n` +
                     `/jumia — Menu complet Jumia (pending, bilan, retours, comparatifs, graphiques)\n` +
-                    `/jumia_top — Top 10 des livres Jumia et CA par produit pour le mois\n\n` +
+                    `/jumia_top — Top 10 des produits Jumia et CA par produit pour le mois\n\n` +
                     `<b>📦 Marketing & Réseaux Sociaux</b>\n` +
                     `/generer — Liste des créatives, prévisualisation et publication (IG, FB, TT, TG)\n` +
                     `#legende [votre texte] — Définir une légende personnalisée pour la prochaine publication Facebook/Instagram\n\n` +
                     `<b>🔍 Recherche</b>\n` +
-                    `/stock [titre] — Vérifier le stock d'un livre\n` +
+                    `/stock [titre] — Vérifier le stock d'un produit\n` +
                     `/search [nom/téléphone] — Rechercher un client\n\n` +
                     `<b>⭐ Gestion Rapide</b>\n` +
                     `/avis — Modérer les nouveaux avis clients\n` +
@@ -2405,7 +2405,7 @@ export async function POST(req: Request) {
                         `<b>Comment déclarer un article manquant :</b>\n` +
                         `1️⃣ Cliquez sur le bouton <b>⚠️ Déclarer Manquant</b> sous une commande\n` +
                         `2️⃣ Ou tapez : <code>/manquant [ID Commande]</code> (ex: <code>/manquant #A1B2C3D4</code>)\n` +
-                        `3️⃣ Ou tapez : <code>/manquant [Nom du livre]</code> pour déclarer une rupture générale\n` +
+                        `3️⃣ Ou tapez : <code>/manquant [Nom du produit]</code> pour déclarer une rupture générale\n` +
                         `4️⃣ Pour voir la liste complète : <code>/manque</code>\n\n` +
                         `📋 <b>5 Dernières Commandes :</b>`
 
@@ -2449,7 +2449,7 @@ export async function POST(req: Request) {
                                 `📦 <b>Commande #${shortId}</b>\n` +
                                 `👤 Client: <b>${escapeHtml(targetOrder.fullName)}</b> (${escapeHtml(targetOrder.city)})\n` +
                                 `📞 Tél: <code>${targetOrder.phone}</code>\n` +
-                                `📖 Article: <b>${escapeHtml(rawTitle)}</b>\n` +
+                                `📱 Article: <b>${escapeHtml(rawTitle)}</b>\n` +
                                 `🔴 Statut: <b>MANQUANT</b>\n\n` +
                                 `<i>L'article portera désormais le libellé [MANQUANT] sur les notifications et la commande.</i>`
 
@@ -2500,15 +2500,15 @@ export async function POST(req: Request) {
                                 data: { isMissing: true }
                             })
 
-                            const msg = `⚠️ <b>Livre Déclaré MANQUANT (Rupture Immédiate)</b>\n\n` +
-                                `📖 <b>${escapeHtml(book.title)}</b>\n` +
+                            const msg = `⚠️ <b>Produit Déclaré MANQUANT (Rupture Immédiate)</b>\n\n` +
+                                `📱 <b>${escapeHtml(book.title)}</b>\n` +
                                 `📉 Stock passé à <b>0</b>\n` +
                                 `🔔 <b>${updateResult.count}</b> commande(s) en attente marquée(s) avec le libellé <b>[MANQUANT]</b>.`
 
                             await sendTelegramMessage(msg, chatId.toString(), token)
                         } else {
                             await sendTelegramMessage(
-                                `❌ <b>Introuvable :</b> Aucun livre ou commande ne correspond à <code>${escapeHtml(cleanQuery)}</code>.\n\n` +
+                                `❌ <b>Introuvable :</b> Aucun produit ou commande ne correspond à <code>${escapeHtml(cleanQuery)}</code>.\n\n` +
                                 `Utilisez <code>/manquant [ID Commande]</code> ou <code>/manquant</code> pour afficher le menu.`,
                                 chatId.toString(),
                                 token
@@ -2576,9 +2576,9 @@ export async function POST(req: Request) {
                 })
 
                 if (outOfStockBooks.length === 0) {
-                    await sendTelegramMessage(`✅ <b>Tout est en stock !</b>\nAucun livre n'est actuellement en rupture.`, chatId.toString(), token)
+                    await sendTelegramMessage(`✅ <b>Tout est en stock !</b>\nAucun produit n'est actuellement en rupture.`, chatId.toString(), token)
                 } else {
-                    let orderText = `🚨 <b>Livres en rupture de stock (${outOfStockBooks.length})</b>\n\n`
+                    let orderText = `🚨 <b>Produits en rupture de stock (${outOfStockBooks.length})</b>\n\n`
                     for (const b of outOfStockBooks) {
                         if (orderText.length > 3800) {
                             orderText += `\n... (Liste tronquée pour cause de limite de texte Telegram)\n`
@@ -2714,8 +2714,8 @@ export async function POST(req: Request) {
                             { text: '📅 1 An', callback_data: 'stats:1year' }
                         ],
                         [
-                            { text: '🏆 Top 5 Livres', callback_data: 'stats:top5' },
-                            { text: '🏆 Top 10 Livres', callback_data: 'stats:top10' }
+                            { text: '🏆 Top 5 Produits', callback_data: 'stats:top5' },
+                            { text: '🏆 Top 10 Produits', callback_data: 'stats:top10' }
                         ],
                         [
                             { text: '🛒 Dernières Commandes', callback_data: 'stats:recent_orders' },
@@ -2848,7 +2848,7 @@ export async function POST(req: Request) {
             else if (text.startsWith('/STOCK')) {
                 const query = rawText.split(' ').slice(1).join(' ')
                 if (!query) {
-                    await sendTelegramMessage(`💡 Utilisation : <code>/stock [nom du livre]</code>`, chatId.toString(), token)
+                    await sendTelegramMessage(`💡 Utilisation : <code>/stock [nom du produit]</code>`, chatId.toString(), token)
                 } else {
                     const books = await prisma.book.findMany({
                         where: { title: { contains: query } },
@@ -2856,9 +2856,9 @@ export async function POST(req: Request) {
                         select: { title: true, stock: true, price: true }
                     })
                     if (books.length === 0) {
-                        await sendTelegramMessage(`❌ Aucun livre trouvé pour "${query}"`, chatId.toString(), token)
+                        await sendTelegramMessage(`❌ Aucun produit trouvé pour "${query}"`, chatId.toString(), token)
                     } else {
-                        const list = books.map(b => `📖 <b>${b.title}</b>\n📦 Stock: <b>${b.stock}</b> | 💰 ${b.price} درهم`).join('\n\n')
+                        const list = books.map(b => `📱 <b>${b.title}</b>\n📦 Stock: <b>${b.stock}</b> | 💰 ${b.price} درهم`).join('\n\n')
                         await sendTelegramMessage(`🔍 <b>Résultats Stock</b> :\n\n${list}`, chatId.toString(), token)
                     }
                 }
@@ -2926,7 +2926,7 @@ export async function POST(req: Request) {
             else if (text.startsWith('/SETSTOCK')) {
                 const parts = rawText.split(' ')
                 if (parts.length < 3) {
-                    await sendTelegramMessage(`💡 Utilisation : <code>/setstock [id_livre] [quantité]</code>`, chatId.toString(), token)
+                    await sendTelegramMessage(`💡 Utilisation : <code>/setstock [id_produit] [quantité]</code>`, chatId.toString(), token)
                 } else {
                     const bookId = parts[1]
                     const qty = parseInt(parts[2], 10)
@@ -2938,9 +2938,9 @@ export async function POST(req: Request) {
                                 where: { id: bookId },
                                 data: { stock: qty }
                             })
-                            await sendTelegramMessage(`✅ Stock mis à jour :\n📖 <b>${updated.title}</b>\n📦 Nouveau stock: <b>${updated.stock}</b>`, chatId.toString(), token)
+                            await sendTelegramMessage(`✅ Stock mis à jour :\n📱 <b>${updated.title}</b>\n📦 Nouveau stock: <b>${updated.stock}</b>`, chatId.toString(), token)
                         } catch (err) {
-                            await sendTelegramMessage(`❌ Erreur ou livre introuvable.`, chatId.toString(), token)
+                            await sendTelegramMessage(`❌ Erreur ou produit introuvable.`, chatId.toString(), token)
                         }
                     }
                 }
@@ -3018,7 +3018,7 @@ export async function POST(req: Request) {
                         .sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue)
                         .slice(0, 10)
                     const lines = ranking.map((product, index) =>
-                        `${index + 1}. <b>${escapeHtml(product.name)}</b>\n   📚 ${product.quantity} vendu(s) — 💰 ${product.revenue.toFixed(2)} درهم`
+                        `${index + 1}. <b>${escapeHtml(product.name)}</b>\n   📱 ${product.quantity} vendu(s) — 💰 ${product.revenue.toFixed(2)} درهم`
                     )
                     const totalRevenue = [...productStats.values()].reduce((sum, product) => sum + product.revenue, 0)
                     const messageText = `🏆 <b>TOP VENTES JUMIA — ${now.toLocaleString('fr-FR', { month: 'long', year: 'numeric' }).toUpperCase()}</b>\n\n` +
@@ -3116,8 +3116,8 @@ export async function POST(req: Request) {
                 if (criticalBooks.length === 0) {
                     await sendTelegramMessage(`✅ <b>Aucun stock critique</b> (seuil: ${threshold})`, chatId.toString(), token)
                 } else {
-                    const lines = criticalBooks.map(b => `📖 ${b.title} → <b>${b.stock}</b>${b.stock === 0 ? ' ⛔' : ''}`).join('\n')
-                    await sendTelegramMessage(`⚠️ <b>${criticalBooks.length} livres stock critique</b>\n\n${lines}`, chatId.toString(), token)
+                    const lines = criticalBooks.map(b => `📱 ${b.title} → <b>${b.stock}</b>${b.stock === 0 ? ' ⛔' : ''}`).join('\n')
+                    await sendTelegramMessage(`⚠️ <b>${criticalBooks.length} produits stock critique</b>\n\n${lines}`, chatId.toString(), token)
                 }
             }
             else if (text.startsWith('/CLEANIMAGES') || text === 'CLEANIMAGES') {
@@ -3126,7 +3126,7 @@ export async function POST(req: Request) {
                     const result = await cleanOrphanImages()
                     await sendTelegramMessage(
                         `🧹 <b>Nettoyage terminé</b>\n\n` +
-                        `• Livres: <b>${result.cleaned.books}</b>\n` +
+                        `• Produits: <b>${result.cleaned.books}</b>\n` +
                         `• Packs: <b>${result.cleaned.packs}</b>\n` +
                         `• Accessoires: <b>${result.cleaned.accessories}</b>\n` +
                         `• Blog: <b>${result.cleaned.posts}</b>\n` +
@@ -3150,7 +3150,7 @@ export async function POST(req: Request) {
                 } else {
                     for (const r of reviews) {
                         const { escapeHtml } = await import('@/lib/telegram')
-                        const msg = `💬 <b>Nouvel Avis en attente</b>\n\n👤 ${escapeHtml(r.fullName)}\n📖 ${escapeHtml(r.book?.title || 'Livre inconnu')}\n⭐ ${r.rating}/5\n📝 <i>${escapeHtml(r.comment)}</i>`
+                        const msg = `💬 <b>Nouvel Avis en attente</b>\n\n👤 ${escapeHtml(r.fullName)}\n📱 ${escapeHtml(r.book?.title || 'Produit inconnu')}\n⭐ ${r.rating}/5\n📝 <i>${escapeHtml(r.comment)}</i>`
                         const markup = {
                             inline_keyboard: [
                                 [
@@ -3169,16 +3169,16 @@ export async function POST(req: Request) {
                 const query = parts.join(' ')
 
                 if (!query || !price) {
-                    await sendTelegramMessage(`💡 Utilisation : <code>/promo [titre du livre] [nouveau_prix]</code>`, chatId.toString(), token)
+                    await sendTelegramMessage(`💡 Utilisation : <code>/promo [nom du produit] [nouveau_prix]</code>`, chatId.toString(), token)
                 } else {
                     const books = await prisma.book.findMany({ where: { title: { contains: query } }, take: 1 })
                     if (books.length === 0) {
-                        await sendTelegramMessage(`❌ Aucun livre trouvé pour "${query}"`, chatId.toString(), token)
+                        await sendTelegramMessage(`❌ Aucun produit trouvé pour "${query}"`, chatId.toString(), token)
                     } else {
                         const book = books[0]
                         await prisma.book.update({ where: { id: book.id }, data: { price } })
                         const { escapeHtml } = await import('@/lib/telegram')
-                        await sendTelegramMessage(`✅ <b>Promo Appliquée !</b>\n\n📖 ${escapeHtml(book.title)}\n💰 Nouveau prix : <b>${price} درهم</b>`, chatId.toString(), token)
+                        await sendTelegramMessage(`✅ <b>Promo Appliquée !</b>\n\n📱 ${escapeHtml(book.title)}\n💰 Nouveau prix : <b>${price} درهم</b>`, chatId.toString(), token)
                     }
                 }
             }
@@ -3341,7 +3341,7 @@ export async function POST(req: Request) {
                                 itemId: post.id,
                                 itemType: 'BLOG',
                                 title: post.title,
-                                caption: `Nouveau sur le blog ! 📚\n\n${post.title}\n\n👉 Lisez l'article complet ici : ${postUrl}`,
+                                caption: `Nouveau sur le blog ! 📱\n\n${post.title}\n\n👉 Lisez l'article complet ici : ${postUrl}`,
                                 image: imageUrl,
                                 isVideo: false,
                                 isPack: false,
@@ -3376,7 +3376,7 @@ export async function POST(req: Request) {
                         select: { id: true, title: true, author: true, image: true }
                     })
                     if (books.length === 0) {
-                        await sendTelegramMessage(`❌ Aucun livre disponible.`, chatId.toString(), token)
+                        await sendTelegramMessage(`❌ Aucun produit disponible.`, chatId.toString(), token)
                     } else {
                         const n8nWebhookUrl = (await prisma.siteSettings.findUnique({ where: { key: 'n8n_webhook_url' } }))?.value || process.env.N8N_WEBHOOK_URL
                         if (!n8nWebhookUrl) {
@@ -3402,7 +3402,7 @@ export async function POST(req: Request) {
                                 scheduleAt.setHours(parseInt(hours), parseInt(minutes), 0, 0)
                                 if (scheduleAt <= today) scheduleAt.setDate(scheduleAt.getDate() + 1)
 
-                                const caption = `📚 Découvrez "${book.title}" par ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://tekno.ma/fr/books/${book.id}\n\n#livre #lecture #tekno`
+                                const caption = `📱 Découvrez "${book.title}" — ${book.author} !\n\nDisponible dès maintenant.\n\n🔗 https://tekno.ma/fr/products/${book.id}\n\n#hightech #tekno`
                                 const post = await prisma.scheduledPost.create({
                                     data: {
                                         date: scheduleAt,
@@ -3431,7 +3431,7 @@ export async function POST(req: Request) {
                                 }).catch(console.error)
                                 successCount++
                             }
-                            await sendTelegramMessage(`✅ <b>${successCount} livre(s) auto-programmé(s) !</b>\n\nLes publications partiront aux heures prévues.`, chatId.toString(), token)
+                            await sendTelegramMessage(`✅ <b>${successCount} produit(s) auto-programmé(s) !</b>\n\nLes publications partiront aux heures prévues.`, chatId.toString(), token)
                         }
                     }
                 } catch (e: any) {
