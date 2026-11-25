@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon, Video, Table2, Quote, BarChart2, Megaphone, Vote, Wand2, Copy, ClipboardPaste, X } from 'lucide-react'
+import { Plus, Trash2, GripVertical, Sparkles, Loader2, Book as BookIcon, Image as ImageIcon, Video, Table2, Quote, BarChart2, Megaphone, Vote, Wand2, Copy, ClipboardPaste, X, Bot, Cpu, AlertCircle } from 'lucide-react'
 import { generatePostContent } from '@/lib/actions/gemini'
 import dynamic from 'next/dynamic'
 import 'react-quill-new/dist/quill.snow.css'
@@ -147,38 +147,42 @@ function BlockTypeBadge({ type }: { type: BlockType }) {
     )
 }
 
-const getBookTemplateSections = (lang: 'fr' | 'ar' | 'en'): Section[] => {
+const getHighTechTemplateSections = (lang: 'fr' | 'ar' | 'en'): Section[] => {
     if (lang === 'ar') {
         return [
-            { id: '1', title: 'مقدمة', content: '[تقديم سريع للكتاب ولماذا يستحق الاهتمام]' },
-            { id: '2', title: 'معلومات عامة', content: '- **العنوان :** \n- **المؤلف :** \n- **النوع :** \n- **تاريخ النشر :** \n- **عدد الصفحات :** ' },
-            { id: '3', title: 'ملخص الكتاب', content: '[ملخص قصير بدون حرق للأحداث]' },
-            { id: '4', title: 'الشخصيات', content: '- **الشخصية الرئيسية :** \n- **شخصيات ثانوية :** ' },
-            { id: '5', title: 'نقاط القوة', content: '- ' },
-            { id: '6', title: 'نقاط الضعف', content: '- ' },
-            { id: '7', title: 'اقتباس(ات) بارزة', content: '> " "', blockType: 'quote' },
-            { id: '8', title: 'لمن هذا الكتاب؟', content: '[المبتدئين، محبي الخيال، إلخ]' },
-            { id: '9', title: 'ملاحظة نهائية', content: '**التقييم العام : ⭐ /5**' },
+            { id: '1', title: 'مقدمة ونظرة عامة', content: '[تقديم موجز للجهاز وأهم مميزاته وسبب إثارة اهتمام عشاق التكنولوجيا في المغرب]' },
+            { id: '2', title: 'المواصفات التقنية الرئيسية', content: '- **المعالج :** \n- **الذاكرة العشوائية (RAM) :** \n- **سعة التخزين :** \n- **الشاشة :** \n- **البطارية وسرعة الشحن :** \n- **الكاميرات :** ' },
+            { id: '3', title: 'التصميم وجودة التصنيع', content: '[تحليل للخامات، الوزن والشعور عند الاستخدام اليومي والراحة في اليد]' },
+            { id: '4', title: 'الأداء وتجربة الاستخدام', content: '[سلاسة النظام، تجربة الألعاب الثقيلة والمهام المتعددة وإدارة الحرارة]' },
+            { id: '5', title: 'نقاط القوة', content: '- جودة شاشة استثنائية\n- أداء قوي وسلس\n- بطارية تصمد طوال اليوم\n- ضمان الوكيل الرسمي 12 شهراً' },
+            { id: '6', title: 'نقاط يجب مراعاتها', content: '- ' },
+            { id: '7', title: 'خلاصة Tekno Store', content: '> "جهاز متكامل يقدم قيمة تكنولوجية حقيقية وضماناً معتمداً مع خيار الدفع عند الاستلام في المغرب."', blockType: 'quote' },
+            { id: '8', title: 'لمن يوجه هذا الجهاز؟', content: '[المهنيون، صناع المحتوى، محبو الألعاب أو المستخدم اليومي الباحث عن الاعتمادية]' },
+            { id: '9', title: 'التقييم النهائي', content: '**التقييم العام : ⭐⭐⭐⭐⭐ 4.8 / 5**' },
         ]
     }
     if (lang === 'en') {
         return [
-            { id: '1', title: 'Introduction', content: '[Brief presentation of the book]' },
-            { id: '2', title: 'General Information', content: '- **Title :** \n- **Author :** \n- **Genre :** \n- **Publication Date :** ' },
-            { id: '3', title: 'Book Summary', content: '[Short summary without spoilers]' },
-            { id: '4', title: 'Notable Quote', content: '> " "', blockType: 'quote' },
-            { id: '5', title: 'Final Note', content: '**Overall Rating : ⭐ /5**' },
+            { id: '1', title: 'Introduction & First Impressions', content: '[Quick overview of the device, key specs, and value proposition in Morocco]' },
+            { id: '2', title: 'Key Technical Specifications', content: '- **Processor :** \n- **RAM :** \n- **Storage :** \n- **Display :** \n- **Battery & Fast Charging :** ' },
+            { id: '3', title: 'Design & Build Quality', content: '[Materials, chassis stiffness, port selection, and everyday ergonomic feel]' },
+            { id: '4', title: 'Performance & Real-world Benchmarks', content: '[Everyday multitasking, gaming, sustained thermal performance]' },
+            { id: '5', title: 'Pros', content: '- Top-tier performance\n- Bright & sharp display\n- Reliable all-day battery life' },
+            { id: '6', title: 'Cons', content: '- ' },
+            { id: '7', title: 'Tekno Store Verdict', content: '> "A solid high-tech pick offering great reliability and full manufacturer warranty with fast delivery across Morocco."', blockType: 'quote' },
+            { id: '8', title: 'Final Rating', content: '**Overall Rating : ⭐⭐⭐⭐⭐ 4.8 / 5**' },
         ]
     }
     return [
-        { id: '1', title: 'Introduction', content: "[Présentation rapide du livre et pourquoi il mérite l'attention]" },
-        { id: '2', title: 'Informations générales', content: '- **Titre :** \n- **Auteur :** \n- **Genre :** \n- **Date de publication :** \n- **Nombre de pages :** ' },
-        { id: '3', title: 'Résumé du livre', content: '[Résumé court sans spoiler]' },
-        { id: '4', title: 'Les points forts', content: '- ' },
-        { id: '5', title: 'Les points faibles', content: '- ' },
-        { id: '6', title: 'Citation(s) marquante(s)', content: '> " "', blockType: 'quote' },
-        { id: '7', title: 'Pour quel type de lecteur ?', content: '[Débutants, fans de fantasy, etc.]' },
-        { id: '8', title: 'Note finale / avis personnel', content: '**Note globale : ⭐ /5**' },
+        { id: '1', title: 'Introduction & Premières impressions', content: "[Présentation rapide de l'appareil high-tech, son positionnement et pourquoi il se démarque au Maroc]" },
+        { id: '2', title: 'Fiche technique clé', content: '- **Marque :** \n- **Modèle :** \n- **Processeur :** \n- **Mémoire vive (RAM) :** \n- **Stockage :** \n- **Écran :** \n- **Batterie & Vitesse de charge :** ' },
+        { id: '3', title: 'Design, Écran et Ergonomie', content: "[Qualité des finitions, matériaux, confort en main, fluidité de la dalle et calibrage d'affichage]" },
+        { id: '4', title: 'Performances et Puissance au quotidien', content: "[Fluidité du système d'exploitation, multitâche intensif, réactivité dans les applications lourdes et jeux]" },
+        { id: '5', title: 'Les points forts', content: '- Performances réactives et stables\n- Écran immersif haute fidélité\n- Excellente autonomie quotidienne\n- Garantie constructeur 12M et support Tekno Store' },
+        { id: '6', title: 'Les points à améliorer', content: '- ' },
+        { id: '7', title: 'Avis & Verdict Tekno Store', content: '> "Un équipement technologique d\'excellence, alliant durabilité, performances de pointe et sérénité avec le paiement à la livraison COD au Maroc."', blockType: 'quote' },
+        { id: '8', title: 'Pour quel profil d’utilisateur ?', content: '[Professionnels nomades, gamers, créateurs multimédias ou utilisateurs à la recherche de pérennité]' },
+        { id: '9', title: 'Note finale Tekno Store', content: '**Note globale : ⭐⭐⭐⭐⭐ 4.8 / 5**' },
     ]
 }
 
@@ -196,6 +200,14 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
     const [imagePromptCount, setImagePromptCount] = useState(2)
     const [generatedImagePrompts, setGeneratedImagePrompts] = useState<string[]>([])
     const [isGeneratingPrompts, setIsGeneratingPrompts] = useState(false)
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null)
+
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 5000)
+            return () => clearTimeout(timer)
+        }
+    }, [toast])
 
     useEffect(() => {
         // Précharger l'éditeur en arrière-plan pour éviter le temps de chargement au clic
@@ -285,8 +297,9 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
     }
 
     const handleApplyTemplate = () => {
-        if (sections.some(s => s.content.trim() !== '') && !confirm('Cela remplacera le contenu actuel. Continuer ?')) return
-        setSections(getBookTemplateSections(lang).map(s => ({ ...s, id: Date.now() + Math.random().toString() })))
+        if (sections.some(s => s.content.trim() !== '') && !confirm('Cela remplacera le contenu actuel par le template High-Tech. Continuer ?')) return
+        setSections(getHighTechTemplateSections(lang).map(s => ({ ...s, id: Date.now() + Math.random().toString() })))
+        setToast({ message: 'Structure d\'article High-Tech Tekno Store appliquée !', type: 'success' })
     }
 
     const handleRephrase = async (sectionId: string, content: string) => {
@@ -385,20 +398,49 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
 
     const handleCopyPrompt = () => {
         const currentMarkdown = sections.map(s => s.title ? `## ${s.title}\n\n${s.content}` : s.content).join('\n\n')
-        const prompt = `Voici le sujet de l'article : "${postTitle}".\n\nJe veux que tu m'écrives un article très long et détaillé qui respecte les conditions Google AdSense (haute valeur ajoutée, structuré, contenu original, pas de bourrage de mots-clés).\n\nTa réponse doit être formattée exactement de cette manière :\n1. Titres de section (utilise ## Titre)\n2. Paragraphes : plusieurs paragraphes détaillés sous chaque section.\n\nVoici le contenu actuel si tu veux t'en inspirer pour le développer :\n\n${currentMarkdown}`
-        navigator.clipboard.writeText(prompt)
-        alert('Prompt copié dans le presse-papier ! Vous pouvez le coller dans ChatGPT.')
+        const prompt = `Tu es un journaliste high-tech expert et rédacteur SEO senior pour le blog officiel de Tekno Store (tekno.ma), la référence e-commerce au Maroc pour les smartphones, ordinateurs portables, Mac et accessoires technologiques.
+
+Sujet de l'article tech : "${postTitle || 'Guide d\'achat & Test High-Tech Tekno Store'}"
+Langue de rédaction : ${lang === 'ar' ? 'Arabe' : lang === 'en' ? 'Anglais' : 'Français'}
+
+CONSIGNES STRICTES POUR LE BLOG TEKNO STORE :
+1. Rédige un article complet, captivant, technique et très bien structuré (optimisé SEO Google, Discover et AdSense).
+2. Adopte un ton d'expert objectif, orienté conseils d'achat et benchmarks concrets pour les consommateurs au Maroc.
+3. STRUCTURE EXIGÉE :
+   - Divise impérativement l'article en 6 à 8 sections claires précédées de deux dièses : ## Titre de la Section.
+   - Sous chaque titre ##, développe 2 à 4 paragraphes riches et bien documentés, avec des puces comparatives.
+4. Sections recommandées à couvrir :
+   - ## Introduction & Premières impressions
+   - ## Fiche Technique & Spécifications Clés
+   - ## Design, Écran et Ergonomie
+   - ## Performances, Processeur et Benchmarks
+   - ## Autonomie et Vitesse de Charge
+   - ## Rapport Qualité / Prix et Disponibilité au Maroc
+   - ## Points Forts et Axes d'Amélioration
+   - ## Verdict & Avis Tekno Store
+5. RÈGLE COMMERCIALE : Ne mentionne pas de prix fixe obsolète, mets plutôt en avant le positionnement tarifaire compétitif, la garantie officielle 12 mois et le paiement sécurisé à la livraison (COD) partout au Maroc.
+
+${currentMarkdown ? `Voici les sections ou notes de travail actuelles à enrichir :\n\n${currentMarkdown}` : ''}`
+
+        navigator.clipboard.writeText(prompt).then(() => {
+            setToast({ message: 'Prompt ChatGPT Tekno Store copié dans le presse-papier !', type: 'success' })
+        }).catch(() => {
+            setToast({ message: 'Erreur lors de la copie du prompt.', type: 'error' })
+        })
     }
 
     const handlePasteChatGPT = async () => {
         try {
             const text = await navigator.clipboard.readText()
             if (!text || text.trim() === '') {
-                alert('Le presse-papier est vide.')
+                setToast({ message: 'Le presse-papier est vide.', type: 'error' })
                 return
             }
-            
-            const parts = text.split(/^(?=#+ )/m)
+
+            let clean = text.trim()
+            clean = clean.replace(/^```(?:markdown|md)?\s*/i, '').replace(/```$/i, '').trim()
+
+            const parts = clean.split(/^(?=#+ )/m)
             const parsedSections: Section[] = parts.map((part, index) => {
                 const match = part.match(/^(#+)\s+([^\r\n]*)(?:[\r\n]+([\s\S]*))?$/)
                 if (match) {
@@ -406,16 +448,15 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                 }
                 return { id: String(Date.now() + index), title: '', content: part.replace(/^(#+)\s*/, '').trim(), blockType: 'text' as BlockType }
             }).filter(s => s.title || s.content)
-            
+
             if (parsedSections.length > 0) {
-                if (confirm('Voulez-vous remplacer le contenu actuel par le texte copié de ChatGPT ?')) {
-                    setSections(parsedSections)
-                }
+                setSections(parsedSections)
+                setToast({ message: `${parsedSections.length} sections Tekno Store injectées avec succès !`, type: 'success' })
             } else {
-                alert("Aucune section valide trouvée dans le presse-papier.")
+                setToast({ message: 'Aucune section markdown (## Titre) trouvée dans le presse-papier.', type: 'error' })
             }
         } catch (err) {
-            alert('Impossible de lire le presse-papier automatiquement. Assurez-vous d\'autoriser l\'accès.')
+            setToast({ message: 'Impossible de lire le presse-papier. Assurez-vous d\'autoriser l\'accès.', type: 'error' })
         }
     }
 
@@ -423,14 +464,12 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
         if (sections.length === 0) return
         setIsGeneratingPrompts(true)
         setGeneratedImagePrompts([])
-        
+
         const imageStyles = [
-            "flat design, modern, warm tones, bookstore atmosphere, Moroccan aesthetic",
-            "3D render, highly detailed, cinematic lighting, cozy atmosphere, vibrant colors",
-            "watercolor illustration, artistic, soft lighting, cultural Moroccan touch, dreamy",
-            "minimalist line art, elegant, sophisticated, warm beige and terracotta tones",
-            "oil painting style, rich textures, classic, dramatic lighting, storytelling",
-            "digital concept art, vibrant and dynamic, highly polished, inspiring"
+            "clean minimalist product photography, sleek high-tech devices, modern studio lighting, 4k ultra detailed, commercial look",
+            "3D tech isometric render, futuristic aesthetics, soft neon edge glow, clean dark background, octane render",
+            "lifestyle high-tech desk setup, laptop and accessories, natural ambient lighting, productivity vibes, realistic photo",
+            "close-up macro photography of device details, brushed metal, screen glass reflection, premium craftsmanship"
         ]
 
         // Prendre les sections les plus longues/pertinentes
@@ -443,7 +482,7 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
             // Nettoyer le contenu HTML pour extraire le texte brut
             const rawContent = s.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
             const style = imageStyles[i % imageStyles.length]
-            return `Image ${i + 1} — Section : "${title}"\nPrompt : A high-quality editorial illustration for an article section titled "${title}". Context: ${rawContent || postTitle}. Style: ${style}. No text in image.`
+            return `Image ${i + 1} — Section : "${title}"\nPrompt : A high-end editorial tech photograph for an article section titled "${title}". Context: ${rawContent || postTitle}. Style: ${style}. No text or typography in image.`
         })
         setGeneratedImagePrompts(prompts)
         setIsGeneratingPrompts(false)
@@ -456,7 +495,21 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
     const blockTypes: BlockType[] = ['text', 'image', 'video', 'table', 'quote', 'chart', 'ad', 'poll']
 
     return (
-        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-black/[0.03] space-y-8">
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-black/[0.03] space-y-8 relative">
+            {/* Custom Toast Notification */}
+            {toast && (
+                <div className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl text-sm font-semibold transition-all animate-in fade-in slide-in-from-top-2 ${
+                    toast.type === 'success' ? 'bg-[#0F172A] text-white border border-[#75C300]' :
+                    toast.type === 'error' ? 'bg-red-600 text-white' :
+                    'bg-blue-600 text-white'
+                }`}>
+                    {toast.type === 'success' && <span className="w-2.5 h-2.5 rounded-full bg-[#75C300]" />}
+                    {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-white" />}
+                    <span>{toast.message}</span>
+                    <button type="button" onClick={() => setToast(null)} className="ml-2 opacity-70 hover:opacity-100 text-xs">✕</button>
+                </div>
+            )}
+
             {/* Styles globaux de Quill et de la prévisualisation */}
             <style jsx global>{`
                 .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #f3f4f6; padding: 12px; background: #faf9f8; }
@@ -464,30 +517,34 @@ export default function PostSectionEditor({ initialContent, onChange, lang, post
                 .ql-editor { min-height: 150px; padding: 16px; text-align: justify; }
                 .ql-editor p { text-align: justify; }
             `}</style>
-            
+
             {/* En-tête */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h3 className="text-xl font-bold text-gray-900">Contenu de l'article</h3>
-                    <p className="text-sm text-gray-500 mt-1">Gérez le contenu par blocs pour plus de clarté.</p>
+                    <p className="text-sm text-gray-500 mt-1">Gérez le contenu par sections pour une structure SEO optimale.</p>
                 </div>
                 <div className="flex flex-col gap-2">
                     <div className="flex flex-wrap gap-2 self-end">
                         <button type="button" onClick={handleApplyTemplate}
-                            className="px-4 py-2 bg-gray-50 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors border border-gray-200 flex items-center gap-2">
-                            <BookIcon className="w-4 h-4" /> Template Livre
+                            className="px-4 py-2 bg-slate-100 text-slate-800 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors border border-slate-300 flex items-center gap-2"
+                            title="Appliquer la structure d'article High-Tech">
+                            <Cpu className="w-4 h-4 text-[#1976D2]" /> Template High-Tech
                         </button>
                         <button type="button" onClick={handleCopyPrompt}
-                            className="px-4 py-2 bg-purple-50 text-purple-700 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors border border-purple-200 flex items-center gap-2" title="Copier le prompt pour ChatGPT">
-                            <Copy className="w-4 h-4" /> Prompt ChatGPT
+                            className="px-4 py-2 bg-[#0F172A] hover:bg-[#1E293B] text-white rounded-xl text-xs font-bold transition-colors border border-slate-700 flex items-center gap-2 shadow-sm"
+                            title="Copier le prompt IA configuré pour le blog Tekno Store">
+                            <Bot className="w-4 h-4 text-[#75C300]" /> Prompt ChatGPT
                         </button>
                         <button type="button" onClick={() => setShowImagePromptModal(true)}
-                            className="px-4 py-2 bg-orange-50 text-orange-700 rounded-xl text-xs font-bold hover:bg-orange-100 transition-colors border border-orange-200 flex items-center gap-2" title="Générer des prompts d'images pour vos sections">
+                            className="px-4 py-2 bg-orange-50 text-orange-700 rounded-xl text-xs font-bold hover:bg-orange-100 transition-colors border border-orange-200 flex items-center gap-2"
+                            title="Générer des prompts d'images pour vos sections">
                             <ImageIcon className="w-4 h-4" /> Générer images
                         </button>
                         <button type="button" onClick={handlePasteChatGPT}
-                            className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-200 flex items-center gap-2" title="Coller la réponse structurée de ChatGPT">
-                            <ClipboardPaste className="w-4 h-4" /> Coller Sections
+                            className="px-4 py-2 bg-[#1976D2] hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors border border-blue-600 flex items-center gap-2 shadow-sm"
+                            title="Coller et injecter la réponse structurée de ChatGPT">
+                            <ClipboardPaste className="w-4 h-4" /> Coller réponse
                         </button>
                         <button type="button" onClick={() => handleGenerateContent('ar')} disabled={isGenerating}
                             className="px-4 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold hover:bg-green-100 transition-colors disabled:opacity-50 border border-green-200 flex items-center gap-2">
