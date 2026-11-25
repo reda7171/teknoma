@@ -463,7 +463,7 @@ Réponds UNIQUEMENT avec un JSON valide, sans balises superflues, suivant ce for
                     {/* Titre */}
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Titre {bookLanguage === 'ar' ? '(Arabe)' : bookLanguage === 'fr' ? '(Français)' : '(Anglais)'} <span className="text-red-500">*</span>
+                            Titre ({currentLang === 'ar' ? 'Arabe' : currentLang === 'fr' ? 'Français' : 'Anglais'}) <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -779,26 +779,8 @@ Réponds UNIQUEMENT avec un JSON valide, sans balises superflues, suivant ce for
                         </div>
                     </div>
 
-                    {/* Langue du Produit */}
-                    <fieldset>
-                        <legend className="block text-sm font-medium text-gray-700 mb-2">
-                            Langue du Produit
-                        </legend>
-                        <div className="flex flex-wrap gap-4">
-                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                                <input type="radio" name="language" value="fr" checked={bookLanguage === 'fr'} onChange={(e) => { setBookLanguage('fr'); setCurrentLang('fr'); }} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
-                                <span className="text-sm font-medium text-gray-900">Français</span>
-                            </label>
-                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                                <input type="radio" name="language" value="ar" checked={bookLanguage === 'ar'} onChange={(e) => { setBookLanguage('ar'); setCurrentLang('ar'); }} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
-                                <span className="text-sm font-medium text-gray-900">Arabe</span>
-                            </label>
-                            <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500 transition-colors">
-                                <input type="radio" name="language" value="en" checked={bookLanguage === 'en'} onChange={(e) => { setBookLanguage('en'); setCurrentLang('en'); }} className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" />
-                                <span className="text-sm font-medium text-gray-900">Anglais</span>
-                            </label>
-                        </div>
-                    </fieldset>
+                    {/* Langue par défaut en arrière-plan */}
+                    <input type="hidden" name="language" value="fr" />
 
                     {/* État du Produit */}
                     <fieldset>
@@ -872,7 +854,7 @@ Réponds UNIQUEMENT avec un JSON valide, sans balises superflues, suivant ce for
                     {/* Description */}
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Description {bookLanguage === 'ar' ? '(Arabe)' : bookLanguage === 'fr' ? '(Français)' : '(Anglais)'} <span className="text-red-500">*</span>
+                            Description ({currentLang === 'ar' ? 'Arabe' : currentLang === 'fr' ? 'Français' : 'Anglais'}) <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             name="description_ar"
