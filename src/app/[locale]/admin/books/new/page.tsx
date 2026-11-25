@@ -51,10 +51,19 @@ function BookFormContent() {
     const [currentLang, setCurrentLang] = useState<'ar' | 'fr' | 'en'>(validLang)
     const [bookLanguage, setBookLanguage] = useState<'ar' | 'fr' | 'en'>(validLang)
     const [selectedMainCategory, setSelectedMainCategory] = useState<string>('')
+    const [selectedSubCategory, setSelectedSubCategory] = useState<string>('')
     const [categoryTree, setCategoryTree] = useState<CategoryTree>({})
     const [warehouseStocks, setWarehouseStocks] = useState<WarehouseStock[]>([])
     const [sellerSkuValue, setSellerSkuValue] = useState<string>('')
     const [hasSkuParasiteChars, setHasSkuParasiteChars] = useState<boolean>(false)
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null)
+
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 6000)
+            return () => clearTimeout(timer)
+        }
+    }, [toast])
     const mainCategories = Object.keys(categoryTree)
 
     useEffect(() => {
@@ -213,94 +222,164 @@ function BookFormContent() {
         const titleAr = (document.querySelector('input[name="title_ar"]') as HTMLInputElement)?.value || ''
         const titleFr = (document.querySelector('input[name="title_fr"]') as HTMLInputElement)?.value || ''
         const titleEn = (document.querySelector('input[name="title_en"]') as HTMLInputElement)?.value || ''
-        const author = (document.querySelector('input[name="author"]') as HTMLInputElement)?.value || ''
+        const author = (document.querySelector('input[name="author"]') as HTMLInputElement)?.value || selectedAuthor || ''
 
-        const title = titleAr || titleFr || titleEn || 'Titre inconnu'
-        const auth = author || 'Marque inconnue'
+        const title = titleFr || titleEn || titleAr || 'Nouveau Produit High-Tech'
+        const auth = author || 'Marque officielle'
 
-        const prompt = `Act as a professional high-tech and consumer electronics specialist. I am adding a tech product (smartphone, PC portátil, Mac, audio or tech accessory) to my online store Tekno Store.
-Brand: ${auth}
-Title / Model: ${title}
+        const prompt = `Tu es un expert e-commerce et spécialiste high-tech pour la boutique en ligne Tekno Store (tekno.ma), leader de la vente de smartphones neufs, ordinateurs portables, Mac et accessoires au Maroc avec livraison express et paiement à la livraison COD.
 
-CRITICAL INSTRUCTION FOR TITLES:
-For title_fr and title_en, ensure the exact brand and model series are preserved (e.g. "Apple iPhone 16 Pro 256 Go Titane Naturel", "Dell XPS 15 OLED Core i7 32 Go").
+Je souhaite ajouter le produit suivant à mon catalogue Tekno Store :
+Marque / Fabricant : ${auth}
+Titre / Modèle indicatif : ${title}
 
-Please provide the following information in JSON format (so I can easily copy-paste or read it):
+CONSIGNES STRICTES POUR TEKNO STORE :
+1. Catégories autorisées (choisir impérativement une des catégories et sous-catégories officielles ci-dessous) :
+   - "Smartphones" (sous-catégories : "Apple iPhone", "Samsung Galaxy", "Xiaomi", "Google Pixel", "Honor", "Accessoires Mobiles")
+   - "PC Portables" (sous-catégories : "PC Gamer", "Ultrabooks", "PC Bureautique", "Workstations", "Écrans PC")
+   - "Mac & Apple" (sous-catégories : "MacBook Air", "MacBook Pro", "iMac & Mac mini", "iPad Pro / Air", "Apple Watch")
+   - "Accessoires" (sous-catégories : "Chargeurs & Câbles", "Coques & Protection", "Supports & Docks", "Claviers & Souris", "Adaptateurs")
+   - "Audio" (sous-catégories : "Écouteurs sans fil", "Casques Bluetooth", "Enceintes portables", "Microphones")
+   - "Stockage" (sous-catégories : "Disques SSD externes", "Disques durs externes", "Clés USB 3.2", "Cartes MicroSD")
+
+2. Titres (FR, EN, AR) :
+   - title_fr : Titre officiel précis (ex : "Apple iPhone 16 Pro 256 Go Titane Naturel", "SanDisk Extreme Pro MicroSDXC 256GB 200Mo/s", "Dell XPS 15 Intel Core i7 32 Go").
+   - title_en : Titre complet en anglais.
+   - title_ar : Titre précis et élégant en arabe.
+
+3. Descriptions courtes (description_fr, description_en, description_ar) :
+   - 2 à 3 paragraphes accrocheurs axés sur les performances réelles, la garantie 12 mois et la fiabilité.
+
+4. Fiche technique longue (longDescription_fr, longDescription_en, longDescription_ar) :
+   - Structurée avec des balises <h2> (ex : <h2>Performances et Puissance</h2>, <h2>Écran et Affichage</h2>, <h2>Connectivité et Autonomie</h2>) et des puces <ul><li>...</li></ul> détaillées.
+
+5. Jumia Highlights & Package Content :
+   - jumiaHighlights : Liste HTML stricte <ul><li>...</li></ul> avec les 4 à 6 spécifications majeures (ex : processeur, écran, autonomie, connectique).
+   - jumiaPackageContent : Contenu exact du packaging (ex : "1 x Smartphone, 1 x Câble USB-C, 1 x Outil d'extraction SIM, 1 x Guide d'utilisation").
+
+6. RÈGLE CRITIQUE PRIX :
+   - NE JAMAIS mentionner de prix, de remises, de promotions ni de devises (DH, MAD, درهم) dans les descriptions ou highlights.
+
+Réponds UNIQUEMENT avec un JSON valide, sans balises superflues, suivant ce format exact :
 {
-  "author": "Brand Name (e.g., Apple, Samsung, Dell)",
-  "title_ar": "Title in Arabic",
-  "title_fr": "Title in French",
-  "title_en": "Title in English",
-  "description_ar": "Short engaging description in Arabic (max 3 paragraphs)",
-  "description_fr": "Short engaging description in French (max 3 paragraphs)",
-  "description_en": "Short engaging description in English (max 3 paragraphs)",
-  "longDescription_ar": "Detailed technical specs description in Arabic",
-  "longDescription_fr": "Detailed technical specs description in French",
-  "longDescription_en": "Detailed technical specs description in English",
-  "category": "Main category (e.g., Smartphones, PC Portables, Mac & Apple, Audio & Son, Accessoires)",
-  "subCategory": "Sub-category",
-  "seoKeywords": "Comma-separated SEO keywords (ar, fr, en)",
-  "jumiaHighlights": "Key highlights and specs (bullet points: processor, RAM, battery, camera)",
-  "jumiaPackageContent": "What's in the box? (e.g., 1 x Smartphone, 1 x Câble USB-C, 1 x Guide)"
-}
-Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NEVER mention price, discounts, promos, or currency (DH, MAD, درهم) in any description or highlights (Jumia strictly rejects listings mentioning price in descriptions).`
+  "author": "${auth !== 'Marque officielle' ? auth : 'Apple'}",
+  "title_ar": "العنوان بالعربية",
+  "title_fr": "Titre officiel du produit en français",
+  "title_en": "Official product title in English",
+  "description_ar": "الوصف القصير باللغة العربية",
+  "description_fr": "Description courte et engageante en français...",
+  "description_en": "Short and engaging description in English...",
+  "longDescription_ar": "<h2>المواصفات التقنية</h2><p>...</p>",
+  "longDescription_fr": "<h2>Performances & Fiche Technique</h2><p>...</p><h2>Écran & Design</h2><p>...</p>",
+  "longDescription_en": "<h2>Technical Specifications</h2><p>...</p>",
+  "category": "Smartphones",
+  "subCategory": "Apple iPhone",
+  "seoKeywords": "tekno store, ${title}, prix maroc, high-tech maroc, livraison 24h",
+  "jumiaHighlights": "<ul><li>Écran OLED haute résolution</li><li>Autonomie longue durée</li><li>Garantie constructeur 12M</li></ul>",
+  "jumiaPackageContent": "1 x Appareil, 1 x Câble d'alimentation, 1 x Manuel d'utilisation",
+  "isbn": "EAN ou référence constructeur si connue"
+}`
 
-        navigator.clipboard.writeText(prompt)
-        alert('Prompt ChatGPT copié dans le presse-papier !')
+        navigator.clipboard.writeText(prompt).then(() => {
+            setToast({ message: 'Prompt ChatGPT Tekno Store copié dans le presse-papier !', type: 'success' })
+        }).catch(() => {
+            setToast({ message: 'Erreur lors de la copie dans le presse-papier.', type: 'error' })
+        })
     }
 
     const pasteChatGptResponse = async () => {
         try {
             const text = await navigator.clipboard.readText()
-            if (!text) {
-                alert('Presse-papier vide')
+            if (!text || !text.trim()) {
+                setToast({ message: 'Le presse-papier est vide. Copiez d\'abord la réponse de ChatGPT.', type: 'error' })
                 return
             }
 
-            const jsonStr = text.replace(/```json\n?/, '').replace(/```/, '').trim()
-            let data
+            let clean = text.trim()
+            clean = clean.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim()
+            const firstBrace = clean.indexOf('{')
+            const lastBrace = clean.lastIndexOf('}')
+            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                clean = clean.substring(firstBrace, lastBrace + 1)
+            }
+
+            let data: any
             try {
-                data = JSON.parse(jsonStr)
+                data = JSON.parse(clean)
             } catch (e) {
-                alert('Le contenu du presse-papier n\'est pas un JSON valide.')
+                setToast({ message: 'Le contenu du presse-papier n\'est pas un JSON valide.', type: 'error' })
                 return
             }
 
-            const setInput = (name: string, value: string) => {
-                if (value) {
-                    const el = document.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement
-                    if (el) el.value = value
+            const setInput = (name: string, value?: string) => {
+                if (value !== undefined && value !== null) {
+                    const el = document.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement | null
+                    if (el) el.value = String(value)
                 }
             }
 
             setInput('title_ar', data.title_ar)
             setInput('title_fr', data.title_fr)
             setInput('title_en', data.title_en)
+
             if (data.author) {
-                setInput('author', data.author)
                 setSelectedAuthor(data.author)
+                setInput('author', data.author)
             }
+
+            if (data.category) {
+                setSelectedMainCategory(data.category)
+                setInput('category', data.category)
+            }
+
+            if (data.subCategory) {
+                setSelectedSubCategory(data.subCategory)
+                setInput('subCategory', data.subCategory)
+            }
+
             setInput('description_ar', data.description_ar)
             setInput('description_fr', data.description_fr)
             setInput('description_en', data.description_en)
+
             setInput('longDescription_ar', data.longDescription_ar)
             setInput('longDescription_fr', data.longDescription_fr)
             setInput('longDescription_en', data.longDescription_en)
-            setInput('category', data.category)
-            setInput('subCategory', data.subCategory)
+
             setInput('seoKeywords', data.seoKeywords)
             setInput('jumiaHighlights', data.jumiaHighlights)
             setInput('jumiaPackageContent', data.jumiaPackageContent)
 
-            alert('Champs remplis avec succès !')
+            if (data.isbn) {
+                setInput('isbn', data.isbn)
+            }
+
+            if (data.price && !isNaN(Number(data.price))) {
+                setInput('price', String(data.price))
+            }
+
+            setToast({ message: 'Produit Tekno Store rempli avec succès depuis la réponse ChatGPT !', type: 'success' })
         } catch (err) {
             console.error(err)
-            alert('Erreur lors de la lecture du presse-papier. Vérifiez les autorisations.')
+            setToast({ message: 'Erreur lors de la lecture du presse-papier. Vérifiez les autorisations de votre navigateur.', type: 'error' })
         }
     }
 
     return (
         <div>
+            {/* Custom Toast Notification */}
+            {toast && (
+                <div className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl text-sm font-semibold transition-all animate-in fade-in slide-in-from-top-2 ${
+                    toast.type === 'success' ? 'bg-[#0F172A] text-white border border-[#75C300]' :
+                    toast.type === 'error' ? 'bg-red-600 text-white' :
+                    'bg-blue-600 text-white'
+                }`}>
+                    {toast.type === 'success' && <span className="w-2.5 h-2.5 rounded-full bg-[#75C300]" />}
+                    {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-white" />}
+                    <span>{toast.message}</span>
+                    <button type="button" onClick={() => setToast(null)} className="ml-2 opacity-70 hover:opacity-100 text-xs">✕</button>
+                </div>
+            )}
+
             {/* Header */}
             <div className="mb-8 flex justify-between items-start">
                 <div>
@@ -313,22 +392,24 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                     </Link>
                     <h1 className="text-3xl font-bold text-gray-900">Ajouter un produit</h1>
                     <p className="mt-2 text-sm text-gray-600">
-                        Remplissez les informations du nouveau produit
+                        Remplissez les informations du nouveau produit Tekno Store
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-2">
                     <button
                         type="button"
                         onClick={copyChatGptPrompt}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm font-medium text-sm w-full sm:w-auto"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0F172A] hover:bg-[#1E293B] text-white rounded-lg border border-slate-700 transition-colors shadow-sm font-medium text-sm w-full sm:w-auto"
+                        title="Copier le prompt IA configuré pour Tekno Store"
                     >
-                        <Bot className="w-4 h-4" />
+                        <Bot className="w-4 h-4 text-[#75C300]" />
                         Prompt ChatGPT
                     </button>
                     <button
                         type="button"
                         onClick={pasteChatGptResponse}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm font-medium text-sm w-full sm:w-auto"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-[#1976D2] hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm font-medium text-sm w-full sm:w-auto"
+                        title="Coller et injecter automatiquement les données JSON du produit"
                     >
                         <ClipboardPaste className="w-4 h-4" />
                         Coller réponse
@@ -514,7 +595,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const newSku = `RIW-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+                                    const newSku = `TEK-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
                                     setSellerSkuValue(newSku)
                                     setHasSkuParasiteChars(false)
                                 }}
@@ -666,7 +747,10 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                                 id="category"
                                 name="category"
                                 value={selectedMainCategory}
-                                onChange={(e) => setSelectedMainCategory(e.target.value)}
+                                onChange={(e) => {
+                                    setSelectedMainCategory(e.target.value)
+                                    setSelectedSubCategory('')
+                                }}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             >
                                 <option value="">Sélectionner une catégorie</option>
@@ -682,6 +766,8 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                             <select aria-label="Sélection subCategory"
                                 id="subCategory"
                                 name="subCategory"
+                                value={selectedSubCategory}
+                                onChange={(e) => setSelectedSubCategory(e.target.value)}
                                 disabled={!selectedMainCategory}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
                             >
@@ -832,28 +918,28 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                             rows={8}
                             style={{ display: currentLang === 'fr' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Description détaillée, caract?ristiques, composition et conseils d’utilisation en français..."
+                            placeholder="Fiche technique détaillée, caractéristiques processeur, écran, autonomie, connectique en français..."
                         />
                         <textarea
                             name="longDescription_en"
                             rows={8}
                             style={{ display: currentLang === 'en' ? 'block' : 'none' }}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Detailed description, author biography, book context in english..."
+                            placeholder="Detailed technical specifications, processor, display, battery, connectivity in English..."
                         />
                     </div>
 
-                    {/* Extrait de Lecture (previewUrl) */}
+                    {/* Extrait / Documentation constructeur */}
                     <div className="md:col-span-2">
                         <label htmlFor="previewUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                            Lien d'extrait (PDF / Google Drive) - Optionnel
+                            Fiche technique PDF / Documentation constructeur - Optionnel
                         </label>
                         <input
                             type="url"
                             id="previewUrl"
                             name="previewUrl"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Ex: https://lien-vers-mon-pdf.com"
+                            placeholder="Ex: https://lien-vers-ma-fiche-technique.pdf"
                         />
                     </div>
                 </div>
@@ -868,7 +954,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         name="seoKeywords"
                         rows={3}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Ex: roman policier, agatha christie, meurtre mystère..."
+                        placeholder="Ex: smartphone maroc, iphone 16 pro maroc, 256go, oled 120hz, tekno store, prix maroc..."
                     />
                 </div>
 
@@ -881,7 +967,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         id="jumiaHighlights"
                         name="jumiaHighlights"
                         rows={3}
-                        placeholder="<ul><li>Titre: ...</li><li>Marque: ...</li></ul>"
+                        placeholder="<ul><li>Écran Super Retina XDR OLED 120Hz</li><li>Puce Apple A18 Pro 3nm</li><li>Garantie officielle 1 an</li></ul>"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <p className="mt-1 text-sm text-gray-500">
@@ -898,7 +984,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. CRITICAL: NE
                         type="text"
                         id="jumiaPackageContent"
                         name="jumiaPackageContent"
-                        placeholder="1 x Produit"
+                        placeholder="1 x Smartphone, 1 x Câble USB-C, 1 x Outil SIM, 1 x Guide"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <p className="mt-1 text-sm text-gray-500">
