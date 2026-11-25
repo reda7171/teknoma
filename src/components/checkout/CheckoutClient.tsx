@@ -33,12 +33,16 @@ export default function CheckoutClient({
     user,
     minOrderAmount = 0,
     paymentSettings,
-    is3For4Active
+    is3For4Active,
+    shippingFee: shippingFeeProp = 30,
+    freeShippingThreshold = 500,
 }: {
     user?: { fullName?: string | null; email: string; image?: string | null; credits?: number } | null;
     minOrderAmount?: number;
     paymentSettings?: { stripeEnabled?: boolean; codEnabled?: boolean; paypalEnabled?: boolean; cmiEnabled?: boolean; bankTransferEnabled?: boolean; bankTransferAccounts?: { bankName: string; accountName: string; rib: string; logo?: string; qrCode?: string }[] }
     is3For4Active?: boolean;
+    shippingFee?: number;
+    freeShippingThreshold?: number;
 }) {
     const router = useRouter()
     const { items, getTotalPrice, clearCart, discount: instantOfferDiscount, sessionId } = useCartStore()
@@ -222,7 +226,7 @@ export default function CheckoutClient({
             const currentSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
             const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
             const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
-            const shippingFee = (hasOnlyDigital || hasFreeShippingItem || currentSubtotal >= 500) ? 0 : 30
+            const shippingFee = (hasOnlyDigital || hasFreeShippingItem || (freeShippingThreshold > 0 && currentSubtotal >= freeShippingThreshold)) ? 0 : shippingFeeProp
             let discountAmount = 0
             if (coupon) {
                 if (coupon.type === 'PERCENTAGE') {
@@ -256,7 +260,7 @@ export default function CheckoutClient({
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const hasOnlyDigital = items.length > 0 && items.every(item => item.type === 'DIGITAL')
     const hasFreeShippingItem = items.some(item => item.shippingFees === 0)
-    const shippingFee = (hasOnlyDigital || hasFreeShippingItem || subtotal >= 500) ? 0 : 30
+    const shippingFee = (hasOnlyDigital || hasFreeShippingItem || (freeShippingThreshold > 0 && subtotal >= freeShippingThreshold)) ? 0 : shippingFeeProp
 
     let discountAmount = 0
     if (coupon) {

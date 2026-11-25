@@ -55,6 +55,12 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
             } else if (key === 'min_order_amount') {
                 category = 'commerce'
                 description = 'Montant minimum du panier'
+            } else if (key === 'shipping_fee') {
+                category = 'commerce'
+                description = 'Frais de livraison'
+            } else if (key === 'free_shipping_threshold') {
+                category = 'commerce'
+                description = 'Seuil livraison gratuite'
             } else if (key === 'n8n_facebook_webhook' || key.startsWith('facebook_') || key.startsWith('meta_')) {
                 category = 'integrations'
                 description = `Intégration ${key}`
@@ -411,6 +417,46 @@ export default function SiteSettingsForm({ initialSettings }: SettingsFormProps)
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
                             Le client ne pourra pas passer commande si le total est inférieur à ce montant. (0 = pas de minimum)
+                        </p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Frais de Livraison
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                value={settings.shipping_fee || '30'}
+                                onChange={(e) => handleChange('shipping_fee', e.target.value)}
+                                placeholder="30"
+                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors pr-12"
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black text-gray-400">
+                                درهم
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                            Coût de livraison appliqué à chaque commande. (défaut : 30 MAD)
+                        </p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                            Seuil Livraison Gratuite
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                value={settings.free_shipping_threshold || '500'}
+                                onChange={(e) => handleChange('free_shipping_threshold', e.target.value)}
+                                placeholder="500"
+                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-black outline-none transition-colors pr-12"
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black text-gray-400">
+                                درهم
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                            Livraison offerte au-dessus de ce montant. (0 = jamais gratuite)
                         </p>
                     </div>
                 </div>

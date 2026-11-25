@@ -8,6 +8,8 @@ export default async function CheckoutPage() {
     const user = await getCommunityUser()
     const minAmount = await getSetting('min_order_amount', '0')
     const feature3For4 = await getSetting('feature_3_for_4', 'false')
+    const shippingFee = await getSetting('shipping_fee', '30')
+    const freeShippingThreshold = await getSetting('free_shipping_threshold', '500')
     
     const stripeEnabled = await getSetting('payment_stripe_enabled') === 'true'
     const paypalEnabled = await getSetting('payment_paypal_enabled') === 'true'
@@ -34,6 +36,8 @@ export default async function CheckoutPage() {
                 minOrderAmount={Number(minAmount)} 
                 paymentSettings={{ stripeEnabled, codEnabled, paypalEnabled, cmiEnabled, bankTransferEnabled, bankTransferAccounts }}
                 is3For4Active={feature3For4 === 'true'}
+                shippingFee={Number(shippingFee) || 30}
+                freeShippingThreshold={Number(freeShippingThreshold) || 500}
             />
             <Footer />
         </div>
