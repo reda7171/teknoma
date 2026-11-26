@@ -43,7 +43,7 @@ if [ ! -d "$BUILD_DIR/.next/cache" ] && [ -d "$APP_DIR/.next/cache" ]; then
 fi
 rm -rf "$BUILD_DIR/.next/standalone" "$BUILD_DIR/.next/static" "$BUILD_DIR/.next/server"
 npx prisma generate
-RAYON_NUM_THREADS=2 UV_THREADPOOL_SIZE=2 NODE_OPTIONS="--max-old-space-size=1024" npm run build
+NEXT_BUILD_CPUS=1 RAYON_NUM_THREADS=2 UV_THREADPOOL_SIZE=2 NODE_OPTIONS="--max-old-space-size=1024" npm run build
 
 echo "📁 [3/5] Préparation du bundle standalone..."
 rm -rf "$BUILD_DIR/.next/standalone/public" "$BUILD_DIR/.next/standalone/.next/static"

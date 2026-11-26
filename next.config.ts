@@ -54,6 +54,12 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     agentUpgrade: 'security',
+    ...(process.env.NEXT_BUILD_CPUS
+      ? {
+          cpus: Number(process.env.NEXT_BUILD_CPUS),
+          staticGenerationMaxConcurrency: Number(process.env.NEXT_BUILD_CPUS),
+        }
+      : {}),
     serverActions: {
       bodySizeLimit: '10mb',
     },
