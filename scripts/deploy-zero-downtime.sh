@@ -36,9 +36,14 @@ elif ! cmp -s "$APP_DIR/package-lock.json" "$BUILD_DIR/package-lock.json" 2>/dev
 fi
 
 echo "🔧 [2/5] Génération Prisma & Build Next.js (le site en prod reste 100% en ligne)..."
+mkdir -p "$BUILD_DIR/.next"
+if [ ! -d "$BUILD_DIR/.next/cache" ] && [ -d "$APP_DIR/.next/cache" ]; then
+  echo "⚡ Copie du cache Turbopack existant..."
+  cp -a "$APP_DIR/.next/cache" "$BUILD_DIR/.next/cache"
+fi
 rm -rf "$BUILD_DIR/.next/standalone" "$BUILD_DIR/.next/static" "$BUILD_DIR/.next/server"
 npx prisma generate
-NODE_OPTIONS="--max-old-space-size=1024" npm run build
+RAYON_NUM_THREADS=2 UV_THREADPOOL_SIZE=2 NODE_OPTIONS="--max-old-space-size=1024" npm run build
 
 echo "📁 [3/5] Préparation du bundle standalone..."
 rm -rf "$BUILD_DIR/.next/standalone/public" "$BUILD_DIR/.next/standalone/.next/static"
