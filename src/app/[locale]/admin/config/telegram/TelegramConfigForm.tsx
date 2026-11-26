@@ -1,9 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { updateSetting } from '@/lib/actions/site-settings'
-import { Save, Send, Webhook, Trash2, Loader2, Sparkles, MessageCircle, Settings, ShieldCheck } from 'lucide-react'
+import { Save, Send, Webhook, Loader2, Sparkles, MessageCircle, Settings, ShieldCheck, RefreshCw, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+
+interface TelegramLiveStatus {
+    bot: { id: number; username: string; firstName: string }
+    webhook: { url: string; pendingUpdateCount: number; lastErrorMessage: string; lastErrorDate: number | null }
+}
 
 interface Props {
     initialBotToken: string
@@ -40,7 +45,47 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
     const [webhookLoading, setWebhookLoading] = useState(false)
     const [customAppUrl, setCustomAppUrl] = useState(appUrl)
     const [message, setMessage] = useState('')
+    const [liveStatus, setLiveStatus] = useState<TelegramLiveStatus | null>(null)
+    const [statusLoading, setStatusLoading] = useState(false)
+    const [statusError, setStatusError] = useState('')
     const router = useRouter()
+
+    const fetchLiveStatus = useCallback(async (tokenOverride?: string) => {
+        const tokenToCheck = (tokenOverride ?? botToken).trim()
+        if (!tokenToCheck) {
+            setLiveStatus(null)
+            setStatusError('')
+            return
+        }
+        setStatusLoading(true)
+        setStatusError('')
+        try {
+            const res = await fetch('/api/telegram/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ botToken: tokenToCheck }),
+            })
+            const data = await res.json()
+            if (data.ok) {
+                setLiveStatus({ bot: data.bot, webhook: data.webhook })
+            } else {
+                setLiveStatus(null)
+                setStatusError(data.error || 'Statut indisponible')
+            }
+        } catch {
+            setLiveStatus(null)
+            setStatusError('Impossible de vérifier le statut Telegram')
+        } finally {
+            setStatusLoading(false)
+        }
+    }, [botToken])
+
+    useEffect(() => {
+        if (initialBotToken) {
+            fetchLiveStatus(initialBotToken)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault()
@@ -112,6 +157,9 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
             })
             const data = await res.json()
             setMessage(data.ok ? `✅ Webhook configuré : ${webhookUrl}` : `❌ Erreur : ${data.error || data.description || 'Réponse invalide du serveur'}`)
+            if (data.ok) {
+                fetchLiveStatus()
+            }
         } catch {
             setMessage('❌ Erreur lors de la configuration du webhook.')
         } finally {
@@ -278,7 +326,78 @@ export default function TelegramConfigForm({ initialBotToken, initialChatId, app
 
                 {/* Colonne Droite Actions Rapides & Guides */}
                 <div className="lg:col-span-1 space-y-6">
-                    
+
+                    {/* Statut en direct Bot & Webhook */}
+                    <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-black text-gray-900 text-sm uppercase tracking-wider">Statut en direct</h3>
+                            <button
+                                type="button"
+                                onClick={() => fetchLiveStatus()}
+                                disabled={statusLoading || !botToken}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors disabled:opacity-50"
+                            >
+                                <RefreshCw className={`w-3.5 h-3.5 ${statusLoading ? 'animate-spin' : ''}`} />
+                                Actualiser
+                            </button>
+                        </div>
+
+                        {statusLoading && !liveStatus && (
+                            <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Vérification du bot…
+                            </div>
+                        )}
+
+                        {statusError && (
+                            <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-xs font-medium text-red-700 flex items-start gap-2">
+                                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                                <span>{statusError}</span>
+                            </div>
+                        )}
+
+                        {liveStatus && (
+                            <div className="space-y-3 text-xs">
+                                <div className="p-3 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-2">
+                                    <div>
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Bot connecté</p>
+                                        <a
+                                            href={`https://t.me/${liveStatus.bot.username}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mt-0.5 inline-flex items-center gap-1 font-black text-blue-600 hover:underline text-sm"
+                                        >
+                                            @{liveStatus.bot.username}
+                                            <ExternalLink className="w-3 h-3" />
+                                        </a>
+                                        <p className="text-[11px] text-gray-500">{liveStatus.bot.firstName}</p>
+                                    </div>
+                                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                                </div>
+
+                                <div className="p-3 rounded-xl bg-gray-50 border border-gray-100 space-y-1.5">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Webhook</span>
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${liveStatus.webhook.url ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                            {liveStatus.webhook.url ? 'Actif' : 'Non configuré'}
+                                        </span>
+                                    </div>
+                                    {liveStatus.webhook.url && (
+                                        <p className="font-mono text-[11px] text-gray-700 break-all">{liveStatus.webhook.url}</p>
+                                    )}
+                                    <p className="text-[11px] text-gray-500">
+                                        Mises à jour en attente : <strong>{liveStatus.webhook.pendingUpdateCount}</strong>
+                                    </p>
+                                    {liveStatus.webhook.lastErrorMessage && (
+                                        <p className="text-[11px] text-red-600 font-medium">
+                                            Dernière erreur : {liveStatus.webhook.lastErrorMessage}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Actions collantes */}
                     <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm sticky top-6">
                         <h3 className="font-black text-gray-900 mb-4 flex items-center gap-2">
