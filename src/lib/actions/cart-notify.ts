@@ -6,12 +6,14 @@ import { isAuthenticated } from '@/lib/actions/auth'
 
 export async function notifyAddToCart(productTitle: string, price: number, type: string, sessionId?: string, cartTotal?: number, cartItemsText?: string, discount?: number | null, productId?: string) {
     try {
-        if (type === 'BOOK' && productId) {
-            const { prisma } = await import('@/lib/prisma')
-            await prisma.book.update({
-                where: { id: productId },
-                data: { cartAdditions: { increment: 1 } }
-            }).catch(() => {})
+        if (type === 'BOOK' || type === 'PRODUIT') {
+            if (productId) {
+                const { prisma } = await import('@/lib/prisma')
+                await prisma.book.update({
+                    where: { id: productId },
+                    data: { cartAdditions: { increment: 1 } }
+                }).catch(() => {})
+            }
         }
 
         const ip = await getIpIdentifier()
@@ -41,7 +43,7 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
                 }
             }
             // On envoie une notification asynchrone
-            let message = `🛒 <b>Nouveau Produit Ajouté</b>${adminTag}\n\nUn client vient d'ajouter un produit à son panier :\n📖 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`
+            let message = `🛒 <b>Nouveau Produit Ajouté</b>${adminTag}\n\nUn client vient d'ajouter un produit à son panier :\n📱 <b>Produit:</b> ${cleanTitle}\n🏷️ <b>Type:</b> ${type}\n💰 <b>Prix:</b> ${price.toFixed(2)} درهم\n🌐 <b>IP:</b> ${ip || 'Inconnue'}${sessionId ? `\n🔑 <b>Session:</b> <code>${sessionId}</code>` : ''}`
 
             if (discount) {
                 message += `\n🎯 <b>Réduction active:</b> ${discount} درهم`
@@ -51,7 +53,7 @@ export async function notifyAddToCart(productTitle: string, price: number, type:
                 message += `\n\n💳 <b>Total du panier actuel:</b> ${cartTotal.toFixed(2)} درهم`
             }
             if (cleanItemsText) {
-                message += `\n📚 <b>Contenu du panier:</b>\n<i>${cleanItemsText}</i>`
+                message += `\n📦 <b>Contenu du panier:</b>\n<i>${cleanItemsText}</i>`
             }
 
             await sendTelegramMessage(
