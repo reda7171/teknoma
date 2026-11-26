@@ -211,7 +211,7 @@ export async function notifyWhatsAppOrderClick(title: string, price: number, typ
         const cleanMessage = (message || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
         const text = `📱 <b>Commande WhatsApp Initiée</b>${adminTag}\n\n` +
-            `📖 <b>Produit :</b> ${cleanTitle}\n` +
+            `📱 <b>Produit :</b> ${cleanTitle}\n` +
             `🏷️ <b>Type :</b> ${type}\n` +
             `💰 <b>Prix :</b> ${price ? price.toFixed(2) : '0.00'} درهم\n` +
             (phone ? `📞 <b>Contact WhatsApp :</b> +${phone}\n` : '') +

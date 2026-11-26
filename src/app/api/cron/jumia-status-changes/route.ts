@@ -187,7 +187,7 @@ export async function GET(request: Request) {
                 `⏮ <b>Avant :</b> ${escapeHtml(statusLabel(change.from))}`,
                 `⏭ <b>Maintenant :</b> ${escapeHtml(statusLabel(change.to))}`,
                 '',
-                '📚 <b>Articles :</b>',
+                '📦 <b>Articles :</b>',
                 itemsText
             ].join('\n')
 

@@ -11,7 +11,7 @@ function formatCartItemsDetail(items: any[]): string {
         const title = String(rawTitle).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         const qty = item.quantity || 1
         const price = item.price !== undefined ? `${item.price} DH` : ''
-        const typeBadge = item.type === 'PACK' ? '📦 Pack' : item.type === 'DIGITAL' ? '💻 Numérique' : item.type === 'ACCESSORY' ? '🎁 Accessoire' : '📖 Livre'
+        const typeBadge = item.type === 'PACK' ? '📦 Pack' : item.type === 'DIGITAL' ? '💻 Numérique' : item.type === 'ACCESSORY' ? '🎁 Accessoire' : '📱 Produit'
         return `  ${idx + 1}. [${typeBadge}] <b>${title}</b> x${qty}${price ? ` - <b>${price}</b>` : ''}`
     }).join('\n')
 }

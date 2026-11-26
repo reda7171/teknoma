@@ -27,14 +27,14 @@ export async function GET(req: Request) {
         }
 
         const lines = criticalBooks
-            .map(b => `📖 <b>${b.title}</b> → Stock: <b>${b.stock}</b>${b.stock === 0 ? ' ⛔ ÉPUISÉ' : ''}`)
+            .map(b => `📱 <b>${b.title}</b> → Stock: <b>${b.stock}</b>${b.stock === 0 ? ' ⛔ ÉPUISÉ' : ''}`)
             .join('\n')
 
         const keyboard = criticalBooks.slice(0, 5).map((b) => {
             return [{ text: `🔄 Maj: ${b.title.substring(0, 25)}`, callback_data: `upd_stock:${b.id}` }]
         })
 
-        const msg = `⚠️ <b>Alerte Stock Critique (< 3)</b>\n\n${criticalBooks.length} livre(s) avec stock < 3 :\n\n${lines}`
+        const msg = `⚠️ <b>Alerte Stock Critique (< 3)</b>\n\n${criticalBooks.length} produit(s) avec stock < 3 :\n\n${lines}`
 
         await sendTelegramMessage(msg, undefined, undefined, { inline_keyboard: keyboard })
 

@@ -30,7 +30,7 @@ export async function POST(req: Request) {
             cleanPhone = '212' + cleanPhone;
         }
 
-        const whatsappText = encodeURIComponent(`Bonjour, suite à votre réservation du livre  "${reservation.book.title}" sur Tekno Store...`);
+        const whatsappText = encodeURIComponent(`Bonjour, suite à votre réservation du produit "${reservation.book.title}" sur Tekno Store...`);
         const whatsappUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${whatsappText}`;
 
         const replyMarkup = {
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         };
 
         // Send Telegram notification
-        const message = `📚 <b>Nouvelle Réservation</b>\n\nLivre: ${reservation.book.title}\nWhatsApp: ${whatsapp}\n\nVous pouvez le contacter directement ou gérer les réservations depuis l'admin.`;
+        const message = `📱 <b>Nouvelle Réservation</b>\n\nProduit: ${reservation.book.title}\nWhatsApp: ${whatsapp}\n\nVous pouvez le contacter directement ou gérer les réservations depuis l'admin.`;
         await sendTelegramMessage(message, undefined, undefined, replyMarkup).catch(console.error);
 
         return NextResponse.json({ success: true, reservation });

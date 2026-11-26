@@ -361,7 +361,7 @@ export async function updateBook(
                 syncJumiaStockForBooksBackground([existingBook.id]).catch(console.error)
 
                 const { sendTelegramMessage } = await import('@/lib/telegram')
-                await sendTelegramMessage(`🔄 <b>Stock Jumia Mis à Jour (Édition)</b>\n\n📖 Produit: ${validatedData.title || existingBook.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${validatedData.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
+                await sendTelegramMessage(`🔄 <b>Stock Jumia Mis à Jour (Édition)</b>\n\n📱 Produit: ${validatedData.title || existingBook.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${validatedData.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
             } catch (err) {
                 console.error("Erreur sync jumia:", err)
             }
@@ -478,7 +478,7 @@ export async function updateBookQuick(
                 syncJumiaStockForBooksBackground([existingBook.id]).catch(console.error)
 
                 const { sendTelegramMessage } = await import('@/lib/telegram')
-                await sendTelegramMessage(`⚡ <b>Stock Jumia Mis à Jour (Édition Rapide)</b>\n\n📖 Produit: ${updated.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${updated.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
+                await sendTelegramMessage(`⚡ <b>Stock Jumia Mis à Jour (Édition Rapide)</b>\n\n📱 Produit: ${updated.title}\n📦 Ancien: ${existingBook.stock} ➔ Nouveau: ${updated.stock}\n🔢 SKU: ${existingBook.sellerSku}`)
             } catch (err) {
                 console.error("Erreur sync jumia:", err)
             }
