@@ -1014,6 +1014,7 @@ Ensure the descriptions are catchy, SEO-friendly, and professional. Use natural 
                             type="text"
                             id="isbn"
                             name="isbn"
+                            maxLength={191}
                             defaultValue={book.isbn || ''}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                             placeholder="Ex: 356938114526841 (IMEI) ou F2LW80... (S/N) ou code-barres"

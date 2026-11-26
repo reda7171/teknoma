@@ -277,7 +277,7 @@ Réponds UNIQUEMENT avec un JSON valide, sans balises superflues, suivant ce for
   "seoKeywords": "tekno store, ${title}, prix maroc, high-tech maroc, livraison 24h",
   "jumiaHighlights": "<ul><li>Écran OLED haute résolution</li><li>Autonomie longue durée</li><li>Garantie constructeur 12M</li></ul>",
   "jumiaPackageContent": "1 x Appareil, 1 x Câble d'alimentation, 1 x Manuel d'utilisation",
-  "isbn": "EAN ou référence constructeur si connue"
+  "isbn": "Code-barres EAN ou référence courte (max 50 car., sinon laisser vide \"\")"
 }`
 
         navigator.clipboard.writeText(prompt).then(() => {
@@ -554,6 +554,7 @@ Réponds UNIQUEMENT avec un JSON valide, sans balises superflues, suivant ce for
                             type="text"
                             id="isbn"
                             name="isbn"
+                            maxLength={191}
                             defaultValue={prefillIsbn}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                             placeholder="Ex: 356938114526841 (IMEI) ou F2LW80... (S/N) ou code-barres"

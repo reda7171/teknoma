@@ -155,7 +155,7 @@ model Book {
   title               String            @db.VarChar(255)
   author              String            @db.VarChar(255)
   description         String            @db.Text
-  isbn                String?           @unique @db.VarChar(20)
+  isbn                String?           @unique @db.VarChar(191)
   price               Float
   originalPrice       Float?
   costPrice           Float             @default(0)

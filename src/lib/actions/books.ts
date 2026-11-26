@@ -10,6 +10,18 @@ import { createAuditLog } from './audit'
 // Schéma de validation pour un produit
 import { getBooks as getBooksDb, BookFilters, getAllAuthors } from '@/lib/db/books'
 
+// Normalise l'identifiant produit (IMEI, N° série, EAN, Référence) pour Tekno Store
+const EMPTY_IDENTIFIER_VALUES = new Set([
+    'n/a', 'na', 'aucun', 'aucune', 'non disponible', 'non connue', 'non connu', 'null', 'undefined', '-', 'none'
+])
+
+function normalizeProductIdentifier(raw?: string | null): string | null {
+    const trimmed = raw?.trim()
+    if (!trimmed) return null
+    if (EMPTY_IDENTIFIER_VALUES.has(trimmed.toLowerCase())) return null
+    return trimmed.slice(0, 191)
+}
+
 const BookSchemaBase = z.object({
     title: z.string().optional().default(""),
     titleFr: z.string().optional(),
@@ -115,7 +127,7 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             }
         }
 
-        const cleanIsbn = validatedData.isbn?.trim() ? validatedData.isbn.trim() : null
+        const cleanIsbn = normalizeProductIdentifier(validatedData.isbn)
 
         if (cleanIsbn) {
             const existingWithIsbn = await prisma.book.findFirst({
@@ -316,7 +328,7 @@ export async function updateBook(
             throw new Error('Non autorisé - Ce produit ne vous appartient pas')
         }
 
-        const cleanIsbn = validatedData.isbn?.trim() ? validatedData.isbn.trim() : null
+        const cleanIsbn = normalizeProductIdentifier(validatedData.isbn)
 
         if (cleanIsbn) {
             const existingWithIsbn = await prisma.book.findFirst({
