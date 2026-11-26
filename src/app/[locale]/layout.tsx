@@ -21,6 +21,7 @@ import DeferredMarketingScripts from '@/components/DeferredMarketingScripts'
 import AuthModalLoader from '@/components/auth/AuthModalLoader'
 import FacebookSDK from '@/components/FacebookSDK'
 import { resolveActiveWhatsAppAgent } from '@/lib/whatsapp-presence'
+import { SiteLogoProvider } from '@/components/SiteLogoProvider'
 
 
 const outfit = localFont({
@@ -255,7 +256,8 @@ export default async function LocaleLayout({
     googleAnalyticsId,
     adsenseId,
     adsenseEnabled,
-    activeWhatsAppAgent
+    activeWhatsAppAgent,
+    siteLogoRaw
   ] = await Promise.all([
     getMessages(),
     isFeatureEnabled('feature_chatbot', false),
@@ -276,10 +278,13 @@ export default async function LocaleLayout({
     getSetting('google_analytics_id'),
     getSetting('adsense_publisher_id'),
     getSetting('adsense_enabled'),
-    resolveActiveWhatsAppAgent()
+    resolveActiveWhatsAppAgent(),
+    getSetting('site_logo')
   ]);
 
   const siteUrl = siteUrlRaw || 'https://tekno.ma';
+  const siteLogo = (siteLogoRaw && siteLogoRaw.trim()) || '/logo.png';
+  const siteLogoAbsolute = siteLogo.startsWith('http') ? siteLogo : `${siteUrl}${siteLogo.startsWith('/') ? '' : '/'}${siteLogo}`;
   const fbPixelId = fbPixelIdRaw || process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
   const googleSearchConsoleId = googleSearchConsoleIdRaw || googleSearchConsoleIdFallback;
 
@@ -309,11 +314,13 @@ export default async function LocaleLayout({
         {/* Google Tag Manager (noscript) */}
         {/* End Google Tag Manager (noscript) */}
         <UtmTracker />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({'@context':'https://schema.org','@type':'ElectronicsStore',name:'Tekno Store',url:siteUrl,description:'Boutique high-tech au Maroc : smartphones neufs, PC portables, Mac et accessoires avec paiement à la livraison COD.',logo:siteUrl+'/logo.png',email:PET_CONTACT_EMAIL}).replace(/</g,'\\u003c')}} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({'@context':'https://schema.org','@type':'ElectronicsStore',name:'Tekno Store',url:siteUrl,description:'Boutique high-tech au Maroc : smartphones neufs, PC portables, Mac et accessoires avec paiement à la livraison COD.',logo:siteLogoAbsolute,email:PET_CONTACT_EMAIL}).replace(/</g,'\\u003c')}} />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <div id="site-shell">
-            {children}
-          </div>
+          <SiteLogoProvider logo={siteLogo}>
+            <div id="site-shell">
+              {children}
+            </div>
+          </SiteLogoProvider>
           <Toaster />
           <CookieConsent />
           {isWhatsAppEnabled && (

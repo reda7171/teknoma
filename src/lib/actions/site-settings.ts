@@ -75,7 +75,7 @@ export async function updateSetting(key: string, value: string, category: string
 
         invalidateSettingsCache([key])
         revalidatePath('/admin/settings')
-        revalidatePath('/')
+        revalidatePath('/', 'layout')
 
         return { success: true, setting }
     } catch (error: any) {
@@ -100,7 +100,7 @@ export async function updateMultipleSettings(settings: { key: string; value: str
 
         invalidateSettingsCache(settings.map(({ key }) => key))
         revalidatePath('/admin/settings')
-        revalidatePath('/')
+        revalidatePath('/', 'layout')
 
         return { success: true }
     } catch (error: any) {

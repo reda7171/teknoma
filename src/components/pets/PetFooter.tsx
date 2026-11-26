@@ -38,7 +38,8 @@ export default async function PetFooter() {
     youtube,
     twitter,
     linkedin,
-    whatsappChannel
+    whatsappChannel,
+    siteLogoRaw
   ] = await Promise.all([
     getSetting('social_instagram'),
     getSetting('social_facebook'),
@@ -46,8 +47,10 @@ export default async function PetFooter() {
     getSetting('social_youtube'),
     getSetting('social_twitter'),
     getSetting('social_linkedin'),
-    getSetting('social_whatsapp_channel')
+    getSetting('social_whatsapp_channel'),
+    getSetting('site_logo')
   ])
+  const siteLogo = (siteLogoRaw && siteLogoRaw.trim()) || '/logo.png'
 
   const socials = [
     { label: 'Instagram', href: instagram || 'https://instagram.com', icon: Instagram },
@@ -108,7 +111,7 @@ export default async function PetFooter() {
           <div>
             <Link href="/" className="inline-block" dir="ltr">
               <Image
-                src="/logo.png"
+                src={siteLogo}
                 alt="Tekno Store"
                 width={160}
                 height={50}

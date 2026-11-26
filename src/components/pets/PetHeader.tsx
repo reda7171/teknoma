@@ -9,11 +9,13 @@ import { useEffect, useState } from 'react'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { getPetCopy } from '@/lib/pets'
 import { getPetContent } from '@/lib/pet-content'
+import { useSiteLogo } from '@/components/SiteLogoProvider'
 
 export default function PetHeader() {
   const locale = useLocale()
   const c = getPetCopy(locale)
   const t = getPetContent(locale)
+  const siteLogo = useSiteLogo()
   const count = useCartStore((s) => s.items.reduce((n, i) => n + i.quantity, 0))
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState(false)
@@ -85,7 +87,7 @@ export default function PetHeader() {
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2" dir="ltr">
             <Image
-              src="/logo.png"
+              src={siteLogo}
               alt="Tekno Store"
               width={160}
               height={45}
