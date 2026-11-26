@@ -22,19 +22,23 @@ cd "$BUILD_DIR"
 cp -f "$APP_DIR/.env" "$BUILD_DIR/.env"
 
 # Réutiliser node_modules existants si package-lock.json est identique pour accélérer
-if [ ! -d "$BUILD_DIR/node_modules" ] || ! cmp -s "$APP_DIR/package-lock.json" "$BUILD_DIR/package-lock.json" 2>/dev/null; then
-  if [ -d "$APP_DIR/node_modules" ] && [ ! -d "$BUILD_DIR/node_modules" ]; then
-    echo "📦 Copie initiale de node_modules..."
+if [ ! -d "$BUILD_DIR/node_modules" ]; then
+  if [ -d "$APP_DIR/node_modules" ] && cmp -s "$APP_DIR/package-lock.json" "$BUILD_DIR/package-lock.json" 2>/dev/null; then
+    echo "📦 Copie de node_modules depuis $APP_DIR (package-lock identique)..."
     cp -a "$APP_DIR/node_modules" "$BUILD_DIR/node_modules"
+  else
+    echo "📦 Installation des dépendances..."
+    npm ci --legacy-peer-deps || npm install --legacy-peer-deps
   fi
-  echo "📦 Synchronisation des dépendances..."
+elif ! cmp -s "$APP_DIR/package-lock.json" "$BUILD_DIR/package-lock.json" 2>/dev/null; then
+  echo "📦 Mise à jour des dépendances..."
   npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 fi
 
 echo "🔧 [2/5] Génération Prisma & Build Next.js (le site en prod reste 100% en ligne)..."
 rm -rf "$BUILD_DIR/.next"
 npx prisma generate
-npm run build
+NODE_OPTIONS="--max-old-space-size=1536" npm run build
 
 echo "📁 [3/5] Préparation du bundle standalone..."
 rm -rf "$BUILD_DIR/.next/standalone/public" "$BUILD_DIR/.next/standalone/.next/static"
