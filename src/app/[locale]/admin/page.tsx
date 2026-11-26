@@ -416,7 +416,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
 
     const statCards = [
         { name: 'Produits actifs', value: stats.booksCount, iconName: 'BookOpen', color: 'blue', roles: ['ADMIN', 'SELLER'] },
-        { name: 'Score SEO ≤ 80', value: stats.seoScoreLte80Count, iconName: 'Sparkles', color: 'amber', roles: ['ADMIN', 'SELLER'], href: `/${locale}/admin/books?seoScore=lte80` },
+        { name: 'Score SEO ≤ 80', value: stats.seoScoreLte80Count, iconName: 'Sparkles', color: 'amber', roles: ['ADMIN', 'SELLER'], href: `/${locale}/admin/products?seoScore=lte80` },
         { name: 'Solde Tokens Économisés', value: `${geminiStats.estimatedTokensSaved.toLocaleString()} tkn`, iconName: 'Cpu', color: 'amber', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
         { name: 'Économie IA ($)', value: `$${geminiStats.estimatedCostSavedUsd.toFixed(3)}`, iconName: 'Coins', color: 'emerald', roles: ['ADMIN'], href: `/${locale}/admin/settings?tab=gemini-cache` },
         { name: 'Packs Actifs', value: stats.packsCount, iconName: 'Package', color: 'amber', roles: ['ADMIN'] },
@@ -732,7 +732,7 @@ export default async function AdminDashboard(props: { params: Promise<{ locale: 
                         )}
                     </div>
                     <div className="p-6 md:p-8 bg-gray-50/50 border-t border-gray-50">
-                        <Link href="/admin/books" className="block w-full text-center py-4 bg-white border border-gray-100 rounded-2xl text-[9px] font-black text-gray-400 hover:text-black hover:border-black transition-all uppercase tracking-[0.2em]">Rapprovisionner</Link>
+                        <Link href="/admin/products" className="block w-full text-center py-4 bg-white border border-gray-100 rounded-2xl text-[9px] font-black text-gray-400 hover:text-black hover:border-black transition-all uppercase tracking-[0.2em]">Rapprovisionner</Link>
                     </div>
                 </div>
             </div>

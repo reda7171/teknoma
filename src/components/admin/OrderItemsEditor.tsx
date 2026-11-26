@@ -200,7 +200,7 @@ export default function OrderItemsEditor({
                         ? `/${locale}/admin/accessories/${product?.id}`
                         : item.type === 'PACK'
                             ? `/${locale}/admin/packs/${product?.id}/edit`
-                            : `/${locale}/admin/books/${product?.id}/edit`
+                            : `/${locale}/admin/products/${product?.id}/edit`
 
                     return (
                         <div key={item.id || `new-${index}`} className={`p-6 flex gap-4 relative group ${item.isMissing ? 'bg-red-50/70' : ''}`}>

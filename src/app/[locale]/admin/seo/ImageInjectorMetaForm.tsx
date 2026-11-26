@@ -506,7 +506,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                     <div key={book.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-white transition-colors flex flex-col h-full">
                         <div className="flex gap-4 items-start">
                             {/* Image */}
-                            <a href={`/fr/admin/books/${book.id}/edit`} target="_blank" title="Éditer ce produit" className="block w-16 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
+                            <a href={`/fr/admin/products/${book.id}/edit`} target="_blank" title="Éditer ce produit" className="block w-16 h-20 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
                                 <img
                                     src={book.image?.startsWith('/') && process.env.NODE_ENV === 'development' ? `https://tekno.ma${book.image}` : book.image}
                                     alt={edits[book.id]?.alt || book.title}
@@ -519,7 +519,7 @@ export default function ImageInjectorMetaForm({ books }: ImageInjectorMetaFormPr
                             {/* Fields */}
                             <div className="flex-1 space-y-3">
                                 <div>
-                                    <a href={`/fr/admin/books/${book.id}/edit`} className="text-xs font-black text-blue-600 hover:text-blue-800 hover:underline uppercase tracking-widest mb-0.5 inline-block" title="Éditer ce produit" target="_blank">{book.title}</a>
+                                    <a href={`/fr/admin/products/${book.id}/edit`} className="text-xs font-black text-blue-600 hover:text-blue-800 hover:underline uppercase tracking-widest mb-0.5 inline-block" title="Éditer ce produit" target="_blank">{book.title}</a>
                                     <p className="text-xs text-gray-400">{book.author}</p>
                                 </div>
 

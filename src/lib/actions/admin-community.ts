@@ -269,7 +269,7 @@ export async function deleteBook(bookId: string) {
             where: { id: bookId }
         })
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         return { success: true }
     } catch (error: any) {
         return { success: false, error: error.message || "Erreur lors de la suppression" }

@@ -134,7 +134,7 @@ export default function BooksTable({
             params.set('limit', effectiveLimit.toString())
         }
         params.set('page', pageNumber.toString())
-        return `/admin/books/${book.id}/edit?${params.toString()}`
+        return `/admin/products/${book.id}/edit?${params.toString()}`
     }
 
     useEffect(() => {

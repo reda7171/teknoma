@@ -84,7 +84,7 @@ export default function GoogleBooksSearchPage() {
         if (cover) params.append('cover', cover)
         if (language) params.append('lang', language)
 
-        router.push(`/admin/books/new?${params.toString()}`)
+        router.push(`/admin/products/new?${params.toString()}`)
     }
 
     return (

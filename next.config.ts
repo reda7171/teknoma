@@ -293,6 +293,37 @@ const nextConfig: NextConfig = {
         destination: '/:locale/devenir-vendeur',
         permanent: true,
       },
+      // Redirections des anciennes routes admin livres -> produits Tekno Store
+      {
+        source: '/admin/books',
+        destination: '/admin/products',
+        permanent: true,
+      },
+      {
+        source: '/:locale/admin/books',
+        destination: '/:locale/admin/products',
+        permanent: true,
+      },
+      {
+        source: '/admin/books/:path*',
+        destination: '/admin/products/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:locale/admin/books/:path*',
+        destination: '/:locale/admin/products/:path*',
+        permanent: true,
+      },
+      {
+        source: '/admin/google-books',
+        destination: '/admin/product-search',
+        permanent: true,
+      },
+      {
+        source: '/:locale/admin/google-books',
+        destination: '/:locale/admin/product-search',
+        permanent: true,
+      },
     ]
   },
   async rewrites() {

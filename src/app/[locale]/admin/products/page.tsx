@@ -417,13 +417,13 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                     <div className="flex flex-wrap items-center gap-3">
                         <DashboardPrivacyToggle />
                         <Link
-                            href="/admin/books/pending"
+                            href="/admin/products/pending"
                             className="inline-flex items-center px-5 py-2.5 bg-amber-50 text-amber-700 font-bold text-sm rounded-xl hover:bg-amber-100 transition-colors"
                         >
                             En attente
                         </Link>
                         <Link
-                            href={linkedParam === 'anomaly' ? '/admin/books' : '/admin/books?linked=anomaly'}
+                            href={linkedParam === 'anomaly' ? '/admin/products' : '/admin/products?linked=anomaly'}
                             className={`inline-flex items-center px-4 py-2.5 font-bold text-xs rounded-xl border transition-all ${
                                 linkedParam === 'anomaly' || jumiaParam.split(',').includes('anomaly')
                                     ? 'bg-red-600 text-white border-red-700 shadow-md ring-2 ring-red-200'
@@ -441,14 +441,14 @@ export default async function BooksPage({ searchParams }: { searchParams: Promis
                             <CatalogImageButton />
                         </div>
                         <Link
-                            href="/admin/books/bulk-import"
+                            href="/admin/products/bulk-import"
                             className="inline-flex items-center px-5 py-2.5 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl hover:bg-emerald-100 transition-colors"
                         >
                             <Upload className="w-4 h-4 mr-2" />
                             Importer
                         </Link>
                         <Link
-                            href="/admin/books/new"
+                            href="/admin/products/new"
                             className="inline-flex items-center px-5 py-2.5 bg-black text-white font-bold text-sm rounded-xl hover:bg-gray-900 transition-all shadow-xl shadow-black/10 active:scale-95"
                         >
                             <Plus className="w-4 h-4 mr-2" />

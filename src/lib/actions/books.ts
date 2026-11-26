@@ -156,7 +156,7 @@ export async function createBook(input: BookInput): Promise<BookResult> {
             },
         })
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/sitemap.xml')
         revalidatePath('/[locale]/books', 'page')
         revalidatePath('/books')
@@ -367,7 +367,7 @@ export async function updateBook(
             }
         }
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/books/[id]', 'page')
         revalidatePath('/[locale]/books/[id]', 'page')
         revalidatePath('/sitemap.xml')
@@ -489,7 +489,7 @@ export async function updateBookQuick(
             sendLowStockNotification({ id: updated.id, title: updated.title, stock: updated.stock }).catch(console.error)
         }
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({
@@ -529,7 +529,7 @@ export async function deleteBook(id: string): Promise<BookResult> {
             where: { id },
         })
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({
@@ -565,7 +565,7 @@ export async function toggleBookStatus(
             data: { active },
         })
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({
@@ -605,8 +605,8 @@ export async function approveBook(id: string): Promise<BookResult> {
             sendSellerBookApproved(book).catch(console.error)
         }
 
-        revalidatePath('/admin/books/pending')
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products/pending')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         return { success: true, bookId: id }
@@ -638,8 +638,8 @@ export async function rejectBook(id: string): Promise<BookResult> {
             sendSellerBookRejected(book, 'Non respect de nos critères de sélection').catch(console.error)
         }
 
-        revalidatePath('/admin/books/pending')
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products/pending')
+        revalidatePath('/admin/products')
 
         return { success: true, bookId: id }
     } catch (error: any) {
@@ -683,7 +683,7 @@ export async function bulkDeleteBooks(ids: string[]) {
             where: { id: { in: ids } },
         })
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({
@@ -765,7 +765,7 @@ export async function deleteAllBooks(): Promise<BookResult> {
         await verifyAdmin()
         await prisma.book.deleteMany({})
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({
@@ -799,7 +799,7 @@ export async function updateBookOrder(orderedIds: string[], pageOffset: number =
             )
         )
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         return { success: true }
@@ -824,7 +824,7 @@ export async function bulkUpdateBookPrices(ids: string[], newPrice: number) {
             data: { price: Number(newPrice) },
         }).catch(() => null)
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({
@@ -869,7 +869,7 @@ export async function bulkUpdateBookLanguages(ids: string[], language: string) {
             data: { language },
         })
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({
@@ -968,7 +968,7 @@ export async function bulkUpdateBookStock(ids: string[], newStock: number, wareh
             syncJumiaStockForBooksBackground(ids).catch(() => null)
         } catch {}
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({
@@ -1075,7 +1075,7 @@ export async function bulkUpdateBooksFromAi(booksData: AiBookUpdateData[]) {
             }
         }
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
         revalidatePath('/books')
 
@@ -1218,7 +1218,7 @@ export async function bulkGenerateSkus(ids?: string[]): Promise<{
             updatedMap[e.id] = newSku
         }
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         await createAuditLog({

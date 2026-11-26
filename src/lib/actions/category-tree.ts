@@ -61,8 +61,8 @@ export async function updateCategoryTree(tree: CategoryTree) {
             }
         })
         
-        revalidatePath('/[locale]/admin/books/new', 'page')
-        revalidatePath('/[locale]/admin/books/[id]/edit', 'page')
+        revalidatePath('/[locale]/admin/products/new', 'page')
+        revalidatePath('/[locale]/admin/products/[id]/edit', 'page')
         revalidatePath('/[locale]/admin/config/categories', 'page')
         
         return { success: true }

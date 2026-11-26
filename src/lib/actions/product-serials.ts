@@ -56,7 +56,7 @@ export async function addProductSerials(productId: string, rawSerials: string) {
         }))
     })
 
-    revalidatePath(`/admin/books/${productId}/edit`)
+    revalidatePath(`/admin/products/${productId}/edit`)
     return {
         success: true,
         addedCount: uniqueToInsert.length,
@@ -70,7 +70,7 @@ export async function deleteProductSerial(id: string, productId?: string) {
         where: { id }
     })
     if (productId) {
-        revalidatePath(`/admin/books/${productId}/edit`)
+        revalidatePath(`/admin/products/${productId}/edit`)
     }
     return { success: true }
 }
@@ -86,7 +86,7 @@ export async function updateProductSerialStatus(id: string, status: string, note
         }
     })
     if (productId) {
-        revalidatePath(`/admin/books/${productId}/edit`)
+        revalidatePath(`/admin/products/${productId}/edit`)
     }
     return { success: true }
 }

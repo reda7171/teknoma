@@ -166,7 +166,7 @@ export default function BulkImportPage() {
                             setProgress(null)
                             if (event.success && event.imported && event.imported > 0) {
                                 setTimeout(() => {
-                                    router.push('/admin/books')
+                                    router.push('/admin/products')
                                     router.refresh()
                                 }, 3500)
                             }
@@ -185,7 +185,7 @@ export default function BulkImportPage() {
                         setProgress(null)
                         if (event.success && event.imported && event.imported > 0) {
                             setTimeout(() => {
-                                router.push('/admin/books')
+                                router.push('/admin/products')
                                 router.refresh()
                             }, 3500)
                         }
@@ -298,7 +298,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
             {/* Header */}
             <div className="mb-8">
                 <Link
-                    href="/admin/books"
+                    href="/admin/products"
                     className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" />
@@ -702,7 +702,7 @@ arb,علمتني سورة البقرة,124.00 Dhs,170.00 Dhs,https://www.jumia.m
                 {/* Submit Button */}
                 <div className="mt-6 flex items-center justify-end gap-4">
                     <Link
-                        href="/admin/books"
+                        href="/admin/products"
                         className={`px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors ${loading ? 'pointer-events-none opacity-50' : ''}`}
                     >
                         Annuler

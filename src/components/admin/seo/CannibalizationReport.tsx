@@ -101,7 +101,7 @@ export default function CannibalizationReport() {
                                                 </Link>
                                                 {/* Lien vers l'édition selon le type */}
                                                 {entity.type === 'BOOK' && (
-                                                    <Link href={`/admin/books/${entity.id}/edit`} className="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200 ml-auto">Éditer SEO</Link>
+                                                    <Link href={`/admin/products/${entity.id}/edit`} className="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200 ml-auto">Éditer SEO</Link>
                                                 )}
                                                 {entity.type === 'PACK' && (
                                                     <Link href={`/admin/packs/${entity.id}/edit`} className="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200 ml-auto">Éditer SEO</Link>

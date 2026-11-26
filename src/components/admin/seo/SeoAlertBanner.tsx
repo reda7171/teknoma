@@ -90,7 +90,7 @@ export default function SeoAlertBanner({
                 {/* Actions */}
                 <div className="flex items-center gap-2 sm:gap-3 self-end md:self-center shrink-0 pt-2 md:pt-0">
                     <Link
-                        href={`/${locale}/admin/books?seoScore=lte80`}
+                        href={`/${locale}/admin/products?seoScore=lte80`}
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-2xl bg-black text-white hover:bg-gray-900 transition-all font-black text-[10px] uppercase tracking-widest shadow-lg shadow-black/10 active:scale-95"
                     >
                         <span>{t('Action')} ({lowSeoBooks})</span>

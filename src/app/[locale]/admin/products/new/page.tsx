@@ -211,9 +211,9 @@ function BookFormContent() {
         // Proceed to route
         setShowJumiaModal(false);
         if (closeAfterSave) {
-            router.push('/admin/books');
+            router.push('/admin/products');
         } else {
-            router.push(`/admin/books/${savedBookId}/edit`);
+            router.push(`/admin/products/${savedBookId}/edit`);
         }
         router.refresh();
     }
@@ -384,7 +384,7 @@ Réponds UNIQUEMENT avec un JSON valide, sans balises superflues, suivant ce for
             <div className="mb-8 flex justify-between items-start">
                 <div>
                     <Link
-                        href="/admin/books"
+                        href="/admin/products"
                         className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -978,7 +978,7 @@ Réponds UNIQUEMENT avec un JSON valide, sans balises superflues, suivant ce for
                 {/* Actions */}
                 <div className="mt-6 flex items-center justify-end gap-3">
                     <Link
-                        href="/admin/books"
+                        href="/admin/products"
                         className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
                     >
                         Annuler

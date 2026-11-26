@@ -133,10 +133,10 @@ export default function AdminLayout({
         },
         {
             name: 'Catalogue',
-            href: `/${lang}/admin/books`,
+            href: `/${lang}/admin/products`,
             icon: BookOpen,
             children: [
-                { name: 'Produits High-Tech', href: `/${lang}/admin/books`, icon: Smartphone },
+                { name: 'Produits High-Tech', href: `/${lang}/admin/products`, icon: Smartphone },
                 { name: 'Catalogue Jumia', href: `/${lang}/admin/jumia-products`, icon: ShoppingBag },
                 { name: 'Packs & Lots', href: `/${lang}/admin/packs`, icon: Package, featureKey: 'feature_packs' },
                 { name: 'Entrepôts', href: `/${lang}/admin/warehouses`, icon: Package },

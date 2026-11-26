@@ -272,7 +272,7 @@ export default function PacksTable({ packs }: { packs: Pack[] }) {
                                     {pack.books.slice(0, 3).map((pb) => (
                                         <Link
                                             key={pb.book.id}
-                                            href={`/admin/books/${pb.book.id}/edit`}
+                                            href={`/admin/products/${pb.book.id}/edit`}
                                             className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-gray-100 text-[10px] font-bold text-gray-700 uppercase tracking-tighter hover:bg-blue-50 hover:text-blue-700 transition-colors border border-gray-200"
                                             title={pb.book.title}
                                         >

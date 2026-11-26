@@ -9,7 +9,7 @@ export async function runOrphanImagesCleanup() {
         await verifyAdmin()
         const result = await cleanOrphanImages()
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/admin/packs')
         revalidatePath('/books')
         revalidatePath('/packs')

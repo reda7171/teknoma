@@ -387,9 +387,9 @@ export async function importBooksFromExcel(
         }
 
         try {
-            revalidatePath('/[locale]/admin/books', 'page')
+            revalidatePath('/[locale]/admin/products', 'page')
             revalidatePath('/[locale]/books', 'page')
-            revalidatePath('/admin/books')
+            revalidatePath('/admin/products')
             revalidatePath('/books')
             revalidatePath('/')
         } catch (revalErr) {
@@ -608,7 +608,7 @@ export async function updateStockFromTsv(
             }
         }
 
-        revalidatePath('/admin/books')
+        revalidatePath('/admin/products')
         revalidatePath('/')
 
         return {

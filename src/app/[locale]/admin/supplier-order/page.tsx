@@ -221,7 +221,7 @@ export default async function SupplierOrderPage({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-1">
-                      <Link href={`/${lang}/admin/books/${book.id}/edit`} className="font-black text-black text-sm leading-tight line-clamp-2 flex-1 hover:text-blue-600 transition-colors">
+                      <Link href={`/${lang}/admin/products/${book.id}/edit`} className="font-black text-black text-sm leading-tight line-clamp-2 flex-1 hover:text-blue-600 transition-colors">
                         {book.isBestSeller && <span className="text-amber-500 mr-1">★</span>}
                         {book.title}
                       </Link>
@@ -332,7 +332,7 @@ export default async function SupplierOrderPage({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <Link href={`/${lang}/admin/books/${book.id}/edit`} className="font-black text-black text-xs leading-tight max-w-[180px] line-clamp-2 hover:text-blue-600 transition-colors block">
+                          <Link href={`/${lang}/admin/products/${book.id}/edit`} className="font-black text-black text-xs leading-tight max-w-[180px] line-clamp-2 hover:text-blue-600 transition-colors block">
                             {book.isBestSeller && <span className="text-amber-500 mr-1">★</span>}
                             {book.title}
                           </Link>

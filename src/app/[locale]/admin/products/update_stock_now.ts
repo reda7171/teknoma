@@ -5,7 +5,7 @@ import path from 'path'
 const prisma = new PrismaClient()
 
 async function main() {
-    const filePath = path.join(process.cwd(), 'src/app/[locale]/admin/books/Nom stock.tsv')
+    const filePath = path.join(process.cwd(), 'src/app/[locale]/admin/products/Nom stock.tsv')
     if (!fs.existsSync(filePath)) {
         console.error('Fichier non trouvé:', filePath)
         return

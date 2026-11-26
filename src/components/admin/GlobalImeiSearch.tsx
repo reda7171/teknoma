@@ -265,7 +265,7 @@ export default function GlobalImeiSearch() {
                                                     </div>
                                                 </div>
                                                 <Link
-                                                    href={`/${locale}/admin/books/${item.product.id}/edit`}
+                                                    href={`/${locale}/admin/products/${item.product.id}/edit`}
                                                     onClick={() => setIsOpen(false)}
                                                     className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-2.5 py-1 rounded-lg shrink-0 transition"
                                                 >

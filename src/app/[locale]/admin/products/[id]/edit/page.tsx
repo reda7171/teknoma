@@ -38,7 +38,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             })
         }
         const returnQuery = returnUrlParams.toString()
-        return `/admin/books${returnQuery ? `?${returnQuery}` : ''}`
+        return `/admin/products${returnQuery ? `?${returnQuery}` : ''}`
     })
 
     useEffect(() => {
@@ -46,7 +46,7 @@ export default function EditBookPage({ params, searchParams }: { params: Promise
             const currentParams = new URLSearchParams(window.location.search)
             const queryStr = currentParams.toString()
             if (queryStr) {
-                setReturnUrl(`/admin/books?${queryStr}`)
+                setReturnUrl(`/admin/products?${queryStr}`)
             }
         }
     }, [])
