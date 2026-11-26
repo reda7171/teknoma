@@ -36,9 +36,9 @@ elif ! cmp -s "$APP_DIR/package-lock.json" "$BUILD_DIR/package-lock.json" 2>/dev
 fi
 
 echo "🔧 [2/5] Génération Prisma & Build Next.js (le site en prod reste 100% en ligne)..."
-rm -rf "$BUILD_DIR/.next"
+rm -rf "$BUILD_DIR/.next/standalone" "$BUILD_DIR/.next/static" "$BUILD_DIR/.next/server"
 npx prisma generate
-NODE_OPTIONS="--max-old-space-size=1536" npm run build
+NODE_OPTIONS="--max-old-space-size=1024" npm run build
 
 echo "📁 [3/5] Préparation du bundle standalone..."
 rm -rf "$BUILD_DIR/.next/standalone/public" "$BUILD_DIR/.next/standalone/.next/static"
