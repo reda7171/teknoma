@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
-import { AlertCircle, RotateCcw, Home } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { AlertCircle, RotateCcw, Home, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { tryAutoReloadOnChunkError } from '@/lib/chunk-reload'
 
 export default function ErrorBoundary({
   error,
@@ -11,9 +12,23 @@ export default function ErrorBoundary({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const [isReloading, setIsReloading] = useState(false)
+
   useEffect(() => {
-    // Silence verbose logs in production
+    // Rechargement automatique unique si les chunks ont changé après déploiement
+    if (tryAutoReloadOnChunkError(error)) {
+      setIsReloading(true)
+    }
   }, [error])
+
+  if (isReloading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-black mb-4" />
+        <p className="text-sm font-bold text-gray-600">Mise à jour de la page en cours…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">

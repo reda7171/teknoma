@@ -1,6 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
 import { AlertCircle, RotateCcw, Home } from 'lucide-react'
+import { tryAutoReloadOnChunkError } from '@/lib/chunk-reload'
 
 export default function GlobalError({
   error,
@@ -9,6 +11,10 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    // Rechargement automatique unique si un chunk a expiré après déploiement
+    tryAutoReloadOnChunkError(error)
+  }, [error])
   return (
     <html lang="fr" dir="ltr">
       <head>
