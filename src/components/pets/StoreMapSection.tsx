@@ -1,4 +1,5 @@
 import { MapPin, Navigation, ExternalLink, Clock } from 'lucide-react'
+import { PET_CONTACT_EMAIL, TEKNO_PHONE } from '@/lib/pet-content'
 
 // URL officielle Google Maps du magasin Tekno Store
 export const TEKNO_MAP_URL = 'https://maps.app.goo.gl/iX2HNyrN1gfnkgc98'
@@ -42,9 +43,60 @@ export default function StoreMapSection({ locale }: { locale: string }) {
     const t = copy[(locale in copy ? locale : 'fr') as keyof typeof copy]
     const hl = locale === 'ar' ? 'ar' : locale === 'en' ? 'en' : 'fr'
     const embedSrc = `https://www.google.com/maps?q=${TEKNO_LAT},${TEKNO_LNG}&hl=${hl}&z=16&output=embed`
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://tekno.ma').replace(/\/$/, '')
+
+    // Données structurées Schema.org LocalBusiness avec GPS et horaires d'ouverture
+    const localBusinessJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': ['LocalBusiness', 'ElectronicsStore'],
+        '@id': `${siteUrl}/#localbusiness`,
+        name: 'Tekno Store',
+        description: t.subtitle,
+        url: `${siteUrl}/${hl}`,
+        logo: `${siteUrl}/logo.png`,
+        image: `${siteUrl}/logo.png`,
+        telephone: TEKNO_PHONE,
+        email: PET_CONTACT_EMAIL,
+        priceRange: 'MAD',
+        hasMap: TEKNO_MAP_URL,
+        sameAs: [TEKNO_MAP_URL],
+        address: {
+            '@type': 'PostalAddress',
+            addressRegion: 'Rabat-Salé-Kénitra',
+            addressCountry: 'MA',
+        },
+        geo: {
+            '@type': 'GeoCoordinates',
+            latitude: TEKNO_LAT,
+            longitude: TEKNO_LNG,
+        },
+        openingHours: 'Mo-Su 10:00-21:00',
+        openingHoursSpecification: [
+            {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: [
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                    'Sunday',
+                ],
+                opens: '10:00',
+                closes: '21:00',
+            },
+        ],
+    }
 
     return (
         <section aria-labelledby="store-map-title" className="mx-auto max-w-7xl px-5 pb-16 sm:px-8">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(localBusinessJsonLd).replace(/</g, '\\u003c'),
+                }}
+            />
             <div className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-sm">
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr]">
                     {/* Informations du magasin */}
