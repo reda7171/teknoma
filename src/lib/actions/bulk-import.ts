@@ -293,14 +293,14 @@ export async function importBooksFromExcel(
                 const parsedStock = stockVal !== undefined ? parseInt(String(stockVal)) : 100
                 const finalStock = isNaN(parsedStock) ? 100 : parsedStock
 
-                // ISBN
-                const isbnVal = extractCellValue(getField(row, ['isbn', 'ISBN']))
+                // Référence produit (IMEI, N° série, EAN, code-barres)
+                const isbnVal = extractCellValue(getField(row, ['ref_produit', 'isbn', 'ISBN', 'ean', 'EAN', 'imei', 'IMEI', 'serial', 'ref']))
                 if (isbnVal) {
                     const existing = await prisma.book.findUnique({
-                        where: { isbn: isbnVal }
+                        where: { isbn: isbnVal.slice(0, 191) }
                     })
                     if (existing) {
-                        const reason = `Le livre avec l'ISBN ${isbnVal} existe déjà.`
+                        const reason = `Un produit avec la référence ${isbnVal} existe déjà.`
                         errors.push(`Ligne ${i + 2}: ${reason}`)
                         rejectedRows.push({
                             line: i + 2,
@@ -334,7 +334,7 @@ export async function importBooksFromExcel(
                         title: String(titleStr),
                         author: String(authorStr),
                         description: String(descriptionStr),
-                        isbn: isbnVal || null,
+                        isbn: isbnVal ? isbnVal.slice(0, 191) : null,
                         price: parsedPrice,
                         originalPrice: parsedOldPrice > 0 ? parsedOldPrice : null,
                         stock: finalStock,

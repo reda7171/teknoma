@@ -92,10 +92,10 @@ export default function GoogleBooksSearchPage() {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                     <Search className="w-8 h-8 text-blue-600" />
-                    Recherche Google Books
+                    Recherche de Produits (OpenLibrary / Google Books)
                 </h1>
                 <p className="mt-2 text-sm text-gray-600">
-                    Recherchez des livres dans la base de données mondiale de Google et ajoutez-les directement à votre catalogue.
+                    Recherchez un produit pour préremplir le formulaire d'ajout au catalogue Tekno Store.
                 </p>
             </div>
 
@@ -108,7 +108,7 @@ export default function GoogleBooksSearchPage() {
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Rechercher par titre, auteur ou ISBN..."
+                        placeholder="Rechercher par nom, marque ou code-barres EAN..."
                         className="block w-full pl-12 pr-32 py-4 text-base border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
                     />
                     <div className="absolute inset-y-2 right-2">
@@ -173,7 +173,7 @@ export default function GoogleBooksSearchPage() {
                                 
                                 {info.industryIdentifiers && (
                                     <p className="text-xs text-gray-500 font-mono mb-4">
-                                        ISBN: {info.industryIdentifiers.find(i => i.type === 'ISBN_13')?.identifier || info.industryIdentifiers[0]?.identifier}
+                                        EAN/Réf.: {info.industryIdentifiers.find(i => i.type === 'ISBN_13')?.identifier || info.industryIdentifiers[0]?.identifier}
                                     </p>
                                 )}
                                 
@@ -195,9 +195,9 @@ export default function GoogleBooksSearchPage() {
             {!loading && query && results.length === 0 && !error && (
                 <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
                     <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Aucun livre trouvé</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Aucun résultat trouvé</h3>
                     <p className="text-gray-500 max-w-md mx-auto">
-                        Nous n'avons trouvé aucun résultat pour "{query}". Essayez avec d'autres termes ou le code ISBN.
+                        Nous n'avons trouvé aucun résultat pour "{query}". Essayez avec d'autres termes ou un code-barres EAN.
                     </p>
                 </div>
             )}

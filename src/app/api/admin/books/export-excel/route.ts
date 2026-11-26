@@ -63,7 +63,7 @@ export async function GET(request: Request) {
             { header: 'Nom', key: 'title', width: 35 },
             { header: 'Prix de vente', key: 'price', width: 15 },
             { header: 'Image', key: 'image', width: 60 },
-            { header: 'isbn', key: 'isbn', width: 20 },
+            { header: 'ref_produit', key: 'isbn', width: 25 },
             { header: 'description', key: 'description', width: 50 },
             { header: 'stock', key: 'stock', width: 10 },
             { header: 'category', key: 'category', width: 20 },
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
             status: 200,
             headers: {
                 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition': `attachment; filename="livres_export_${new Date().toISOString().split('T')[0]}.xlsx"`,
+                'Content-Disposition': `attachment; filename="catalogue_tekno_${new Date().toISOString().split('T')[0]}.xlsx"`,
             },
         })
     } catch (error) {

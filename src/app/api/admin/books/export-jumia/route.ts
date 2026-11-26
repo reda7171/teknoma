@@ -48,7 +48,7 @@ export async function POST(req: Request) {
         const columns = [
             'Name', 'Name_AR', 'Name_FR', 'Description', 'Description_AR', 'Description_FR',
             'SellerSKU', 'ParentSKU', 'Brand', 'PrimaryCategory', 'AdditionalCategory', 'GTIN_Barcode', 'Price_درهم',
-            'Sale_Price_درهم', 'Sale_Price_Start_At', 'Sale_Price_End_At', 'Stock', 'isbn', 'pages',
+            'Sale_Price_درهم', 'Sale_Price_Start_At', 'Sale_Price_End_At', 'Stock', 'ref_produit', 'pages',
             'variation', 'age_range', 'author', 'book_type', 'certifications', 'color', 'color_AR',
             'color_FR', 'color_family', 'genre', 'language', 'main_material', 'manufacturer_txt',
             'material_family', 'model', 'note', 'package_content', 'package_content_AR',
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
                         val = '1000203 - Books, Movies and Music / Bestselling Books'
                         break
                     case 'GTIN_Barcode':
-                    case 'isbn':
+                    case 'ref_produit':
                         val = book.isbn || ''
                         break
                     case 'Price_درهم':
