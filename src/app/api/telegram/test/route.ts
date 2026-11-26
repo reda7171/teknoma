@@ -29,7 +29,12 @@ export async function POST(req: Request) {
             chatId = (s?.value || process.env.TELEGRAM_CHAT_ID || '').trim()
         }
 
-        if (!botToken || !chatId) {
+        const chatIds = chatId
+            .split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
+
+        if (!botToken || chatIds.length === 0) {
             return NextResponse.json(
                 { ok: false, error: 'Bot Token ou Chat ID manquant' },
                 { status: 400 }
@@ -40,29 +45,45 @@ export async function POST(req: Request) {
             '✅ <b>Test Tekno Store réussi !</b>\n\n' +
             'Votre bot Telegram est correctement connecté à <b>tekno.ma</b> et prêt à recevoir vos notifications.'
 
-        const tgRes = await fetch(`https://api.telegram.org/bot${encodeURIComponent(botToken)}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: chatId,
-                text,
-                parse_mode: 'HTML',
-            }),
-        })
+        const results = await Promise.all(
+            chatIds.map(async (cid) => {
+                const tgRes = await fetch(`https://api.telegram.org/bot${encodeURIComponent(botToken)}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: cid,
+                        text,
+                        parse_mode: 'HTML',
+                    }),
+                })
+                const tgData = await tgRes.json().catch(() => null)
+                return {
+                    cid,
+                    ok: Boolean(tgRes.ok && tgData?.ok),
+                    error: tgData?.description || `HTTP ${tgRes.status}`,
+                }
+            })
+        )
 
-        const tgData = await tgRes.json().catch(() => null)
+        const successes = results.filter((r) => r.ok)
+        const failures = results.filter((r) => !r.ok)
 
-        if (!tgRes.ok || !tgData?.ok) {
+        if (successes.length === 0) {
+            const firstErr = failures[0]?.error || 'Erreur API Telegram'
             return NextResponse.json(
                 {
                     ok: false,
-                    error: tgData?.description || `Erreur API Telegram (${tgRes.status})`,
+                    error: `${firstErr} (vérifiez que chaque utilisateur/groupe a démarré le bot avec /start)`,
                 },
                 { status: 400 }
             )
         }
 
-        return NextResponse.json({ ok: true })
+        return NextResponse.json({
+            ok: true,
+            sent: successes.length,
+            failed: failures.map((f) => `${f.cid}: ${f.error}`),
+        })
     } catch {
         return NextResponse.json({ ok: false, error: 'Erreur lors de l\'envoi vers Telegram' }, { status: 500 })
     }
