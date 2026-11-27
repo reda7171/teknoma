@@ -3,13 +3,39 @@
 import { Link } from '@/i18n/routing'
 import Image from 'next/image'
 import { useLocale } from 'next-intl'
-import { ShoppingBag, Menu, X, Search, Phone, MessageCircle, Truck, ShieldCheck, Sparkles } from 'lucide-react'
+import {
+  ShoppingBag,
+  Menu,
+  X,
+  Search,
+  Phone,
+  MessageCircle,
+  Truck,
+  ShieldCheck,
+  Sparkles,
+  ChevronDown,
+  Smartphone,
+  Laptop,
+  Monitor,
+  Zap,
+  Headphones,
+  HardDrive,
+} from 'lucide-react'
 import { useCartStore } from '@/store/cart'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
-import { getPetCopy } from '@/lib/pets'
+import { getPetCopy, PET_CATEGORIES } from '@/lib/pets'
 import { getPetContent } from '@/lib/pet-content'
 import { useSiteLogo } from '@/components/SiteLogoProvider'
+
+const CATEGORY_ICONS: Record<string, typeof Smartphone> = {
+  Smartphones: Smartphone,
+  'PC Portables': Laptop,
+  'Mac & Apple': Monitor,
+  Accessoires: Zap,
+  Audio: Headphones,
+  Stockage: HardDrive,
+}
 
 export default function PetHeader() {
   const locale = useLocale()
@@ -19,8 +45,28 @@ export default function PetHeader() {
   const count = useCartStore((s) => s.items.reduce((n, i) => n + i.quantity, 0))
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState(false)
+  const [expandedCat, setExpandedCat] = useState<string | null>(null)
+  const headerRef = useRef<HTMLElement>(null)
+  const [headerHeight, setHeaderHeight] = useState<number | null>(null)
 
   useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const update = () => setHeaderHeight(el.getBoundingClientRect().height)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [open])
 
   const links = [
     { href: '/products', label: c.all },
@@ -34,7 +80,8 @@ export default function PetHeader() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-xs">
+    <>
+    <header ref={headerRef} className="fixed inset-x-0 top-0 z-50 bg-white shadow-sm">
       <a
         href="#main-content"
         className="sr-only z-50 rounded-lg bg-white p-4 focus:not-sr-only focus:absolute"
@@ -168,20 +215,15 @@ export default function PetHeader() {
         </div>
       </div>
 
-      {/* Category Navigation Bar (MicroMagma Style) */}
+      {/* Category Navigation Bar (Desktop) */}
       <nav
-        id="pet-navigation"
         aria-label={c.catalog}
-        className={
-          (open ? 'flex' : 'hidden') +
-          ' mx-auto max-w-7xl flex-col gap-1 border-t border-gray-100 px-4 py-2.5 text-xs font-semibold sm:px-8 md:flex md:flex-row md:items-center md:gap-1'
-        }
+        className="mx-auto hidden max-w-7xl flex-row items-center gap-1 border-t border-gray-100 px-4 py-2.5 text-xs font-semibold sm:px-8 md:flex"
       >
         {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            onClick={() => setOpen(false)}
             className="rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-[#1976D2] transition-colors"
           >
             {link.label}
@@ -190,7 +232,6 @@ export default function PetHeader() {
 
         <Link
           href="/products?packs=true"
-          onClick={() => setOpen(false)}
           className="inline-flex items-center gap-1 rounded-lg px-3 py-2 font-bold text-[#1976D2] hover:bg-blue-50 transition-colors"
         >
           <Sparkles className="h-3.5 w-3.5 text-[#75C300]" />
@@ -199,12 +240,132 @@ export default function PetHeader() {
 
         <Link
           href="/contact"
-          onClick={() => setOpen(false)}
-          className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-[#75C300] px-4 py-1.5 text-xs font-bold text-[#1A1C1F] hover:bg-[#68ad00] transition md:ms-auto md:mt-0"
+          className="ms-auto flex items-center justify-center gap-1.5 rounded-full bg-[#75C300] px-4 py-1.5 text-xs font-bold text-[#1A1C1F] hover:bg-[#68ad00] transition"
         >
           {c.contact}
         </Link>
       </nav>
+
+      {/* Mobile Sandwich Menu — Plein écran, uniquement les catégories Tekno */}
+      {open && (
+        <nav
+          id="pet-navigation"
+          aria-label={c.catalog}
+          className="fixed inset-0 z-[100] flex flex-col bg-white md:hidden"
+        >
+          {/* En-tête plein écran */}
+          <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+            <span className="text-base font-black tracking-tight text-[#1A1C1F]">
+              {locale === 'ar' ? 'الفئات' : locale === 'en' ? 'Categories' : 'Catégories'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label={locale === 'ar' ? 'إغلاق' : locale === 'en' ? 'Close' : 'Fermer'}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[#1A1C1F] hover:bg-gray-100"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Barre de recherche en haut du menu mobile */}
+          <div className="border-b border-gray-100 px-4 py-3">
+            <form
+              action={'/' + locale + '/products'}
+              onSubmit={() => setOpen(false)}
+              className="flex w-full items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-2 focus-within:border-[#1976D2] focus-within:bg-white"
+            >
+              <input
+                name="search"
+                aria-label={c.search}
+                placeholder={c.search || 'Rechercher un produit...'}
+                className="min-w-0 flex-1 bg-transparent text-xs text-[#1A1C1F] outline-none placeholder:text-gray-400"
+              />
+              <button
+                type="submit"
+                aria-label={c.searchButton}
+                className="rounded-full bg-[#75C300] p-1.5 text-[#1A1C1F] hover:bg-[#68ad00]"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </form>
+          </div>
+
+          {/* Liste plein écran des catégories Tekno (sous-menus au clic) */}
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2.5">
+            {Object.entries(PET_CATEGORIES).map(([cat, subcats]) => {
+              const Icon = CATEGORY_ICONS[cat] || Smartphone
+              const isExpanded = expandedCat === cat
+              const catLabel =
+                cat === 'Smartphones'
+                  ? c.smartphones
+                  : cat === 'PC Portables'
+                    ? c.pc
+                    : cat === 'Mac & Apple'
+                      ? c.mac
+                      : cat === 'Audio'
+                        ? c.care
+                        : cat === 'Accessoires'
+                          ? c.accessories
+                          : cat === 'Stockage'
+                            ? c.small
+                            : cat
+
+              return (
+                <div key={cat} className="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50/70">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedCat(isExpanded ? null : cat)}
+                    aria-expanded={isExpanded}
+                    className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-black text-[#1A1C1F] transition hover:bg-white hover:text-[#1976D2]"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-[#1976D2]">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span>{catLabel}</span>
+                    </span>
+                    <ChevronDown
+                      className={`h-5 w-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180 text-[#1976D2]' : ''}`}
+                    />
+                  </button>
+
+                  {isExpanded && (
+                    <ul className="divide-y divide-gray-100 border-t border-gray-200 bg-white">
+                      <li>
+                        <Link
+                          href={`/products?category=${encodeURIComponent(cat)}`}
+                          onClick={() => setOpen(false)}
+                          className="flex items-center justify-between px-4 py-3 text-xs font-bold text-[#4e8200] hover:bg-gray-50"
+                        >
+                          <span>{locale === 'ar' ? 'الكل' : locale === 'en' ? 'View all' : 'Tout voir'}</span>
+                        </Link>
+                      </li>
+                      {subcats.map((sub) => (
+                        <li key={sub}>
+                          <Link
+                            href={`/products?category=${encodeURIComponent(cat)}&brand=${encodeURIComponent(sub)}`}
+                            onClick={() => setOpen(false)}
+                            className="flex items-center justify-between px-4 py-3 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-[#1976D2]"
+                          >
+                            <span>{sub}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </nav>
+      )}
     </header>
+    <div
+      aria-hidden="true"
+      style={headerHeight ? { height: `${headerHeight}px` } : undefined}
+      className="h-[146px] sm:h-[154px] md:h-[156px]"
+    />
+    </>
   )
 }
