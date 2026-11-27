@@ -4,6 +4,7 @@ import Footer from '@/components/Footer'
 import PetArtwork from '@/components/pets/PetArtwork'
 import PetProductGrid from '@/components/pets/PetProductGrid'
 import PetBrandStrip from '@/components/pets/PetBrandStrip'
+import PetHomeSlider from '@/components/pets/PetHomeSlider'
 import PetPromoPacks from '@/components/pets/PetPromoPacks'
 import PetTestimonials from '@/components/pets/PetTestimonials'
 import { Link } from '@/i18n/routing'
@@ -120,6 +121,26 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main id="main-content" className="pets-store bg-[#F0EFF2] text-[#1A1C1F]">
+        {/* SLIDER PROMO / MISES EN AVANT APRÈS LE MENU */}
+        <PetHomeSlider
+          locale={locale}
+          featuredProducts={products.slice(0, 6).map((p) => {
+            let img = p.image
+            try {
+              const parsed = JSON.parse(img)
+              if (Array.isArray(parsed)) img = parsed[0] || ''
+            } catch {}
+            return {
+              id: p.id,
+              title: p.title,
+              author: p.author,
+              price: p.price,
+              image: img,
+              category: p.category,
+            }
+          })}
+        />
+
         {/* HERO SECTION (MicroMagma High-Tech Aesthetic) */}
         <section className="relative overflow-hidden border-b border-gray-200 bg-white py-12 md:py-20">
           <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 sm:px-8 lg:grid-cols-2">
